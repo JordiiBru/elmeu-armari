@@ -4,9 +4,9 @@ Gestor de armario personal. Base de datos de prendas con sistema de recomendacio
 
 ## Stack
 
-- **Next.js** (App Router) + TypeScript
+- **Next.js 16** (App Router) + TypeScript
 - **Tailwind CSS** + shadcn/ui
-- **Prisma** ORM + SQLite
+- **Prisma 7** ORM + SQLite (via `@prisma/adapter-better-sqlite3`)
 - **Docker** + k3s (homelab)
 
 ## Estructura
@@ -14,19 +14,45 @@ Gestor de armario personal. Base de datos de prendas con sistema de recomendacio
 ```
 src/
   app/              rutas Next.js (HTTP layer)
+    /               homepage con 3 accesos
+    /add            formulario nueva prenda
+    /armari         grid de prendas con filtros
+    /edit/[id]      editar prenda existente
+    /paleta         paletas Sanzo Wada estaticas
   lib/
     prendas/        dominio prendas: repository, service, types
-    colores/        dominio color: paletas Sanzo Wada, logica combinaciones
+    colores/        dominio color: paletas Sanzo Wada, repository
     outfits/        dominio outfits: recomendador (post-MVP)
+  components/       componentes client reutilizables
+  generated/prisma  cliente Prisma generado (gitignore)
 prisma/
   schema.prisma     modelo de datos
+  migrations/       migraciones SQL
 ```
 
 ## Modelo de datos
 
-Cada prenda tiene: categoria, N colores (hex), textura, dibujo, temporada, talla, fit y una nota libre opcional.
+Cada prenda tiene: categoria, N colores (hex), textura, dibujo, temporada (JSON array), talla, fit y una nota libre opcional.
 
-Los colores se guardan en tabla separada (`Color`) vinculada a la prenda — esto permite al recomendador buscar combinaciones por paleta de color.
+Los colores se guardan en tabla separada (`Color`) vinculada a la prenda.
+
+## Desarrollo local
+
+```bash
+npm install
+npx prisma migrate dev
+npm run dev
+```
+
+App en http://localhost:3000
+
+## Con Docker
+
+```bash
+docker compose up
+```
+
+App en http://localhost:3000. La DB SQLite persiste en el volumen `sqlite_data`.
 
 ## Vistas
 
@@ -37,20 +63,6 @@ Los colores se guardan en tabla separada (`Color`) vinculada a la prenda — est
 | `/add` | Formulario nueva prenda |
 | `/edit/[id]` | Editar prenda existente |
 | `/paleta` | Paletas de color del libro Sanzo Wada |
-
-## Desarrollo local
-
-```bash
-npm install
-npx prisma migrate dev
-npm run dev
-```
-
-Con Docker:
-
-```bash
-docker compose up
-```
 
 ## Roadmap
 

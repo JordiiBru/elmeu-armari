@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        DATABASE_URL: file:/data/prod.db
+    image: ghcr.io/jordiiibru/elmeu-armari:latest
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: file:/data/prod.db
+    volumes:
+      - sqlite_data:/data
+
+volumes:
+  sqlite_data:
