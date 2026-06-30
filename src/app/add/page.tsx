@@ -2,13 +2,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ColorPickers } from "@/components/ColorPickers";
 import { TemporadaCheckboxes } from "@/components/TemporadaCheckboxes";
 import { createPrendaAction } from "./actions";
@@ -50,6 +43,9 @@ const FIT_LABELS: Record<string, string> = {
   REGULAR: "Regular",
 };
 
+const selectClass =
+  "w-full h-8 rounded-lg border border-input bg-background px-2.5 text-sm text-foreground focus:outline-none focus:ring-3 focus:ring-ring/50 focus:border-ring";
+
 export default function AddPage() {
   return (
     <div className="max-w-lg mx-auto p-4">
@@ -63,18 +59,14 @@ export default function AddPage() {
       <form action={createPrendaAction} className="space-y-5">
         <div className="space-y-1.5">
           <Label htmlFor="categoria">Categoria *</Label>
-          <Select name="categoria" required>
-            <SelectTrigger id="categoria">
-              <SelectValue placeholder="Selecciona..." />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORIAS.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {CATEGORIA_LABELS[c]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select id="categoria" name="categoria" required className={selectClass}>
+            <option value="">Selecciona...</option>
+            {CATEGORIAS.map((c) => (
+              <option key={c} value={c}>
+                {CATEGORIA_LABELS[c]}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-1.5">
@@ -84,34 +76,26 @@ export default function AddPage() {
 
         <div className="space-y-1.5">
           <Label htmlFor="textura">Textura *</Label>
-          <Select name="textura" required>
-            <SelectTrigger id="textura">
-              <SelectValue placeholder="Selecciona..." />
-            </SelectTrigger>
-            <SelectContent>
-              {TEXTURAS.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {TEXTURA_LABELS[t]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select id="textura" name="textura" required className={selectClass}>
+            <option value="">Selecciona...</option>
+            {TEXTURAS.map((t) => (
+              <option key={t} value={t}>
+                {TEXTURA_LABELS[t]}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="dibujo">Dibuix *</Label>
-          <Select name="dibujo" required>
-            <SelectTrigger id="dibujo">
-              <SelectValue placeholder="Selecciona..." />
-            </SelectTrigger>
-            <SelectContent>
-              {DIBUJOS.map((d) => (
-                <SelectItem key={d} value={d}>
-                  {DIBUJO_LABELS[d]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select id="dibujo" name="dibujo" required className={selectClass}>
+            <option value="">Selecciona...</option>
+            {DIBUJOS.map((d) => (
+              <option key={d} value={d}>
+                {DIBUJO_LABELS[d]}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-1.5">
@@ -126,18 +110,14 @@ export default function AddPage() {
 
         <div className="space-y-1.5">
           <Label htmlFor="fit">Fit *</Label>
-          <Select name="fit" required>
-            <SelectTrigger id="fit">
-              <SelectValue placeholder="Selecciona..." />
-            </SelectTrigger>
-            <SelectContent>
-              {FITS.map((f) => (
-                <SelectItem key={f} value={f}>
-                  {FIT_LABELS[f]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select id="fit" name="fit" required className={selectClass}>
+            <option value="">Selecciona...</option>
+            {FITS.map((f) => (
+              <option key={f} value={f}>
+                {FIT_LABELS[f]}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-1.5">

@@ -3,13 +3,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ColorPickersEdit } from "@/components/ColorPickersEdit";
 import { TemporadaCheckboxes } from "@/components/TemporadaCheckboxes";
 import { findPrendaById, parseTemporada } from "@/lib/prendas/service";
@@ -49,6 +42,9 @@ const FIT_LABELS: Record<string, string> = {
   REGULAR: "Regular",
 };
 
+const selectClass =
+  "w-full h-8 rounded-lg border border-input bg-background px-2.5 text-sm text-foreground focus:outline-none focus:ring-3 focus:ring-ring/50 focus:border-ring";
+
 export default async function EditPage({
   params,
 }: {
@@ -75,18 +71,19 @@ export default async function EditPage({
       <form action={action} className="space-y-5">
         <div className="space-y-1.5">
           <Label htmlFor="categoria">Categoria *</Label>
-          <Select name="categoria" defaultValue={prenda.categoria} required>
-            <SelectTrigger id="categoria">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORIAS.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {CATEGORIA_LABELS[c]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select
+            id="categoria"
+            name="categoria"
+            defaultValue={prenda.categoria}
+            required
+            className={selectClass}
+          >
+            {CATEGORIAS.map((c) => (
+              <option key={c} value={c}>
+                {CATEGORIA_LABELS[c]}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-1.5">
@@ -96,34 +93,36 @@ export default async function EditPage({
 
         <div className="space-y-1.5">
           <Label htmlFor="textura">Textura *</Label>
-          <Select name="textura" defaultValue={prenda.textura} required>
-            <SelectTrigger id="textura">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {TEXTURAS.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {TEXTURA_LABELS[t]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select
+            id="textura"
+            name="textura"
+            defaultValue={prenda.textura}
+            required
+            className={selectClass}
+          >
+            {TEXTURAS.map((t) => (
+              <option key={t} value={t}>
+                {TEXTURA_LABELS[t]}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="dibujo">Dibuix *</Label>
-          <Select name="dibujo" defaultValue={prenda.dibujo} required>
-            <SelectTrigger id="dibujo">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {DIBUJOS.map((d) => (
-                <SelectItem key={d} value={d}>
-                  {DIBUJO_LABELS[d]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select
+            id="dibujo"
+            name="dibujo"
+            defaultValue={prenda.dibujo}
+            required
+            className={selectClass}
+          >
+            {DIBUJOS.map((d) => (
+              <option key={d} value={d}>
+                {DIBUJO_LABELS[d]}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-1.5">
@@ -143,18 +142,19 @@ export default async function EditPage({
 
         <div className="space-y-1.5">
           <Label htmlFor="fit">Fit *</Label>
-          <Select name="fit" defaultValue={prenda.fit} required>
-            <SelectTrigger id="fit">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {FITS.map((f) => (
-                <SelectItem key={f} value={f}>
-                  {FIT_LABELS[f]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select
+            id="fit"
+            name="fit"
+            defaultValue={prenda.fit}
+            required
+            className={selectClass}
+          >
+            {FITS.map((f) => (
+              <option key={f} value={f}>
+                {FIT_LABELS[f]}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-1.5">
