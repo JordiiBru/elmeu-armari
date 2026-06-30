@@ -1,0 +1,1 @@
+export { findColoresByPrenda } from "./repository";

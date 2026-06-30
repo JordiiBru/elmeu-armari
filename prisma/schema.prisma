@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Prenda {
+  id        String   @id @default(cuid())
+  categoria Categoria
+  colores   Color[]
+  textura   Textura
+  dibujo    Dibujo
+  temporada String
+  talla     String
+  fit       Fit
+  nota      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Color {
+  id       String @id @default(cuid())
+  hex      String
+  prendaId String
+  prenda   Prenda @relation(fields: [prendaId], references: [id], onDelete: Cascade)
+}
+
+enum Categoria {
+  JERSEI
+  CAMISA
+  PANTALONES
+  CALCETINES
+  ZAPATOS
+}
+
+enum Textura {
+  PUNTO
+  DENIM
+  LINO
+  ALGODON
+  POLIESTER
+  CUERO
+  SINTETICO
+}
+
+enum Dibujo {
+  LISO
+  RAYAS
+  CUADROS
+  FLORES
+  ESTAMPADO
+  GEOMETRICO
+}
+
+enum Fit {
+  OVERSIZED
+  STRAIGHT
+  CROPPED
+  SLIM
+  BAGGY
+  REGULAR
+}
