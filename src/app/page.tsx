@@ -12,6 +12,11 @@ const NAV_ITEMS = [
     description: "Veu i gestiona totes les teves peces",
   },
   {
+    href: "/outfits",
+    title: "Outfits",
+    description: "Genera combinacions de roba amb paletes Sanzo Wada",
+  },
+  {
     href: "/paleta",
     title: "Paletes de color",
     description: "Paletes Sanzo Wada per combinar colors",
