@@ -1,9 +1,8 @@
-import type { GarmentWithColors, Category, Fit, Texture } from "./types";
-import { parseSeasons } from "./types";
+import type { GarmentWithColors, Category, Fit, Texture, Season } from "./types";
 
 export interface GarmentFilters {
   categories: Category[];
-  seasons: string[];
+  seasons: Season[];
   fits: Fit[];
   textures: Texture[];
   query: string;
@@ -22,8 +21,8 @@ export function filterGarments(
     if (textures.length > 0 && !textures.includes(g.texture)) return false;
 
     if (seasons.length > 0) {
-      const garmentSeasons = parseSeasons(g.season);
-      if (!seasons.some((s) => garmentSeasons.includes(s as never))) return false;
+      const garmentSeasons = g.seasons.map((s) => s.season);
+      if (!seasons.some((s) => garmentSeasons.includes(s))) return false;
     }
 
     if (q) {

@@ -6,7 +6,6 @@ import {
   deleteGarment,
 } from "./repository";
 import type { Category, Pattern, Fit, Texture, Season } from "./types";
-export { parseSeasons } from "./types";
 
 export { findAllGarments, findGarmentById, deleteGarment };
 
@@ -20,10 +19,7 @@ export async function addGarment(data: {
   notes?: string;
   hexColors: string[];
 }) {
-  return createGarment({
-    ...data,
-    season: JSON.stringify(data.seasons),
-  });
+  return createGarment(data);
 }
 
 export async function editGarment(
@@ -39,9 +35,6 @@ export async function editGarment(
     hexColors: string[];
   }
 ) {
-  return updateGarment(id, {
-    ...data,
-    season: JSON.stringify(data.seasons),
-  });
+  return updateGarment(id, data);
 }
 

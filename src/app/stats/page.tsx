@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { findAllGarments, parseSeasons } from "@/lib/prendas/service";
+import { findAllGarments } from "@/lib/prendas/service";
 import {
   CATEGORY_LABELS,
   SEASON_LABELS,
@@ -46,8 +46,8 @@ export default async function StatsPage() {
     perFit[g.fit] = (perFit[g.fit] ?? 0) + 1;
     perTexture[g.texture] = (perTexture[g.texture] ?? 0) + 1;
 
-    for (const s of parseSeasons(g.season)) {
-      if (s in perSeason) perSeason[s]++;
+    for (const s of g.seasons) {
+      if (s.season in perSeason) perSeason[s.season]++;
     }
 
     for (const c of g.colors) {

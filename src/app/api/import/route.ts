@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { addGarment, findAllGarments, deleteGarment } from "@/lib/prendas/service";
 import { CATEGORIES, TEXTURES, PATTERNS, FITS, SEASONS } from "@/lib/prendas/types";
+import { isHex } from "@/lib/prendas/validation";
 import type { Category, Texture, Pattern, Fit, Season } from "@/lib/prendas/types";
 
 interface GarmentImport {
@@ -19,14 +20,10 @@ interface ImportPayload {
   garments: GarmentImport[];
 }
 
-function isHex(s: string) {
-  return /^#[0-9a-fA-F]{6}$/.test(s);
-}
-
 function validate(body: unknown): { ok: true; payload: ImportPayload } | { ok: false; error: string } {
   if (typeof body !== "object" || body === null) return { ok: false, error: "Format invàlid" };
   const b = body as Record<string, unknown>;
-  if (b.version !== 2) return { ok: false, error: "Versió no suportada (cal versió 2)" };
+  if (b.version !== 3) return { ok: false, error: "Versió no suportada (cal versió 3)" };
   if (!Array.isArray(b.garments)) return { ok: false, error: "Camp 'garments' obligatori" };
 
   for (const [i, g] of (b.garments as unknown[]).entries()) {
@@ -47,6 +44,15 @@ function validate(body: unknown): { ok: true; payload: ImportPayload } | { ok: f
 }
 
 export async function POST(req: NextRequest) {
+  const importSecret = process.env.IMPORT_SECRET;
+  if (importSecret) {
+    const auth = req.headers.get("Authorization");
+    const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
+    if (token !== importSecret) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
+
   const mode = req.nextUrl.searchParams.get("mode") ?? "merge";
 
   let body: unknown;

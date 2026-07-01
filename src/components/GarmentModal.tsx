@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { deleteGarmentAction } from "@/app/armari/actions";
-import { parseSeasons } from "@/lib/prendas/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import {
   CATEGORY_LABELS,
@@ -12,6 +11,7 @@ import {
   FIT_LABELS,
   SEASON_LABELS,
 } from "@/lib/prendas/labels";
+import { UI } from "@/lib/prendas/ui-strings";
 
 interface Props {
   garment: GarmentWithColors;
@@ -30,8 +30,6 @@ export function GarmentModal({ garment, onClose }: Props) {
       document.body.style.overflow = "";
     };
   }, [onClose]);
-
-  const seasons = parseSeasons(garment.season);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -64,17 +62,17 @@ export function GarmentModal({ garment, onClose }: Props) {
 
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <span className="text-xs text-gray-400 block mb-0.5">Textura</span>
+              <span className="text-xs text-gray-400 block mb-0.5">{UI.modal.texture}</span>
               {TEXTURE_LABELS[garment.texture]}
             </div>
             <div>
-              <span className="text-xs text-gray-400 block mb-0.5">Dibuix</span>
+              <span className="text-xs text-gray-400 block mb-0.5">{UI.modal.pattern}</span>
               {PATTERN_LABELS[garment.pattern]}
             </div>
           </div>
 
           <div>
-            <span className="text-xs text-gray-400 block mb-1.5">Colors</span>
+            <span className="text-xs text-gray-400 block mb-1.5">{UI.modal.colors}</span>
             <div className="flex flex-wrap gap-2">
               {garment.colors.map((c) => (
                 <div key={c.id} className="flex items-center gap-1.5">
@@ -85,13 +83,13 @@ export function GarmentModal({ garment, onClose }: Props) {
             </div>
           </div>
 
-          {seasons.length > 0 && (
+          {garment.seasons.length > 0 && (
             <div>
-              <span className="text-xs text-gray-400 block mb-1.5">Temporada</span>
+              <span className="text-xs text-gray-400 block mb-1.5">{UI.modal.seasons}</span>
               <div className="flex flex-wrap gap-1.5">
-                {seasons.map((s) => (
-                  <span key={s} className="text-xs px-2.5 py-1 bg-gray-100 rounded-full">
-                    {SEASON_LABELS[s]}
+                {garment.seasons.map((s) => (
+                  <span key={s.id} className="text-xs px-2.5 py-1 bg-gray-100 rounded-full">
+                    {SEASON_LABELS[s.season]}
                   </span>
                 ))}
               </div>
@@ -110,7 +108,7 @@ export function GarmentModal({ garment, onClose }: Props) {
               href={`/edit/${garment.id}`}
               className="flex-1 h-9 flex items-center justify-center text-sm border rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Editar
+              {UI.buttons.edit}
             </Link>
             <form action={deleteGarmentAction} className="flex-1">
               <input type="hidden" name="id" value={garment.id} />
@@ -118,10 +116,10 @@ export function GarmentModal({ garment, onClose }: Props) {
                 type="submit"
                 className="w-full h-9 text-sm border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
                 onClick={(e) => {
-                  if (!confirm("Eliminar peça?")) e.preventDefault();
+                  if (!confirm(`${UI.buttons.delete} peça?`)) e.preventDefault();
                 }}
               >
-                Eliminar
+                {UI.buttons.delete}
               </button>
             </form>
           </div>
