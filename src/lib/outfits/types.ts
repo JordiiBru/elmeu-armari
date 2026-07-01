@@ -13,6 +13,19 @@ export interface GarmentMatch {
   distance: number;
 }
 
+export interface PaletteMatch {
+  palette: SanzoPalette;
+  colorAssignments: { garmentId: string; paletteColorIndex: number; distance: number }[];
+  unmatchedColors: number[];
+  totalDistance: number;
+}
+
+export interface OutfitGroup {
+  garments: GarmentWithColors[];
+  palettes: PaletteMatch[];
+  bestDistance: number;
+}
+
 export interface OutfitResult {
   palette: SanzoPalette;
   matches: GarmentMatch[];

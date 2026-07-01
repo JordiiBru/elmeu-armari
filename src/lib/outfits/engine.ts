@@ -1,5 +1,5 @@
 import type { GarmentWithColors } from "@/lib/prendas/types";
-import type { SanzoPalette, OutfitResult, GarmentMatch } from "./types";
+import type { SanzoPalette, PaletteMatch, OutfitGroup } from "./types";
 import { oklchDistance, OKLCH_DISTANCE_THRESHOLD } from "./color-matching";
 
 const EXCLUDED_CATEGORIES = new Set(["SOCKS", "SHOES"]);
@@ -11,9 +11,6 @@ interface GarmentPaletteMatch {
   distance: number;
 }
 
-/**
- * For each garment, find which palette colors it matches (using first color in garment.colors[]).
- */
 function matchGarmentToPalette(
   garment: GarmentWithColors,
   palette: SanzoPalette
@@ -32,15 +29,10 @@ function matchGarmentToPalette(
   return matches;
 }
 
-/**
- * Generate outfit combinations for a single palette.
- * Returns valid combinations sorted by total distance.
- */
-function generateForPalette(
+function findCombinationsForPalette(
   garments: GarmentWithColors[],
   palette: SanzoPalette
-): OutfitResult[] {
-  // Build map: paletteColorIndex → list of matching garments
+): { key: string; garments: GarmentWithColors[]; paletteMatch: PaletteMatch }[] {
   const colorToGarments = new Map<number, GarmentPaletteMatch[]>();
 
   for (const garment of garments) {
@@ -53,31 +45,44 @@ function generateForPalette(
     }
   }
 
-  // Get palette color indices that have at least one garment match
   const matchedIndices = Array.from(colorToGarments.keys()).sort();
   if (matchedIndices.length < MIN_PIECES) return [];
 
-  // Generate combinations: pick at most one garment per palette color,
-  // ensuring different categories and min 2 pieces
-  const results: OutfitResult[] = [];
   const allIndices = Array.from({ length: palette.colores.length }, (_, i) => i);
+  const results: { key: string; garments: GarmentWithColors[]; paletteMatch: PaletteMatch }[] = [];
+  const seen = new Set<string>();
 
   function backtrack(
     idx: number,
-    current: GarmentMatch[],
+    current: { garment: GarmentWithColors; colorIndex: number; distance: number }[],
     usedCategories: Set<string>
   ) {
-    // If we've checked all matched indices, evaluate
     if (idx === matchedIndices.length) {
-      if (current.length >= MIN_PIECES) {
-        const totalDistance = current.reduce((sum, m) => sum + m.distance, 0);
-        const matchedColorIndices = new Set(current.map((m) => m.paletteColorIndex));
-        const unmatchedColors = allIndices.filter((i) => !matchedColorIndices.has(i));
+      const categories = new Set(current.map((c) => c.garment.category));
+      const hasPants = categories.has("PANTS");
+      const hasTop = categories.has("SHIRT") || categories.has("SWEATER");
+      if (current.length >= MIN_PIECES && hasPants && hasTop) {
+        const ids = current.map((c) => c.garment.id).sort();
+        const key = ids.join(",");
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        const matchedColorIndices = new Set(current.map((c) => c.colorIndex));
+        const totalDistance = current.reduce((sum, c) => sum + c.distance, 0);
+
         results.push({
-          palette,
-          matches: [...current],
-          totalDistance,
-          unmatchedColors,
+          key,
+          garments: current.map((c) => c.garment),
+          paletteMatch: {
+            palette,
+            colorAssignments: current.map((c) => ({
+              garmentId: c.garment.id,
+              paletteColorIndex: c.colorIndex,
+              distance: c.distance,
+            })),
+            unmatchedColors: allIndices.filter((i) => !matchedColorIndices.has(i)),
+            totalDistance,
+          },
         });
       }
       return;
@@ -86,19 +91,12 @@ function generateForPalette(
     const colorIdx = matchedIndices[idx];
     const candidates = colorToGarments.get(colorIdx) ?? [];
 
-    // Option: skip this palette color
     backtrack(idx + 1, current, usedCategories);
 
-    // Option: pick one garment for this palette color
     for (const candidate of candidates) {
       if (usedCategories.has(candidate.garment.category)) continue;
       usedCategories.add(candidate.garment.category);
-      current.push({
-        garment: candidate.garment,
-        paletteColorIndex: candidate.colorIndex,
-        paletteColorHex: palette.colores[candidate.colorIndex],
-        distance: candidate.distance,
-      });
+      current.push(candidate);
       backtrack(idx + 1, current, usedCategories);
       current.pop();
       usedCategories.delete(candidate.garment.category);
@@ -106,50 +104,81 @@ function generateForPalette(
   }
 
   backtrack(0, [], new Set());
-
-  // Sort by total distance (best matches first)
-  results.sort((a, b) => a.totalDistance - b.totalDistance);
-
   return results;
 }
 
-/**
- * Main entry point: generate outfit combinations across all palettes.
- * Returns results sorted by match quality, paginated.
- */
-export function generateOutfits(
+export function generateOutfitGroupsForGarment(
+  targetGarment: GarmentWithColors,
+  allGarments: GarmentWithColors[],
+  palettes: SanzoPalette[],
+  limit: number = 10,
+  offset: number = 0
+): { groups: OutfitGroup[]; hasMore: boolean } {
+  const garments = allGarments.filter((g) => g.id !== targetGarment.id);
+  const garmentsWithTarget = [targetGarment, ...garments];
+
+  const { groups: allGroups } = generateOutfitGroupsInternal(garmentsWithTarget, palettes);
+
+  const filtered = allGroups.filter((group) =>
+    group.garments.some((g) => g.id === targetGarment.id)
+  );
+
+  const paginated = filtered.slice(offset, offset + limit);
+  return {
+    groups: paginated,
+    hasMore: filtered.length > offset + limit,
+  };
+}
+
+function generateOutfitGroupsInternal(
+  garments: GarmentWithColors[],
+  palettes: SanzoPalette[]
+): { groups: OutfitGroup[] } {
+  const groupMap = new Map<string, OutfitGroup>();
+
+  for (const palette of palettes) {
+    const combos = findCombinationsForPalette(garments, palette);
+    for (const combo of combos) {
+      const existing = groupMap.get(combo.key);
+      if (existing) {
+        existing.palettes.push(combo.paletteMatch);
+        if (combo.paletteMatch.totalDistance < existing.bestDistance) {
+          existing.bestDistance = combo.paletteMatch.totalDistance;
+        }
+      } else {
+        groupMap.set(combo.key, {
+          garments: combo.garments,
+          palettes: [combo.paletteMatch],
+          bestDistance: combo.paletteMatch.totalDistance,
+        });
+      }
+    }
+  }
+
+  const allGroups = Array.from(groupMap.values());
+
+  allGroups.sort((a, b) => {
+    if (a.garments.length !== b.garments.length) return a.garments.length - b.garments.length;
+    return a.bestDistance - b.bestDistance;
+  });
+
+  for (const group of allGroups) {
+    group.palettes.sort((a, b) => a.totalDistance - b.totalDistance);
+  }
+
+  return { groups: allGroups };
+}
+
+export function generateOutfitGroups(
   garments: GarmentWithColors[],
   palettes: SanzoPalette[],
   limit: number = 10,
   offset: number = 0
-): { results: OutfitResult[]; hasMore: boolean } {
-  const allResults: OutfitResult[] = [];
-
-  for (const palette of palettes) {
-    const paletteResults = generateForPalette(garments, palette);
-    allResults.push(...paletteResults);
-  }
-
-  // Sort all results by total distance
-  allResults.sort((a, b) => a.totalDistance - b.totalDistance);
-
-  // Deduplicate: same set of garment IDs = same outfit
-  const seen = new Set<string>();
-  const unique: OutfitResult[] = [];
-  for (const r of allResults) {
-    const key = r.matches
-      .map((m) => m.garment.id)
-      .sort()
-      .join(",") + "|" + r.palette.id;
-    if (!seen.has(key)) {
-      seen.add(key);
-      unique.push(r);
-    }
-  }
-
-  const paginated = unique.slice(offset, offset + limit);
+): { groups: OutfitGroup[]; hasMore: boolean } {
+  const { groups: allGroups } = generateOutfitGroupsInternal(garments, palettes);
+  const paginated = allGroups.slice(offset, offset + limit);
   return {
-    results: paginated,
-    hasMore: unique.length > offset + limit,
+    groups: paginated,
+    hasMore: allGroups.length > offset + limit,
   };
 }

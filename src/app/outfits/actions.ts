@@ -5,11 +5,11 @@ import { revalidatePath } from "next/cache";
 
 export async function saveOutfitAction(paletteId: number, garmentIds: string[]) {
   const outfit = await saveOutfit({ paletteId, garmentIds });
-  revalidatePath("/outfits/saved");
+  revalidatePath("/armari");
   return { id: outfit.id, name: outfit.name };
 }
 
 export async function deleteOutfitAction(id: string) {
   await deleteOutfit(id);
-  revalidatePath("/outfits/saved");
+  revalidatePath("/armari");
 }

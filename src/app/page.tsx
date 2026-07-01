@@ -9,12 +9,7 @@ const NAV_ITEMS = [
   {
     href: "/armari",
     title: "El meu armari",
-    description: "Veu i gestiona totes les teves peces",
-  },
-  {
-    href: "/outfits",
-    title: "Outfits",
-    description: "Genera combinacions de roba amb paletes Sanzo Wada",
+    description: "Peces, combinacions i outfits desats",
   },
   {
     href: "/paleta",
