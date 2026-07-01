@@ -1,11 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { deletePrenda } from "@/lib/prendas/service";
+import { deleteGarment } from "@/lib/prendas/service";
 
-export async function deletePrendaAction(formData: FormData) {
+export async function deleteGarmentAction(formData: FormData) {
   const id = formData.get("id") as string;
-  if (!id) throw new Error("ID requerit");
-  await deletePrenda(id);
+  if (!id) throw new Error("ID required");
+  await deleteGarment(id);
   revalidatePath("/armari");
 }

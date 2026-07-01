@@ -1,21 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { addPrenda, findAllPrendas, deletePrenda } from "@/lib/prendas/service";
-import { CATEGORIAS, TEXTURAS, DIBUJOS, FITS, TEMPORADAS } from "@/lib/prendas/types";
+import { addGarment, findAllGarments, deleteGarment } from "@/lib/prendas/service";
+import { CATEGORIES, TEXTURES, PATTERNS, FITS, SEASONS } from "@/lib/prendas/types";
+import type { Category, Texture, Pattern, Fit, Season } from "@/lib/prendas/types";
 
-interface PrendaImport {
-  categoria: string;
-  textura: string;
-  dibujo: string;
-  temporada: string[];
-  talla: string;
-  fit: string;
-  nota?: string | null;
-  colores: string[];
+interface GarmentImport {
+  category: Category;
+  texture: Texture;
+  pattern: Pattern;
+  seasons: Season[];
+  size: string;
+  fit: Fit;
+  notes?: string | null;
+  colors: string[];
 }
 
 interface ImportPayload {
   version: number;
-  prendas: PrendaImport[];
+  garments: GarmentImport[];
 }
 
 function isHex(s: string) {
@@ -25,20 +26,20 @@ function isHex(s: string) {
 function validate(body: unknown): { ok: true; payload: ImportPayload } | { ok: false; error: string } {
   if (typeof body !== "object" || body === null) return { ok: false, error: "Format invàlid" };
   const b = body as Record<string, unknown>;
-  if (b.version !== 1) return { ok: false, error: "Versió no suportada" };
-  if (!Array.isArray(b.prendas)) return { ok: false, error: "Camp 'prendas' obligatori" };
+  if (b.version !== 2) return { ok: false, error: "Versió no suportada (cal versió 2)" };
+  if (!Array.isArray(b.garments)) return { ok: false, error: "Camp 'garments' obligatori" };
 
-  for (const [i, p] of (b.prendas as unknown[]).entries()) {
-    if (typeof p !== "object" || p === null) return { ok: false, error: `Peça ${i}: format invàlid` };
-    const pr = p as Record<string, unknown>;
-    if (!CATEGORIAS.includes(pr.categoria as never)) return { ok: false, error: `Peça ${i}: categoria invàlida` };
-    if (!TEXTURAS.includes(pr.textura as never)) return { ok: false, error: `Peça ${i}: textura invàlida` };
-    if (!DIBUJOS.includes(pr.dibujo as never)) return { ok: false, error: `Peça ${i}: dibujo invàlid` };
-    if (!FITS.includes(pr.fit as never)) return { ok: false, error: `Peça ${i}: fit invàlid` };
-    if (!Array.isArray(pr.temporada) || pr.temporada.some((t) => !TEMPORADAS.includes(t as never)))
-      return { ok: false, error: `Peça ${i}: temporada invàlida` };
-    if (typeof pr.talla !== "string" || pr.talla.trim() === "") return { ok: false, error: `Peça ${i}: talla buida` };
-    if (!Array.isArray(pr.colores) || pr.colores.length === 0 || pr.colores.some((c) => !isHex(c)))
+  for (const [i, g] of (b.garments as unknown[]).entries()) {
+    if (typeof g !== "object" || g === null) return { ok: false, error: `Peça ${i}: format invàlid` };
+    const gr = g as Record<string, unknown>;
+    if (!CATEGORIES.includes(gr.category as Category)) return { ok: false, error: `Peça ${i}: category invàlida` };
+    if (!TEXTURES.includes(gr.texture as Texture)) return { ok: false, error: `Peça ${i}: texture invàlida` };
+    if (!PATTERNS.includes(gr.pattern as Pattern)) return { ok: false, error: `Peça ${i}: pattern invàlid` };
+    if (!FITS.includes(gr.fit as Fit)) return { ok: false, error: `Peça ${i}: fit invàlid` };
+    if (!Array.isArray(gr.seasons) || gr.seasons.some((s) => !SEASONS.includes(s as Season)))
+      return { ok: false, error: `Peça ${i}: seasons invàlides` };
+    if (typeof gr.size !== "string" || gr.size.trim() === "") return { ok: false, error: `Peça ${i}: size buit` };
+    if (!Array.isArray(gr.colors) || gr.colors.length === 0 || gr.colors.some((c) => !isHex(c)))
       return { ok: false, error: `Peça ${i}: colors invàlids (cal array de hex #rrggbb)` };
   }
 
@@ -59,21 +60,21 @@ export async function POST(req: NextRequest) {
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 422 });
 
   if (mode === "replace") {
-    const existing = await findAllPrendas();
-    await Promise.all(existing.map((p) => deletePrenda(p.id)));
+    const existing = await findAllGarments();
+    await Promise.all(existing.map((g) => deleteGarment(g.id)));
   }
 
   const created = await Promise.all(
-    result.payload.prendas.map((p) =>
-      addPrenda({
-        categoria: p.categoria as never,
-        textura: p.textura as never,
-        dibujo: p.dibujo as never,
-        temporada: p.temporada,
-        talla: p.talla,
-        fit: p.fit as never,
-        nota: p.nota ?? undefined,
-        hexColores: p.colores,
+    result.payload.garments.map((g) =>
+      addGarment({
+        category: g.category,
+        texture: g.texture,
+        pattern: g.pattern,
+        seasons: g.seasons,
+        size: g.size,
+        fit: g.fit,
+        notes: g.notes ?? undefined,
+        hexColors: g.colors,
       })
     )
   );

@@ -1,30 +1,30 @@
-import type { Categoria, Dibujo, Fit, Textura, Temporada } from "./types";
+import type { Category, Pattern, Fit, Texture, Season } from "./types";
 
-export const CATEGORIA_LABELS: Record<Categoria, string> = {
-  JERSEI: "Jersei",
-  CAMISA: "Camisa",
-  PANTALONES: "Pantalons",
-  CALCETINES: "Mitjons",
-  ZAPATOS: "Sabates",
+export const CATEGORY_LABELS: Record<Category, string> = {
+  SWEATER: "Jersei",
+  SHIRT: "Camisa",
+  PANTS: "Pantalons",
+  SOCKS: "Mitjons",
+  SHOES: "Sabates",
 };
 
-export const TEXTURA_LABELS: Record<Textura, string> = {
-  PUNTO: "Punt",
+export const TEXTURE_LABELS: Record<Texture, string> = {
+  KNIT: "Punt",
   DENIM: "Denim",
-  LINO: "Lli",
-  ALGODON: "Cotó",
-  POLIESTER: "Poliester",
-  CUERO: "Cuir",
-  SINTETICO: "Sintètic",
+  LINEN: "Lli",
+  COTTON: "Cotó",
+  POLYESTER: "Poliester",
+  LEATHER: "Cuir",
+  SYNTHETIC: "Sintètic",
 };
 
-export const DIBUJO_LABELS: Record<Dibujo, string> = {
-  LISO: "Llis",
-  RAYAS: "Ratlles",
-  CUADROS: "Quadres",
-  FLORES: "Flors",
-  ESTAMPADO: "Estampat",
-  GEOMETRICO: "Geomètric",
+export const PATTERN_LABELS: Record<Pattern, string> = {
+  PLAIN: "Llis",
+  STRIPES: "Ratlles",
+  CHECKS: "Quadres",
+  FLORAL: "Flors",
+  PRINTED: "Estampat",
+  GEOMETRIC: "Geomètric",
 };
 
 export const FIT_LABELS: Record<Fit, string> = {
@@ -36,10 +36,10 @@ export const FIT_LABELS: Record<Fit, string> = {
   REGULAR: "Regular",
 };
 
-export const TEMPORADA_LABELS: Record<Temporada, string> = {
-  PRIMAVERA: "Primavera",
-  VERANO: "Estiu",
-  OTONO: "Tardor",
-  INVIERNO: "Hivern",
-  TODO_EL_ANIO: "Tot l'any",
+export const SEASON_LABELS: Record<Season, string> = {
+  SPRING: "Primavera",
+  SUMMER: "Estiu",
+  AUTUMN: "Tardor",
+  WINTER: "Hivern",
+  ALL_YEAR: "Tot l'any",
 };

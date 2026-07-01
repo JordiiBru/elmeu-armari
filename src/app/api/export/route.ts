@@ -1,23 +1,23 @@
 import { NextResponse } from "next/server";
-import { findAllPrendas } from "@/lib/prendas/service";
+import { findAllGarments, parseSeasons } from "@/lib/prendas/service";
 
 export async function GET() {
-  const prendas = await findAllPrendas();
+  const garments = await findAllGarments();
 
-  const data = prendas.map((p) => ({
-    id: p.id,
-    categoria: p.categoria,
-    textura: p.textura,
-    dibujo: p.dibujo,
-    temporada: JSON.parse(p.temporada) as string[],
-    talla: p.talla,
-    fit: p.fit,
-    nota: p.nota,
-    colores: p.colores.map((c) => c.hex),
-    createdAt: p.createdAt.toISOString(),
+  const data = garments.map((g) => ({
+    id: g.id,
+    category: g.category,
+    texture: g.texture,
+    pattern: g.pattern,
+    seasons: parseSeasons(g.season),
+    size: g.size,
+    fit: g.fit,
+    notes: g.notes,
+    colors: g.colors.map((c) => c.hex),
+    createdAt: g.createdAt.toISOString(),
   }));
 
-  const payload = { version: 1, exportedAt: new Date().toISOString(), prendas: data };
+  const payload = { version: 2, exportedAt: new Date().toISOString(), garments: data };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
     headers: {

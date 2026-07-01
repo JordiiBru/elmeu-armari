@@ -1,79 +1,79 @@
 import { prisma } from "@/lib/prisma";
-import type { Categoria, Dibujo, Fit, Textura } from "@/generated/prisma/enums";
+import type { Category, Pattern, Fit, Texture } from "@/generated/prisma/enums";
 
-export async function findAllPrendas() {
-  return prisma.prenda.findMany({
-    include: { colores: true },
+export async function findAllGarments() {
+  return prisma.garment.findMany({
+    include: { colors: true },
     orderBy: { createdAt: "desc" },
   });
 }
 
-export async function findPrendaById(id: string) {
-  return prisma.prenda.findUnique({
+export async function findGarmentById(id: string) {
+  return prisma.garment.findUnique({
     where: { id },
-    include: { colores: true },
+    include: { colors: true },
   });
 }
 
-export async function createPrenda(data: {
-  categoria: Categoria;
-  textura: Textura;
-  dibujo: Dibujo;
-  temporada: string;
-  talla: string;
+export async function createGarment(data: {
+  category: Category;
+  texture: Texture;
+  pattern: Pattern;
+  season: string;
+  size: string;
   fit: Fit;
-  nota?: string;
-  hexColores: string[];
+  notes?: string;
+  hexColors: string[];
 }) {
-  return prisma.prenda.create({
+  return prisma.garment.create({
     data: {
-      categoria: data.categoria,
-      textura: data.textura,
-      dibujo: data.dibujo,
-      temporada: data.temporada,
-      talla: data.talla,
+      category: data.category,
+      texture: data.texture,
+      pattern: data.pattern,
+      season: data.season,
+      size: data.size,
       fit: data.fit,
-      nota: data.nota ?? null,
-      colores: {
-        create: data.hexColores.map((hex) => ({ hex })),
+      notes: data.notes ?? null,
+      colors: {
+        create: data.hexColors.map((hex) => ({ hex })),
       },
     },
-    include: { colores: true },
+    include: { colors: true },
   });
 }
 
-export async function updatePrenda(
+export async function updateGarment(
   id: string,
   data: {
-    categoria: Categoria;
-    textura: Textura;
-    dibujo: Dibujo;
-    temporada: string;
-    talla: string;
+    category: Category;
+    texture: Texture;
+    pattern: Pattern;
+    season: string;
+    size: string;
     fit: Fit;
-    nota?: string;
-    hexColores: string[];
+    notes?: string;
+    hexColors: string[];
   }
 ) {
-  await prisma.color.deleteMany({ where: { prendaId: id } });
-  return prisma.prenda.update({
+  await prisma.color.deleteMany({ where: { garmentId: id } });
+  return prisma.garment.update({
     where: { id },
     data: {
-      categoria: data.categoria,
-      textura: data.textura,
-      dibujo: data.dibujo,
-      temporada: data.temporada,
-      talla: data.talla,
+      category: data.category,
+      texture: data.texture,
+      pattern: data.pattern,
+      season: data.season,
+      size: data.size,
       fit: data.fit,
-      nota: data.nota ?? null,
-      colores: {
-        create: data.hexColores.map((hex) => ({ hex })),
+      notes: data.notes ?? null,
+      colors: {
+        create: data.hexColors.map((hex) => ({ hex })),
       },
     },
-    include: { colores: true },
+    include: { colors: true },
   });
 }
 
-export async function deletePrenda(id: string) {
-  return prisma.prenda.delete({ where: { id } });
+export async function deleteGarment(id: string) {
+  return prisma.garment.delete({ where: { id } });
 }

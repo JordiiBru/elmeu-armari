@@ -1,19 +1,19 @@
 import Link from "next/link";
-import { findAllPrendas } from "@/lib/prendas/service";
+import { findAllGarments, parseSeasons } from "@/lib/prendas/service";
 import {
-  CATEGORIA_LABELS,
-  TEMPORADA_LABELS,
+  CATEGORY_LABELS,
+  SEASON_LABELS,
   FIT_LABELS,
-  TEXTURA_LABELS,
+  TEXTURE_LABELS,
 } from "@/lib/prendas/labels";
-import { CATEGORIAS, TEMPORADAS, FITS, TEXTURAS } from "@/lib/prendas/types";
+import { CATEGORIES, SEASONS, FITS, TEXTURES } from "@/lib/prendas/types";
 
 function pct(n: number, total: number) {
   if (total === 0) return "0%";
   return `${Math.round((n / total) * 100)}%`;
 }
 
-function bar(n: number, total: number) {
+function Bar({ n, total }: { n: number; total: number }) {
   const width = total === 0 ? 0 : Math.round((n / total) * 100);
   return (
     <div className="w-full bg-gray-100 rounded-full h-1.5 mt-1">
@@ -23,7 +23,7 @@ function bar(n: number, total: number) {
 }
 
 export default async function StatsPage() {
-  const raw = await findAllPrendas();
+  const raw = await findAllGarments();
   const total = raw.length;
 
   if (total === 0) {
@@ -35,30 +35,22 @@ export default async function StatsPage() {
     );
   }
 
-  // Categoria
-  const perCat = Object.fromEntries(CATEGORIAS.map((c) => [c, 0])) as Record<string, number>;
-  // Temporada
-  const perTemp = Object.fromEntries(TEMPORADAS.map((t) => [t, 0])) as Record<string, number>;
-  // Fit
+  const perCategory = Object.fromEntries(CATEGORIES.map((c) => [c, 0])) as Record<string, number>;
+  const perSeason = Object.fromEntries(SEASONS.map((s) => [s, 0])) as Record<string, number>;
   const perFit = Object.fromEntries(FITS.map((f) => [f, 0])) as Record<string, number>;
-  // Textura
-  const perTex = Object.fromEntries(TEXTURAS.map((t) => [t, 0])) as Record<string, number>;
-  // Colors: acumula tots els hex
+  const perTexture = Object.fromEntries(TEXTURES.map((t) => [t, 0])) as Record<string, number>;
   const hexCount: Record<string, number> = {};
 
-  for (const p of raw) {
-    perCat[p.categoria] = (perCat[p.categoria] ?? 0) + 1;
-    perFit[p.fit] = (perFit[p.fit] ?? 0) + 1;
-    perTex[p.textura] = (perTex[p.textura] ?? 0) + 1;
+  for (const g of raw) {
+    perCategory[g.category] = (perCategory[g.category] ?? 0) + 1;
+    perFit[g.fit] = (perFit[g.fit] ?? 0) + 1;
+    perTexture[g.texture] = (perTexture[g.texture] ?? 0) + 1;
 
-    try {
-      const temps = JSON.parse(p.temporada) as string[];
-      for (const t of temps) {
-        if (t in perTemp) perTemp[t]++;
-      }
-    } catch {}
+    for (const s of parseSeasons(g.season)) {
+      if (s in perSeason) perSeason[s]++;
+    }
 
-    for (const c of p.colores) {
+    for (const c of g.colors) {
       hexCount[c.hex] = (hexCount[c.hex] ?? 0) + 1;
     }
   }
@@ -74,41 +66,40 @@ export default async function StatsPage() {
         <h1 className="text-xl font-semibold">Estadístiques</h1>
       </div>
 
-      <p className="text-3xl font-bold">{total} <span className="text-base font-normal text-gray-500">peces en total</span></p>
+      <p className="text-3xl font-bold">
+        {total} <span className="text-base font-normal text-gray-500">peces en total</span>
+      </p>
 
-      {/* Categoria */}
       <section>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Per categoria</h2>
         <div className="space-y-3">
-          {CATEGORIAS.filter((c) => perCat[c] > 0).map((c) => (
+          {CATEGORIES.filter((c) => perCategory[c] > 0).map((c) => (
             <div key={c}>
               <div className="flex justify-between text-sm">
-                <span>{CATEGORIA_LABELS[c]}</span>
-                <span className="text-gray-500">{perCat[c]} · {pct(perCat[c], total)}</span>
+                <span>{CATEGORY_LABELS[c]}</span>
+                <span className="text-gray-500">{perCategory[c]} · {pct(perCategory[c], total)}</span>
               </div>
-              {bar(perCat[c], total)}
+              <Bar n={perCategory[c]} total={total} />
             </div>
           ))}
         </div>
       </section>
 
-      {/* Temporada */}
       <section>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Per temporada</h2>
         <div className="space-y-3">
-          {TEMPORADAS.filter((t) => perTemp[t] > 0).map((t) => (
-            <div key={t}>
+          {SEASONS.filter((s) => perSeason[s] > 0).map((s) => (
+            <div key={s}>
               <div className="flex justify-between text-sm">
-                <span>{TEMPORADA_LABELS[t]}</span>
-                <span className="text-gray-500">{perTemp[t]} · {pct(perTemp[t], total)}</span>
+                <span>{SEASON_LABELS[s]}</span>
+                <span className="text-gray-500">{perSeason[s]} · {pct(perSeason[s], total)}</span>
               </div>
-              {bar(perTemp[t], total)}
+              <Bar n={perSeason[s]} total={total} />
             </div>
           ))}
         </div>
       </section>
 
-      {/* Fit */}
       <section>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Per fit</h2>
         <div className="space-y-3">
@@ -118,29 +109,27 @@ export default async function StatsPage() {
                 <span>{FIT_LABELS[f]}</span>
                 <span className="text-gray-500">{perFit[f]} · {pct(perFit[f], total)}</span>
               </div>
-              {bar(perFit[f], total)}
+              <Bar n={perFit[f]} total={total} />
             </div>
           ))}
         </div>
       </section>
 
-      {/* Textura */}
       <section>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Per textura</h2>
         <div className="space-y-3">
-          {TEXTURAS.filter((t) => perTex[t] > 0).map((t) => (
+          {TEXTURES.filter((t) => perTexture[t] > 0).map((t) => (
             <div key={t}>
               <div className="flex justify-between text-sm">
-                <span>{TEXTURA_LABELS[t]}</span>
-                <span className="text-gray-500">{perTex[t]} · {pct(perTex[t], total)}</span>
+                <span>{TEXTURE_LABELS[t]}</span>
+                <span className="text-gray-500">{perTexture[t]} · {pct(perTexture[t], total)}</span>
               </div>
-              {bar(perTex[t], total)}
+              <Bar n={perTexture[t]} total={total} />
             </div>
           ))}
         </div>
       </section>
 
-      {/* Colors dominants */}
       {topColors.length > 0 && (
         <section>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Colors dominants</h2>

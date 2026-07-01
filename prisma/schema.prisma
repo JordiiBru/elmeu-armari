@@ -7,52 +7,52 @@ datasource db {
   provider = "sqlite"
 }
 
-model Prenda {
+model Garment {
   id        String   @id @default(cuid())
-  categoria Categoria
-  colores   Color[]
-  textura   Textura
-  dibujo    Dibujo
-  temporada String
-  talla     String
+  category  Category
+  colors    Color[]
+  texture   Texture
+  pattern   Pattern
+  season    String
+  size      String
   fit       Fit
-  nota      String?
+  notes     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Color {
-  id       String @id @default(cuid())
-  hex      String
-  prendaId String
-  prenda   Prenda @relation(fields: [prendaId], references: [id], onDelete: Cascade)
+  id        String  @id @default(cuid())
+  hex       String
+  garmentId String
+  garment   Garment @relation(fields: [garmentId], references: [id], onDelete: Cascade)
 }
 
-enum Categoria {
-  JERSEI
-  CAMISA
-  PANTALONES
-  CALCETINES
-  ZAPATOS
+enum Category {
+  SWEATER
+  SHIRT
+  PANTS
+  SOCKS
+  SHOES
 }
 
-enum Textura {
-  PUNTO
+enum Texture {
+  KNIT
   DENIM
-  LINO
-  ALGODON
-  POLIESTER
-  CUERO
-  SINTETICO
+  LINEN
+  COTTON
+  POLYESTER
+  LEATHER
+  SYNTHETIC
 }
 
-enum Dibujo {
-  LISO
-  RAYAS
-  CUADROS
-  FLORES
-  ESTAMPADO
-  GEOMETRICO
+enum Pattern {
+  PLAIN
+  STRIPES
+  CHECKS
+  FLORAL
+  PRINTED
+  GEOMETRIC
 }
 
 enum Fit {

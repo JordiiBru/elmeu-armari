@@ -2,75 +2,70 @@
 
 import { useActionState } from "react";
 import { ColorPickers } from "@/components/ColorPickers";
-import { TemporadaCheckboxes } from "@/components/TemporadaCheckboxes";
-import { createPrendaAction } from "@/app/add/actions";
-import { CATEGORIAS, TEXTURAS, DIBUJOS, FITS } from "@/lib/prendas/types";
+import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
+import { createGarmentAction } from "@/app/add/actions";
+import { CATEGORIES, TEXTURES, PATTERNS, FITS } from "@/lib/prendas/types";
 import {
-  CATEGORIA_LABELS,
-  TEXTURA_LABELS,
-  DIBUJO_LABELS,
+  CATEGORY_LABELS,
+  TEXTURE_LABELS,
+  PATTERN_LABELS,
   FIT_LABELS,
 } from "@/lib/prendas/labels";
-
-const sel =
-  "w-full h-8 rounded-lg border border-gray-300 bg-white px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black";
-const inp =
-  "w-full h-8 rounded-lg border border-gray-300 bg-white px-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black";
-const lbl = "block text-sm font-medium mb-1";
+import { FORM_STYLES } from "@/lib/ui";
 
 export function AddForm() {
-  const [state, formAction, isPending] = useActionState(createPrendaAction, null);
+  const [state, formAction, isPending] = useActionState(createGarmentAction, null);
 
   return (
     <form action={formAction} className="space-y-5">
       <div>
-        <label htmlFor="categoria" className={lbl}>Categoria *</label>
-        <select id="categoria" name="categoria" required className={sel}>
+        <label htmlFor="category" className={FORM_STYLES.label}>Categoria *</label>
+        <select id="category" name="category" required className={FORM_STYLES.select}>
           <option value="">Selecciona...</option>
-          {CATEGORIAS.map((c) => (
-            <option key={c} value={c}>{CATEGORIA_LABELS[c]}</option>
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
           ))}
         </select>
       </div>
 
       <div>
-        <span className={lbl}>Colors *</span>
+        <span className={FORM_STYLES.label}>Colors *</span>
         <ColorPickers />
       </div>
 
       <div>
-        <label htmlFor="textura" className={lbl}>Textura *</label>
-        <select id="textura" name="textura" required className={sel}>
+        <label htmlFor="texture" className={FORM_STYLES.label}>Textura *</label>
+        <select id="texture" name="texture" required className={FORM_STYLES.select}>
           <option value="">Selecciona...</option>
-          {TEXTURAS.map((t) => (
-            <option key={t} value={t}>{TEXTURA_LABELS[t]}</option>
+          {TEXTURES.map((t) => (
+            <option key={t} value={t}>{TEXTURE_LABELS[t]}</option>
           ))}
         </select>
       </div>
 
       <div>
-        <label htmlFor="dibujo" className={lbl}>Dibuix *</label>
-        <select id="dibujo" name="dibujo" required className={sel}>
+        <label htmlFor="pattern" className={FORM_STYLES.label}>Dibuix *</label>
+        <select id="pattern" name="pattern" required className={FORM_STYLES.select}>
           <option value="">Selecciona...</option>
-          {DIBUJOS.map((d) => (
-            <option key={d} value={d}>{DIBUJO_LABELS[d]}</option>
+          {PATTERNS.map((p) => (
+            <option key={p} value={p}>{PATTERN_LABELS[p]}</option>
           ))}
         </select>
       </div>
 
       <div>
-        <span className={lbl}>Temporada *</span>
-        <TemporadaCheckboxes />
+        <span className={FORM_STYLES.label}>Temporada *</span>
+        <SeasonCheckboxes />
       </div>
 
       <div>
-        <label htmlFor="talla" className={lbl}>Talla *</label>
-        <input id="talla" name="talla" placeholder="M, L, 42..." required className={inp} />
+        <label htmlFor="size" className={FORM_STYLES.label}>Talla *</label>
+        <input id="size" name="size" placeholder="M, L, 42..." required className={FORM_STYLES.input} />
       </div>
 
       <div>
-        <label htmlFor="fit" className={lbl}>Fit *</label>
-        <select id="fit" name="fit" required className={sel}>
+        <label htmlFor="fit" className={FORM_STYLES.label}>Fit *</label>
+        <select id="fit" name="fit" required className={FORM_STYLES.select}>
           <option value="">Selecciona...</option>
           {FITS.map((f) => (
             <option key={f} value={f}>{FIT_LABELS[f]}</option>
@@ -79,8 +74,8 @@ export function AddForm() {
       </div>
 
       <div>
-        <label htmlFor="nota" className={lbl}>Nota</label>
-        <input id="nota" name="nota" placeholder="Opcional..." className={inp} />
+        <label htmlFor="notes" className={FORM_STYLES.label}>Nota</label>
+        <input id="notes" name="notes" placeholder="Opcional..." className={FORM_STYLES.input} />
       </div>
 
       {state?.error && (
