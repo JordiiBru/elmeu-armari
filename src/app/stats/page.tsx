@@ -1,4 +1,7 @@
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
+
 import { findAllGarments } from "@/lib/prendas/service";
 import {
   CATEGORY_LABELS,

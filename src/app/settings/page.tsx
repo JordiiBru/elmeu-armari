@@ -1,4 +1,7 @@
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
+
 import { ImportForm } from "@/components/ImportForm";
 import { findAllGarments } from "@/lib/prendas/service";
 
