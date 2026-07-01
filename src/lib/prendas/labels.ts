@@ -4,7 +4,7 @@ export const CATEGORIA_LABELS: Record<Categoria, string> = {
   JERSEI: "Jersei",
   CAMISA: "Camisa",
   PANTALONES: "Pantalons",
-  CALCETINES: "Calcetins",
+  CALCETINES: "Mitjons",
   ZAPATOS: "Sabates",
 };
 

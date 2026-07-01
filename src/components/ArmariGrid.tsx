@@ -50,7 +50,7 @@ export function ArmariGrid({ prendas }: Props) {
       {/* Filtre temporada */}
       <div className="flex flex-wrap gap-2 mb-6">
         <button type="button" onClick={() => setFiltroTemp("TOTES")} className={pill(filtroTemp === "TOTES")}>
-          Tot l'any
+          Totes
         </button>
         {TEMPORADAS.map((t) => (
           <button type="button" key={t} onClick={() => setFiltroTemp(t)} className={pill(filtroTemp === t)}>
