@@ -1,0 +1,87 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "security:openssf-scorecard",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":separatePatchReleases"
+  ],
+  "timezone": "Europe/Madrid",
+  "schedule": ["before 7am on Monday"],
+  "prHourlyLimit": 5,
+  "prConcurrentLimit": 10,
+  "automerge": false,
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "automerge": true,
+    "schedule": ["at any time"]
+  },
+  "packageRules": [
+    {
+      "description": "Automerge non-major devDependencies",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
+    },
+    {
+      "description": "Group Next.js + React ecosystem",
+      "matchPackageNames": [
+        "next",
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom",
+        "eslint-config-next"
+      ],
+      "groupName": "Next.js ecosystem",
+      "automerge": false
+    },
+    {
+      "description": "Group Prisma",
+      "matchPackageNames": [
+        "prisma",
+        "@prisma/client",
+        "@prisma/adapter-better-sqlite3",
+        "better-sqlite3",
+        "@types/better-sqlite3"
+      ],
+      "groupName": "Prisma",
+      "automerge": false
+    },
+    {
+      "description": "Group Tailwind CSS",
+      "matchPackageNames": [
+        "tailwindcss",
+        "@tailwindcss/postcss",
+        "postcss"
+      ],
+      "groupName": "Tailwind CSS",
+      "automerge": true
+    },
+    {
+      "description": "Pin Docker base image digests",
+      "matchManagers": ["dockerfile"],
+      "pinDigests": true
+    },
+    {
+      "description": "Automerge patch Docker base images",
+      "matchManagers": ["dockerfile"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    },
+    {
+      "description": "Group GitHub Actions",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "automerge": true
+    },
+    {
+      "description": "Major updates need manual review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["major-update"]
+    }
+  ],
+  "ignoreDeps": []
+}
