@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { findPrendaById, parseTemporada } from "@/lib/prendas/service";
+import { findGarmentById, parseSeasons } from "@/lib/prendas/service";
 import { EditForm } from "@/components/EditForm";
 
 export default async function EditPage({
@@ -9,14 +9,14 @@ export default async function EditPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const prenda = await findPrendaById(id);
-  if (!prenda) notFound();
+  const garment = await findGarmentById(id);
+  if (!garment) notFound();
 
   const serialized = {
-    ...prenda,
-    createdAt: prenda.createdAt.toISOString(),
-    updatedAt: prenda.updatedAt.toISOString(),
-    colores: prenda.colores.map(({ id, hex }) => ({ id, hex })),
+    ...garment,
+    createdAt: garment.createdAt.toISOString(),
+    updatedAt: garment.updatedAt.toISOString(),
+    colors: garment.colors.map(({ id, hex }) => ({ id, hex })),
   };
 
   return (
@@ -26,9 +26,9 @@ export default async function EditPage({
         <h1 className="text-xl font-semibold">Editar peça</h1>
       </div>
       <EditForm
-        prenda={serialized}
-        temporadaValues={parseTemporada(prenda.temporada)}
-        hexColores={prenda.colores.map((c) => c.hex)}
+        garment={serialized}
+        defaultSeasons={parseSeasons(garment.season)}
+        defaultHexColors={garment.colors.map((c) => c.hex)}
       />
     </div>
   );

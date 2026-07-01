@@ -1,52 +1,52 @@
 import {
-  findAllPrendas,
-  findPrendaById,
-  createPrenda,
-  updatePrenda,
-  deletePrenda,
+  findAllGarments,
+  findGarmentById,
+  createGarment,
+  updateGarment,
+  deleteGarment,
 } from "./repository";
-import type { Categoria, Dibujo, Fit, Textura } from "./types";
+import type { Category, Pattern, Fit, Texture, Season } from "./types";
 
-export { findAllPrendas, findPrendaById, deletePrenda };
+export { findAllGarments, findGarmentById, deleteGarment };
 
-export async function addPrenda(data: {
-  categoria: Categoria;
-  textura: Textura;
-  dibujo: Dibujo;
-  temporada: string[];
-  talla: string;
+export async function addGarment(data: {
+  category: Category;
+  texture: Texture;
+  pattern: Pattern;
+  seasons: Season[];
+  size: string;
   fit: Fit;
-  nota?: string;
-  hexColores: string[];
+  notes?: string;
+  hexColors: string[];
 }) {
-  return createPrenda({
+  return createGarment({
     ...data,
-    temporada: JSON.stringify(data.temporada),
+    season: JSON.stringify(data.seasons),
   });
 }
 
-export async function editPrenda(
+export async function editGarment(
   id: string,
   data: {
-    categoria: Categoria;
-    textura: Textura;
-    dibujo: Dibujo;
-    temporada: string[];
-    talla: string;
+    category: Category;
+    texture: Texture;
+    pattern: Pattern;
+    seasons: Season[];
+    size: string;
     fit: Fit;
-    nota?: string;
-    hexColores: string[];
+    notes?: string;
+    hexColors: string[];
   }
 ) {
-  return updatePrenda(id, {
+  return updateGarment(id, {
     ...data,
-    temporada: JSON.stringify(data.temporada),
+    season: JSON.stringify(data.seasons),
   });
 }
 
-export function parseTemporada(raw: string): string[] {
+export function parseSeasons(raw: string): Season[] {
   try {
-    return JSON.parse(raw) as string[];
+    return JSON.parse(raw) as Season[];
   } catch {
     return [];
   }

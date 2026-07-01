@@ -2,80 +2,75 @@
 
 import { useActionState } from "react";
 import { ColorPickers } from "@/components/ColorPickers";
-import { TemporadaCheckboxes } from "@/components/TemporadaCheckboxes";
-import { updatePrendaAction } from "@/app/edit/[id]/actions";
-import { CATEGORIAS, TEXTURAS, DIBUJOS, FITS } from "@/lib/prendas/types";
+import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
+import { updateGarmentAction } from "@/app/edit/[id]/actions";
+import { CATEGORIES, TEXTURES, PATTERNS, FITS } from "@/lib/prendas/types";
 import {
-  CATEGORIA_LABELS,
-  TEXTURA_LABELS,
-  DIBUJO_LABELS,
+  CATEGORY_LABELS,
+  TEXTURE_LABELS,
+  PATTERN_LABELS,
   FIT_LABELS,
 } from "@/lib/prendas/labels";
-import type { PrendaConColores } from "@/lib/prendas/types";
+import { FORM_STYLES } from "@/lib/ui";
+import type { GarmentWithColors, Season } from "@/lib/prendas/types";
 
 interface Props {
-  prenda: PrendaConColores;
-  temporadaValues: string[];
-  hexColores: string[];
+  garment: GarmentWithColors;
+  defaultSeasons: Season[];
+  defaultHexColors: string[];
 }
 
-const sel =
-  "w-full h-8 rounded-lg border border-gray-300 bg-white px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black";
-const inp =
-  "w-full h-8 rounded-lg border border-gray-300 bg-white px-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black";
-const lbl = "block text-sm font-medium mb-1";
-
-export function EditForm({ prenda, temporadaValues, hexColores }: Props) {
-  const boundAction = updatePrendaAction.bind(null, prenda.id);
+export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
+  const boundAction = updateGarmentAction.bind(null, garment.id);
   const [state, formAction, isPending] = useActionState(boundAction, null);
 
   return (
     <form action={formAction} className="space-y-5">
       <div>
-        <label htmlFor="categoria" className={lbl}>Categoria *</label>
-        <select id="categoria" name="categoria" defaultValue={prenda.categoria} required className={sel}>
-          {CATEGORIAS.map((c) => (
-            <option key={c} value={c}>{CATEGORIA_LABELS[c]}</option>
+        <label htmlFor="category" className={FORM_STYLES.label}>Categoria *</label>
+        <select id="category" name="category" defaultValue={garment.category} required className={FORM_STYLES.select}>
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
           ))}
         </select>
       </div>
 
       <div>
-        <span className={lbl}>Colors *</span>
-        <ColorPickers initialColors={hexColores} />
+        <span className={FORM_STYLES.label}>Colors *</span>
+        <ColorPickers initialColors={defaultHexColors} />
       </div>
 
       <div>
-        <label htmlFor="textura" className={lbl}>Textura *</label>
-        <select id="textura" name="textura" defaultValue={prenda.textura} required className={sel}>
-          {TEXTURAS.map((t) => (
-            <option key={t} value={t}>{TEXTURA_LABELS[t]}</option>
+        <label htmlFor="texture" className={FORM_STYLES.label}>Textura *</label>
+        <select id="texture" name="texture" defaultValue={garment.texture} required className={FORM_STYLES.select}>
+          {TEXTURES.map((t) => (
+            <option key={t} value={t}>{TEXTURE_LABELS[t]}</option>
           ))}
         </select>
       </div>
 
       <div>
-        <label htmlFor="dibujo" className={lbl}>Dibuix *</label>
-        <select id="dibujo" name="dibujo" defaultValue={prenda.dibujo} required className={sel}>
-          {DIBUJOS.map((d) => (
-            <option key={d} value={d}>{DIBUJO_LABELS[d]}</option>
+        <label htmlFor="pattern" className={FORM_STYLES.label}>Dibuix *</label>
+        <select id="pattern" name="pattern" defaultValue={garment.pattern} required className={FORM_STYLES.select}>
+          {PATTERNS.map((p) => (
+            <option key={p} value={p}>{PATTERN_LABELS[p]}</option>
           ))}
         </select>
       </div>
 
       <div>
-        <span className={lbl}>Temporada *</span>
-        <TemporadaCheckboxes defaultValues={temporadaValues} />
+        <span className={FORM_STYLES.label}>Temporada *</span>
+        <SeasonCheckboxes defaultValues={defaultSeasons} />
       </div>
 
       <div>
-        <label htmlFor="talla" className={lbl}>Talla *</label>
-        <input id="talla" name="talla" defaultValue={prenda.talla} required className={inp} />
+        <label htmlFor="size" className={FORM_STYLES.label}>Talla *</label>
+        <input id="size" name="size" defaultValue={garment.size} required className={FORM_STYLES.input} />
       </div>
 
       <div>
-        <label htmlFor="fit" className={lbl}>Fit *</label>
-        <select id="fit" name="fit" defaultValue={prenda.fit} required className={sel}>
+        <label htmlFor="fit" className={FORM_STYLES.label}>Fit *</label>
+        <select id="fit" name="fit" defaultValue={garment.fit} required className={FORM_STYLES.select}>
           {FITS.map((f) => (
             <option key={f} value={f}>{FIT_LABELS[f]}</option>
           ))}
@@ -83,8 +78,8 @@ export function EditForm({ prenda, temporadaValues, hexColores }: Props) {
       </div>
 
       <div>
-        <label htmlFor="nota" className={lbl}>Nota</label>
-        <input id="nota" name="nota" defaultValue={prenda.nota ?? ""} className={inp} />
+        <label htmlFor="notes" className={FORM_STYLES.label}>Nota</label>
+        <input id="notes" name="notes" defaultValue={garment.notes ?? ""} className={FORM_STYLES.input} />
       </div>
 
       {state?.error && (

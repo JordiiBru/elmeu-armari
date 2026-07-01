@@ -1,24 +1,24 @@
-import type { Categoria, Dibujo, Fit, Textura } from "@/generated/prisma/enums";
+import type { Category, Pattern, Fit, Texture } from "@/generated/prisma/enums";
 
-export type { Categoria, Dibujo, Fit, Textura };
+export type { Category, Pattern, Fit, Texture };
 
-export const CATEGORIAS: Categoria[] = ["JERSEI", "CAMISA", "PANTALONES", "CALCETINES", "ZAPATOS"];
-export const TEXTURAS: Textura[] = ["PUNTO", "DENIM", "LINO", "ALGODON", "POLIESTER", "CUERO", "SINTETICO"];
-export const DIBUJOS: Dibujo[] = ["LISO", "RAYAS", "CUADROS", "FLORES", "ESTAMPADO", "GEOMETRICO"];
+export const CATEGORIES: Category[] = ["SWEATER", "SHIRT", "PANTS", "SOCKS", "SHOES"];
+export const TEXTURES: Texture[] = ["KNIT", "DENIM", "LINEN", "COTTON", "POLYESTER", "LEATHER", "SYNTHETIC"];
+export const PATTERNS: Pattern[] = ["PLAIN", "STRIPES", "CHECKS", "FLORAL", "PRINTED", "GEOMETRIC"];
 export const FITS: Fit[] = ["OVERSIZED", "STRAIGHT", "CROPPED", "SLIM", "BAGGY", "REGULAR"];
-export const TEMPORADAS = ["PRIMAVERA", "VERANO", "OTONO", "INVIERNO", "TODO_EL_ANIO"] as const;
-export type Temporada = (typeof TEMPORADAS)[number];
+export const SEASONS = ["SPRING", "SUMMER", "AUTUMN", "WINTER", "ALL_YEAR"] as const;
+export type Season = (typeof SEASONS)[number];
 
-export interface PrendaConColores {
+export interface GarmentWithColors {
   id: string;
-  categoria: Categoria;
-  textura: Textura;
-  dibujo: Dibujo;
-  temporada: string;
-  talla: string;
+  category: Category;
+  texture: Texture;
+  pattern: Pattern;
+  season: string;
+  size: string;
   fit: Fit;
-  nota: string | null;
+  notes: string | null;
   createdAt: string;
   updatedAt: string;
-  colores: { id: string; hex: string }[];
+  colors: { id: string; hex: string }[];
 }

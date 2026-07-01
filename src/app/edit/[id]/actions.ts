@@ -1,35 +1,21 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { editPrenda } from "@/lib/prendas/service";
-import type { Categoria, Dibujo, Fit, Textura } from "@/lib/prendas/types";
+import { editGarment } from "@/lib/prendas/service";
+import { validateGarmentForm } from "@/lib/prendas/validation";
+import type { Season } from "@/lib/prendas/types";
 
 export type ActionState = { error: string } | null;
 
-export async function updatePrendaAction(
+export async function updateGarmentAction(
   id: string,
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const categoria = formData.get("categoria") as Categoria;
-  const textura = formData.get("textura") as Textura;
-  const dibujo = formData.get("dibujo") as Dibujo;
-  const fit = formData.get("fit") as Fit;
-  const talla = (formData.get("talla") as string)?.trim();
-  const nota = formData.get("nota") as string | null;
-  const temporada = formData.getAll("temporada") as string[];
-  const hexColores = formData.getAll("color") as string[];
+  const result = validateGarmentForm(formData);
+  if (!result.ok) return { error: result.error };
 
-  if (!categoria || !textura || !dibujo || !fit || !talla) {
-    return { error: "Omple tots els camps marcats amb *" };
-  }
-  if (temporada.length === 0) {
-    return { error: "Selecciona almenys una temporada" };
-  }
-  if (hexColores.length === 0) {
-    return { error: "Afegeix almenys un color" };
-  }
-
-  await editPrenda(id, { categoria, textura, dibujo, fit, talla, nota: nota || undefined, temporada, hexColores });
+  const { category, texture, pattern, fit, size, notes, seasons, hexColors } = result.data;
+  await editGarment(id, { category, texture, pattern, fit, size, notes, seasons: seasons as Season[], hexColors });
   redirect("/armari");
 }

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { ImportForm } from "@/components/ImportForm";
-import { findAllPrendas } from "@/lib/prendas/service";
+import { findAllGarments } from "@/lib/prendas/service";
 
 export default async function SettingsPage() {
-  const prendas = await findAllPrendas();
+  const garments = await findAllGarments();
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-8">
@@ -18,7 +18,7 @@ export default async function SettingsPage() {
         <p className="text-sm text-gray-500">
           Descarrega totes les teves peces en format JSON. Útil com a backup o per migrar a un altre dispositiu.
         </p>
-        <p className="text-xs text-gray-400">{prendas.length} peces al teu armari</p>
+        <p className="text-xs text-gray-400">{garments.length} peces al teu armari</p>
         <a
           href="/api/export"
           download

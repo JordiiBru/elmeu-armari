@@ -1,16 +1,16 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { findAllPrendas } from "@/lib/prendas/service";
+import { findAllGarments } from "@/lib/prendas/service";
 import { ArmariGrid } from "@/components/ArmariGrid";
 
 export default async function ArmariPage() {
-  const raw = await findAllPrendas();
+  const raw = await findAllGarments();
 
-  const prendas = raw.map((p) => ({
-    ...p,
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString(),
-    colores: p.colores.map(({ id, hex }) => ({ id, hex })),
+  const garments = raw.map((g) => ({
+    ...g,
+    createdAt: g.createdAt.toISOString(),
+    updatedAt: g.updatedAt.toISOString(),
+    colors: g.colors.map(({ id, hex }) => ({ id, hex })),
   }));
 
   return (
@@ -31,7 +31,7 @@ export default async function ArmariPage() {
       </div>
 
       <Suspense>
-        <ArmariGrid prendas={prendas} />
+        <ArmariGrid garments={garments} />
       </Suspense>
     </div>
   );

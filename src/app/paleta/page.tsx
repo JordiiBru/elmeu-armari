@@ -1,5 +1,5 @@
 import Link from "next/link";
-import paletes from "@/lib/colores/sanzo-wada.json";
+import paletes from "@/lib/colors/sanzo-wada.json";
 
 export default function PaletaPage() {
   return (
