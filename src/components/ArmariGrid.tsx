@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { deletePrendaAction } from "@/app/armari/actions";
+import { PrendaModal } from "@/components/PrendaModal";
 import type { PrendaConColores, Categoria } from "@/lib/prendas/types";
 import { CATEGORIAS, TEMPORADAS } from "@/lib/prendas/types";
 import { CATEGORIA_LABELS, TEMPORADA_LABELS } from "@/lib/prendas/labels";
+import Link from "next/link";
 
 interface Props {
   prendas: PrendaConColores[];
@@ -13,12 +13,15 @@ interface Props {
 
 const pill = (active: boolean) =>
   `px-3 py-1 text-xs border rounded-full transition-colors ${
-    active ? "bg-black text-white border-black" : "bg-white text-gray-700 border-gray-300 hover:border-gray-500"
+    active
+      ? "bg-black text-white border-black"
+      : "bg-white text-gray-700 border-gray-300 hover:border-gray-500"
   }`;
 
 export function ArmariGrid({ prendas }: Props) {
   const [filtrocat, setFiltrocat] = useState<Categoria | "TOTES">("TOTES");
   const [filtroTemp, setFiltroTemp] = useState<string>("TOTES");
+  const [selected, setSelected] = useState<PrendaConColores | null>(null);
 
   const filtered = prendas.filter((p) => {
     if (filtrocat !== "TOTES" && p.categoria !== filtrocat) return false;
@@ -34,7 +37,7 @@ export function ArmariGrid({ prendas }: Props) {
   });
 
   return (
-    <div>
+    <>
       {/* Filtre categoria */}
       <div className="flex flex-wrap gap-2 mb-2">
         <button type="button" onClick={() => setFiltrocat("TOTES")} className={pill(filtrocat === "TOTES")}>
@@ -64,41 +67,40 @@ export function ArmariGrid({ prendas }: Props) {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {filtered.map((prenda) => (
-            <div key={prenda.id} className="rounded-lg border overflow-hidden flex flex-col">
+            <button
+              type="button"
+              key={prenda.id}
+              onClick={() => setSelected(prenda)}
+              className="rounded-lg border overflow-hidden flex flex-col text-left hover:shadow-md transition-shadow"
+            >
               {/* Colors */}
-              <div className="flex h-24">
+              <div className="flex h-24 w-full">
                 {prenda.colores.map((c) => (
-                  <div key={c.id} className="flex-1" style={{ backgroundColor: c.hex }} title={c.hex} />
+                  <div
+                    key={c.id}
+                    className="flex-1"
+                    style={{ backgroundColor: c.hex }}
+                    title={c.hex}
+                  />
                 ))}
               </div>
 
               {/* Info */}
-              <div className="p-2 flex flex-col gap-0.5 bg-white">
+              <div className="p-2 flex flex-col gap-0.5 bg-white w-full">
                 <span className="text-xs font-medium">{CATEGORIA_LABELS[prenda.categoria]}</span>
                 <span className="text-xs text-gray-500">{prenda.fit} · {prenda.talla}</span>
                 {prenda.nota && (
                   <span className="text-xs text-gray-400 truncate">{prenda.nota}</span>
                 )}
-                <div className="flex gap-2 mt-1">
-                  <Link href={`/edit/${prenda.id}`} className="text-xs text-blue-600 hover:underline">
-                    Editar
-                  </Link>
-                  <form action={deletePrendaAction}>
-                    <input type="hidden" name="id" value={prenda.id} />
-                    <button
-                      type="submit"
-                      className="text-xs text-red-500 hover:underline"
-                      onClick={(e) => { if (!confirm("Eliminar peça?")) e.preventDefault(); }}
-                    >
-                      Eliminar
-                    </button>
-                  </form>
-                </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       )}
-    </div>
+
+      {selected && (
+        <PrendaModal prenda={selected} onClose={() => setSelected(null)} />
+      )}
+    </>
   );
 }
