@@ -9,6 +9,14 @@ export const FITS: Fit[] = ["OVERSIZED", "STRAIGHT", "CROPPED", "SLIM", "BAGGY",
 export const SEASONS = ["SPRING", "SUMMER", "AUTUMN", "WINTER", "ALL_YEAR"] as const;
 export type Season = (typeof SEASONS)[number];
 
+export function parseSeasons(raw: string): Season[] {
+  try {
+    return JSON.parse(raw) as Season[];
+  } catch {
+    return [];
+  }
+}
+
 export interface GarmentWithColors {
   id: string;
   category: Category;

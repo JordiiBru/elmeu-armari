@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { deleteGarmentAction } from "@/app/armari/actions";
-import { parseSeasons } from "@/lib/prendas/service";
+import { parseSeasons } from "@/lib/prendas/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import {
   CATEGORY_LABELS,

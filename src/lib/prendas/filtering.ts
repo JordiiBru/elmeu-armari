@@ -1,5 +1,5 @@
 import type { GarmentWithColors, Category, Fit, Texture } from "./types";
-import { parseSeasons } from "./service";
+import { parseSeasons } from "./types";
 
 export interface GarmentFilters {
   categories: Category[];

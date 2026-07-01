@@ -6,6 +6,7 @@ import {
   deleteGarment,
 } from "./repository";
 import type { Category, Pattern, Fit, Texture, Season } from "./types";
+export { parseSeasons } from "./types";
 
 export { findAllGarments, findGarmentById, deleteGarment };
 
@@ -44,10 +45,3 @@ export async function editGarment(
   });
 }
 
-export function parseSeasons(raw: string): Season[] {
-  try {
-    return JSON.parse(raw) as Season[];
-  } catch {
-    return [];
-  }
-}
