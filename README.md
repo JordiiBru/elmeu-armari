@@ -1,75 +1,139 @@
 # elmeu-armari
 
-Gestor de armario personal. Base de datos de prendas con sistema de recomendacion de outfits basado en teoria del color (Sanzo Wada).
+Gestor personal de roba. Registra les teves peces, filtra per categoria i temporada, i troba combinacions de colors amb les paletes de Sanzo Wada.
 
 ## Stack
 
-- **Next.js 16** (App Router) + TypeScript
-- **Tailwind CSS** + shadcn/ui
-- **Prisma 7** ORM + SQLite (via `@prisma/adapter-better-sqlite3`)
-- **Docker** + k3s (homelab)
+- **Next.js 16.2** (App Router, React Server Components) + TypeScript
+- **Tailwind CSS v4** — sense preprocessor
+- **Prisma 7** + SQLite via `@prisma/adapter-better-sqlite3`
+- **React 19** — Server Actions, `useActionState`
 
 ## Estructura
 
 ```
 src/
-  app/              rutas Next.js (HTTP layer)
-    /               homepage con 3 accesos
-    /add            formulario nueva prenda
-    /armari         grid de prendas con filtros
-    /edit/[id]      editar prenda existente
-    /paleta         paletas Sanzo Wada estaticas
+  app/
+    /               Homepage
+    /add            Formulari nova peça
+    /armari         Grid de peces amb filtres
+    /edit/[id]      Editar peça
+    /paleta         348 paletes Sanzo Wada
+  components/
+    AddForm.tsx           Formulari client (useActionState + errors)
+    EditForm.tsx          Formulari edició client
+    ArmariGrid.tsx        Grid filtrable (categoria + temporada)
+    ColorPickers.tsx      Selector de colors múltiple
+    TemporadaCheckboxes.tsx
   lib/
-    prendas/        dominio prendas: repository, service, types
-    colores/        dominio color: paletas Sanzo Wada, repository
-    outfits/        dominio outfits: recomendador (post-MVP)
-  components/       componentes client reutilizables
-  generated/prisma  cliente Prisma generado (gitignore)
+    prendas/
+      labels.ts     Labels localitzats (font única)
+      types.ts      Enums, constants, PrendaConColores
+      service.ts    Lògica de negoci
+      repository.ts Accés a dades (Prisma)
+    colores/
+      sanzo-wada.json  348 combinacions reals
+    prisma.ts       Singleton Prisma amb adapter SQLite
 prisma/
-  schema.prisma     modelo de datos
-  migrations/       migraciones SQL
+  schema.prisma     Model de dades
+  migrations/       Migracions SQL
 ```
 
-## Modelo de datos
+## Model de dades
 
-Cada prenda tiene: categoria, N colores (hex), textura, dibujo, temporada (JSON array), talla, fit y una nota libre opcional.
+Cada peça: `categoria`, N colors (hex, taula `Color` separada), `textura`, `dibuix`, `temporada` (JSON array), `talla`, `fit`, `nota` opcional.
 
-Los colores se guardan en tabla separada (`Color`) vinculada a la prenda.
+```
+Prenda (1) ──── (*) Color
+```
 
-## Desarrollo local
+## Desenvolupament local
 
 ```bash
 npm install
 npx prisma migrate dev
 npm run dev
+# → http://localhost:3000
 ```
 
-App en http://localhost:3000
-
-## Con Docker
+Per accedir des d'un altre dispositiu de la xarxa:
 
 ```bash
-docker compose up
+# Troba la teva IP local
+ip route get 1 | awk '{print $7; exit}'
+# → http://<ip>:3000
 ```
 
-App en http://localhost:3000. La DB SQLite persiste en el volumen `sqlite_data`.
+## Docker
 
-## Vistas
+### Una sola comanda (build local)
 
-| Ruta | Descripcion |
-|------|-------------|
-| `/` | Homepage: acceso a armario, anadir prenda y paleta |
-| `/armari` | Grid de prendas filtrable por categoria |
-| `/add` | Formulario nueva prenda |
-| `/edit/[id]` | Editar prenda existente |
-| `/paleta` | Paletas de color del libro Sanzo Wada |
+```bash
+docker build -t elmeu-armari .
 
-## Roadmap
+docker run -d \
+  --name elmeu-armari \
+  -p 3000:3000 \
+  -v elmeu-armari-data:/data \
+  elmeu-armari
+# → http://localhost:3000
+```
 
-- **MVP**: CRUD de prendas, vista armario con filtros, paleta Sanzo Wada
-- **v2**: subida de imagenes (ficheros en PVC, path en DB)
-- **v3**: vista outfit con carrusel por categoria
-- **v4**: recomendador de outfits (Sanzo Wada + fit + temporada)
-- **v5**: multiusuario + auth
+### Docker Compose (recomanat)
 
-Ver issues para el detalle de cada fase.
+```bash
+# Arrancar (build + migracions automàtiques)
+docker compose up -d
+
+# Logs
+docker compose logs -f
+
+# Aturar
+docker compose down
+
+# Aturar i esborrar dades (destructiu)
+docker compose down -v
+
+# Rebuild després de canvis
+docker compose up -d --build
+```
+
+### Imatge prebuilt (GHCR)
+
+```bash
+docker run -d \
+  --name elmeu-armari \
+  -p 3000:3000 \
+  -v elmeu-armari-data:/data \
+  ghcr.io/jordiiibru/elmeu-armari:latest
+```
+
+### Variables d'entorn
+
+| Variable | Defecte | Descripció |
+|---|---|---|
+| `DATABASE_URL` | `file:/data/prod.db` | Ruta del fitxer SQLite |
+| `PORT` | `3000` | Port HTTP |
+
+## Rutes
+
+| Ruta | Descripció |
+|---|---|
+| `/` | Homepage |
+| `/armari` | Grid de peces, filtre per categoria i temporada |
+| `/add` | Nova peça |
+| `/edit/[id]` | Editar peça |
+| `/paleta` | 348 paletes Sanzo Wada |
+
+## Issues oberts (post-MVP)
+
+| # | Feature |
+|---|---|
+| [#13](https://github.com/JordiiBru/elmeu-armari/issues/13) | PWA manifest — instal·lable al mòbil |
+| [#14](https://github.com/JordiiBru/elmeu-armari/issues/14) | Deploy k3s (Helm + ArgoCD) |
+| [#15](https://github.com/JordiiBru/elmeu-armari/issues/15) | Pàgina de detall de peça |
+| [#16](https://github.com/JordiiBru/elmeu-armari/issues/16) | Upload foto |
+| [#17](https://github.com/JordiiBru/elmeu-armari/issues/17) | Outfit builder amb Sanzo Wada |
+| [#18](https://github.com/JordiiBru/elmeu-armari/issues/18) | Estadístiques |
+| [#19](https://github.com/JordiiBru/elmeu-armari/issues/19) | Filtres multi-select i cerca |
+| [#20](https://github.com/JordiiBru/elmeu-armari/issues/20) | Export / import JSON |

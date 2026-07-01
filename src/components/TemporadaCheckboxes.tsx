@@ -1,14 +1,7 @@
 "use client";
 
 import { TEMPORADAS } from "@/lib/prendas/types";
-
-const LABELS: Record<string, string> = {
-  PRIMAVERA: "Primavera",
-  VERANO: "Estiu",
-  OTONO: "Tardor",
-  INVIERNO: "Hivern",
-  TODO_EL_ANIO: "Tot l'any",
-};
+import { TEMPORADA_LABELS } from "@/lib/prendas/labels";
 
 interface Props {
   defaultValues?: string[];
@@ -26,7 +19,7 @@ export function TemporadaCheckboxes({ defaultValues = [] }: Props) {
             defaultChecked={defaultValues.includes(t)}
             className="rounded"
           />
-          {LABELS[t]}
+          {TEMPORADA_LABELS[t]}
         </label>
       ))}
     </div>

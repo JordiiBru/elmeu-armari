@@ -18,7 +18,7 @@ export interface PrendaConColores {
   talla: string;
   fit: Fit;
   nota: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  colores: { id: string; hex: string; prendaId: string }[];
+  createdAt: string;
+  updatedAt: string;
+  colores: { id: string; hex: string }[];
 }

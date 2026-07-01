@@ -1,22 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 
-export function ColorPickers() {
-  const [colors, setColors] = useState<string[]>(["#000000"]);
+interface Props {
+  initialColors?: string[];
+}
 
-  function addColor() {
-    setColors((prev) => [...prev, "#000000"]);
-  }
-
-  function removeColor(index: number) {
-    setColors((prev) => prev.filter((_, i) => i !== index));
-  }
-
-  function updateColor(index: number, value: string) {
-    setColors((prev) => prev.map((c, i) => (i === index ? value : c)));
-  }
+export function ColorPickers({ initialColors }: Props) {
+  const [colors, setColors] = useState<string[]>(
+    initialColors && initialColors.length > 0 ? initialColors : ["#000000"]
+  );
 
   return (
     <div className="space-y-2">
@@ -26,14 +19,16 @@ export function ColorPickers() {
             type="color"
             name="color"
             value={color}
-            onChange={(e) => updateColor(i, e.target.value)}
+            onChange={(e) =>
+              setColors((prev) => prev.map((c, j) => (j === i ? e.target.value : c)))
+            }
             className="h-9 w-16 cursor-pointer rounded border border-gray-300"
           />
           <span className="text-sm font-mono text-gray-600">{color}</span>
           {colors.length > 1 && (
             <button
               type="button"
-              onClick={() => removeColor(i)}
+              onClick={() => setColors((prev) => prev.filter((_, j) => j !== i))}
               className="text-sm text-red-500 hover:text-red-700"
             >
               Eliminar
@@ -41,9 +36,13 @@ export function ColorPickers() {
           )}
         </div>
       ))}
-      <Button type="button" variant="outline" size="sm" onClick={addColor}>
+      <button
+        type="button"
+        onClick={() => setColors((prev) => [...prev, "#000000"])}
+        className="px-2.5 py-1 text-sm border rounded hover:bg-gray-50"
+      >
         + Afegir color
-      </Button>
+      </button>
     </div>
   );
 }
