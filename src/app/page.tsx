@@ -16,6 +16,11 @@ const NAV_ITEMS = [
     title: "Paletes de color",
     description: "Paletes Sanzo Wada per combinar colors",
   },
+  {
+    href: "/stats",
+    title: "Estadístiques",
+    description: "Distribució per categoria, temporada, fit i colors",
+  },
 ];
 
 export default function HomePage() {
