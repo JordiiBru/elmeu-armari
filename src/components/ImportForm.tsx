@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 export function ImportForm() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   const [mode, setMode] = useState<"merge" | "replace">("merge");
   const [status, setStatus] = useState<{ type: "ok" | "error"; msg: string } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -33,6 +34,7 @@ export function ImportForm() {
       } else {
         setStatus({ type: "ok", msg: `${data.imported} peces importades correctament.` });
         if (inputRef.current) inputRef.current.value = "";
+        setFileName(null);
         router.refresh();
       }
     } catch {
@@ -71,11 +73,19 @@ export function ImportForm() {
           type="file"
           accept="application/json,.json"
           required
-          className="text-sm"
+          className="sr-only"
+          onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
         />
         <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50"
+        >
+          {fileName ?? "Seleccionar fitxer"}
+        </button>
+        <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !fileName}
           className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50"
         >
           {loading ? "Important..." : "Importar"}
