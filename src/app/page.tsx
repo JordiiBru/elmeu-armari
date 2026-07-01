@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   {
     href: "/armari",
     title: "El meu armari",
-    description: "Veu i gestiona totes les teves peces",
+    description: "Peces, combinacions i outfits desats",
   },
   {
     href: "/paleta",

@@ -17,8 +17,30 @@ model Garment {
   size      String
   fit       Fit
   notes     String?
+  outfits   OutfitGarment[]
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
+}
+
+model Outfit {
+  id        String          @id @default(cuid())
+  name      String?
+  paletteId Int
+  garments  OutfitGarment[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model OutfitGarment {
+  id        String  @id @default(cuid())
+  outfitId  String
+  garmentId String
+  outfit    Outfit  @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  garment   Garment @relation(fields: [garmentId], references: [id], onDelete: Cascade)
+
+  @@unique([outfitId, garmentId])
+  @@index([outfitId])
+  @@index([garmentId])
 }
 
 model Color {
