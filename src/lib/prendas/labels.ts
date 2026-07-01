@@ -1,45 +1,74 @@
-import type { Category, Pattern, Fit, Texture, Season } from "./types";
+import type { Category, Pattern, Texture, Season } from "./types";
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   SWEATER: "Jersei",
-  SHIRT: "Camisa",
-  PANTS: "Pantalons",
-  SOCKS: "Mitjons",
-  SHOES: "Sabates",
+  SHIRT:   "Samarreta",
+  PANTS:   "Pantalons",
+  SOCKS:   "Mitjons",
+  SHOES:   "Sabates",
 };
 
 export const TEXTURE_LABELS: Record<Texture, string> = {
-  KNIT: "Punt",
-  DENIM: "Denim",
-  LINEN: "Lli",
-  COTTON: "Cotó",
-  POLYESTER: "Poliester",
-  LEATHER: "Cuir",
-  SYNTHETIC: "Sintètic",
+  KNIT:       "Punt",
+  DENIM:      "Denim",
+  LINEN:      "Lli",
+  COTTON:     "Cotó",
+  POLYESTER:  "Poliester",
+  LEATHER:    "Cuir",
+  SYNTHETIC:  "Sintètic",
 };
 
 export const PATTERN_LABELS: Record<Pattern, string> = {
-  PLAIN: "Llis",
-  STRIPES: "Ratlles",
-  CHECKS: "Quadres",
-  FLORAL: "Flors",
-  PRINTED: "Estampat",
+  PLAIN:     "Llis",
+  STRIPES:   "Ratlles",
+  CHECKS:    "Quadres",
+  FLORAL:    "Flors",
+  PRINTED:   "Estampat",
   GEOMETRIC: "Geomètric",
 };
 
-export const FIT_LABELS: Record<Fit, string> = {
-  OVERSIZED: "Oversized",
-  STRAIGHT: "Straight",
-  CROPPED: "Cropped",
-  SLIM: "Slim",
-  BAGGY: "Baggy",
-  REGULAR: "Regular",
+export const FIT_LABELS: Record<string, string> = {
+  REGULAR:    "Regular",
+  OVERSIZED:  "Oversized",
+  CROPPED:    "Cropped",
+  SLIM:       "Slim",
+  STRAIGHT:   "Straight",
+  SKINNY:     "Skinny",
+  BAGGY:      "Baggy",
+  BARREL:     "Barrel",
+  WIDE_LEG:   "Wide Leg",
+  CURT:       "Curt",
+  TURMELL:    "Turmell",
+  MITJA_CANYA:"Mitja canya",
+  GENOLLERA:  "Genollera",
+  LOW_TOP:    "Low Top",
+  MID:        "Mid",
+  HIGH_TOP:   "High Top",
+};
+
+export const SUBTYPE_LABELS: Record<string, string> = {
+  PULLOVER: "Pullover",
+  ZIP:      "Zip",
+  HOODIE:   "Hoodie",
+  CARDIGAN: "Cardigan",
+  TEE:      "Samarreta",
+  POLO:     "Polo",
+  CAMISA:   "Camisa",
+  VAQUERS:  "Vaquers",
+  CHINO:    "Chino",
+  JOGGER:   "Jogger",
+  CARGO:    "Cargo",
+  SNEAKER:  "Sneaker",
+  BOTA:     "Bota",
+  LOAFER:   "Loafer",
+  SANDALIA: "Sandàlia",
+  OXFORD:   "Oxford",
 };
 
 export const SEASON_LABELS: Record<Season, string> = {
-  SPRING: "Primavera",
-  SUMMER: "Estiu",
-  AUTUMN: "Tardor",
-  WINTER: "Hivern",
+  SPRING:   "Primavera",
+  SUMMER:   "Estiu",
+  AUTUMN:   "Tardor",
+  WINTER:   "Hivern",
   ALL_YEAR: "Tot l'any",
 };

@@ -1,9 +1,9 @@
-import type { GarmentWithColors, Category, Fit, Texture, Season } from "./types";
+import type { GarmentWithColors, Category, Texture, Season } from "./types";
 
 export interface GarmentFilters {
   categories: Category[];
   seasons: Season[];
-  fits: Fit[];
+  fits: string[];
   textures: Texture[];
   query: string;
 }

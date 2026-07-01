@@ -15,7 +15,8 @@ model Garment {
   texture   Texture
   pattern   Pattern
   size      String
-  fit       Fit
+  subtype   String?
+  fit       String
   notes     String?
   outfits   OutfitGarment[]
   createdAt DateTime         @default(now())
@@ -87,15 +88,6 @@ enum Pattern {
   FLORAL
   PRINTED
   GEOMETRIC
-}
-
-enum Fit {
-  OVERSIZED
-  STRAIGHT
-  CROPPED
-  SLIM
-  BAGGY
-  REGULAR
 }
 
 enum Season {

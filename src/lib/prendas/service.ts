@@ -5,7 +5,7 @@ import {
   updateGarment,
   deleteGarment,
 } from "./repository";
-import type { Category, Pattern, Fit, Texture, Season } from "./types";
+import type { Category, Pattern, Texture, Season } from "./types";
 
 export { findAllGarments, findGarmentById, deleteGarment };
 
@@ -15,7 +15,8 @@ export async function addGarment(data: {
   pattern: Pattern;
   seasons: Season[];
   size: string;
-  fit: Fit;
+  subtype: string | null;
+  fit: string;
   notes?: string;
   hexColors: string[];
 }) {
@@ -30,11 +31,11 @@ export async function editGarment(
     pattern: Pattern;
     seasons: Season[];
     size: string;
-    fit: Fit;
+    subtype: string | null;
+    fit: string;
     notes?: string;
     hexColors: string[];
   }
 ) {
   return updateGarment(id, data);
 }
-
