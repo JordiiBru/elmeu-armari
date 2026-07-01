@@ -10,7 +10,8 @@ COPY . .
 
 RUN npx prisma generate
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN DATABASE_URL=file:/tmp/build.db npx prisma migrate deploy && \
+    DATABASE_URL=file:/tmp/build.db npm run build
 
 # Production image
 FROM node:20-alpine AS runner
