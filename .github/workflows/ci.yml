@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
@@ -72,10 +72,15 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
 
+      - name: Migrate DB
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: file:/tmp/ci.db
+
       - name: Next.js build
         run: npm run build
         env:
-          DATABASE_URL: file:./dev.db
+          DATABASE_URL: file:/tmp/ci.db
 
   performance:
     name: Performance (Lighthouse)
@@ -91,13 +96,13 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
 
-      - name: Next.js build
-        run: npm run build
+      - name: Migrate DB
+        run: npx prisma migrate deploy
         env:
           DATABASE_URL: file:/tmp/ci.db
 
-      - name: Migrate DB
-        run: npx prisma migrate deploy
+      - name: Next.js build
+        run: npm run build
         env:
           DATABASE_URL: file:/tmp/ci.db
 
