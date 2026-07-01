@@ -90,3 +90,29 @@ L'entrypoint executa `prisma migrate deploy` automàticament abans d'arrencar el
 - Automerge immediat d'alertes de seguretat
 - Grups: Next.js ecosystem, Prisma, Tailwind, GitHub Actions
 - Digest pinning per imatges Docker de base
+
+## Flux de treball
+
+### Implementació de features
+1. Llegir la issue de GitHub corresponent abans de començar.
+2. Branch: `feature/cosmo-<propòsit>`.
+3. Implementar, commit, push, PR.
+4. Esperar que el CI estigui en verd (tots els checks han de passar).
+5. Quan el CI passa, fer merge — mai abans.
+6. Actualitzar la issue de la Torre de control (#21) amb les decisions preses i canvis de roadmap.
+
+### Com avisar que una feature està llesta per provar
+Quan una feature estigui en PR i el CI en verd, indicar a Jordi:
+- Quina comanda executar: `npm run dev` → `http://localhost:3000`
+- Quines pantalles o accions concretes ha de provar
+- Quins casos límit o edge cases val la pena verificar manualment
+
+### Torre de control (#21)
+La issue #21 és el dashboard del projecte — **mai es tanca**. Actualitzar-la:
+- Quan s'obre una issue nova rellevant (afegir-la a la fase corresponent)
+- Quan es fa merge d'una feature (marcar com a feta, anotar decisions preses)
+- Quan es prenen decisions d'arquitectura (afegir a "Decisions obertes" o "Historial")
+
+### Decisions importants preses
+- **2026-07**: CI/CD complet amb GitHub Actions. CI: lint+typecheck, npm audit, Trivy fs, build, Lighthouse. CD: push tag semver → GHCR. Renovate per mantenir deps segures.
+- **2026-07**: `CLAUDE.md` com a font de veritat per a agents IA (stack, convencions, flux de treball).
