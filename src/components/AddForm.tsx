@@ -11,6 +11,7 @@ import {
   PATTERN_LABELS,
   FIT_LABELS,
 } from "@/lib/prendas/labels";
+import { UI } from "@/lib/prendas/ui-strings";
 import { FORM_STYLES } from "@/lib/ui";
 
 export function AddForm() {
@@ -19,7 +20,7 @@ export function AddForm() {
   return (
     <form action={formAction} className="space-y-5">
       <div>
-        <label htmlFor="category" className={FORM_STYLES.label}>Categoria *</label>
+        <label htmlFor="category" className={FORM_STYLES.label}>{UI.form.category} {UI.form.required}</label>
         <select id="category" name="category" required className={FORM_STYLES.select}>
           <option value="">Selecciona...</option>
           {CATEGORIES.map((c) => (
@@ -29,12 +30,12 @@ export function AddForm() {
       </div>
 
       <div>
-        <span className={FORM_STYLES.label}>Colors *</span>
+        <span className={FORM_STYLES.label}>{UI.form.colors} {UI.form.required}</span>
         <ColorPickers />
       </div>
 
       <div>
-        <label htmlFor="texture" className={FORM_STYLES.label}>Textura *</label>
+        <label htmlFor="texture" className={FORM_STYLES.label}>{UI.form.texture} {UI.form.required}</label>
         <select id="texture" name="texture" required className={FORM_STYLES.select}>
           <option value="">Selecciona...</option>
           {TEXTURES.map((t) => (
@@ -44,7 +45,7 @@ export function AddForm() {
       </div>
 
       <div>
-        <label htmlFor="pattern" className={FORM_STYLES.label}>Dibuix *</label>
+        <label htmlFor="pattern" className={FORM_STYLES.label}>{UI.form.pattern} {UI.form.required}</label>
         <select id="pattern" name="pattern" required className={FORM_STYLES.select}>
           <option value="">Selecciona...</option>
           {PATTERNS.map((p) => (
@@ -54,17 +55,17 @@ export function AddForm() {
       </div>
 
       <div>
-        <span className={FORM_STYLES.label}>Temporada *</span>
+        <span className={FORM_STYLES.label}>{UI.form.seasons} {UI.form.required}</span>
         <SeasonCheckboxes />
       </div>
 
       <div>
-        <label htmlFor="size" className={FORM_STYLES.label}>Talla *</label>
+        <label htmlFor="size" className={FORM_STYLES.label}>{UI.form.size} {UI.form.required}</label>
         <input id="size" name="size" placeholder="M, L, 42..." required className={FORM_STYLES.input} />
       </div>
 
       <div>
-        <label htmlFor="fit" className={FORM_STYLES.label}>Fit *</label>
+        <label htmlFor="fit" className={FORM_STYLES.label}>{UI.form.fit} {UI.form.required}</label>
         <select id="fit" name="fit" required className={FORM_STYLES.select}>
           <option value="">Selecciona...</option>
           {FITS.map((f) => (
@@ -74,7 +75,7 @@ export function AddForm() {
       </div>
 
       <div>
-        <label htmlFor="notes" className={FORM_STYLES.label}>Nota</label>
+        <label htmlFor="notes" className={FORM_STYLES.label}>{UI.form.notes}</label>
         <input id="notes" name="notes" placeholder="Opcional..." className={FORM_STYLES.input} />
       </div>
 
@@ -89,7 +90,7 @@ export function AddForm() {
         disabled={isPending}
         className="w-full h-9 rounded-lg bg-black text-white text-sm font-medium hover:bg-black/80 disabled:opacity-50 transition-opacity"
       >
-        {isPending ? "Guardant..." : "Guardar peça"}
+        {isPending ? "Guardant..." : UI.buttons.save}
       </button>
     </form>
   );

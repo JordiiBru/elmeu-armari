@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { findGarmentById, parseSeasons } from "@/lib/prendas/service";
+import { findGarmentById } from "@/lib/prendas/service";
 import { EditForm } from "@/components/EditForm";
 
 export default async function EditPage({
@@ -12,12 +12,7 @@ export default async function EditPage({
   const garment = await findGarmentById(id);
   if (!garment) notFound();
 
-  const serialized = {
-    ...garment,
-    createdAt: garment.createdAt.toISOString(),
-    updatedAt: garment.updatedAt.toISOString(),
-    colors: garment.colors.map(({ id, hex }) => ({ id, hex })),
-  };
+  const serialized = garment;
 
   return (
     <div className="max-w-lg mx-auto p-4">
@@ -27,7 +22,7 @@ export default async function EditPage({
       </div>
       <EditForm
         garment={serialized}
-        defaultSeasons={parseSeasons(garment.season)}
+        defaultSeasons={garment.seasons.map((s) => s.season)}
         defaultHexColors={garment.colors.map((c) => c.hex)}
       />
     </div>

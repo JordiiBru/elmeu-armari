@@ -6,12 +6,7 @@ import { ArmariGrid } from "@/components/ArmariGrid";
 export default async function ArmariPage() {
   const raw = await findAllGarments();
 
-  const garments = raw.map((g) => ({
-    ...g,
-    createdAt: g.createdAt.toISOString(),
-    updatedAt: g.updatedAt.toISOString(),
-    colors: g.colors.map(({ id, hex }) => ({ id, hex })),
-  }));
+  const garments = raw;
 
   return (
     <div className="max-w-4xl mx-auto p-4">

@@ -1,32 +1,23 @@
-import type { Category, Pattern, Fit, Texture } from "@/generated/prisma/enums";
+import type { Category, Pattern, Fit, Texture, Season } from "@/generated/prisma/enums";
 
-export type { Category, Pattern, Fit, Texture };
+export type { Category, Pattern, Fit, Texture, Season };
 
 export const CATEGORIES: Category[] = ["SWEATER", "SHIRT", "PANTS", "SOCKS", "SHOES"];
 export const TEXTURES: Texture[] = ["KNIT", "DENIM", "LINEN", "COTTON", "POLYESTER", "LEATHER", "SYNTHETIC"];
 export const PATTERNS: Pattern[] = ["PLAIN", "STRIPES", "CHECKS", "FLORAL", "PRINTED", "GEOMETRIC"];
 export const FITS: Fit[] = ["OVERSIZED", "STRAIGHT", "CROPPED", "SLIM", "BAGGY", "REGULAR"];
-export const SEASONS = ["SPRING", "SUMMER", "AUTUMN", "WINTER", "ALL_YEAR"] as const;
-export type Season = (typeof SEASONS)[number];
-
-export function parseSeasons(raw: string): Season[] {
-  try {
-    return JSON.parse(raw) as Season[];
-  } catch {
-    return [];
-  }
-}
+export const SEASONS: Season[] = ["SPRING", "SUMMER", "AUTUMN", "WINTER", "ALL_YEAR"];
 
 export interface GarmentWithColors {
   id: string;
   category: Category;
   texture: Texture;
   pattern: Pattern;
-  season: string;
   size: string;
   fit: Fit;
   notes: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   colors: { id: string; hex: string }[];
+  seasons: { id: string; season: Season }[];
 }

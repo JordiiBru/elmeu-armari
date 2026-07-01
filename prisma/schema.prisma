@@ -8,17 +8,17 @@ datasource db {
 }
 
 model Garment {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   category  Category
   colors    Color[]
+  seasons   GarmentSeason[]
   texture   Texture
   pattern   Pattern
-  season    String
   size      String
   fit       Fit
   notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 }
 
 model Color {
@@ -26,6 +26,18 @@ model Color {
   hex       String
   garmentId String
   garment   Garment @relation(fields: [garmentId], references: [id], onDelete: Cascade)
+
+  @@index([garmentId])
+}
+
+model GarmentSeason {
+  id        String   @id @default(cuid())
+  garmentId String
+  season    Season
+  garment   Garment  @relation(fields: [garmentId], references: [id], onDelete: Cascade)
+
+  @@unique([garmentId, season])
+  @@index([garmentId])
 }
 
 enum Category {
@@ -62,4 +74,12 @@ enum Fit {
   SLIM
   BAGGY
   REGULAR
+}
+
+enum Season {
+  SPRING
+  SUMMER
+  AUTUMN
+  WINTER
+  ALL_YEAR
 }

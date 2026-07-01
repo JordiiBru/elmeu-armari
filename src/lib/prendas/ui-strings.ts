@@ -1,0 +1,43 @@
+export const UI = {
+  buttons: {
+    save: "Guardar peça",
+    saveChanges: "Guardar canvis",
+    delete: "Eliminar",
+    close: "Tancar",
+    clearFilters: "Netejar filtres",
+    edit: "Editar",
+  },
+  form: {
+    category: "Categoria",
+    colors: "Colors",
+    texture: "Textura",
+    pattern: "Dibuix",
+    seasons: "Temporada",
+    size: "Talla",
+    fit: "Tall",
+    notes: "Notes",
+    required: "*",
+  },
+  errors: {
+    requiredFields: "Omple tots els camps marcats amb *",
+    minOneSeason: "Selecciona almenys una temporada",
+    minOneColor: "Selecciona almenys un color",
+    invalidColor: "Color no valid",
+  },
+  modal: {
+    texture: "Textura",
+    pattern: "Dibuix",
+    colors: "Colors",
+    seasons: "Temporada",
+    notes: "Notes",
+  },
+  grid: {
+    filters: "Filtres",
+    categories: "Categoria",
+    seasons: "Temporada",
+    fits: "Tall",
+    textures: "Textura",
+    noResults: "Cap peça trobada",
+    results: (count: number) => `${count} peça${count !== 1 ? "s" : ""}`,
+  },
+} as const;

@@ -4,7 +4,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useState, useMemo } from "react";
 import { GarmentModal } from "@/components/GarmentModal";
 import { filterGarments } from "@/lib/prendas/filtering";
-import type { GarmentWithColors, Category, Fit, Texture } from "@/lib/prendas/types";
+import type { GarmentWithColors, Category, Fit, Texture, Season } from "@/lib/prendas/types";
 import { CATEGORIES, SEASONS, FITS, TEXTURES } from "@/lib/prendas/types";
 import {
   CATEGORY_LABELS,
@@ -12,6 +12,7 @@ import {
   FIT_LABELS,
   TEXTURE_LABELS,
 } from "@/lib/prendas/labels";
+import { UI } from "@/lib/prendas/ui-strings";
 
 interface Props {
   garments: GarmentWithColors[];
@@ -31,7 +32,7 @@ export function ArmariGrid({ garments }: Props) {
   const [selected, setSelected] = useState<GarmentWithColors | null>(null);
 
   const categories = searchParams.getAll("cat") as Category[];
-  const seasons = searchParams.getAll("season");
+  const seasons = searchParams.getAll("season") as Season[];
   const fits = searchParams.getAll("fit") as Fit[];
   const textures = searchParams.getAll("tex") as Texture[];
   const query = searchParams.get("q") ?? "";
@@ -113,17 +114,17 @@ export function ArmariGrid({ garments }: Props) {
               onClick={() => router.replace(pathname, { scroll: false })}
               className="text-xs text-gray-500 underline hover:text-black"
             >
-              Neteja filtres
+              {UI.buttons.clearFilters}
             </button>
             <span className="text-xs text-gray-400">
-              {filtered.length} de {garments.length} peces
+              {filtered.length} de {garments.length} {UI.grid.results(garments.length)}
             </span>
           </div>
         )}
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-gray-400 text-sm">Cap peça amb aquests filtres.</p>
+        <p className="text-gray-400 text-sm">{UI.grid.noResults}</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {filtered.map((garment) => (

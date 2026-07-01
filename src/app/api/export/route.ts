@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { findAllGarments, parseSeasons } from "@/lib/prendas/service";
+import { findAllGarments } from "@/lib/prendas/service";
 
 export async function GET() {
   const garments = await findAllGarments();
@@ -9,7 +9,7 @@ export async function GET() {
     category: g.category,
     texture: g.texture,
     pattern: g.pattern,
-    seasons: parseSeasons(g.season),
+    seasons: g.seasons.map((s) => s.season),
     size: g.size,
     fit: g.fit,
     notes: g.notes,
@@ -17,7 +17,7 @@ export async function GET() {
     createdAt: g.createdAt.toISOString(),
   }));
 
-  const payload = { version: 2, exportedAt: new Date().toISOString(), garments: data };
+  const payload = { version: 3, exportedAt: new Date().toISOString(), garments: data };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
     headers: {

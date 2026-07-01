@@ -1,6 +1,7 @@
 #!/bin/sh
 set -e
 
-npx prisma migrate deploy
+echo "Running migrations..."
+npx prisma migrate deploy || { echo "Migration failed"; exit 1; }
 
 exec npm start

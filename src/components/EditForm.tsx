@@ -11,6 +11,7 @@ import {
   PATTERN_LABELS,
   FIT_LABELS,
 } from "@/lib/prendas/labels";
+import { UI } from "@/lib/prendas/ui-strings";
 import { FORM_STYLES } from "@/lib/ui";
 import type { GarmentWithColors, Season } from "@/lib/prendas/types";
 
@@ -27,7 +28,7 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
   return (
     <form action={formAction} className="space-y-5">
       <div>
-        <label htmlFor="category" className={FORM_STYLES.label}>Categoria *</label>
+        <label htmlFor="category" className={FORM_STYLES.label}>{UI.form.category} {UI.form.required}</label>
         <select id="category" name="category" defaultValue={garment.category} required className={FORM_STYLES.select}>
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
@@ -36,12 +37,12 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
       </div>
 
       <div>
-        <span className={FORM_STYLES.label}>Colors *</span>
+        <span className={FORM_STYLES.label}>{UI.form.colors} {UI.form.required}</span>
         <ColorPickers initialColors={defaultHexColors} />
       </div>
 
       <div>
-        <label htmlFor="texture" className={FORM_STYLES.label}>Textura *</label>
+        <label htmlFor="texture" className={FORM_STYLES.label}>{UI.form.texture} {UI.form.required}</label>
         <select id="texture" name="texture" defaultValue={garment.texture} required className={FORM_STYLES.select}>
           {TEXTURES.map((t) => (
             <option key={t} value={t}>{TEXTURE_LABELS[t]}</option>
@@ -50,7 +51,7 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
       </div>
 
       <div>
-        <label htmlFor="pattern" className={FORM_STYLES.label}>Dibuix *</label>
+        <label htmlFor="pattern" className={FORM_STYLES.label}>{UI.form.pattern} {UI.form.required}</label>
         <select id="pattern" name="pattern" defaultValue={garment.pattern} required className={FORM_STYLES.select}>
           {PATTERNS.map((p) => (
             <option key={p} value={p}>{PATTERN_LABELS[p]}</option>
@@ -59,17 +60,17 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
       </div>
 
       <div>
-        <span className={FORM_STYLES.label}>Temporada *</span>
+        <span className={FORM_STYLES.label}>{UI.form.seasons} {UI.form.required}</span>
         <SeasonCheckboxes defaultValues={defaultSeasons} />
       </div>
 
       <div>
-        <label htmlFor="size" className={FORM_STYLES.label}>Talla *</label>
+        <label htmlFor="size" className={FORM_STYLES.label}>{UI.form.size} {UI.form.required}</label>
         <input id="size" name="size" defaultValue={garment.size} required className={FORM_STYLES.input} />
       </div>
 
       <div>
-        <label htmlFor="fit" className={FORM_STYLES.label}>Fit *</label>
+        <label htmlFor="fit" className={FORM_STYLES.label}>{UI.form.fit} {UI.form.required}</label>
         <select id="fit" name="fit" defaultValue={garment.fit} required className={FORM_STYLES.select}>
           {FITS.map((f) => (
             <option key={f} value={f}>{FIT_LABELS[f]}</option>
@@ -78,7 +79,7 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
       </div>
 
       <div>
-        <label htmlFor="notes" className={FORM_STYLES.label}>Nota</label>
+        <label htmlFor="notes" className={FORM_STYLES.label}>{UI.form.notes}</label>
         <input id="notes" name="notes" defaultValue={garment.notes ?? ""} className={FORM_STYLES.input} />
       </div>
 
@@ -93,7 +94,7 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
         disabled={isPending}
         className="w-full h-9 rounded-lg bg-black text-white text-sm font-medium hover:bg-black/80 disabled:opacity-50 transition-opacity"
       >
-        {isPending ? "Guardant..." : "Guardar canvis"}
+        {isPending ? "Guardant..." : UI.buttons.saveChanges}
       </button>
     </form>
   );
