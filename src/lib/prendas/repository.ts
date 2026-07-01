@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { Category, Pattern, Fit, Texture, Season } from "@/generated/prisma/enums";
+import type { Category, Pattern, Texture, Season } from "@/generated/prisma/enums";
 
 export async function findAllGarments() {
   return prisma.garment.findMany({
@@ -21,7 +21,8 @@ export async function createGarment(data: {
   pattern: Pattern;
   seasons: Season[];
   size: string;
-  fit: Fit;
+  subtype: string | null;
+  fit: string;
   notes?: string;
   hexColors: string[];
 }) {
@@ -31,6 +32,7 @@ export async function createGarment(data: {
       texture: data.texture,
       pattern: data.pattern,
       size: data.size,
+      subtype: data.subtype,
       fit: data.fit,
       notes: data.notes ?? null,
       colors: {
@@ -52,7 +54,8 @@ export async function updateGarment(
     pattern: Pattern;
     seasons: Season[];
     size: string;
-    fit: Fit;
+    subtype: string | null;
+    fit: string;
     notes?: string;
     hexColors: string[];
   }
@@ -67,6 +70,7 @@ export async function updateGarment(
         texture: data.texture,
         pattern: data.pattern,
         size: data.size,
+        subtype: data.subtype,
         fit: data.fit,
         notes: data.notes ?? null,
         colors: {

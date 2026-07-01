@@ -4,8 +4,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useState, useMemo } from "react";
 import { GarmentModal } from "@/components/GarmentModal";
 import { filterGarments } from "@/lib/prendas/filtering";
-import type { GarmentWithColors, Category, Fit, Texture, Season } from "@/lib/prendas/types";
-import { CATEGORIES, SEASONS, FITS, TEXTURES } from "@/lib/prendas/types";
+import type { GarmentWithColors, Category, Texture, Season } from "@/lib/prendas/types";
+import { CATEGORIES, SEASONS, ALL_FITS, TEXTURES } from "@/lib/prendas/types";
 import {
   CATEGORY_LABELS,
   SEASON_LABELS,
@@ -33,7 +33,7 @@ export function ArmariGrid({ garments }: Props) {
 
   const categories = searchParams.getAll("cat") as Category[];
   const seasons = searchParams.getAll("season") as Season[];
-  const fits = searchParams.getAll("fit") as Fit[];
+  const fits = searchParams.getAll("fit") as string[];
   const textures = searchParams.getAll("tex") as Texture[];
   const query = searchParams.get("q") ?? "";
 
@@ -92,7 +92,7 @@ export function ArmariGrid({ garments }: Props) {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {FITS.map((f) => (
+          {ALL_FITS.map((f) => (
             <button type="button" key={f} onClick={() => toggle("fit", f)} className={pill(fits.includes(f))}>
               {FIT_LABELS[f]}
             </button>
@@ -141,7 +141,7 @@ export function ArmariGrid({ garments }: Props) {
               </div>
               <div className="p-2 flex flex-col gap-0.5 bg-white w-full">
                 <span className="text-xs font-medium">{CATEGORY_LABELS[garment.category]}</span>
-                <span className="text-xs text-gray-500">{garment.fit} · {garment.size}</span>
+                <span className="text-xs text-gray-500">{FIT_LABELS[garment.fit] ?? garment.fit} · {garment.size}</span>
                 {garment.notes && (
                   <span className="text-xs text-gray-400 truncate">{garment.notes}</span>
                 )}

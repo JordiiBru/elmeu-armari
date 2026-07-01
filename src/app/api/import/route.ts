@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { addGarment, findAllGarments, deleteGarment } from "@/lib/prendas/service";
-import { CATEGORIES, TEXTURES, PATTERNS, FITS, SEASONS } from "@/lib/prendas/types";
+import { CATEGORIES, TEXTURES, PATTERNS, SEASONS, FITS_BY_CATEGORY, SUBTYPES_BY_CATEGORY } from "@/lib/prendas/types";
 import { isHex } from "@/lib/prendas/validation";
-import type { Category, Texture, Pattern, Fit, Season } from "@/lib/prendas/types";
+import type { Category, Texture, Pattern, Season } from "@/lib/prendas/types";
 
 interface GarmentImport {
   category: Category;
@@ -10,7 +10,8 @@ interface GarmentImport {
   pattern: Pattern;
   seasons: Season[];
   size: string;
-  fit: Fit;
+  fit: string;
+  subtype?: string | null;
   notes?: string | null;
   colors: string[];
 }
@@ -29,15 +30,20 @@ function validate(body: unknown): { ok: true; payload: ImportPayload } | { ok: f
   for (const [i, g] of (b.garments as unknown[]).entries()) {
     if (typeof g !== "object" || g === null) return { ok: false, error: `Peça ${i}: format invàlid` };
     const gr = g as Record<string, unknown>;
-    if (!CATEGORIES.includes(gr.category as Category)) return { ok: false, error: `Peça ${i}: category invàlida` };
+    const category = gr.category as Category;
+    if (!CATEGORIES.includes(category)) return { ok: false, error: `Peça ${i}: category invàlida` };
     if (!TEXTURES.includes(gr.texture as Texture)) return { ok: false, error: `Peça ${i}: texture invàlida` };
     if (!PATTERNS.includes(gr.pattern as Pattern)) return { ok: false, error: `Peça ${i}: pattern invàlid` };
-    if (!FITS.includes(gr.fit as Fit)) return { ok: false, error: `Peça ${i}: fit invàlid` };
+    if (!FITS_BY_CATEGORY[category]?.includes(gr.fit as string)) return { ok: false, error: `Peça ${i}: fit invàlid per categoria ${category}` };
     if (!Array.isArray(gr.seasons) || gr.seasons.some((s) => !SEASONS.includes(s as Season)))
       return { ok: false, error: `Peça ${i}: seasons invàlides` };
     if (typeof gr.size !== "string" || gr.size.trim() === "") return { ok: false, error: `Peça ${i}: size buit` };
     if (!Array.isArray(gr.colors) || gr.colors.length === 0 || gr.colors.some((c) => !isHex(c)))
       return { ok: false, error: `Peça ${i}: colors invàlids (cal array de hex #rrggbb)` };
+    const validSubtypes = SUBTYPES_BY_CATEGORY[category];
+    const subtype = gr.subtype as string | null | undefined;
+    if (validSubtypes.length > 0 && subtype && !validSubtypes.includes(subtype))
+      return { ok: false, error: `Peça ${i}: subtype invàlid per categoria ${category}` };
   }
 
   return { ok: true, payload: b as unknown as ImportPayload };
@@ -78,6 +84,7 @@ export async function POST(req: NextRequest) {
         pattern: g.pattern,
         seasons: g.seasons,
         size: g.size,
+        subtype: g.subtype ?? null,
         fit: g.fit,
         notes: g.notes ?? undefined,
         hexColors: g.colors,

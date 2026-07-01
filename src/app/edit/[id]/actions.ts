@@ -15,7 +15,7 @@ export async function updateGarmentAction(
   const result = validateGarmentForm(formData);
   if (!result.ok) return { error: result.error };
 
-  const { category, texture, pattern, fit, size, notes, seasons, hexColors } = result.data;
-  await editGarment(id, { category, texture, pattern, fit, size, notes, seasons: seasons as Season[], hexColors });
+  const { category, texture, pattern, fit, subtype, size, notes, seasons, hexColors } = result.data;
+  await editGarment(id, { category, texture, pattern, fit, subtype, size, notes, seasons: seasons as Season[], hexColors });
   redirect("/armari");
 }

@@ -1,19 +1,28 @@
 "use client";
 
+import { useState } from "react";
 import { useActionState } from "react";
 import { ColorPickers } from "@/components/ColorPickers";
 import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
 import { updateGarmentAction } from "@/app/edit/[id]/actions";
-import { CATEGORIES, TEXTURES, PATTERNS, FITS } from "@/lib/prendas/types";
+import {
+  CATEGORIES,
+  TEXTURES,
+  PATTERNS,
+  FITS_BY_CATEGORY,
+  SUBTYPES_BY_CATEGORY,
+  SIZES_BY_CATEGORY,
+} from "@/lib/prendas/types";
+import type { GarmentWithColors, Season, Category } from "@/lib/prendas/types";
 import {
   CATEGORY_LABELS,
   TEXTURE_LABELS,
   PATTERN_LABELS,
   FIT_LABELS,
+  SUBTYPE_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import { FORM_STYLES } from "@/lib/ui";
-import type { GarmentWithColors, Season } from "@/lib/prendas/types";
 
 interface Props {
   garment: GarmentWithColors;
@@ -24,17 +33,45 @@ interface Props {
 export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
   const boundAction = updateGarmentAction.bind(null, garment.id);
   const [state, formAction, isPending] = useActionState(boundAction, null);
+  const [category, setCategory] = useState<Category>(garment.category);
+
+  const fits = FITS_BY_CATEGORY[category];
+  const subtypes = SUBTYPES_BY_CATEGORY[category];
+  const sizes = SIZES_BY_CATEGORY[category];
+
+  const defaultFit = fits.includes(garment.fit) ? garment.fit : "";
+  const defaultSubtype = garment.subtype && subtypes.includes(garment.subtype) ? garment.subtype : "";
+  const defaultSize = sizes.includes(garment.size) ? garment.size : "";
 
   return (
     <form action={formAction} className="space-y-5">
       <div>
         <label htmlFor="category" className={FORM_STYLES.label}>{UI.form.category} {UI.form.required}</label>
-        <select id="category" name="category" defaultValue={garment.category} required className={FORM_STYLES.select}>
+        <select
+          id="category"
+          name="category"
+          required
+          className={FORM_STYLES.select}
+          value={category}
+          onChange={(e) => setCategory(e.target.value as Category)}
+        >
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
           ))}
         </select>
       </div>
+
+      {subtypes.length > 0 && (
+        <div>
+          <label htmlFor="subtype" className={FORM_STYLES.label}>{UI.form.subtype} {UI.form.required}</label>
+          <select id="subtype" name="subtype" defaultValue={defaultSubtype} required className={FORM_STYLES.select}>
+            <option value="">Selecciona...</option>
+            {subtypes.map((s) => (
+              <option key={s} value={s}>{SUBTYPE_LABELS[s]}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <span className={FORM_STYLES.label}>{UI.form.colors} {UI.form.required}</span>
@@ -66,13 +103,19 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
 
       <div>
         <label htmlFor="size" className={FORM_STYLES.label}>{UI.form.size} {UI.form.required}</label>
-        <input id="size" name="size" defaultValue={garment.size} required className={FORM_STYLES.input} />
+        <select id="size" name="size" defaultValue={defaultSize} required className={FORM_STYLES.select}>
+          <option value="">Selecciona...</option>
+          {sizes.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
       </div>
 
       <div>
         <label htmlFor="fit" className={FORM_STYLES.label}>{UI.form.fit} {UI.form.required}</label>
-        <select id="fit" name="fit" defaultValue={garment.fit} required className={FORM_STYLES.select}>
-          {FITS.map((f) => (
+        <select id="fit" name="fit" defaultValue={defaultFit} required className={FORM_STYLES.select}>
+          <option value="">Selecciona...</option>
+          {fits.map((f) => (
             <option key={f} value={f}>{FIT_LABELS[f]}</option>
           ))}
         </select>

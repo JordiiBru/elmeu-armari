@@ -14,6 +14,7 @@ export const UI = {
     pattern: "Dibuix",
     seasons: "Temporada",
     size: "Talla",
+    subtype: "Tipus",
     fit: "Tall",
     notes: "Notes",
     required: "*",

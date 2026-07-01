@@ -1,33 +1,67 @@
 "use client";
 
+import { useState } from "react";
 import { useActionState } from "react";
 import { ColorPickers } from "@/components/ColorPickers";
 import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
 import { createGarmentAction } from "@/app/add/actions";
-import { CATEGORIES, TEXTURES, PATTERNS, FITS } from "@/lib/prendas/types";
+import {
+  CATEGORIES,
+  TEXTURES,
+  PATTERNS,
+  FITS_BY_CATEGORY,
+  SUBTYPES_BY_CATEGORY,
+  SIZES_BY_CATEGORY,
+} from "@/lib/prendas/types";
+import type { Category } from "@/lib/prendas/types";
 import {
   CATEGORY_LABELS,
   TEXTURE_LABELS,
   PATTERN_LABELS,
   FIT_LABELS,
+  SUBTYPE_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import { FORM_STYLES } from "@/lib/ui";
 
 export function AddForm() {
   const [state, formAction, isPending] = useActionState(createGarmentAction, null);
+  const [category, setCategory] = useState<Category | "">("");
+
+  const fits = category ? FITS_BY_CATEGORY[category] : [];
+  const subtypes = category ? SUBTYPES_BY_CATEGORY[category] : [];
+  const sizes = category ? SIZES_BY_CATEGORY[category] : [];
 
   return (
     <form action={formAction} className="space-y-5">
       <div>
         <label htmlFor="category" className={FORM_STYLES.label}>{UI.form.category} {UI.form.required}</label>
-        <select id="category" name="category" required className={FORM_STYLES.select}>
+        <select
+          id="category"
+          name="category"
+          required
+          className={FORM_STYLES.select}
+          value={category}
+          onChange={(e) => setCategory(e.target.value as Category | "")}
+        >
           <option value="">Selecciona...</option>
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
           ))}
         </select>
       </div>
+
+      {category && subtypes.length > 0 && (
+        <div>
+          <label htmlFor="subtype" className={FORM_STYLES.label}>{UI.form.subtype} {UI.form.required}</label>
+          <select id="subtype" name="subtype" required className={FORM_STYLES.select}>
+            <option value="">Selecciona...</option>
+            {subtypes.map((s) => (
+              <option key={s} value={s}>{SUBTYPE_LABELS[s]}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <span className={FORM_STYLES.label}>{UI.form.colors} {UI.form.required}</span>
@@ -61,14 +95,19 @@ export function AddForm() {
 
       <div>
         <label htmlFor="size" className={FORM_STYLES.label}>{UI.form.size} {UI.form.required}</label>
-        <input id="size" name="size" placeholder="M, L, 42..." required className={FORM_STYLES.input} />
+        <select id="size" name="size" required className={FORM_STYLES.select} disabled={!category}>
+          <option value="">Selecciona...</option>
+          {sizes.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
       </div>
 
       <div>
         <label htmlFor="fit" className={FORM_STYLES.label}>{UI.form.fit} {UI.form.required}</label>
-        <select id="fit" name="fit" required className={FORM_STYLES.select}>
+        <select id="fit" name="fit" required className={FORM_STYLES.select} disabled={!category}>
           <option value="">Selecciona...</option>
-          {FITS.map((f) => (
+          {fits.map((f) => (
             <option key={f} value={f}>{FIT_LABELS[f]}</option>
           ))}
         </select>
