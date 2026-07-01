@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { findAllPrendas } from "@/lib/prendas/service";
 import { ArmariGrid } from "@/components/ArmariGrid";
@@ -29,7 +30,9 @@ export default async function ArmariPage() {
         </Link>
       </div>
 
-      <ArmariGrid prendas={prendas} />
+      <Suspense>
+        <ArmariGrid prendas={prendas} />
+      </Suspense>
     </div>
   );
 }
