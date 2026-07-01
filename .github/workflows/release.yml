@@ -55,7 +55,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/jordiiibru/elmeu-armari
+          images: ghcr.io/${{ github.repository_owner }}/elmeu-armari
           tags: |
             type=raw,value=${{ needs.release.outputs.new_tag }}
             type=raw,value=latest
@@ -93,7 +93,7 @@ jobs:
       - name: Trivy image scan
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: ghcr.io/jordiiibru/elmeu-armari:${{ needs.release.outputs.new_tag }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/elmeu-armari:${{ needs.release.outputs.new_tag }}
           severity: HIGH,CRITICAL
           exit-code: 1
           ignore-unfixed: true
