@@ -141,7 +141,7 @@ export function ArmariGrid({ garments }: Props) {
               </div>
               <div className="p-2 flex flex-col gap-0.5 bg-white w-full">
                 <span className="text-xs font-medium">{CATEGORY_LABELS[garment.category]}</span>
-                <span className="text-xs text-gray-500">{garment.fit} · {garment.size}</span>
+                <span className="text-xs text-gray-500">{FIT_LABELS[garment.fit] ?? garment.fit} · {garment.size}</span>
                 {garment.notes && (
                   <span className="text-xs text-gray-400 truncate">{garment.notes}</span>
                 )}

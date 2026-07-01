@@ -6,7 +6,7 @@ import {
   FIT_LABELS,
   TEXTURE_LABELS,
 } from "@/lib/prendas/labels";
-import { CATEGORIES, SEASONS, FITS, TEXTURES } from "@/lib/prendas/types";
+import { CATEGORIES, SEASONS, ALL_FITS, TEXTURES } from "@/lib/prendas/types";
 
 function pct(n: number, total: number) {
   if (total === 0) return "0%";
@@ -37,7 +37,7 @@ export default async function StatsPage() {
 
   const perCategory = Object.fromEntries(CATEGORIES.map((c) => [c, 0])) as Record<string, number>;
   const perSeason = Object.fromEntries(SEASONS.map((s) => [s, 0])) as Record<string, number>;
-  const perFit = Object.fromEntries(FITS.map((f) => [f, 0])) as Record<string, number>;
+  const perFit = Object.fromEntries(ALL_FITS.map((f) => [f, 0])) as Record<string, number>;
   const perTexture = Object.fromEntries(TEXTURES.map((t) => [t, 0])) as Record<string, number>;
   const hexCount: Record<string, number> = {};
 
@@ -103,7 +103,7 @@ export default async function StatsPage() {
       <section>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Per fit</h2>
         <div className="space-y-3">
-          {FITS.filter((f) => perFit[f] > 0).map((f) => (
+          {ALL_FITS.filter((f) => perFit[f] > 0).map((f) => (
             <div key={f}>
               <div className="flex justify-between text-sm">
                 <span>{FIT_LABELS[f]}</span>

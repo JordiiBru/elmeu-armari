@@ -9,6 +9,7 @@ import {
   TEXTURE_LABELS,
   PATTERN_LABELS,
   FIT_LABELS,
+  SUBTYPE_LABELS,
   SEASON_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
@@ -45,7 +46,10 @@ export function GarmentModal({ garment, onClose }: Props) {
         <div className="overflow-y-auto overscroll-contain p-4 space-y-4">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h2 className="font-semibold">{CATEGORY_LABELS[garment.category]}</h2>
+              <h2 className="font-semibold">
+                {CATEGORY_LABELS[garment.category]}
+                {garment.subtype && <span className="font-normal text-gray-500"> · {SUBTYPE_LABELS[garment.subtype]}</span>}
+              </h2>
               <p className="text-sm text-gray-500">
                 {FIT_LABELS[garment.fit]} · Talla {garment.size}
               </p>
