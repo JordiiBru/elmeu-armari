@@ -1,4 +1,6 @@
 import { Suspense } from "react";
+
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { findAllGarments } from "@/lib/prendas/service";
 import { findAllOutfits } from "@/lib/outfits/service";
