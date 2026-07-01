@@ -21,6 +21,11 @@ const NAV_ITEMS = [
     title: "Estadístiques",
     description: "Distribució per categoria, temporada, fit i colors",
   },
+  {
+    href: "/settings",
+    title: "Configuració",
+    description: "Exportar i importar totes les teves peces en JSON",
+  },
 ];
 
 export default function HomePage() {
