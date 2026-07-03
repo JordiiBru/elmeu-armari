@@ -7,7 +7,6 @@ const PRIMARY = [
 ];
 
 const SECONDARY = [
-  { href: "/add", label: "afegir" },
   { href: "/stats", label: "estadístiques" },
   { href: "/settings", label: "configuració" },
 ];
@@ -36,7 +35,7 @@ export default function HomePage() {
             <span className="font-serif text-lg">{entry.label}</span>
             <span
               aria-hidden
-              className="inline-block transition-[transform,color] duration-300 group-hover:translate-x-1 group-hover:text-accent"
+              className="inline-block text-accent transition-[transform,color] duration-500 group-hover:translate-x-1"
             >
               →
             </span>
@@ -46,13 +45,13 @@ export default function HomePage() {
 
       {/* Peu: navegacio secundaria + selector d'estacio */}
       <footer className="w-full flex flex-col items-center gap-6">
-        <nav className="flex items-center gap-5 text-[11px] tracking-[0.15em] text-foreground-secondary">
+        <nav className="flex items-center gap-6 text-sm tracking-wide text-foreground-secondary">
           {SECONDARY.map((entry, i) => (
-            <span key={entry.href} className="inline-flex items-center gap-5">
+            <span key={entry.href} className="inline-flex items-center gap-6">
               {i > 0 && (
                 <span
                   aria-hidden
-                  className="inline-block h-[3px] w-[3px] rounded-full bg-border"
+                  className="inline-block h-1 w-1 rounded-full bg-border"
                 />
               )}
               <Link
@@ -67,8 +66,8 @@ export default function HomePage() {
 
         <div
           aria-hidden
-          className="h-px w-16 bg-border transition-colors duration-700"
-          style={{ backgroundColor: "var(--accent-soft)" }}
+          className="h-px w-24 transition-colors duration-700"
+          style={{ backgroundColor: "var(--accent)" }}
         />
 
         <SeasonSelector />
