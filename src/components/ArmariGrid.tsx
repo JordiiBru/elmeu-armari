@@ -18,12 +18,38 @@ interface Props {
   garments: GarmentWithColors[];
 }
 
-const pill = (active: boolean) =>
-  `px-3 py-1 text-xs border rounded-full transition-colors cursor-pointer ${
-    active
-      ? "bg-black text-white border-black"
-      : "bg-white text-gray-700 border-gray-300 hover:border-gray-500"
+const tag = (active: boolean) =>
+  `inline-flex items-center gap-1.5 text-[11px] tracking-[0.15em] uppercase transition-colors cursor-pointer ${
+    active ? "text-foreground" : "text-foreground-secondary hover:text-foreground"
   }`;
+
+function Dot({ active }: { active: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className={`inline-block h-1 w-1 rounded-full transition-colors ${
+        active ? "bg-foreground" : "bg-border"
+      }`}
+    />
+  );
+}
+
+function FilterRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid grid-cols-[100px_1fr] gap-6 items-baseline">
+      <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary pt-0.5">
+        {label}
+      </span>
+      <div className="flex flex-wrap gap-x-5 gap-y-2">{children}</div>
+    </div>
+  );
+}
 
 export function ArmariGrid({ garments }: Props) {
   const searchParams = useSearchParams();
@@ -66,86 +92,128 @@ export function ArmariGrid({ garments }: Props) {
 
   return (
     <>
-      <div className="space-y-3 mb-6">
+      <div className="flex flex-col gap-6 mb-14">
         <input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Cerca per talla o nota..."
-          className="w-full px-3 py-1.5 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-black"
+          placeholder="cerca per talla o nota"
+          className="w-full bg-transparent border-0 border-b border-border pb-2 text-sm placeholder:text-foreground-secondary focus:outline-none focus:border-foreground transition-colors"
         />
 
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => (
-            <button type="button" key={c} onClick={() => toggle("cat", c)} className={pill(categories.includes(c))}>
-              {CATEGORY_LABELS[c]}
-            </button>
-          ))}
-        </div>
+        <div className="flex flex-col gap-4">
+          <FilterRow label="categoria">
+            {CATEGORIES.map((c) => (
+              <button
+                type="button"
+                key={c}
+                onClick={() => toggle("cat", c)}
+                className={tag(categories.includes(c))}
+              >
+                <Dot active={categories.includes(c)} />
+                {CATEGORY_LABELS[c]}
+              </button>
+            ))}
+          </FilterRow>
 
-        <div className="flex flex-wrap gap-2">
-          {SEASONS.map((s) => (
-            <button type="button" key={s} onClick={() => toggle("season", s)} className={pill(seasons.includes(s))}>
-              {SEASON_LABELS[s]}
-            </button>
-          ))}
-        </div>
+          <FilterRow label="temporada">
+            {SEASONS.map((s) => (
+              <button
+                type="button"
+                key={s}
+                onClick={() => toggle("season", s)}
+                className={tag(seasons.includes(s))}
+              >
+                <Dot active={seasons.includes(s)} />
+                {SEASON_LABELS[s]}
+              </button>
+            ))}
+          </FilterRow>
 
-        <div className="flex flex-wrap gap-2">
-          {ALL_FITS.map((f) => (
-            <button type="button" key={f} onClick={() => toggle("fit", f)} className={pill(fits.includes(f))}>
-              {FIT_LABELS[f]}
-            </button>
-          ))}
-        </div>
+          <FilterRow label="fit">
+            {ALL_FITS.map((f) => (
+              <button
+                type="button"
+                key={f}
+                onClick={() => toggle("fit", f)}
+                className={tag(fits.includes(f))}
+              >
+                <Dot active={fits.includes(f)} />
+                {FIT_LABELS[f]}
+              </button>
+            ))}
+          </FilterRow>
 
-        <div className="flex flex-wrap gap-2">
-          {TEXTURES.map((t) => (
-            <button type="button" key={t} onClick={() => toggle("tex", t)} className={pill(textures.includes(t))}>
-              {TEXTURE_LABELS[t]}
-            </button>
-          ))}
+          <FilterRow label="textura">
+            {TEXTURES.map((t) => (
+              <button
+                type="button"
+                key={t}
+                onClick={() => toggle("tex", t)}
+                className={tag(textures.includes(t))}
+              >
+                <Dot active={textures.includes(t)} />
+                {TEXTURE_LABELS[t]}
+              </button>
+            ))}
+          </FilterRow>
         </div>
 
         {hasFilters && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between pt-2 border-t border-border">
             <button
               type="button"
               onClick={() => router.replace(pathname, { scroll: false })}
-              className="text-xs text-gray-500 underline hover:text-black"
+              className="font-serif italic text-sm text-foreground-secondary hover:text-foreground"
             >
               {UI.buttons.clearFilters}
             </button>
-            <span className="text-xs text-gray-400">
-              {filtered.length} de {garments.length} {UI.grid.results(garments.length)}
+            <span className="text-[11px] tracking-[0.2em] uppercase text-foreground-secondary">
+              {filtered.length} de {garments.length}
             </span>
           </div>
         )}
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-gray-400 text-sm">{UI.grid.noResults}</p>
+        <p className="font-serif italic text-foreground-secondary text-center py-16">
+          {UI.grid.noResults}
+        </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {filtered.map((garment) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+          {filtered.map((garment, i) => (
             <button
               type="button"
               key={garment.id}
               onClick={() => setSelected(garment)}
-              className="rounded-lg border overflow-hidden flex flex-col text-left hover:shadow-md transition-shadow"
+              className="group flex flex-col text-left"
             >
-              <div className="flex h-24 w-full">
+              <div className="relative flex aspect-[3/4] w-full overflow-hidden transition-transform duration-500 ease-out group-hover:-translate-y-1">
                 {garment.colors.map((c) => (
-                  <div key={c.id} className="flex-1" style={{ backgroundColor: c.hex }} title={c.hex} />
+                  <div
+                    key={c.id}
+                    className="flex-1"
+                    style={{ backgroundColor: c.hex }}
+                    title={c.hex}
+                  />
                 ))}
               </div>
-              <div className="p-2 flex flex-col gap-0.5 bg-white w-full">
-                <span className="text-xs font-medium">{CATEGORY_LABELS[garment.category]}</span>
-                <span className="text-xs text-gray-500">{FIT_LABELS[garment.fit] ?? garment.fit} · {garment.size}</span>
-                {garment.notes && (
-                  <span className="text-xs text-gray-400 truncate">{garment.notes}</span>
-                )}
+              <div className="flex items-baseline justify-between pt-3">
+                <span className="font-serif text-base leading-tight">
+                  {CATEGORY_LABELS[garment.category]}
+                </span>
+                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+                  n{String(i + 1).padStart(3, "0")}
+                </span>
               </div>
+              <span className="text-xs italic text-foreground-secondary mt-0.5">
+                {FIT_LABELS[garment.fit] ?? garment.fit} · {garment.size}
+              </span>
+              {garment.notes && (
+                <span className="text-xs text-foreground-secondary mt-0.5 truncate">
+                  {garment.notes}
+                </span>
+              )}
             </button>
           ))}
         </div>

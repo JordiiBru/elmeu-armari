@@ -28,21 +28,28 @@ export default async function ArmariPage() {
   }));
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-sm text-gray-500 hover:text-gray-700">
-            ← Inici
+    <div className="max-w-5xl mx-auto w-full px-6 md:px-10 pb-24">
+      <header className="pt-6 pb-14 md:pb-20 flex flex-col gap-8">
+        <div className="flex items-baseline justify-between">
+          <span className="text-[11px] tracking-[0.25em] uppercase text-foreground-secondary">
+            arxiu
+          </span>
+          <Link
+            href="/add"
+            className="font-serif italic text-sm text-foreground-secondary hover:text-foreground"
+          >
+            afegir una peça
           </Link>
-          <h1 className="text-xl font-semibold">El meu armari</h1>
         </div>
-        <Link
-          href="/add"
-          className="text-sm px-3 py-1.5 border rounded hover:bg-gray-50"
-        >
-          + Afegir peça
-        </Link>
-      </div>
+        <h1 className="font-serif text-5xl md:text-6xl tracking-tight leading-[0.95]">
+          el meu armari
+        </h1>
+        <p className="font-serif italic text-base text-foreground-secondary max-w-md">
+          {garments.length === 0
+            ? "encara no hi ha res desat."
+            : `${garments.length} peces registrades.`}
+        </p>
+      </header>
 
       <Suspense>
         <ArmariTabs

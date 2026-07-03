@@ -35,20 +35,18 @@ export default function HomePage() {
             <Link
               key={entry.href}
               href={entry.href}
-              className="group inline-flex items-center gap-4 font-serif text-xl text-foreground"
+              className="group relative font-serif text-xl text-foreground"
             >
               <span>{entry.label}</span>
               <span
                 aria-hidden
-                className="text-foreground-secondary transition-transform duration-300 group-hover:translate-x-1"
-              >
-                →
-              </span>
+                className="pointer-events-none absolute left-1/2 -bottom-1 h-px w-0 -translate-x-1/2 bg-foreground transition-[width] duration-500 ease-out group-hover:w-full"
+              />
             </Link>
           ))}
         </nav>
 
-        <nav className="flex items-center gap-6 text-sm tracking-wide text-foreground-secondary">
+        <nav className="flex items-center gap-6 font-serif italic text-sm text-foreground-secondary">
           {SECONDARY.map((entry, i) => (
             <span key={entry.href} className="inline-flex items-center gap-6">
               {i > 0 && (

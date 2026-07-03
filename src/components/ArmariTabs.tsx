@@ -27,25 +27,37 @@ export function ArmariTabs({
   const [tab, setTab] = useState<TabId>("peces");
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-1 border-b">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`px-4 py-2 text-sm transition-colors ${
-              tab === t.id
-                ? "border-b-2 border-gray-900 font-medium"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {t.label}
-            {t.id === "desats" && savedOutfits.length > 0 && (
-              <span className="ml-1.5 text-xs text-gray-400">{savedOutfits.length}</span>
-            )}
-          </button>
-        ))}
-      </div>
+    <div className="flex flex-col gap-10">
+      <nav className="flex items-center gap-8 border-b border-border pb-3">
+        {TABS.map((t) => {
+          const active = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className="group relative font-serif text-base outline-none"
+              aria-current={active}
+            >
+              <span
+                className={active ? "text-foreground" : "text-foreground-secondary hover:text-foreground"}
+              >
+                {t.label}
+              </span>
+              {t.id === "desats" && savedOutfits.length > 0 && (
+                <span className="ml-2 text-[10px] tracking-widest text-foreground-secondary align-super">
+                  {savedOutfits.length}
+                </span>
+              )}
+              <span
+                aria-hidden
+                className={`pointer-events-none absolute left-0 -bottom-[13px] h-px bg-foreground transition-all duration-500 ease-out ${
+                  active ? "w-full" : "w-0 group-hover:w-full"
+                }`}
+              />
+            </button>
+          );
+        })}
+      </nav>
 
       {tab === "peces" && <ArmariGrid garments={garments} />}
       {tab === "combinar" && <OutfitBuilder garments={garments} palettes={palettes} />}
