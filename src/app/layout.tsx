@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter_Tight, Geist_Mono } from "next/font/google";
-import PaperTexture from "@/components/PaperTexture";
 import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
@@ -37,7 +36,6 @@ export default function RootLayout({
       className={`${fraunces.variable} ${interTight.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <PaperTexture />
         <SiteHeader />
         <main className="flex-1 flex flex-col">{children}</main>
       </body>

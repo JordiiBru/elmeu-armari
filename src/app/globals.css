@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* -------------------------------------------------------------------------- */
-/* Paleta base — mai canvia. Lienzo neutre per a la roba.                     */
+/* Paleta base — neutra calida. Mai canvia.                                   */
 /* -------------------------------------------------------------------------- */
 
 :root {
@@ -12,62 +12,9 @@
   --foreground: #2f2f2d;
   --foreground-secondary: #6f6a63;
 
-  /* Acents estacionals. Sense estacio triada = neutres calids molt suaus
-     perque les taques ambient siguin quasi invisibles. */
-  --accent: var(--foreground);
-  --accent-soft: var(--foreground-secondary);
-  --accent-1: var(--background-secondary);
-  --accent-2: var(--background-secondary);
-  --accent-3: var(--background-secondary);
-  --accent-4: var(--background-secondary);
-
   --ring: var(--border);
   --input: var(--border);
 }
-
-/* Primavera — coral suau, meloco, mantega, verd fulla clar */
-:root[data-season="spring"] {
-  --accent-1: #f2a29a;
-  --accent-2: #f3c9a3;
-  --accent-3: #ecd6a0;
-  --accent-4: #b8cf9c;
-  --accent: var(--accent-1);
-  --accent-soft: #d9b7a8;
-}
-
-/* Estiu — lavanda grisosa, blau boira, rosa empolvorat, gris blau */
-:root[data-season="summer"] {
-  --accent-1: #b6b0c9;
-  --accent-2: #a9bcc9;
-  --accent-3: #d5b8b8;
-  --accent-4: #8f9aa6;
-  --accent: var(--accent-2);
-  --accent-soft: #b0aebd;
-}
-
-/* Tardor — oliva, terracota, camel, marró calid */
-:root[data-season="autumn"] {
-  --accent-1: #8a8a5a;
-  --accent-2: #b76e4a;
-  --accent-3: #c9a274;
-  --accent-4: #8a5a3b;
-  --accent: var(--accent-2);
-  --accent-soft: #a68a6a;
-}
-
-/* Hivern — blau marí, prunya, gris fred, blanc pur */
-:root[data-season="winter"] {
-  --accent-1: #2a3b5c;
-  --accent-2: #6b3a5c;
-  --accent-3: #8a8f96;
-  --accent-4: #f2f2f2;
-  --accent: var(--accent-1);
-  --accent-soft: #6a7386;
-}
-
-/* -------------------------------------------------------------------------- */
-/* Theme mapping per a Tailwind v4                                            */
-/* -------------------------------------------------------------------------- */
 
 @theme inline {
   --color-background: var(--background);
@@ -78,21 +25,11 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-accent: var(--accent);
-  --color-accent-soft: var(--accent-soft);
-  --color-accent-1: var(--accent-1);
-  --color-accent-2: var(--accent-2);
-  --color-accent-3: var(--accent-3);
-  --color-accent-4: var(--accent-4);
 
   --font-sans: var(--font-inter-tight);
   --font-serif: var(--font-fraunces);
   --font-mono: var(--font-geist-mono);
 }
-
-/* -------------------------------------------------------------------------- */
-/* Base                                                                       */
-/* -------------------------------------------------------------------------- */
 
 @layer base {
   * {
@@ -101,10 +38,6 @@
 
   html {
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-    /* Canvi d'estació = canvi de llum d'una habitacio */
-    transition:
-      background-color 700ms cubic-bezier(0.25, 0.1, 0.25, 1),
-      color 700ms cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
   body {
@@ -119,14 +52,9 @@
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/* Transicions globals de canvi d'estacio — acents nomes                      */
-/* -------------------------------------------------------------------------- */
-
-*,
-*::before,
-*::after {
-  transition-property: background-color, border-color, color, fill, stroke, opacity;
-  transition-duration: 350ms;
+/* Micro-transicions calmades a tots els elements interactius */
+button, a, input, textarea, select {
+  transition-property: background-color, border-color, color, opacity, transform;
+  transition-duration: 250ms;
   transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
