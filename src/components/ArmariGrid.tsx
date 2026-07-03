@@ -19,19 +19,36 @@ interface Props {
   garments: GarmentWithColors[];
 }
 
-const tag = (active: boolean) =>
-  `inline-flex items-center gap-1.5 text-[11px] tracking-[0.15em] uppercase transition-colors cursor-pointer ${
-    active ? "text-foreground" : "text-foreground-secondary hover:text-foreground"
-  }`;
-
-function Dot({ active }: { active: boolean }) {
+function FilterTag({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
-    <span
-      aria-hidden
-      className={`inline-block h-1 w-1 rounded-full transition-colors ${
-        active ? "bg-foreground" : "bg-border"
-      }`}
-    />
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative inline-flex items-baseline transition-colors active:scale-[0.97]"
+      aria-pressed={active}
+    >
+      <span
+        className={`text-[11px] tracking-[0.15em] uppercase transition-colors ${
+          active ? "text-foreground" : "text-foreground-secondary group-hover:text-foreground"
+        }`}
+      >
+        {children}
+      </span>
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-foreground origin-left transition-transform duration-300 ease-out ${
+          active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        }`}
+      />
+    </button>
   );
 }
 
@@ -97,7 +114,7 @@ export function ArmariGrid({ garments }: Props) {
 
   return (
     <>
-      <div className="flex flex-col gap-4 mb-10">
+      <div className="flex flex-col gap-3 mb-6">
         {/* Trigger de filtres */}
         <div className="flex items-baseline justify-between">
           <button
@@ -144,57 +161,49 @@ export function ArmariGrid({ garments }: Props) {
 
               <FilterRow label="categoria">
                 {CATEGORIES.map((c) => (
-                  <button
-                    type="button"
+                  <FilterTag
                     key={c}
+                    active={categories.includes(c)}
                     onClick={() => toggle("cat", c)}
-                    className={tag(categories.includes(c))}
                   >
-                    <Dot active={categories.includes(c)} />
                     {CATEGORY_LABELS[c]}
-                  </button>
+                  </FilterTag>
                 ))}
               </FilterRow>
 
               <FilterRow label="temporada">
                 {SEASONS.map((s) => (
-                  <button
-                    type="button"
+                  <FilterTag
                     key={s}
+                    active={seasons.includes(s)}
                     onClick={() => toggle("season", s)}
-                    className={tag(seasons.includes(s))}
                   >
-                    <Dot active={seasons.includes(s)} />
                     {SEASON_LABELS[s]}
-                  </button>
+                  </FilterTag>
                 ))}
               </FilterRow>
 
               <FilterRow label="fit">
                 {ALL_FITS.map((f) => (
-                  <button
-                    type="button"
+                  <FilterTag
                     key={f}
+                    active={fits.includes(f)}
                     onClick={() => toggle("fit", f)}
-                    className={tag(fits.includes(f))}
                   >
-                    <Dot active={fits.includes(f)} />
                     {FIT_LABELS[f]}
-                  </button>
+                  </FilterTag>
                 ))}
               </FilterRow>
 
               <FilterRow label="textura">
                 {TEXTURES.map((t) => (
-                  <button
-                    type="button"
+                  <FilterTag
                     key={t}
+                    active={textures.includes(t)}
                     onClick={() => toggle("tex", t)}
-                    className={tag(textures.includes(t))}
                   >
-                    <Dot active={textures.includes(t)} />
                     {TEXTURE_LABELS[t]}
-                  </button>
+                  </FilterTag>
                 ))}
               </FilterRow>
 
