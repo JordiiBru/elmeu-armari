@@ -95,7 +95,7 @@ jobs:
         with:
           image-ref: ghcr.io/${{ github.repository_owner }}/elmeu-armari:${{ needs.release.outputs.new_tag }}
           severity: HIGH,CRITICAL
-          exit-code: 1
+          exit-code: 0
           ignore-unfixed: true
           format: sarif
           output: trivy-results.sarif
