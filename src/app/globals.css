@@ -12,13 +12,14 @@
   --foreground: #2f2f2d;
   --foreground-secondary: #6f6a63;
 
-  /* Acents estacionals. Sense estació triada = neutres (color foreground). */
+  /* Acents estacionals. Sense estacio triada = neutres calids molt suaus
+     perque les taques ambient siguin quasi invisibles. */
   --accent: var(--foreground);
   --accent-soft: var(--foreground-secondary);
-  --accent-1: var(--foreground);
-  --accent-2: var(--foreground);
-  --accent-3: var(--foreground);
-  --accent-4: var(--foreground);
+  --accent-1: var(--background-secondary);
+  --accent-2: var(--background-secondary);
+  --accent-3: var(--background-secondary);
+  --accent-4: var(--background-secondary);
 
   --ring: var(--border);
   --input: var(--border);

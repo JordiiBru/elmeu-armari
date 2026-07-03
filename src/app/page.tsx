@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AmbientBackground from "@/components/AmbientBackground";
 import SeasonSelector from "@/components/SeasonSelector";
 
 const PRIMARY = [
@@ -13,7 +14,8 @@ const SECONDARY = [
 
 export default function HomePage() {
   return (
-    <div className="flex-1 flex flex-col items-center justify-between px-6 py-10 md:py-16">
+    <div className="relative flex-1 flex flex-col items-center justify-between px-6 py-10 md:py-16">
+      <AmbientBackground />
       {/* Hero */}
       <section className="flex flex-col items-center text-center gap-4 mt-6 md:mt-12">
         <h1 className="font-serif text-5xl md:text-7xl tracking-tight text-foreground">
@@ -35,7 +37,8 @@ export default function HomePage() {
             <span className="font-serif text-lg">{entry.label}</span>
             <span
               aria-hidden
-              className="inline-block text-accent transition-[transform,color] duration-500 group-hover:translate-x-1"
+              className="inline-block transition-[transform,color] duration-500 group-hover:translate-x-1"
+              style={{ color: "var(--accent)" }}
             >
               →
             </span>
