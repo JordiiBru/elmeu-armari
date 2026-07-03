@@ -54,7 +54,7 @@ function Section({
       <h2 className="text-[10px] tracking-[0.3em] uppercase text-foreground-secondary pb-2 border-b border-border">
         {title}
       </h2>
-      <div className="flex flex-col divide-y divide-border">{children}</div>
+      <div className="flex flex-col gap-3 pt-2">{children}</div>
     </section>
   );
 }

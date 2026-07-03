@@ -36,7 +36,7 @@ export function GarmentModal({ garment, onClose }: Props) {
     if (closing) return;
     setClosing(true);
     setShown(false);
-    setTimeout(() => onClose(), 350);
+    setTimeout(() => onClose(), 420);
   };
 
   useEffect(() => {
@@ -50,30 +50,35 @@ export function GarmentModal({ garment, onClose }: Props) {
 
   const open = shown && !closing;
 
+  // Easing tipus iOS sheet — spring-feel sense rebot
+  const EASE_SPRING = "cubic-bezier(0.32, 0.72, 0, 1)";
+
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
         onClick={handleClose}
-        className={`absolute inset-0 bg-foreground/30 transition-opacity duration-500 ease-out ${
-          open ? "opacity-100" : "opacity-0"
-        }`}
+        className="absolute inset-0 bg-foreground/40"
+        style={{
+          opacity: open ? 1 : 0,
+          transition: `opacity 380ms ${EASE_SPRING}`,
+          backdropFilter: open ? "blur(2px)" : "blur(0px)",
+          WebkitBackdropFilter: open ? "blur(2px)" : "blur(0px)",
+        }}
       />
 
       {/* Panell */}
       <div
         role="dialog"
         aria-modal
-        className={`relative bg-card w-full sm:max-w-md max-h-[92vh] flex flex-col overflow-hidden
-          sm:rounded-none
-          transition-transform transition-opacity duration-[350ms]
-          ${
-            open
-              ? "translate-y-0 opacity-100 sm:scale-100"
-              : "translate-y-full opacity-0 sm:translate-y-0 sm:scale-[0.98]"
-          }`}
+        className="relative bg-card w-full sm:max-w-md max-h-[92vh] flex flex-col overflow-hidden shadow-[0_-8px_40px_-20px_rgba(0,0,0,0.15)]"
         style={{
-          transitionTimingFunction: "cubic-bezier(0.25, 0.1, 0.25, 1)",
+          transform: open
+            ? "translateY(0) scale(1)"
+            : "translateY(100%) scale(1)",
+          opacity: open ? 1 : 0,
+          transition: `transform 520ms ${EASE_SPRING}, opacity 380ms ${EASE_SPRING}`,
+          willChange: "transform, opacity",
         }}
       >
         {/* Handle mobil */}
@@ -93,7 +98,14 @@ export function GarmentModal({ garment, onClose }: Props) {
           ))}
         </div>
 
-        <div className="overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6">
+        <div
+          className="overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6"
+          style={{
+            opacity: open ? 1 : 0,
+            transform: open ? "translateY(0)" : "translateY(8px)",
+            transition: `opacity 400ms ${EASE_SPRING} 120ms, transform 400ms ${EASE_SPRING} 120ms`,
+          }}
+        >
           {/* Titol */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
