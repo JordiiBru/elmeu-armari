@@ -3,11 +3,8 @@ import { Suspense } from "react";
 export const dynamic = "force-dynamic";
 import { findAllGarments } from "@/lib/prendas/service";
 import { findAllOutfits } from "@/lib/outfits/service";
-import palettesData from "@/lib/colors/sanzo-wada.json";
-import type { SanzoPalette } from "@/lib/outfits/types";
+import { palettes } from "@/lib/colors";
 import { ArmariTabs } from "@/components/ArmariTabs";
-
-const palettes = palettesData as SanzoPalette[];
 
 export default async function ArmariPage() {
   const [garments, outfits] = await Promise.all([

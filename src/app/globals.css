@@ -5,11 +5,11 @@
 /* -------------------------------------------------------------------------- */
 
 :root {
-  /* Paleta cream MUJI — subtil desviacio cap al groguet calid */
-  --background: #f7f3e5;
-  --card: #fbf8ec;
-  --background-secondary: #ece4ce;
-  --border: #d8cfb6;
+  /* Paleta cream MUJI — mes calida, tirant al paper vintage japones */
+  --background: #f5edcd;
+  --card: #faf3d9;
+  --background-secondary: #e8dcb0;
+  --border: #cdc196;
   --foreground: #2f2f2d;
   --foreground-secondary: #6f6a63;
 

@@ -1,42 +1,43 @@
-import Link from "next/link";
-import paletes from "@/lib/colors/sanzo-wada.json";
+import { palettes, namedColors, paletteColors } from "@/lib/colors";
+import PaletaTabs from "@/components/PaletaTabs";
 
 export default function PaletaPage() {
-  return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/" className="text-sm text-gray-500 hover:text-gray-700">
-          ← Inici
-        </Link>
-        <h1 className="text-xl font-semibold">Paletes Sanzo Wada</h1>
-      </div>
+  // Preprocessem al servidor per evitar treball al client
+  const enriched = palettes.map((p) => ({
+    id: p.id,
+    nombre: p.nombre,
+    colors: paletteColors(p),
+  }));
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {paletes.map((paleta) => (
-          <div key={paleta.id} className="border rounded overflow-hidden">
-            <div className="flex h-14">
-              {paleta.colores.map((hex, i) => (
-                <div
-                  key={i}
-                  className="flex-1"
-                  style={{ backgroundColor: hex }}
-                  title={hex}
-                />
-              ))}
-            </div>
-            <div className="p-2">
-              <p className="text-sm font-medium">{paleta.nombre}</p>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {paleta.colores.map((hex, i) => (
-                  <span key={i} className="text-xs font-mono text-gray-500">
-                    {hex}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+  const colors = namedColors.map((c) => ({
+    index: c.index,
+    name: c.name,
+    hex: c.hex,
+    combinations: c.combinations.length,
+  }));
+
+  return (
+    <div className="max-w-5xl mx-auto w-full px-6 md:px-10 pb-24">
+      <header className="pt-2 pb-8 flex flex-col gap-2">
+        <span className="text-[11px] tracking-[0.25em] uppercase text-foreground-secondary">
+          catàleg cromàtic
+        </span>
+        <h1 className="font-serif text-5xl md:text-6xl tracking-tight leading-[0.95]">
+          sanzo wada
+        </h1>
+        <p className="font-serif italic text-base text-foreground-secondary max-w-md">
+          {colors.length} colors i {enriched.length} combinacions dels
+          diccionaris cromàtics de sanzo wada, publicats a tòquio entre 1933
+          i 1934.
+        </p>
+      </header>
+
+      <PaletaTabs
+        colorCount={colors.length}
+        paletteCount={enriched.length}
+        colors={colors}
+        palettes={enriched}
+      />
     </div>
   );
 }
