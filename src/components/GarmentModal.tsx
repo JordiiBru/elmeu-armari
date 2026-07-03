@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { deleteGarmentAction } from "@/app/armari/actions";
 import type { GarmentWithColors } from "@/lib/prendas/types";
@@ -20,79 +20,150 @@ interface Props {
 }
 
 export function GarmentModal({ garment, onClose }: Props) {
+  const [shown, setShown] = useState(false);
+  const [closing, setClosing] = useState(false);
+
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
+    const raf = requestAnimationFrame(() => setShown(true));
     document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("keydown", handler);
+      cancelAnimationFrame(raf);
       document.body.style.overflow = "";
     };
-  }, [onClose]);
+  }, []);
+
+  const handleClose = () => {
+    if (closing) return;
+    setClosing(true);
+    setShown(false);
+    setTimeout(() => onClose(), 350);
+  };
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleClose();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const open = shown && !closing;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      {/* Backdrop */}
+      <div
+        onClick={handleClose}
+        className={`absolute inset-0 bg-foreground/30 transition-opacity duration-500 ease-out ${
+          open ? "opacity-100" : "opacity-0"
+        }`}
+      />
 
-      <div className="relative bg-white w-full sm:max-w-sm sm:rounded-2xl rounded-t-2xl overflow-hidden max-h-[92vh] flex flex-col shadow-2xl">
-        <div className="flex h-20 flex-shrink-0">
+      {/* Panell */}
+      <div
+        role="dialog"
+        aria-modal
+        className={`relative bg-card w-full sm:max-w-md max-h-[92vh] flex flex-col overflow-hidden
+          sm:rounded-none
+          transition-transform transition-opacity duration-[350ms]
+          ${
+            open
+              ? "translate-y-0 opacity-100 sm:scale-100"
+              : "translate-y-full opacity-0 sm:translate-y-0 sm:scale-[0.98]"
+          }`}
+        style={{
+          transitionTimingFunction: "cubic-bezier(0.25, 0.1, 0.25, 1)",
+        }}
+      >
+        {/* Handle mobil */}
+        <div className="sm:hidden pt-3 pb-1 flex justify-center">
+          <span className="block h-1 w-10 rounded-full bg-border" />
+        </div>
+
+        {/* Franja de swatches — protagonista */}
+        <div className="flex h-32 flex-shrink-0">
           {garment.colors.map((c) => (
-            <div key={c.id} className="flex-1" style={{ backgroundColor: c.hex }} title={c.hex} />
+            <div
+              key={c.id}
+              className="flex-1"
+              style={{ backgroundColor: c.hex }}
+              title={c.hex}
+            />
           ))}
         </div>
 
-        <div className="overflow-y-auto overscroll-contain p-4 space-y-4">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <h2 className="font-semibold">
+        <div className="overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6">
+          {/* Titol */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+                peça
+              </span>
+              <h2 className="font-serif text-2xl leading-tight">
                 {CATEGORY_LABELS[garment.category]}
-                {garment.subtype && <span className="font-normal text-gray-500"> · {SUBTYPE_LABELS[garment.subtype]}</span>}
+                {garment.subtype && (
+                  <span className="text-foreground-secondary italic">
+                    {" "}
+                    · {SUBTYPE_LABELS[garment.subtype]}
+                  </span>
+                )}
               </h2>
-              <p className="text-sm text-gray-500">
-                {FIT_LABELS[garment.fit]} · Talla {garment.size}
+              <p className="font-serif italic text-sm text-foreground-secondary">
+                {FIT_LABELS[garment.fit]} · talla {garment.size}
               </p>
             </div>
             <button
               type="button"
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-700 text-2xl leading-none flex-shrink-0"
+              onClick={handleClose}
+              className="text-foreground-secondary hover:text-foreground text-xl leading-none flex-shrink-0 -mr-1 -mt-1 h-8 w-8 flex items-center justify-center transition-colors active:scale-95"
               aria-label="Tancar"
             >
               ×
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <span className="text-xs text-gray-400 block mb-0.5">{UI.modal.texture}</span>
-              {TEXTURE_LABELS[garment.texture]}
-            </div>
-            <div>
-              <span className="text-xs text-gray-400 block mb-0.5">{UI.modal.pattern}</span>
-              {PATTERN_LABELS[garment.pattern]}
-            </div>
-          </div>
+          {/* Meta */}
+          <dl className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+            <Meta label={UI.modal.texture} value={TEXTURE_LABELS[garment.texture]} />
+            <Meta label={UI.modal.pattern} value={PATTERN_LABELS[garment.pattern]} />
+          </dl>
 
-          <div>
-            <span className="text-xs text-gray-400 block mb-1.5">{UI.modal.colors}</span>
-            <div className="flex flex-wrap gap-2">
+          {/* Colors */}
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+              {UI.modal.colors}
+            </span>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
               {garment.colors.map((c) => (
-                <div key={c.id} className="flex items-center gap-1.5">
-                  <div className="w-5 h-5 rounded border border-black/10" style={{ backgroundColor: c.hex }} />
-                  <span className="text-xs font-mono text-gray-600">{c.hex}</span>
+                <div key={c.id} className="flex items-center gap-2">
+                  <span
+                    className="inline-block h-4 w-4"
+                    style={{ backgroundColor: c.hex }}
+                  />
+                  <span className="text-xs font-mono text-foreground-secondary">
+                    {c.hex}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
 
+          {/* Estacions */}
           {garment.seasons.length > 0 && (
-            <div>
-              <span className="text-xs text-gray-400 block mb-1.5">{UI.modal.seasons}</span>
-              <div className="flex flex-wrap gap-1.5">
-                {garment.seasons.map((s) => (
-                  <span key={s.id} className="text-xs px-2.5 py-1 bg-gray-100 rounded-full">
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+                {UI.modal.seasons}
+              </span>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-serif italic">
+                {garment.seasons.map((s, i) => (
+                  <span key={s.id} className="inline-flex items-center gap-4">
+                    {i > 0 && (
+                      <span
+                        aria-hidden
+                        className="inline-block h-1 w-1 rounded-full bg-border"
+                      />
+                    )}
                     {SEASON_LABELS[s.season]}
                   </span>
                 ))}
@@ -100,35 +171,53 @@ export function GarmentModal({ garment, onClose }: Props) {
             </div>
           )}
 
+          {/* Notes */}
           {garment.notes && (
-            <div>
-              <span className="text-xs text-gray-400 block mb-0.5">Nota</span>
-              <p className="text-sm text-gray-700">{garment.notes}</p>
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+                nota
+              </span>
+              <p className="font-serif italic text-sm text-foreground">
+                {garment.notes}
+              </p>
             </div>
           )}
 
-          <div className="flex gap-2 pt-1 pb-2">
+          {/* Accions */}
+          <div className="flex items-center justify-between pt-4 border-t border-border">
             <Link
               href={`/edit/${garment.id}`}
-              className="flex-1 h-9 flex items-center justify-center text-sm border rounded-lg hover:bg-gray-50 transition-colors"
+              className="font-serif italic text-sm text-foreground hover:text-foreground-secondary transition-colors"
+              onClick={handleClose}
             >
-              {UI.buttons.edit}
+              editar
             </Link>
-            <form action={deleteGarmentAction} className="flex-1">
+            <form action={deleteGarmentAction}>
               <input type="hidden" name="id" value={garment.id} />
               <button
                 type="submit"
-                className="w-full h-9 text-sm border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                className="font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors active:scale-95"
                 onClick={(e) => {
                   if (!confirm(`${UI.buttons.delete} peça?`)) e.preventDefault();
                 }}
               >
-                {UI.buttons.delete}
+                eliminar
               </button>
             </form>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Meta({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <dt className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+        {label}
+      </dt>
+      <dd className="font-serif text-sm text-foreground">{value}</dd>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useState, useMemo } from "react";
 import { GarmentModal } from "@/components/GarmentModal";
+import { GarmentCard, AddGarmentCard } from "@/components/GarmentCard";
 import { filterGarments } from "@/lib/prendas/filtering";
 import type { GarmentWithColors, Category, Texture, Season } from "@/lib/prendas/types";
 import { CATEGORIES, SEASONS, ALL_FITS, TEXTURES } from "@/lib/prendas/types";
@@ -56,6 +57,7 @@ export function ArmariGrid({ garments }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [selected, setSelected] = useState<GarmentWithColors | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const categories = searchParams.getAll("cat") as Category[];
   const seasons = searchParams.getAll("season") as Season[];
@@ -90,131 +92,144 @@ export function ArmariGrid({ garments }: Props) {
     [garments, categories, seasons, fits, textures, query]
   );
 
+  const activeCount =
+    categories.length + seasons.length + fits.length + textures.length + (query ? 1 : 0);
+
   return (
     <>
-      <div className="flex flex-col gap-6 mb-14">
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="cerca per talla o nota"
-          className="w-full bg-transparent border-0 border-b border-border pb-2 text-sm placeholder:text-foreground-secondary focus:outline-none focus:border-foreground transition-colors"
-        />
-
-        <div className="flex flex-col gap-4">
-          <FilterRow label="categoria">
-            {CATEGORIES.map((c) => (
-              <button
-                type="button"
-                key={c}
-                onClick={() => toggle("cat", c)}
-                className={tag(categories.includes(c))}
-              >
-                <Dot active={categories.includes(c)} />
-                {CATEGORY_LABELS[c]}
-              </button>
-            ))}
-          </FilterRow>
-
-          <FilterRow label="temporada">
-            {SEASONS.map((s) => (
-              <button
-                type="button"
-                key={s}
-                onClick={() => toggle("season", s)}
-                className={tag(seasons.includes(s))}
-              >
-                <Dot active={seasons.includes(s)} />
-                {SEASON_LABELS[s]}
-              </button>
-            ))}
-          </FilterRow>
-
-          <FilterRow label="fit">
-            {ALL_FITS.map((f) => (
-              <button
-                type="button"
-                key={f}
-                onClick={() => toggle("fit", f)}
-                className={tag(fits.includes(f))}
-              >
-                <Dot active={fits.includes(f)} />
-                {FIT_LABELS[f]}
-              </button>
-            ))}
-          </FilterRow>
-
-          <FilterRow label="textura">
-            {TEXTURES.map((t) => (
-              <button
-                type="button"
-                key={t}
-                onClick={() => toggle("tex", t)}
-                className={tag(textures.includes(t))}
-              >
-                <Dot active={textures.includes(t)} />
-                {TEXTURE_LABELS[t]}
-              </button>
-            ))}
-          </FilterRow>
+      <div className="flex flex-col gap-4 mb-10">
+        {/* Trigger de filtres */}
+        <div className="flex items-baseline justify-between">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            className="group inline-flex items-baseline gap-3 text-[11px] tracking-[0.25em] uppercase text-foreground-secondary hover:text-foreground transition-colors"
+            aria-expanded={filtersOpen}
+          >
+            <span>filtres</span>
+            {activeCount > 0 && (
+              <span className="text-[10px] text-foreground tabular-nums">
+                {activeCount}
+              </span>
+            )}
+            <span
+              aria-hidden
+              className={`inline-block transition-transform duration-500 ease-out ${
+                filtersOpen ? "rotate-180" : ""
+              }`}
+            >
+              ˅
+            </span>
+          </button>
+          <span className="text-[11px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+            {filtered.length} / {garments.length}
+          </span>
         </div>
 
-        {hasFilters && (
-          <div className="flex items-center justify-between pt-2 border-t border-border">
-            <button
-              type="button"
-              onClick={() => router.replace(pathname, { scroll: false })}
-              className="font-serif italic text-sm text-foreground-secondary hover:text-foreground"
-            >
-              {UI.buttons.clearFilters}
-            </button>
-            <span className="text-[11px] tracking-[0.2em] uppercase text-foreground-secondary">
-              {filtered.length} de {garments.length}
-            </span>
+        {/* Panell col·lapsable */}
+        <div
+          className={`grid transition-[grid-template-rows] duration-500 ease-out ${
+            filtersOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className="flex flex-col gap-5 pt-4 pb-2">
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="cerca per talla o nota"
+                className="w-full bg-transparent border-0 border-b border-border pb-2 text-sm placeholder:text-foreground-secondary focus:outline-none focus:border-foreground transition-colors"
+              />
+
+              <FilterRow label="categoria">
+                {CATEGORIES.map((c) => (
+                  <button
+                    type="button"
+                    key={c}
+                    onClick={() => toggle("cat", c)}
+                    className={tag(categories.includes(c))}
+                  >
+                    <Dot active={categories.includes(c)} />
+                    {CATEGORY_LABELS[c]}
+                  </button>
+                ))}
+              </FilterRow>
+
+              <FilterRow label="temporada">
+                {SEASONS.map((s) => (
+                  <button
+                    type="button"
+                    key={s}
+                    onClick={() => toggle("season", s)}
+                    className={tag(seasons.includes(s))}
+                  >
+                    <Dot active={seasons.includes(s)} />
+                    {SEASON_LABELS[s]}
+                  </button>
+                ))}
+              </FilterRow>
+
+              <FilterRow label="fit">
+                {ALL_FITS.map((f) => (
+                  <button
+                    type="button"
+                    key={f}
+                    onClick={() => toggle("fit", f)}
+                    className={tag(fits.includes(f))}
+                  >
+                    <Dot active={fits.includes(f)} />
+                    {FIT_LABELS[f]}
+                  </button>
+                ))}
+              </FilterRow>
+
+              <FilterRow label="textura">
+                {TEXTURES.map((t) => (
+                  <button
+                    type="button"
+                    key={t}
+                    onClick={() => toggle("tex", t)}
+                    className={tag(textures.includes(t))}
+                  >
+                    <Dot active={textures.includes(t)} />
+                    {TEXTURE_LABELS[t]}
+                  </button>
+                ))}
+              </FilterRow>
+
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={() => router.replace(pathname, { scroll: false })}
+                  className="self-start font-serif italic text-sm text-foreground-secondary hover:text-foreground"
+                >
+                  {UI.buttons.clearFilters}
+                </button>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {filtered.length === 0 && !hasFilters ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+          <AddGarmentCard />
+        </div>
+      ) : filtered.length === 0 ? (
         <p className="font-serif italic text-foreground-secondary text-center py-16">
           {UI.grid.noResults}
         </p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+          <AddGarmentCard />
           {filtered.map((garment, i) => (
-            <button
-              type="button"
+            <GarmentCard
               key={garment.id}
-              onClick={() => setSelected(garment)}
-              className="group flex flex-col text-left"
-            >
-              <div className="relative flex aspect-[3/4] w-full overflow-hidden transition-transform duration-500 ease-out group-hover:-translate-y-1">
-                {garment.colors.map((c) => (
-                  <div
-                    key={c.id}
-                    className="flex-1"
-                    style={{ backgroundColor: c.hex }}
-                    title={c.hex}
-                  />
-                ))}
-              </div>
-              <div className="flex items-baseline justify-between pt-3">
-                <span className="font-serif text-base leading-tight">
-                  {CATEGORY_LABELS[garment.category]}
-                </span>
-                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
-                  n{String(i + 1).padStart(3, "0")}
-                </span>
-              </div>
-              <span className="text-xs italic text-foreground-secondary mt-0.5">
-                {FIT_LABELS[garment.fit] ?? garment.fit} · {garment.size}
-              </span>
-              {garment.notes && (
-                <span className="text-xs text-foreground-secondary mt-0.5 truncate">
-                  {garment.notes}
-                </span>
-              )}
-            </button>
+              garment={garment}
+              index={i}
+              onClick={setSelected}
+            />
           ))}
         </div>
       )}
