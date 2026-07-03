@@ -1,49 +1,70 @@
 import Link from "next/link";
 
-const NAV_ITEMS = [
-  {
-    href: "/add",
-    title: "Afegir peça",
-    description: "Registra una nova peça al teu armari",
-  },
-  {
-    href: "/armari",
-    title: "El meu armari",
-    description: "Peces, combinacions i outfits desats",
-  },
-  {
-    href: "/paleta",
-    title: "Paletes de color",
-    description: "Paletes Sanzo Wada per combinar colors",
-  },
-  {
-    href: "/stats",
-    title: "Estadístiques",
-    description: "Distribució per categoria, temporada, fit i colors",
-  },
-  {
-    href: "/settings",
-    title: "Configuració",
-    description: "Exportar i importar totes les teves peces en JSON",
-  },
+const PRIMARY = [
+  { href: "/armari", label: "El meu armari" },
+  { href: "/paleta", label: "Paletes" },
+];
+
+const SECONDARY = [
+  { href: "/stats", label: "estadístiques" },
+  { href: "/settings", label: "configuració" },
 ];
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm space-y-2">
-        <h1 className="text-2xl font-semibold mb-6">El meu armari</h1>
-        {NAV_ITEMS.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="block border rounded p-4 hover:bg-gray-50 transition-colors"
-          >
-            <p className="font-medium text-sm">{item.title}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
-          </Link>
-        ))}
+    <div className="flex-1 grid grid-rows-[1fr_auto_1fr] px-6 py-12 md:py-20">
+      {/* Hero: wordmark + manifest, ancorats a la part inferior de la primera fila */}
+      <section className="self-end flex flex-col items-center text-center gap-5">
+        <h1 className="font-serif text-6xl md:text-8xl tracking-tight leading-[0.95] text-foreground">
+          el meu armari
+        </h1>
+        <p className="font-serif italic text-base md:text-lg text-foreground-secondary">
+          un estudi d&apos;harmonia visual
+        </p>
+      </section>
+
+      {/* Divisor tipografic mid-page */}
+      <div className="flex justify-center py-16 md:py-24">
+        <div className="h-px w-16 bg-border" aria-hidden />
       </div>
+
+      {/* Navegacio: primaria centrada, secundaria discreta al peu */}
+      <section className="self-start flex flex-col items-center gap-14">
+        <nav className="flex flex-col items-center gap-4">
+          {PRIMARY.map((entry) => (
+            <Link
+              key={entry.href}
+              href={entry.href}
+              className="group relative font-serif text-xl text-foreground"
+            >
+              <span>{entry.label}</span>
+              <span
+                aria-hidden
+                className="pointer-events-none absolute left-1/2 -bottom-1 h-px w-0 -translate-x-1/2 bg-foreground transition-[width] duration-500 ease-out group-hover:w-full"
+              />
+            </Link>
+          ))}
+        </nav>
+
+        <nav className="flex items-center gap-6 font-serif italic text-sm text-foreground-secondary">
+          {SECONDARY.map((entry, i) => (
+            <span key={entry.href} className="inline-flex items-center gap-6">
+              {i > 0 && (
+                <span
+                  aria-hidden
+                  className="inline-block h-1 w-1 rounded-full bg-border"
+                />
+              )}
+              <Link
+                href={entry.href}
+                className="hover:text-foreground transition-colors duration-300"
+              >
+                {entry.label}
+              </Link>
+            </span>
+          ))}
+        </nav>
+      </section>
     </div>
   );
 }

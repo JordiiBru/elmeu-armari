@@ -27,12 +27,15 @@ export function ImportForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = await res.json() as { imported?: number; error?: string };
+      const data = (await res.json()) as { imported?: number; error?: string };
 
       if (!res.ok) {
         setStatus({ type: "error", msg: data.error ?? "Error desconegut" });
       } else {
-        setStatus({ type: "ok", msg: `${data.imported} peces importades correctament.` });
+        setStatus({
+          type: "ok",
+          msg: `${data.imported} peces importades correctament.`,
+        });
         if (inputRef.current) inputRef.current.value = "";
         setFileName(null);
         router.refresh();
@@ -45,29 +48,31 @@ export function ImportForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex gap-4">
-        <label className="flex items-center gap-2 text-sm cursor-pointer">
-          <input
-            type="radio"
-            value="merge"
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+          mode
+        </span>
+        <div className="flex flex-col gap-2">
+          <ModeOption
             checked={mode === "merge"}
-            onChange={() => setMode("merge")}
+            onSelect={() => setMode("merge")}
+            title="fusionar"
+            description="afegeix les peces sense esborrar les existents."
           />
-          Merge <span className="text-gray-400">(afegeix sense esborrar les existents)</span>
-        </label>
-        <label className="flex items-center gap-2 text-sm cursor-pointer">
-          <input
-            type="radio"
-            value="replace"
+          <ModeOption
             checked={mode === "replace"}
-            onChange={() => setMode("replace")}
+            onSelect={() => setMode("replace")}
+            title="reemplaçar"
+            description="esborra tot l'arxiu i el reimporta des de zero."
           />
-          Replace <span className="text-gray-400">(esborra tot i reimporta)</span>
-        </label>
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3">
+        <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+          fitxer
+        </span>
         <input
           ref={inputRef}
           type="file"
@@ -76,27 +81,79 @@ export function ImportForm() {
           className="sr-only"
           onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
         />
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50"
-        >
-          {fileName ?? "Seleccionar fitxer"}
-        </button>
-        <button
-          type="submit"
-          disabled={loading || !fileName}
-          className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50"
-        >
-          {loading ? "Important..." : "Importar"}
-        </button>
+        <div className="flex items-baseline gap-6">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="group relative font-serif italic text-base text-foreground active:scale-[0.98]"
+          >
+            <span>{fileName ?? "seleccionar fitxer"}</span>
+            <span
+              aria-hidden
+              className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-foreground origin-left transition-transform duration-500 ease-out scale-x-0 group-hover:scale-x-100"
+            />
+          </button>
+          <button
+            type="submit"
+            disabled={loading || !fileName}
+            className="group relative font-serif italic text-base text-foreground disabled:opacity-40 active:scale-[0.98]"
+          >
+            <span>{loading ? "important…" : "→ importar"}</span>
+            <span
+              aria-hidden
+              className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-foreground origin-left transition-transform duration-500 ease-out scale-x-0 group-hover:scale-x-100"
+            />
+          </button>
+        </div>
       </div>
 
       {status && (
-        <p className={`text-sm ${status.type === "ok" ? "text-green-700" : "text-red-600"}`}>
+        <p className="font-serif italic text-sm text-foreground border-t border-foreground pt-3">
           {status.msg}
         </p>
       )}
     </form>
+  );
+}
+
+function ModeOption({
+  checked,
+  onSelect,
+  title,
+  description,
+}: {
+  checked: boolean;
+  onSelect: () => void;
+  title: string;
+  description: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className="flex items-start gap-3 text-left active:scale-[0.99] transition-transform"
+      aria-pressed={checked}
+    >
+      <span
+        aria-hidden
+        className={`mt-1.5 h-2.5 w-2.5 rounded-full border transition-colors ${
+          checked
+            ? "bg-foreground border-foreground"
+            : "bg-transparent border-border"
+        }`}
+      />
+      <span className="flex flex-col gap-0.5">
+        <span
+          className={`font-serif text-base ${
+            checked ? "text-foreground" : "text-foreground-secondary"
+          }`}
+        >
+          {title}
+        </span>
+        <span className="font-serif italic text-sm text-foreground-secondary">
+          {description}
+        </span>
+      </span>
+    </button>
   );
 }

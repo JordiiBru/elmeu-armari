@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useState, useMemo } from "react";
 import { GarmentModal } from "@/components/GarmentModal";
+import { GarmentCard, AddGarmentCard } from "@/components/GarmentCard";
 import { filterGarments } from "@/lib/prendas/filtering";
 import type { GarmentWithColors, Category, Texture, Season } from "@/lib/prendas/types";
 import { CATEGORIES, SEASONS, ALL_FITS, TEXTURES } from "@/lib/prendas/types";
@@ -18,18 +19,62 @@ interface Props {
   garments: GarmentWithColors[];
 }
 
-const pill = (active: boolean) =>
-  `px-3 py-1 text-xs border rounded-full transition-colors cursor-pointer ${
-    active
-      ? "bg-black text-white border-black"
-      : "bg-white text-gray-700 border-gray-300 hover:border-gray-500"
-  }`;
+function FilterTag({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative inline-flex items-baseline transition-colors active:scale-[0.97]"
+      aria-pressed={active}
+    >
+      <span
+        className={`text-[11px] tracking-[0.15em] uppercase transition-colors ${
+          active ? "text-foreground" : "text-foreground-secondary group-hover:text-foreground"
+        }`}
+      >
+        {children}
+      </span>
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-foreground origin-left transition-transform duration-300 ease-out ${
+          active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        }`}
+      />
+    </button>
+  );
+}
+
+function FilterRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid grid-cols-[100px_1fr] gap-6 items-baseline">
+      <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary pt-0.5">
+        {label}
+      </span>
+      <div className="flex flex-wrap gap-x-5 gap-y-2">{children}</div>
+    </div>
+  );
+}
 
 export function ArmariGrid({ garments }: Props) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const [selected, setSelected] = useState<GarmentWithColors | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const categories = searchParams.getAll("cat") as Category[];
   const seasons = searchParams.getAll("season") as Season[];
@@ -64,89 +109,136 @@ export function ArmariGrid({ garments }: Props) {
     [garments, categories, seasons, fits, textures, query]
   );
 
+  const activeCount =
+    categories.length + seasons.length + fits.length + textures.length + (query ? 1 : 0);
+
   return (
     <>
-      <div className="space-y-3 mb-6">
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Cerca per talla o nota..."
-          className="w-full px-3 py-1.5 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-black"
-        />
-
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => (
-            <button type="button" key={c} onClick={() => toggle("cat", c)} className={pill(categories.includes(c))}>
-              {CATEGORY_LABELS[c]}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {SEASONS.map((s) => (
-            <button type="button" key={s} onClick={() => toggle("season", s)} className={pill(seasons.includes(s))}>
-              {SEASON_LABELS[s]}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {ALL_FITS.map((f) => (
-            <button type="button" key={f} onClick={() => toggle("fit", f)} className={pill(fits.includes(f))}>
-              {FIT_LABELS[f]}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {TEXTURES.map((t) => (
-            <button type="button" key={t} onClick={() => toggle("tex", t)} className={pill(textures.includes(t))}>
-              {TEXTURE_LABELS[t]}
-            </button>
-          ))}
-        </div>
-
-        {hasFilters && (
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => router.replace(pathname, { scroll: false })}
-              className="text-xs text-gray-500 underline hover:text-black"
+      <div className="flex flex-col gap-3 mb-6">
+        {/* Trigger de filtres */}
+        <div className="flex items-baseline justify-between">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            className="group inline-flex items-baseline gap-3 text-[11px] tracking-[0.25em] uppercase text-foreground-secondary hover:text-foreground transition-colors"
+            aria-expanded={filtersOpen}
+          >
+            <span>filtres</span>
+            {activeCount > 0 && (
+              <span className="text-[10px] text-foreground tabular-nums">
+                {activeCount}
+              </span>
+            )}
+            <span
+              aria-hidden
+              className={`inline-block transition-transform duration-500 ease-out ${
+                filtersOpen ? "rotate-180" : ""
+              }`}
             >
-              {UI.buttons.clearFilters}
-            </button>
-            <span className="text-xs text-gray-400">
-              {filtered.length} de {garments.length} {UI.grid.results(garments.length)}
+              ˅
             </span>
+          </button>
+          <span className="text-[11px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+            {filtered.length} / {garments.length}
+          </span>
+        </div>
+
+        {/* Panell col·lapsable */}
+        <div
+          className={`grid transition-[grid-template-rows] duration-500 ease-out ${
+            filtersOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className="flex flex-col gap-5 pt-4 pb-2">
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="cerca per talla o nota"
+                className="w-full bg-transparent border-0 border-b border-border pb-2 text-sm placeholder:text-foreground-secondary focus:outline-none focus:border-foreground transition-colors"
+              />
+
+              <FilterRow label="categoria">
+                {CATEGORIES.map((c) => (
+                  <FilterTag
+                    key={c}
+                    active={categories.includes(c)}
+                    onClick={() => toggle("cat", c)}
+                  >
+                    {CATEGORY_LABELS[c]}
+                  </FilterTag>
+                ))}
+              </FilterRow>
+
+              <FilterRow label="temporada">
+                {SEASONS.map((s) => (
+                  <FilterTag
+                    key={s}
+                    active={seasons.includes(s)}
+                    onClick={() => toggle("season", s)}
+                  >
+                    {SEASON_LABELS[s]}
+                  </FilterTag>
+                ))}
+              </FilterRow>
+
+              <FilterRow label="fit">
+                {ALL_FITS.map((f) => (
+                  <FilterTag
+                    key={f}
+                    active={fits.includes(f)}
+                    onClick={() => toggle("fit", f)}
+                  >
+                    {FIT_LABELS[f]}
+                  </FilterTag>
+                ))}
+              </FilterRow>
+
+              <FilterRow label="textura">
+                {TEXTURES.map((t) => (
+                  <FilterTag
+                    key={t}
+                    active={textures.includes(t)}
+                    onClick={() => toggle("tex", t)}
+                  >
+                    {TEXTURE_LABELS[t]}
+                  </FilterTag>
+                ))}
+              </FilterRow>
+
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={() => router.replace(pathname, { scroll: false })}
+                  className="self-start font-serif italic text-sm text-foreground-secondary hover:text-foreground"
+                >
+                  {UI.buttons.clearFilters}
+                </button>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
-      {filtered.length === 0 ? (
-        <p className="text-gray-400 text-sm">{UI.grid.noResults}</p>
+      {filtered.length === 0 && !hasFilters ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+          <AddGarmentCard />
+        </div>
+      ) : filtered.length === 0 ? (
+        <p className="font-serif italic text-foreground-secondary text-center py-16">
+          {UI.grid.noResults}
+        </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {filtered.map((garment) => (
-            <button
-              type="button"
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+          <AddGarmentCard />
+          {filtered.map((garment, i) => (
+            <GarmentCard
               key={garment.id}
-              onClick={() => setSelected(garment)}
-              className="rounded-lg border overflow-hidden flex flex-col text-left hover:shadow-md transition-shadow"
-            >
-              <div className="flex h-24 w-full">
-                {garment.colors.map((c) => (
-                  <div key={c.id} className="flex-1" style={{ backgroundColor: c.hex }} title={c.hex} />
-                ))}
-              </div>
-              <div className="p-2 flex flex-col gap-0.5 bg-white w-full">
-                <span className="text-xs font-medium">{CATEGORY_LABELS[garment.category]}</span>
-                <span className="text-xs text-gray-500">{FIT_LABELS[garment.fit] ?? garment.fit} · {garment.size}</span>
-                {garment.notes && (
-                  <span className="text-xs text-gray-400 truncate">{garment.notes}</span>
-                )}
-              </div>
-            </button>
+              garment={garment}
+              index={i}
+              onClick={setSelected}
+            />
           ))}
         </div>
       )}

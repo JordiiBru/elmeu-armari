@@ -1,31 +1,61 @@
 @import "tailwindcss";
 
+/* -------------------------------------------------------------------------- */
+/* Paleta base — neutra calida. Mai canvia.                                   */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  /* Paleta cream MUJI — mes calida, tirant al paper vintage japones */
+  --background: #f5edcd;
+  --card: #faf3d9;
+  --background-secondary: #e8dcb0;
+  --border: #cdc196;
+  --foreground: #2f2f2d;
+  --foreground-secondary: #6f6a63;
+
+  --ring: var(--border);
+  --input: var(--border);
+}
+
 @theme inline {
   --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-card: var(--card);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-foreground-secondary: var(--foreground-secondary);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-}
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --font-sans: var(--font-inter-tight);
+  --font-serif: var(--font-fraunces);
+  --font-mono: var(--font-geist-mono);
 }
 
 @layer base {
   * {
     @apply border-border;
   }
+
+  html {
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
   }
-  html {
-    @apply font-sans;
+
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
+}
+
+/* Micro-transicions calmades a tots els elements interactius */
+button, a, input, textarea, select {
+  transition-property: background-color, border-color, color, opacity, transform;
+  transition-duration: 250ms;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 }

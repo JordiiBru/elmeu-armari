@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Inter_Tight, Geist_Mono } from "next/font/google";
+import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const interTight = Inter_Tight({
+  variable: "--font-inter-tight",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -14,7 +22,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "El meu armari",
-  description: "Gestió personal del teu armari",
+  description: "Un estudi d'harmonia visual per al teu armari.",
 };
 
 export default function RootLayout({
@@ -25,9 +33,12 @@ export default function RootLayout({
   return (
     <html
       lang="ca"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${interTight.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        <SiteHeader />
+        <main className="flex-1 flex flex-col">{children}</main>
+      </body>
     </html>
   );
 }

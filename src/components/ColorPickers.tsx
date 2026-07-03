@@ -8,30 +8,41 @@ interface Props {
 
 export function ColorPickers({ initialColors }: Props) {
   const [colors, setColors] = useState<string[]>(
-    initialColors && initialColors.length > 0 ? initialColors : ["#000000"]
+    initialColors && initialColors.length > 0 ? initialColors : ["#000000"],
   );
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-3">
       {colors.map((color, i) => (
-        <div key={i} className="flex items-center gap-2">
-          <input
-            type="color"
-            name="color"
-            value={color}
-            onChange={(e) =>
-              setColors((prev) => prev.map((c, j) => (j === i ? e.target.value : c)))
-            }
-            className="h-9 w-16 cursor-pointer rounded border border-gray-300"
-          />
-          <span className="text-sm font-mono text-gray-600">{color}</span>
+        <div key={i} className="flex items-center gap-3">
+          <label
+            className="relative h-10 w-14 cursor-pointer overflow-hidden border border-border transition-colors hover:border-foreground"
+            style={{ backgroundColor: color }}
+          >
+            <input
+              type="color"
+              name="color"
+              value={color}
+              onChange={(e) =>
+                setColors((prev) =>
+                  prev.map((c, j) => (j === i ? e.target.value : c)),
+                )
+              }
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+          </label>
+          <span className="font-mono text-xs text-foreground-secondary tabular-nums">
+            {color.toUpperCase()}
+          </span>
           {colors.length > 1 && (
             <button
               type="button"
-              onClick={() => setColors((prev) => prev.filter((_, j) => j !== i))}
-              className="text-sm text-red-500 hover:text-red-700"
+              onClick={() =>
+                setColors((prev) => prev.filter((_, j) => j !== i))
+              }
+              className="ml-auto text-[10px] tracking-[0.2em] uppercase text-foreground-secondary hover:text-foreground transition-colors active:scale-95"
             >
-              Eliminar
+              eliminar
             </button>
           )}
         </div>
@@ -39,9 +50,9 @@ export function ColorPickers({ initialColors }: Props) {
       <button
         type="button"
         onClick={() => setColors((prev) => [...prev, "#000000"])}
-        className="px-2.5 py-1 text-sm border rounded hover:bg-gray-50"
+        className="group relative self-start font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors mt-1 active:scale-[0.98]"
       >
-        + Afegir color
+        <span>+ afegir color</span>
       </button>
     </div>
   );
