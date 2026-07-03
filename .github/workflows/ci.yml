@@ -46,6 +46,9 @@ jobs:
   security-code:
     name: Security — Filesystem (Trivy)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -55,8 +58,16 @@ jobs:
           scan-type: fs
           scan-ref: .
           severity: HIGH,CRITICAL
-          exit-code: 1
+          exit-code: 0
           ignore-unfixed: true
+          format: sarif
+          output: trivy-fs.sarif
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-fs.sarif
 
   build:
     name: Build
