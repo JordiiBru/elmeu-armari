@@ -113,42 +113,52 @@ function ColorsGrid({ colors }: { colors: ColorEntry[] }) {
 
 function CombinationsGrid({ palettes }: { palettes: PaletteEntry[] }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
+    <div className="flex flex-col divide-y divide-border">
       {palettes.map((p) => (
-        <article key={p.id} className="group flex flex-col">
-          <div className="flex h-24 w-full transition-transform duration-500 ease-out group-hover:-translate-y-1">
-            {p.colors.map((c, i) => (
-              <div
-                key={i}
-                className="flex-1"
-                style={{ backgroundColor: c.hex }}
-                title={c.name ?? c.hex}
-              />
-            ))}
-          </div>
-          <div className="flex items-baseline justify-between pt-3">
-            <span className="font-serif text-base leading-tight text-foreground">
-              {p.colors
-                .map((c) => c.name)
-                .filter((n): n is string => Boolean(n))
-                .join(" · ") || "sense nom"}
-            </span>
-            <span className="text-[10px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
-              n{String(p.id).padStart(3, "0")}
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1">
-            {p.colors.map((c, i) => (
-              <span
-                key={i}
-                className="font-mono text-[11px] text-foreground-secondary"
-              >
-                {c.hex.toUpperCase()}
-              </span>
-            ))}
-          </div>
-        </article>
+        <PaletteRow key={p.id} palette={p} />
       ))}
     </div>
+  );
+}
+
+function PaletteRow({ palette }: { palette: PaletteEntry }) {
+  return (
+    <article className="group flex flex-col gap-4 py-10 md:py-12">
+      {/* Numero editorial */}
+      <div className="flex items-baseline justify-end">
+        <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary tabular-nums">
+          n{String(palette.id).padStart(3, "0")}
+        </span>
+      </div>
+
+      {/* Mostres altes com un mostrari textil */}
+      <div className="flex w-full h-40 md:h-56 transition-transform duration-500 ease-out group-hover:-translate-y-1">
+        {palette.colors.map((c, i) => (
+          <div
+            key={i}
+            className="flex-1"
+            style={{ backgroundColor: c.hex }}
+            title={c.name ?? c.hex}
+          />
+        ))}
+      </div>
+
+      {/* Un peu per cada color */}
+      <div className="flex w-full">
+        {palette.colors.map((c, i) => (
+          <div
+            key={i}
+            className="flex-1 flex flex-col gap-0.5 pr-4"
+          >
+            <span className="font-serif text-sm md:text-base leading-tight text-foreground">
+              {c.name ?? "sense nom"}
+            </span>
+            <span className="font-mono text-[11px] text-foreground-secondary">
+              {c.hex.toUpperCase()}
+            </span>
+          </div>
+        ))}
+      </div>
+    </article>
   );
 }
