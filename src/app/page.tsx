@@ -1,49 +1,47 @@
 import Link from "next/link";
+import SeasonSelector from "@/components/SeasonSelector";
 
-const NAV_ITEMS = [
-  {
-    href: "/add",
-    title: "Afegir peça",
-    description: "Registra una nova peça al teu armari",
-  },
-  {
-    href: "/armari",
-    title: "El meu armari",
-    description: "Peces, combinacions i outfits desats",
-  },
-  {
-    href: "/paleta",
-    title: "Paletes de color",
-    description: "Paletes Sanzo Wada per combinar colors",
-  },
-  {
-    href: "/stats",
-    title: "Estadístiques",
-    description: "Distribució per categoria, temporada, fit i colors",
-  },
-  {
-    href: "/settings",
-    title: "Configuració",
-    description: "Exportar i importar totes les teves peces en JSON",
-  },
+const ENTRIES = [
+  { href: "/armari", label: "El meu armari" },
+  { href: "/paleta", label: "Paletes" },
 ];
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm space-y-2">
-        <h1 className="text-2xl font-semibold mb-6">El meu armari</h1>
-        {NAV_ITEMS.map((item) => (
+    <div className="flex-1 flex flex-col items-center justify-between px-6 py-12 md:py-20">
+      {/* Hero */}
+      <section className="flex flex-col items-center text-center gap-4 mt-8 md:mt-16">
+        <h1 className="font-serif text-5xl md:text-7xl tracking-tight text-foreground">
+          el meu armari
+        </h1>
+        <p className="font-serif italic text-base md:text-lg text-foreground-secondary max-w-md">
+          un estudi d&apos;harmonia visual
+        </p>
+      </section>
+
+      {/* Selector d'estacio integrat a la composicio */}
+      <section className="w-full max-w-2xl my-16 md:my-24">
+        <SeasonSelector />
+      </section>
+
+      {/* Navegacio minima */}
+      <nav className="flex flex-col items-center gap-5">
+        {ENTRIES.map((entry) => (
           <Link
-            key={item.href}
-            href={item.href}
-            className="block border rounded p-4 hover:bg-gray-50 transition-colors"
+            key={entry.href}
+            href={entry.href}
+            className="group inline-flex items-center gap-3 text-foreground hover:text-accent transition-colors duration-300"
           >
-            <p className="font-medium text-sm">{item.title}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
+            <span className="font-serif text-lg">{entry.label}</span>
+            <span
+              aria-hidden
+              className="inline-block transition-transform duration-300 group-hover:translate-x-1"
+            >
+              →
+            </span>
           </Link>
         ))}
-      </div>
+      </nav>
     </div>
   );
 }

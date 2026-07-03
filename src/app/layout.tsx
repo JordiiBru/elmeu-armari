@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter_Tight, Geist_Mono } from "next/font/google";
-import Link from "next/link";
-import SeasonDial from "@/components/SeasonDial";
+import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -37,14 +36,7 @@ export default function RootLayout({
       className={`${fraunces.variable} ${interTight.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <header className="w-full px-6 md:px-12 pt-8 pb-6 flex items-center justify-between">
-          <Link href="/" className="group">
-            <span className="font-serif text-lg tracking-tight text-foreground">
-              el meu armari
-            </span>
-          </Link>
-          <SeasonDial />
-        </header>
+        <SiteHeader />
         <main className="flex-1 flex flex-col">{children}</main>
       </body>
     </html>
