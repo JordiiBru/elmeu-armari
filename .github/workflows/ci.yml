@@ -60,14 +60,6 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: 0
           ignore-unfixed: true
-          format: sarif
-          output: trivy-fs.sarif
-
-      - name: Upload SARIF to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: trivy-fs.sarif
 
   build:
     name: Build
