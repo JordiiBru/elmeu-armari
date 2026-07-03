@@ -44,7 +44,7 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
   const defaultSize = sizes.includes(garment.size) ? garment.size : "";
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="flex flex-col gap-7">
       <div>
         <label htmlFor="category" className={FORM_STYLES.label}>{UI.form.category} {UI.form.required}</label>
         <select
@@ -127,7 +127,7 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
       </div>
 
       {state?.error && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <p className="font-serif italic text-sm text-foreground border-t border-foreground pt-3">
           {state.error}
         </p>
       )}
@@ -135,9 +135,13 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full h-9 rounded-lg bg-black text-white text-sm font-medium hover:bg-black/80 disabled:opacity-50 transition-opacity"
+        className="group self-start relative font-serif italic text-lg text-foreground disabled:opacity-40 transition-opacity active:scale-[0.98] mt-2"
       >
-        {isPending ? "Guardant..." : UI.buttons.saveChanges}
+        <span>{isPending ? "guardant…" : "guardar canvis"}</span>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-foreground origin-left transition-transform duration-500 ease-out scale-x-0 group-hover:scale-x-100"
+        />
       </button>
     </form>
   );
