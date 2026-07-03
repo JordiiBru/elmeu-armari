@@ -58,7 +58,7 @@ export function OutfitBuilder({
         </p>
       ) : (
         <>
-          <p className="text-xs text-gray-400">{filtered.length} peces · toca una per veure combinacions</p>
+          <p className="text-xs text-gray-400">{filtered.length} peces · toca una per veure outfits</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {filtered.map((g) => (
               <button
