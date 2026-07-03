@@ -1,5 +1,5 @@
 import Link from "next/link";
-import AmbientBackground from "@/components/AmbientBackground";
+import SeasonMark from "@/components/SeasonMark";
 import SeasonSelector from "@/components/SeasonSelector";
 
 const PRIMARY = [
@@ -15,7 +15,7 @@ const SECONDARY = [
 export default function HomePage() {
   return (
     <div className="relative flex-1 flex flex-col items-center justify-between px-6 py-10 md:py-16">
-      <AmbientBackground />
+      <SeasonMark />
       {/* Hero */}
       <section className="flex flex-col items-center text-center gap-4 mt-6 md:mt-12">
         <h1 className="font-serif text-5xl md:text-7xl tracking-tight text-foreground">
