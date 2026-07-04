@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSwipeToClose } from "@/lib/useSwipeToClose";
 
 type Palette = {
   id: number;
@@ -54,6 +55,7 @@ export default function PaletteSheet({
   }, []);
 
   const open = shown && !closing;
+  const swipe = useSwipeToClose(handleClose);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -76,21 +78,27 @@ export default function PaletteSheet({
         aria-label={`Combinacions de ${color.name}`}
         className="relative bg-card w-full sm:max-w-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-[0_-8px_40px_-20px_rgba(0,0,0,0.15)]"
         style={{
-          transform: open ? "translateY(0)" : "translateY(100%)",
+          transform: open ? `translateY(${swipe.dragY}px)` : "translateY(100%)",
           opacity: open ? 1 : 0,
-          transition: `transform 520ms ${EASE_SPRING}, opacity 380ms ${EASE_SPRING}`,
+          transition: swipe.dragging
+            ? "none"
+            : `transform 520ms ${EASE_SPRING}, opacity 380ms ${EASE_SPRING}`,
           willChange: "transform, opacity",
         }}
       >
-        {/* Handle mobil */}
-        <div className="sm:hidden pt-3 pb-1 flex justify-center">
+        {/* Handle mobil (swipe zone) */}
+        <div
+          className="sm:hidden pt-3 pb-2 flex justify-center touch-none"
+          {...swipe.handlers}
+        >
           <span className="block h-1 w-10 rounded-full bg-border" />
         </div>
 
-        {/* Franja del color triat */}
+        {/* Franja del color triat + swipe zone */}
         <div
-          className="h-24 sm:h-32 flex-shrink-0"
+          className="h-24 sm:h-32 flex-shrink-0 touch-none"
           style={{ backgroundColor: color.hex }}
+          {...swipe.handlers}
         />
 
         <div
@@ -158,6 +166,8 @@ function SheetPaletteRow({
   highlightHex: string;
 }) {
   const hi = highlightHex.toLowerCase();
+  // Mostres de mida fixa — totes iguals, no s'estiren.
+  const SWATCH = "w-16 sm:w-20";
   return (
     <article className="flex flex-col gap-3 py-6">
       <div className="flex items-baseline justify-end">
@@ -165,33 +175,26 @@ function SheetPaletteRow({
           n{String(palette.id).padStart(3, "0")}
         </span>
       </div>
-      <div className="flex w-full h-24 md:h-28">
-        {palette.colors.map((c, i) => {
-          const isHi = c.hex.toLowerCase() === hi;
-          return (
-            <div
-              key={i}
-              className="flex-1 transition-[flex,transform] duration-500 ease-out"
-              style={{
-                backgroundColor: c.hex,
-                flex: isHi ? "1.5 1 0%" : "1 1 0%",
-              }}
-              title={c.name ?? c.hex}
-            />
-          );
-        })}
+      <div className="flex h-24 md:h-28">
+        {palette.colors.map((c, i) => (
+          <div
+            key={i}
+            className={`${SWATCH} shrink-0`}
+            style={{ backgroundColor: c.hex }}
+            title={c.name ?? c.hex}
+          />
+        ))}
       </div>
-      <div className="flex w-full">
+      <div className="flex">
         {palette.colors.map((c, i) => {
           const isHi = c.hex.toLowerCase() === hi;
           return (
             <div
               key={i}
-              className="flex flex-col gap-0.5 pr-3 transition-[flex] duration-500 ease-out"
-              style={{ flex: isHi ? "1.5 1 0%" : "1 1 0%" }}
+              className={`${SWATCH} shrink-0 flex flex-col gap-0.5 pr-3`}
             >
               <span
-                className={`font-serif text-sm leading-tight ${
+                className={`font-serif text-xs sm:text-sm leading-tight ${
                   isHi ? "text-foreground" : "text-foreground-secondary"
                 }`}
               >

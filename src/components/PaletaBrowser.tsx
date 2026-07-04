@@ -40,7 +40,7 @@ export default function PaletaBrowser({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="cerca un color per nom o hex"
+          placeholder="search a color — english (pink, ochre, cerulian…)"
           className="w-full bg-transparent border-0 border-b border-border pb-2 text-sm placeholder:text-foreground-secondary placeholder:italic placeholder:font-serif focus:outline-none focus:border-foreground transition-colors"
         />
         <div className="flex items-baseline justify-between pt-2">

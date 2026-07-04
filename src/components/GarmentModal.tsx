@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { deleteGarmentAction } from "@/app/armari/actions";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import {
@@ -49,6 +50,7 @@ export function GarmentModal({ garment, onClose }: Props) {
   }, []);
 
   const open = shown && !closing;
+  const swipe = useSwipeToClose(handleClose);
 
   // Easing tipus iOS sheet — spring-feel sense rebot
   const EASE_SPRING = "cubic-bezier(0.32, 0.72, 0, 1)";
@@ -74,20 +76,25 @@ export function GarmentModal({ garment, onClose }: Props) {
         className="relative bg-card w-full sm:max-w-md max-h-[92vh] flex flex-col overflow-hidden shadow-[0_-8px_40px_-20px_rgba(0,0,0,0.15)]"
         style={{
           transform: open
-            ? "translateY(0) scale(1)"
-            : "translateY(100%) scale(1)",
+            ? `translateY(${swipe.dragY}px)`
+            : "translateY(100%)",
           opacity: open ? 1 : 0,
-          transition: `transform 520ms ${EASE_SPRING}, opacity 380ms ${EASE_SPRING}`,
+          transition: swipe.dragging
+            ? "none"
+            : `transform 520ms ${EASE_SPRING}, opacity 380ms ${EASE_SPRING}`,
           willChange: "transform, opacity",
         }}
       >
-        {/* Handle mobil */}
-        <div className="sm:hidden pt-3 pb-1 flex justify-center">
+        {/* Handle mobil (swipe zone) */}
+        <div
+          className="sm:hidden pt-3 pb-2 flex justify-center touch-none"
+          {...swipe.handlers}
+        >
           <span className="block h-1 w-10 rounded-full bg-border" />
         </div>
 
-        {/* Franja de swatches — protagonista */}
-        <div className="flex h-32 flex-shrink-0">
+        {/* Franja de swatches — protagonista + swipe zone */}
+        <div className="flex h-32 flex-shrink-0 touch-none" {...swipe.handlers}>
           {garment.colors.map((c) => (
             <div
               key={c.id}
