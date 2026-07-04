@@ -35,12 +35,14 @@ export default function HomePage() {
             <Link
               key={entry.href}
               href={entry.href}
-              className="group relative font-serif text-xl text-foreground"
+              className="group relative font-serif text-xl text-foreground transition-transform duration-200 active:scale-[0.96]"
             >
-              <span>{entry.label}</span>
+              <span className="transition-opacity duration-200 group-active:opacity-70">
+                {entry.label}
+              </span>
               <span
                 aria-hidden
-                className="pointer-events-none absolute left-1/2 -bottom-1 h-px w-0 -translate-x-1/2 bg-foreground transition-[width] duration-500 ease-out group-hover:w-full"
+                className="pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-foreground origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out will-change-transform"
               />
             </Link>
           ))}
@@ -64,6 +66,7 @@ export default function HomePage() {
             </span>
           ))}
         </nav>
+
       </section>
     </div>
   );

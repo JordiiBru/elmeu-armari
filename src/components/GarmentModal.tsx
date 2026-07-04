@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { SHEET_EASE, useSheetState } from "@/lib/useSheetState";
+import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { deleteGarmentAction } from "@/app/armari/actions";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import {
@@ -20,50 +21,20 @@ interface Props {
 }
 
 export function GarmentModal({ garment, onClose }: Props) {
-  const [shown, setShown] = useState(false);
-  const [closing, setClosing] = useState(false);
-
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setShown(true));
-    document.body.style.overflow = "hidden";
-    return () => {
-      cancelAnimationFrame(raf);
-      document.body.style.overflow = "";
-    };
-  }, []);
-
-  const handleClose = () => {
-    if (closing) return;
-    setClosing(true);
-    setShown(false);
-    setTimeout(() => onClose(), 420);
-  };
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const open = shown && !closing;
-
-  // Easing tipus iOS sheet — spring-feel sense rebot
-  const EASE_SPRING = "cubic-bezier(0.32, 0.72, 0, 1)";
+  const { open, close } = useSheetState(onClose, 420);
+  const swipe = useSwipeToClose(close);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
-        onClick={handleClose}
+        onClick={close}
         className="absolute inset-0 bg-foreground/40"
         style={{
           opacity: open ? 1 : 0,
-          transition: `opacity 380ms ${EASE_SPRING}`,
-          backdropFilter: open ? "blur(2px)" : "blur(0px)",
-          WebkitBackdropFilter: open ? "blur(2px)" : "blur(0px)",
+          transition: `opacity 380ms ${SHEET_EASE}`,
+          // backdrop-filter blur eliminat: era font principal de jank a Safari Mac.
+          // L'opacitat sola ja donava profunditat suficient.
         }}
       />
 
@@ -71,23 +42,29 @@ export function GarmentModal({ garment, onClose }: Props) {
       <div
         role="dialog"
         aria-modal
-        className="relative bg-card w-full sm:max-w-md max-h-[92vh] flex flex-col overflow-hidden shadow-[0_-8px_40px_-20px_rgba(0,0,0,0.15)]"
+        className="relative bg-card w-full sm:max-w-md max-h-[92vh] flex flex-col overflow-hidden"
         style={{
           transform: open
-            ? "translateY(0) scale(1)"
-            : "translateY(100%) scale(1)",
+            ? `translate3d(0, ${swipe.dragY}px, 0)`
+            : "translate3d(0, 100%, 0)",
           opacity: open ? 1 : 0,
-          transition: `transform 520ms ${EASE_SPRING}, opacity 380ms ${EASE_SPRING}`,
+          transition: swipe.dragging
+            ? "none"
+            : `transform 420ms ${SHEET_EASE}, opacity 300ms ${SHEET_EASE}`,
           willChange: "transform, opacity",
+          contain: "layout paint",
         }}
       >
-        {/* Handle mobil */}
-        <div className="sm:hidden pt-3 pb-1 flex justify-center">
+        {/* Handle mobil (swipe zone) */}
+        <div
+          className="sm:hidden pt-3 pb-2 flex justify-center touch-none"
+          {...swipe.handlers}
+        >
           <span className="block h-1 w-10 rounded-full bg-border" />
         </div>
 
-        {/* Franja de swatches — protagonista */}
-        <div className="flex h-32 flex-shrink-0">
+        {/* Franja de swatches — protagonista + swipe zone */}
+        <div className="flex h-32 flex-shrink-0 touch-none" {...swipe.handlers}>
           {garment.colors.map((c) => (
             <div
               key={c.id}
@@ -98,14 +75,7 @@ export function GarmentModal({ garment, onClose }: Props) {
           ))}
         </div>
 
-        <div
-          className="overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6"
-          style={{
-            opacity: open ? 1 : 0,
-            transform: open ? "translateY(0)" : "translateY(8px)",
-            transition: `opacity 400ms ${EASE_SPRING} 120ms, transform 400ms ${EASE_SPRING} 120ms`,
-          }}
-        >
+        <div className="overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6">
           {/* Titol */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
@@ -127,7 +97,7 @@ export function GarmentModal({ garment, onClose }: Props) {
             </div>
             <button
               type="button"
-              onClick={handleClose}
+              onClick={close}
               className="text-foreground-secondary hover:text-foreground text-xl leading-none flex-shrink-0 -mr-1 -mt-1 h-8 w-8 flex items-center justify-center transition-colors active:scale-95"
               aria-label="Tancar"
             >
@@ -200,7 +170,7 @@ export function GarmentModal({ garment, onClose }: Props) {
             <Link
               href={`/edit/${garment.id}`}
               className="font-serif italic text-sm text-foreground hover:text-foreground-secondary transition-colors"
-              onClick={handleClose}
+              onClick={close}
             >
               editar
             </Link>

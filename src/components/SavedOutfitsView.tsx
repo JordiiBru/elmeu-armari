@@ -128,11 +128,10 @@ function SavedGroupCard({
 
       {/* Panel expandit */}
       <div
-        className={`grid transition-[grid-template-rows] duration-500 ease-out ${
-          expanded ? "grid-rows-[1fr] mt-6" : "grid-rows-[0fr]"
-        }`}
+        className={`collapse-panel ${expanded ? "mt-6" : ""}`}
+        data-open={expanded}
       >
-        <div className="overflow-hidden">
+        <div>
           <div className="flex flex-col gap-4 pl-[calc(0.375rem*4+3rem)]">
             {group.entries.map((entry) => (
               <SavedPaletteRow key={entry.outfitId} entry={entry} />

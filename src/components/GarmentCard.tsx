@@ -17,7 +17,7 @@ export function GarmentCard({
     <button
       type="button"
       onClick={() => onClick(garment)}
-      className="group flex flex-col text-left outline-none focus-visible:ring-1 focus-visible:ring-foreground/30 focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+      className="cv-auto group flex flex-col text-left outline-none focus-visible:ring-1 focus-visible:ring-foreground/30 focus-visible:ring-offset-4 focus-visible:ring-offset-background"
     >
       <div className="relative flex aspect-[3/4] w-full overflow-hidden transition-transform duration-500 ease-out group-hover:-translate-y-1 group-active:translate-y-0 group-active:scale-[0.98]">
         {garment.colors.map((c) => (

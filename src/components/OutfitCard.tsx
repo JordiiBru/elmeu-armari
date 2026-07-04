@@ -95,7 +95,6 @@ export function OutfitGroupCard({
 }
 
 function PaletteHero({ pm }: { pm: PaletteMatch }) {
-  const allIndices = pm.palette.colores.map((_, i) => i);
   return (
     <div className="flex items-center gap-3">
       <div className="flex gap-1.5 flex-shrink-0">
