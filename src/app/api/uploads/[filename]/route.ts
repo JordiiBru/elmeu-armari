@@ -22,7 +22,7 @@ export async function GET(
     return new NextResponse(data, {
       headers: {
         "Content-Type": "image/webp",
-        "Cache-Control": "public, max-age=60, must-revalidate",
+        "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
   } catch (e: unknown) {

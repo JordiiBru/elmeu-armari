@@ -1,7 +1,7 @@
 "use client";
 
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { GarmentModal } from "@/components/GarmentModal";
 import { GarmentCard, AddGarmentCard } from "@/components/GarmentCard";
 import { filterGarments } from "@/lib/prendas/filtering";
@@ -70,39 +70,53 @@ function FilterRow({
 }
 
 export function ArmariGrid({ garments }: Props) {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const initialParams = useSearchParams();
   const [selected, setSelected] = useState<GarmentWithColors | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const categories = searchParams.getAll("cat") as Category[];
-  const seasons = searchParams.getAll("season") as Season[];
-  const fits = searchParams.getAll("fit") as string[];
-  const textures = searchParams.getAll("tex") as Texture[];
-  const query = searchParams.get("q") ?? "";
+  const [categories, setCategories] = useState<Category[]>(
+    () => initialParams.getAll("cat") as Category[]
+  );
+  const [seasons, setSeasons] = useState<Season[]>(
+    () => initialParams.getAll("season") as Season[]
+  );
+  const [fits, setFits] = useState<string[]>(() => initialParams.getAll("fit"));
+  const [textures, setTextures] = useState<Texture[]>(
+    () => initialParams.getAll("tex") as Texture[]
+  );
+  const [query, setQuery] = useState<string>(() => initialParams.get("q") ?? "");
 
   const hasFilters =
     categories.length > 0 || seasons.length > 0 || fits.length > 0 || textures.length > 0 || query !== "";
 
-  function toggle(key: string, value: string) {
-    const params = new URLSearchParams(searchParams.toString());
-    const current = params.getAll(key);
-    params.delete(key);
-    if (current.includes(value)) {
-      current.filter((v) => v !== value).forEach((v) => params.append(key, v));
-    } else {
-      [...current, value].forEach((v) => params.append(key, v));
-    }
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }
+  useEffect(() => {
+    const params = new URLSearchParams();
+    categories.forEach((c) => params.append("cat", c));
+    seasons.forEach((s) => params.append("season", s));
+    fits.forEach((f) => params.append("fit", f));
+    textures.forEach((t) => params.append("tex", t));
+    if (query) params.set("q", query);
+    const qs = params.toString();
+    const next = qs ? `?${qs}` : window.location.pathname;
+    window.history.replaceState(null, "", next);
+  }, [categories, seasons, fits, textures, query]);
 
-  function setQuery(value: string) {
-    const params = new URLSearchParams(searchParams.toString());
-    if (value) params.set("q", value);
-    else params.delete("q");
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }
+  const toggleIn = useCallback(
+    <T extends string>(setter: React.Dispatch<React.SetStateAction<T[]>>, value: T) => {
+      setter((prev) =>
+        prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+      );
+    },
+    []
+  );
+
+  const clearAll = useCallback(() => {
+    setCategories([]);
+    setSeasons([]);
+    setFits([]);
+    setTextures([]);
+    setQuery("");
+  }, []);
 
   const filtered = useMemo(
     () => filterGarments(garments, { categories, seasons, fits, textures, query }),
@@ -160,7 +174,7 @@ export function ArmariGrid({ garments }: Props) {
                   <FilterTag
                     key={c}
                     active={categories.includes(c)}
-                    onClick={() => toggle("cat", c)}
+                    onClick={() => toggleIn(setCategories, c)}
                   >
                     {CATEGORY_LABELS[c]}
                   </FilterTag>
@@ -172,7 +186,7 @@ export function ArmariGrid({ garments }: Props) {
                   <FilterTag
                     key={s}
                     active={seasons.includes(s)}
-                    onClick={() => toggle("season", s)}
+                    onClick={() => toggleIn(setSeasons, s)}
                   >
                     {SEASON_LABELS[s]}
                   </FilterTag>
@@ -184,7 +198,7 @@ export function ArmariGrid({ garments }: Props) {
                   <FilterTag
                     key={f}
                     active={fits.includes(f)}
-                    onClick={() => toggle("fit", f)}
+                    onClick={() => toggleIn(setFits, f)}
                   >
                     {FIT_LABELS[f]}
                   </FilterTag>
@@ -196,7 +210,7 @@ export function ArmariGrid({ garments }: Props) {
                   <FilterTag
                     key={t}
                     active={textures.includes(t)}
-                    onClick={() => toggle("tex", t)}
+                    onClick={() => toggleIn(setTextures, t)}
                   >
                     {TEXTURE_LABELS[t]}
                   </FilterTag>
@@ -206,7 +220,7 @@ export function ArmariGrid({ garments }: Props) {
               {hasFilters && (
                 <button
                   type="button"
-                  onClick={() => router.replace(pathname, { scroll: false })}
+                  onClick={clearAll}
                   className="self-start font-serif italic text-sm text-foreground-secondary hover:text-foreground"
                 >
                   {UI.buttons.clearFilters}
