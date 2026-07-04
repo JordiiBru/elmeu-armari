@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
     formats: ["image/webp"],
     deviceSizes: [200, 400, 640, 828, 1080],
     imageSizes: [96, 200, 320],
+    localPatterns: [
+      {
+        pathname: "/api/uploads/**",
+      },
+    ],
   },
 };
 
