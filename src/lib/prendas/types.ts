@@ -48,6 +48,7 @@ export interface GarmentWithColors {
   subtype: string | null;
   fit: string;
   notes: string | null;
+  image: string | null;
   createdAt: Date;
   updatedAt: Date;
   colors: { id: string; hex: string }[];

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useActionState } from "react";
+import { useRouter } from "next/navigation";
 import { ColorPickers } from "@/components/ColorPickers";
 import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
 import { createGarmentAction } from "@/app/add/actions";
@@ -25,15 +26,43 @@ import { UI } from "@/lib/prendas/ui-strings";
 import { FORM_STYLES } from "@/lib/ui";
 
 export function AddForm() {
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(createGarmentAction, null);
   const [category, setCategory] = useState<Category | "">("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!state || !("newId" in state)) return;
+    const { newId } = state;
+    if (!imageFile) { router.push("/armari"); return; }
+
+    setIsUploading(true);
+    const fd = new FormData();
+    fd.append("file", imageFile);
+    fetch(`/api/garments/${newId}/image`, { method: "POST", body: fd })
+      .then((r) => { if (!r.ok) throw new Error(); })
+      .catch(() => setUploadError("La peça s'ha guardat però no s'ha pogut pujar la foto."))
+      .finally(() => { setIsUploading(false); router.push("/armari"); });
+  }, [state, imageFile, router]);
 
   const fits = category ? FITS_BY_CATEGORY[category] : [];
   const subtypes = category ? SUBTYPES_BY_CATEGORY[category] : [];
   const sizes = category ? SIZES_BY_CATEGORY[category] : [];
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setImageFile(file);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(file ? URL.createObjectURL(file) : null);
+  }
+
   return (
     <form action={formAction} className="flex flex-col gap-7">
+      {imageFile && <input type="hidden" name="_hasImage" value="1" />}
       <div>
         <label htmlFor="category" className={FORM_STYLES.label}>{UI.form.category} {UI.form.required}</label>
         <select
@@ -118,7 +147,52 @@ export function AddForm() {
         <input id="notes" name="notes" placeholder="Opcional..." className={FORM_STYLES.input} />
       </div>
 
-      {state?.error && (
+      <div>
+        <span className={FORM_STYLES.label}>Foto (opcional)</span>
+        <div className="flex flex-col gap-3 mt-2">
+          {previewUrl && (
+            <img src={previewUrl} alt="Preview" className="w-32 h-32 object-cover" />
+          )}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors"
+            >
+              {imageFile ? "canviar foto" : "afegir foto"}
+            </button>
+            {imageFile && (
+              <button
+                type="button"
+                onClick={() => {
+                  setImageFile(null);
+                  if (previewUrl) URL.revokeObjectURL(previewUrl);
+                  setPreviewUrl(null);
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                className="font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors"
+              >
+                treure
+              </button>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
+      </div>
+
+      {uploadError && (
+        <p className="font-serif italic text-sm text-foreground border-t border-foreground pt-3">
+          {uploadError}
+        </p>
+      )}
+
+      {state && "error" in state && (
         <p className="font-serif italic text-sm text-foreground border-t border-foreground pt-3">
           {state.error}
         </p>
@@ -126,11 +200,11 @@ export function AddForm() {
 
       <button
         type="submit"
-        disabled={isPending}
+        disabled={isPending || isUploading}
         className="group self-start relative font-serif italic text-lg text-foreground disabled:opacity-40 transition-opacity active:scale-[0.98] mt-2"
       >
         <span>
-          {isPending ? "guardant…" : "guardar peça"}
+          {isUploading ? "pujant foto…" : isPending ? "guardant…" : "guardar peça"}
         </span>
         <span
           aria-hidden

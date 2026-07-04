@@ -18,6 +18,7 @@ model Garment {
   subtype   String?
   fit       String
   notes     String?
+  image     String?
   outfits   OutfitGarment[]
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt

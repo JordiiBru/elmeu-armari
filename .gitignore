@@ -44,3 +44,6 @@ next-env.d.ts
 /prisma/*.db
 /prisma/*.db-journal
 dev.db
+
+# uploads (self-hosted data, not tracked in git)
+/data/

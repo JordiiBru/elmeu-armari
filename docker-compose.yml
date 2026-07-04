@@ -9,6 +9,7 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: file:/data/prod.db
+      UPLOAD_DIR: /data/uploads
     volumes:
       - sqlite_data:/data
 

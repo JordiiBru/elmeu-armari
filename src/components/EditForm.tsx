@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useActionState } from "react";
 import { ColorPickers } from "@/components/ColorPickers";
 import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
@@ -34,6 +34,40 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
   const boundAction = updateGarmentAction.bind(null, garment.id);
   const [state, formAction, isPending] = useActionState(boundAction, null);
   const [category, setCategory] = useState<Category>(garment.category);
+  const [currentImage, setCurrentImage] = useState<string | null>(garment.image);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imageStatus, setImageStatus] = useState<"idle" | "uploading" | "error">("idle");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(URL.createObjectURL(file));
+    setImageStatus("uploading");
+    const fd = new FormData();
+    fd.append("file", file);
+    const r = await fetch(`/api/garments/${garment.id}/image`, { method: "POST", body: fd });
+    if (r.ok) {
+      const data = await r.json();
+      setCurrentImage(data.image);
+      setImageStatus("idle");
+    } else {
+      setImageStatus("error");
+    }
+  }
+
+  async function handleDeleteImage() {
+    setImageStatus("uploading");
+    const r = await fetch(`/api/garments/${garment.id}/image`, { method: "DELETE" });
+    if (r.ok) {
+      setCurrentImage(null);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+    setImageStatus("idle");
+  }
 
   const fits = FITS_BY_CATEGORY[category];
   const subtypes = SUBTYPES_BY_CATEGORY[category];
@@ -124,6 +158,50 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
       <div>
         <label htmlFor="notes" className={FORM_STYLES.label}>{UI.form.notes}</label>
         <input id="notes" name="notes" defaultValue={garment.notes ?? ""} className={FORM_STYLES.input} />
+      </div>
+
+      <div>
+        <span className={FORM_STYLES.label}>Foto (opcional)</span>
+        <div className="flex flex-col gap-3 mt-2">
+          {(previewUrl ?? (currentImage ? `/api/uploads/${currentImage}?v=${garment.updatedAt.getTime()}` : null)) && (
+            <img
+              src={previewUrl ?? `/api/uploads/${currentImage}?v=${garment.updatedAt.getTime()}`}
+              alt="Preview"
+              className="w-32 h-32 object-cover"
+            />
+          )}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              disabled={imageStatus === "uploading"}
+              onClick={() => fileInputRef.current?.click()}
+              className="font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors disabled:opacity-40"
+            >
+              {imageStatus === "uploading" ? "pujant…" : currentImage ? "canviar foto" : "afegir foto"}
+            </button>
+            {currentImage && imageStatus !== "uploading" && (
+              <button
+                type="button"
+                onClick={handleDeleteImage}
+                className="font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors"
+              >
+                treure foto
+              </button>
+            )}
+          </div>
+          {imageStatus === "error" && (
+            <p className="font-serif italic text-xs text-foreground-secondary">
+              No s&apos;ha pogut pujar la foto. Torna-ho a provar.
+            </p>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
       </div>
 
       {state?.error && (
