@@ -64,6 +64,13 @@ export default function HomePage() {
             </span>
           ))}
         </nav>
+
+        <p className="font-serif italic text-[11px] leading-relaxed text-foreground-secondary text-center max-w-xs pt-4">
+          amb els diccionaris cromàtics de{" "}
+          <span className="not-italic tracking-wide">和田三造</span>
+          <br />
+          sanzo wada, tòquio, 1933.
+        </p>
       </section>
     </div>
   );

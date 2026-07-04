@@ -1,20 +1,21 @@
 import { palettes, namedColors, paletteColors } from "@/lib/colors";
-import PaletaTabs from "@/components/PaletaTabs";
+import PaletaBrowser from "@/components/PaletaBrowser";
 
 export default function PaletaPage() {
-  // Preprocessem al servidor per evitar treball al client
-  const enriched = palettes.map((p) => ({
-    id: p.id,
-    nombre: p.nombre,
-    colors: paletteColors(p),
-  }));
-
   const colors = namedColors.map((c) => ({
     index: c.index,
     name: c.name,
     hex: c.hex,
-    combinations: c.combinations.length,
+    combinations: c.combinations,
   }));
+
+  const palettesById: Record<
+    number,
+    { id: number; colors: { hex: string; name: string | null }[] }
+  > = {};
+  for (const p of palettes) {
+    palettesById[p.id] = { id: p.id, colors: paletteColors(p) };
+  }
 
   return (
     <div className="max-w-5xl mx-auto w-full px-6 md:px-10 pb-24">
@@ -26,18 +27,13 @@ export default function PaletaPage() {
           sanzo wada
         </h1>
         <p className="font-serif italic text-base text-foreground-secondary max-w-md">
-          {colors.length} colors i {enriched.length} combinacions dels
-          diccionaris cromàtics de sanzo wada, publicats a tòquio entre 1933
-          i 1934.
+          {colors.length} colors dels diccionaris cromàtics de sanzo wada,
+          publicats a tòquio entre 1933 i 1934. tria un color per veure amb què
+          combinava.
         </p>
       </header>
 
-      <PaletaTabs
-        colorCount={colors.length}
-        paletteCount={enriched.length}
-        colors={colors}
-        palettes={enriched}
-      />
+      <PaletaBrowser colors={colors} palettesById={palettesById} />
     </div>
   );
 }
