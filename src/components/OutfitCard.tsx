@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import type { OutfitGroup, PaletteMatch } from "@/lib/outfits/types";
-import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
-import type { Category } from "@/lib/prendas/types";
+import { CATEGORY_LABELS } from "@/lib/prendas/labels";
+import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 
 const CATEGORY_ORDER: Category[] = ["SHIRT", "SWEATER", "PANTS", "SOCKS", "SHOES"];
 
@@ -13,6 +14,33 @@ function sortedGarments(garments: OutfitGroup["garments"]) {
     const bi = CATEGORY_ORDER.indexOf(b.category as Category);
     return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
   });
+}
+
+function GarmentTile({ garment }: { garment: GarmentWithColors }) {
+  return (
+    <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+      <div className="relative h-20 w-20 overflow-hidden">
+        {garment.image ? (
+          <Image
+            src={`/api/uploads/${garment.image}?v=${garment.updatedAt.getTime()}`}
+            alt=""
+            fill
+            unoptimized
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full">
+            {garment.colors.map((c) => (
+              <div key={c.id} className="flex-1" style={{ backgroundColor: c.hex }} title={c.hex} />
+            ))}
+          </div>
+        )}
+      </div>
+      <span className="text-[10px] tracking-[0.15em] uppercase text-foreground-secondary">
+        {CATEGORY_LABELS[garment.category]}
+      </span>
+    </div>
+  );
 }
 
 export function OutfitGroupCard({
@@ -31,54 +59,37 @@ export function OutfitGroupCard({
   const mainSaved = savedPaletteIds.has(mainPalette.palette.id);
 
   return (
-    <div className="border rounded-xl overflow-hidden bg-white shadow-sm">
-      {/* Outfit hero — prendas verticals */}
-      <div className="p-4 space-y-3">
+    <div className="flex flex-col gap-6 py-8 border-b border-border">
+      {/* Tiles de peces */}
+      <div className="flex flex-wrap gap-4">
         {ordered.map((g) => (
-          <div key={g.id} className="flex items-center gap-3">
-            <div className="flex h-14 w-14 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
-              {g.colors.map((c) => (
-                <div key={c.id} className="flex-1" style={{ backgroundColor: c.hex }} title={c.hex} />
-              ))}
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-gray-800">{CATEGORY_LABELS[g.category]}</p>
-              <p className="text-xs text-gray-400">
-                {FIT_LABELS[g.fit]} · {g.size}
-                {g.notes && ` · ${g.notes}`}
-              </p>
-            </div>
-          </div>
+          <GarmentTile key={g.id} garment={g} />
         ))}
       </div>
 
       {/* Paleta principal */}
-      <div className="px-4 pb-4 space-y-3 border-t pt-3">
+      <div className="flex flex-col gap-3">
         <PaletteHero pm={mainPalette} />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => onSave(mainPalette.palette.id)}
             disabled={mainSaved}
-            className={`flex-1 text-sm py-2 rounded-lg font-medium transition-colors ${
-              mainSaved
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-gray-900 text-white hover:bg-gray-700"
-            }`}
+            className="font-serif italic text-sm text-foreground disabled:text-foreground-secondary transition-colors active:scale-95 disabled:cursor-default"
           >
-            {mainSaved ? "Desat ✓" : "Desar aquest outfit"}
+            {mainSaved ? "desat" : "desar outfit"}
           </button>
           {extraPalettes.length > 0 && (
             <button
               onClick={() => setExpanded((e) => !e)}
-              className="text-xs px-3 py-2 border rounded-lg text-gray-500 hover:bg-gray-50 shrink-0"
+              className="font-serif italic text-xs text-foreground-secondary hover:text-foreground transition-colors"
             >
-              {expanded ? "Menys ▴" : `+${extraPalettes.length} paletes ▾`}
+              {expanded ? "menys" : `+${extraPalettes.length} paletes`}
             </button>
           )}
         </div>
 
         {expanded && (
-          <div className="space-y-2 pt-1">
+          <div className="flex flex-col gap-2 pt-1">
             {extraPalettes.map((pm) => (
               <PaletteRow
                 key={pm.palette.id}
@@ -97,22 +108,20 @@ export function OutfitGroupCard({
 function PaletteHero({ pm }: { pm: PaletteMatch }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex gap-1.5 flex-shrink-0">
+      <div className="flex gap-1 flex-shrink-0">
         {pm.palette.colores.map((color, i) => {
           const isMatched = !pm.unmatchedColors.includes(i);
           return (
             <span
               key={i}
-              className={`inline-block w-6 h-6 rounded-full border ${
-                isMatched ? "border-gray-300" : "opacity-35 border-dashed border-gray-200"
-              }`}
+              className={`inline-block w-5 h-5 ${isMatched ? "" : "opacity-35"}`}
               style={{ backgroundColor: color }}
               title={`${color}${isMatched ? "" : " (lliure)"}`}
             />
           );
         })}
       </div>
-      <span className="text-sm text-gray-700 min-w-0">{pm.palette.nombre}</span>
+      <span className="font-serif italic text-sm text-foreground-secondary">{pm.palette.nombre}</span>
     </div>
   );
 }
@@ -127,29 +136,30 @@ function PaletteRow({
   saved: boolean;
 }) {
   return (
-    <div className="flex items-center gap-3 py-1">
-      <div className="flex gap-1 flex-shrink-0">
+    <div className="grid grid-cols-[auto_1fr_auto] gap-3 items-center">
+      <div className="flex gap-0.5 flex-shrink-0">
         {pm.palette.colores.map((color, i) => {
           const isMatched = !pm.unmatchedColors.includes(i);
           return (
             <span
               key={i}
-              className={`inline-block w-5 h-5 rounded-full border ${
-                isMatched ? "border-gray-300" : "border-dashed border-gray-200 opacity-40"
-              }`}
+              className={`inline-block w-4 h-4 ${isMatched ? "" : "opacity-40"}`}
               style={{ backgroundColor: color }}
               title={color}
             />
           );
         })}
       </div>
-      <span className="text-xs text-gray-500 min-w-0 truncate">{pm.palette.nombre}</span>
+      <span className="font-serif italic text-xs text-foreground-secondary min-w-0 truncate">
+        {pm.palette.nombre}
+      </span>
       <button
         onClick={onSave}
         disabled={saved}
-        className="ml-auto text-xs px-2 py-0.5 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+        className="font-serif italic text-xs text-foreground-secondary hover:text-foreground disabled:opacity-40 transition-colors active:scale-95 shrink-0"
+        aria-label={saved ? "Ja desat" : "Desar paleta"}
       >
-        {saved ? "Desat" : "Desar"}
+        {saved ? "desat" : "desar"}
       </button>
     </div>
   );

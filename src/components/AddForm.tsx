@@ -42,7 +42,7 @@ export function AddForm() {
     const { newId } = state;
 
     async function run() {
-      if (!imageFile) { router.push("/armari"); return; }
+      if (!imageFile) { router.replace("/armari"); return; }
       setIsUploading(true);
       const fd = new FormData();
       fd.append("file", imageFile);
@@ -53,7 +53,7 @@ export function AddForm() {
         setUploadError("La peça s'ha guardat però no s'ha pogut pujar la foto.");
       }
       setIsUploading(false);
-      router.push("/armari");
+      router.replace("/armari");
     }
     run();
   }, [state, imageFile, router]);

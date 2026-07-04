@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useTransition, useMemo } from "react";
+import Image from "next/image";
 import { deleteOutfitAction } from "@/app/outfits/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
+import type { GarmentWithColors } from "@/lib/prendas/types";
 
 interface SavedGroup {
   garmentKey: string;
@@ -36,6 +38,31 @@ function groupOutfits(outfits: SavedOutfit[], palettes: SanzoPalette[]): SavedGr
   }
 
   return Array.from(groups.values());
+}
+
+function GarmentThumb({ garment }: { garment: GarmentWithColors }) {
+  return (
+    <div
+      className="relative h-16 w-16 flex-shrink-0 overflow-hidden"
+      title={CATEGORY_LABELS[garment.category as keyof typeof CATEGORY_LABELS]}
+    >
+      {garment.image ? (
+        <Image
+          src={`/api/uploads/${garment.image}?v=${garment.updatedAt.getTime()}`}
+          alt=""
+          fill
+          unoptimized
+          className="object-cover"
+        />
+      ) : (
+        <div className="flex h-full w-full">
+          {garment.colors.map((c) => (
+            <div key={c.id} className="flex-1 h-full" style={{ backgroundColor: c.hex }} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function SavedOutfitsView({
@@ -78,25 +105,13 @@ function SavedGroupCard({
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="group w-full flex items-center gap-6 text-left outline-none"
+        className="group w-full flex items-center gap-4 text-left outline-none"
         aria-expanded={expanded}
       >
-        {/* Tira de swatches horitzontal (una tira per cada peça) */}
-        <div className="flex gap-1.5 flex-shrink-0">
+        {/* Tiles de peces */}
+        <div className="flex gap-2 flex-shrink-0">
           {group.garments.map((og) => (
-            <div
-              key={og.garment.id}
-              className="flex h-14 w-3 overflow-hidden flex-col"
-              title={CATEGORY_LABELS[og.garment.category as keyof typeof CATEGORY_LABELS]}
-            >
-              {og.garment.colors.map((c) => (
-                <div
-                  key={c.id}
-                  className="flex-1 w-full"
-                  style={{ backgroundColor: c.hex }}
-                />
-              ))}
-            </div>
+            <GarmentThumb key={og.garment.id} garment={og.garment} />
           ))}
         </div>
 
@@ -131,12 +146,10 @@ function SavedGroupCard({
         className={`collapse-panel ${expanded ? "mt-6" : ""}`}
         data-open={expanded}
       >
-        <div>
-          <div className="flex flex-col gap-4 pl-[calc(0.375rem*4+3rem)]">
-            {group.entries.map((entry) => (
-              <SavedPaletteRow key={entry.outfitId} entry={entry} />
-            ))}
-          </div>
+        <div className="flex flex-col gap-4">
+          {group.entries.map((entry) => (
+            <SavedPaletteRow key={entry.outfitId} entry={entry} />
+          ))}
         </div>
       </div>
     </div>
@@ -157,8 +170,8 @@ function SavedPaletteRow({
   };
 
   return (
-    <div className="flex items-center gap-4">
-      {entry.palette && (
+    <div className="grid grid-cols-[auto_1fr_auto] gap-3 items-center">
+      {entry.palette ? (
         <div className="flex gap-0 shrink-0">
           {entry.palette.colores.map((color, i) => (
             <span
@@ -169,16 +182,19 @@ function SavedPaletteRow({
             />
           ))}
         </div>
+      ) : (
+        <div />
       )}
-      <span className="flex-1 min-w-0 truncate font-serif italic text-sm text-foreground-secondary">
+      <span className="font-serif italic text-sm text-foreground-secondary min-w-0 truncate">
         {entry.palette?.nombre ?? `paleta #${entry.outfitId}`}
       </span>
       <button
         onClick={handleDelete}
         disabled={pending}
-        className="text-[10px] tracking-[0.2em] uppercase text-foreground-secondary hover:text-foreground disabled:opacity-40 transition-colors active:scale-95 shrink-0"
+        className="text-foreground-secondary hover:text-foreground disabled:opacity-40 transition-colors active:scale-95 shrink-0 h-6 w-6 flex items-center justify-center"
+        aria-label="Eliminar outfit"
       >
-        {pending ? "…" : "eliminar"}
+        <span aria-hidden className="text-base leading-none">×</span>
       </button>
     </div>
   );
