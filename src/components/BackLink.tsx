@@ -8,10 +8,8 @@ import { useRouter } from "next/navigation";
  */
 export default function BackLink({
   fallbackHref = "/",
-  label = "enrere",
 }: {
   fallbackHref?: string;
-  label?: string;
 }) {
   const router = useRouter();
 
@@ -26,10 +24,12 @@ export default function BackLink({
     <a
       href={fallbackHref}
       onClick={handleClick}
-      className="inline-flex items-center gap-2 text-[11px] tracking-[0.25em] uppercase text-foreground-secondary hover:text-foreground transition-colors active:scale-95"
+      aria-label="Enrere"
+      className="group relative inline-flex items-center justify-center h-8 w-8 -ml-1 text-foreground-secondary hover:text-foreground transition-colors active:scale-90"
     >
-      <span aria-hidden>←</span>
-      {label}
+      <span aria-hidden className="font-serif text-xl leading-none transition-transform duration-300 ease-out group-hover:-translate-x-1">
+        ←
+      </span>
     </a>
   );
 }

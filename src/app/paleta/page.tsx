@@ -26,10 +26,13 @@ export default function PaletaPage() {
         <h1 className="font-serif text-5xl md:text-6xl tracking-tight leading-[0.95]">
           sanzo wada
         </h1>
-        <p className="font-serif italic text-base text-foreground-secondary max-w-md">
-          {colors.length} colors dels diccionaris cromàtics de sanzo wada,
-          publicats a tòquio entre 1933 i 1934. tria un color per veure amb què
-          combinava.
+        <p className="font-serif italic text-base text-foreground-secondary max-w-lg leading-relaxed">
+          {colors.length} colors de{" "}
+          <span className="not-italic tracking-wide text-foreground">
+            配色事典
+          </span>{" "}
+          — «a dictionary of color combinations», sis volums publicats a tòquio
+          entre 1933 i 1934. tria un color per veure amb què combinava.
         </p>
       </header>
 

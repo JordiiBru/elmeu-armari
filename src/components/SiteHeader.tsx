@@ -19,7 +19,7 @@ export default function SiteHeader() {
 
   return (
     <header className="w-full px-6 md:px-10 pt-6 pb-4">
-      <BackLink fallbackHref={fallbackFor(pathname)} label="enrere" />
+      <BackLink fallbackHref={fallbackFor(pathname)} />
     </header>
   );
 }
