@@ -61,7 +61,7 @@ export default function PaletaBrowser({
               key={c.index}
               type="button"
               onClick={() => setSelected(c)}
-              className="group flex flex-col text-left outline-none focus-visible:ring-1 focus-visible:ring-foreground/30 focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+              className="cv-auto group flex flex-col text-left outline-none focus-visible:ring-1 focus-visible:ring-foreground/30 focus-visible:ring-offset-4 focus-visible:ring-offset-background"
             >
               <div
                 className="aspect-square w-full transition-transform duration-500 ease-out group-hover:-translate-y-1 group-active:translate-y-0 group-active:scale-[0.98]"

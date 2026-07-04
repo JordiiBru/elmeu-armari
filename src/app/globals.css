@@ -53,6 +53,9 @@
 
   html {
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   body {
@@ -65,6 +68,14 @@
     font-weight: 400;
     letter-spacing: -0.01em;
   }
+}
+
+/* Salta el pintat de peces off-screen — millora dramatica a grids llargs
+   (Chrome/Firefox suportats). Contain-intrinsic-size dona una alcada
+   estimada perque el scroll no salti. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
 }
 
 /* Micro-transicions calmades a tots els elements interactius */
