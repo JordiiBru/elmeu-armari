@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
 
@@ -20,14 +21,24 @@ export function GarmentCard({
       className="cv-auto group flex flex-col text-left outline-none focus-visible:ring-1 focus-visible:ring-foreground/30 focus-visible:ring-offset-4 focus-visible:ring-offset-background"
     >
       <div className="relative flex aspect-[3/4] w-full overflow-hidden transition-transform duration-500 ease-out group-hover:-translate-y-1 group-active:translate-y-0 group-active:scale-[0.98]">
-        {garment.colors.map((c) => (
-          <div
-            key={c.id}
-            className="flex-1"
-            style={{ backgroundColor: c.hex }}
-            title={c.hex}
+        {garment.image ? (
+          <Image
+            src={`/api/uploads/${garment.image}?v=${garment.updatedAt.getTime()}`}
+            alt=""
+            fill
+            unoptimized
+            className="object-cover"
           />
-        ))}
+        ) : (
+          garment.colors.map((c) => (
+            <div
+              key={c.id}
+              className="flex-1"
+              style={{ backgroundColor: c.hex }}
+              title={c.hex}
+            />
+          ))
+        )}
       </div>
       <div className="flex items-baseline justify-between pt-3">
         <span className="font-serif text-base leading-tight">

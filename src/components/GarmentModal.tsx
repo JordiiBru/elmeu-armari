@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { SHEET_EASE, useSheetState } from "@/lib/useSheetState";
 import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { deleteGarmentAction } from "@/app/armari/actions";
@@ -63,16 +64,26 @@ export function GarmentModal({ garment, onClose }: Props) {
           <span className="block h-1 w-10 rounded-full bg-border" />
         </div>
 
-        {/* Franja de swatches — protagonista + swipe zone */}
-        <div className="flex h-32 flex-shrink-0 touch-none" {...swipe.handlers}>
-          {garment.colors.map((c) => (
-            <div
-              key={c.id}
-              className="flex-1"
-              style={{ backgroundColor: c.hex }}
-              title={c.hex}
+        {/* Franja visual — foto o swatches. Swipe zone. */}
+        <div className="relative flex h-40 flex-shrink-0 touch-none overflow-hidden" {...swipe.handlers}>
+          {garment.image ? (
+            <Image
+              src={`/api/uploads/${garment.image}?v=${garment.updatedAt.getTime()}`}
+              alt=""
+              fill
+              unoptimized
+              className="object-cover"
             />
-          ))}
+          ) : (
+            garment.colors.map((c) => (
+              <div
+                key={c.id}
+                className="flex-1"
+                style={{ backgroundColor: c.hex }}
+                title={c.hex}
+              />
+            ))
+          )}
         </div>
 
         <div className="overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6">

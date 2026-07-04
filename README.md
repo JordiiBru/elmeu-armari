@@ -113,7 +113,42 @@ docker run -d \
 | Variable | Defecte | Descripció |
 |---|---|---|
 | `DATABASE_URL` | `file:/data/prod.db` | Ruta del fitxer SQLite |
+| `UPLOAD_DIR` | `/data/uploads` | Directori on es guarden les fotos de les peces |
+| `UPLOAD_MAX_MB` | `10` | Mida màxima del fitxer pujat (abans del resize) |
 | `PORT` | `3000` | Port HTTP |
+
+## Fotos de prenda (opcional)
+
+Cada prenda pot tenir una foto que substitueix els quadres de color a la targeta. Es opcional: sense foto, la targeta mostra els colors com fins ara.
+
+### Setup
+
+Les imatges es guarden al filesystem, no dins la SQLite, per evitar que la db creixi. El volum `/data` ja inclou les fotos i la base de dades — cal fer-ne backup conjuntament.
+
+### Formats
+
+Nomes s'accepten `JPEG`, `PNG` i `WebP`. Els mobils iOS que pugen HEIC solen convertir a JPEG automaticament en usar el selector de fitxers; si no, converteix-la abans de pujar-la.
+
+Les imatges es re-encoden a WebP 800px (costat major) amb qualitat 80. Les fotos originals no es guarden: metadata EXIF (GPS inclos) queda eliminada.
+
+### Backup
+
+Fer copia del volum `/data` sencer (conte db + uploads). Restaurar es copiar-lo de tornada.
+
+### Prompt per retocar la foto amb IA abans de pujar-la
+
+Si vols una foto neta i uniforme (fons blanc, prenda centrada), pots passar-la per ChatGPT/Claude/Gemini amb aquest prompt:
+
+> Necessito preparar aquesta foto d'una peca de roba per catalogar-la al meu armari digital. Retoca-la amb aquests criteris:
+> - Fons blanc o gris molt clar, uniforme, sense ombres fortes.
+> - La peca centrada, ben plana o penjada, ocupant aproximadament el 80% del marc.
+> - Colors fidels al original (no saturis).
+> - Sense text, marques d'aigua, ni objectes al voltant.
+> - Format quadrat 1:1.
+> - Resolucio final entre 800 i 1200 px per costat.
+> - Exporta com a JPEG o PNG.
+
+Un cop retocada, puja-la des del formulari d'afegir/editar prenda.
 
 ## Rutes
 
