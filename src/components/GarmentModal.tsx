@@ -71,8 +71,9 @@ export function GarmentModal({ garment, onClose }: Props) {
               src={`/api/uploads/${garment.image}?v=${garment.updatedAt.getTime()}`}
               alt=""
               fill
-              unoptimized
+              sizes="(min-width: 640px) 448px, 100vw"
               className="object-cover"
+              priority
             />
           ) : (
             garment.colors.map((c) => (
