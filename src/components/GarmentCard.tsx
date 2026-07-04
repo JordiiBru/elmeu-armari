@@ -26,7 +26,7 @@ export function GarmentCard({
             src={`/api/uploads/${garment.image}?v=${garment.updatedAt.getTime()}`}
             alt=""
             fill
-            sizes="(min-width: 768px) 25vw, 50vw"
+            unoptimized
             className="object-cover"
             loading={index < 4 ? "eager" : "lazy"}
           />

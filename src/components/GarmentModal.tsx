@@ -71,7 +71,7 @@ export function GarmentModal({ garment, onClose }: Props) {
               src={`/api/uploads/${garment.image}?v=${garment.updatedAt.getTime()}`}
               alt=""
               fill
-              sizes="(min-width: 640px) 448px, 100vw"
+              unoptimized
               className="object-cover"
               priority
             />
