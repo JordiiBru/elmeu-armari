@@ -24,7 +24,7 @@ export default function PaletteSheet({
   palettes: Palette[];
   onClose: () => void;
 }) {
-  const { open, close } = useSheetState(onClose);
+  const { open, close } = useSheetState(onClose, 420);
   const swipe = useSwipeToClose(close);
 
   return (
@@ -46,14 +46,17 @@ export default function PaletteSheet({
         role="dialog"
         aria-modal
         aria-label={`Combinacions de ${color.name}`}
-        className="relative bg-card w-full sm:max-w-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-[0_-8px_40px_-20px_rgba(0,0,0,0.15)]"
+        className="relative bg-card w-full sm:max-w-2xl max-h-[92vh] flex flex-col overflow-hidden"
         style={{
-          transform: open ? `translateY(${swipe.dragY}px)` : "translateY(100%)",
+          transform: open
+            ? `translate3d(0, ${swipe.dragY}px, 0)`
+            : "translate3d(0, 100%, 0)",
           opacity: open ? 1 : 0,
           transition: swipe.dragging
             ? "none"
-            : `transform 520ms ${SHEET_EASE}, opacity 380ms ${SHEET_EASE}`,
+            : `transform 420ms ${SHEET_EASE}, opacity 300ms ${SHEET_EASE}`,
           willChange: "transform, opacity",
+          contain: "layout paint",
         }}
       >
         {/* Handle mobil (swipe zone) */}
@@ -71,14 +74,7 @@ export default function PaletteSheet({
           {...swipe.handlers}
         />
 
-        <div
-          className="overflow-y-auto overscroll-contain px-6 md:px-10 pt-6 pb-10 flex flex-col gap-6"
-          style={{
-            opacity: open ? 1 : 0,
-            transform: open ? "translateY(0)" : "translateY(8px)",
-            transition: `opacity 400ms ${SHEET_EASE} 120ms, transform 400ms ${SHEET_EASE} 120ms`,
-          }}
-        >
+        <div className="overflow-y-auto overscroll-contain px-6 md:px-10 pt-6 pb-10 flex flex-col gap-6">
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">

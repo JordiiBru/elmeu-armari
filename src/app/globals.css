@@ -15,6 +15,20 @@
 
   --ring: var(--border);
   --input: var(--border);
+
+  /* Permet animar height: auto (Chrome 129+, Safari 17.4+, Firefox 129+) */
+  interpolate-size: allow-keywords;
+}
+
+/* Panell col·lapsable amb height nadiu — molt mes fluid que grid-template-rows */
+.collapse-panel {
+  display: grid;
+  height: 0;
+  overflow: hidden;
+  transition: height 400ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.collapse-panel[data-open="true"] {
+  height: auto;
 }
 
 @theme inline {

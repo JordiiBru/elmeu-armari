@@ -144,12 +144,8 @@ export function ArmariGrid({ garments }: Props) {
         </div>
 
         {/* Panell col·lapsable */}
-        <div
-          className={`grid transition-[grid-template-rows] duration-500 ease-out will-change-[grid-template-rows] [contain:layout] ${
-            filtersOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-          }`}
-        >
-          <div className="overflow-hidden">
+        <div className="collapse-panel" data-open={filtersOpen}>
+          <div>
             <div className="flex flex-col gap-5 pt-4 pb-2">
               <input
                 type="search"
