@@ -128,7 +128,7 @@ function SavedGroupCard({
 
       {/* Panel expandit */}
       <div
-        className={`grid transition-[grid-template-rows] duration-500 ease-out ${
+        className={`grid transition-[grid-template-rows] duration-500 ease-out will-change-[grid-template-rows] [contain:layout] ${
           expanded ? "grid-rows-[1fr] mt-6" : "grid-rows-[0fr]"
         }`}
       >

@@ -145,7 +145,7 @@ export function ArmariGrid({ garments }: Props) {
 
         {/* Panell col·lapsable */}
         <div
-          className={`grid transition-[grid-template-rows] duration-500 ease-out ${
+          className={`grid transition-[grid-template-rows] duration-500 ease-out will-change-[grid-template-rows] [contain:layout] ${
             filtersOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           }`}
         >

@@ -36,8 +36,8 @@ export default function PaletteSheet({
         style={{
           opacity: open ? 1 : 0,
           transition: `opacity 380ms ${SHEET_EASE}`,
-          backdropFilter: open ? "blur(2px)" : "blur(0px)",
-          WebkitBackdropFilter: open ? "blur(2px)" : "blur(0px)",
+          // backdrop-filter blur eliminat: era font principal de jank a Safari Mac.
+          // L'opacitat sola ja donava profunditat suficient.
         }}
       />
 

@@ -34,8 +34,8 @@ function Row({
       </div>
       <div className="w-full h-px bg-border relative overflow-hidden">
         <div
-          className="absolute inset-y-0 left-0 bg-foreground transition-[width] duration-700 ease-out"
-          style={{ width: `${width}%` }}
+          className="absolute inset-0 bg-foreground origin-left transition-transform duration-700 ease-out will-change-transform"
+          style={{ transform: `scaleX(${width / 100})` }}
         />
       </div>
     </div>
