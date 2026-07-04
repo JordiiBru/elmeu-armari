@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { useActionState } from "react";
 import { ColorPickers } from "@/components/ColorPickers";
 import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
@@ -163,13 +164,20 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
       <div>
         <span className={FORM_STYLES.label}>Foto (opcional)</span>
         <div className="flex flex-col gap-3 mt-2">
-          {(previewUrl ?? (currentImage ? `/api/uploads/${currentImage}?v=${garment.updatedAt.getTime()}` : null)) && (
-            <img
-              src={previewUrl ?? `/api/uploads/${currentImage}?v=${garment.updatedAt.getTime()}`}
-              alt="Preview"
-              className="w-32 h-32 object-cover"
-            />
-          )}
+          {previewUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={previewUrl} alt="Preview" className="w-32 h-32 object-cover" />
+          ) : currentImage ? (
+            <div className="relative w-32 h-32">
+              <Image
+                src={`/api/uploads/${currentImage}?v=${garment.updatedAt.getTime()}`}
+                alt="Foto actual"
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            </div>
+          ) : null}
           <div className="flex items-center gap-3">
             <button
               type="button"

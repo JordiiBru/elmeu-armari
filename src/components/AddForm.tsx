@@ -34,19 +34,28 @@ export function AddForm() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadingRef = useRef(false);
 
   useEffect(() => {
-    if (!state || !("newId" in state)) return;
+    if (!state || !("newId" in state) || uploadingRef.current) return;
+    uploadingRef.current = true;
     const { newId } = state;
-    if (!imageFile) { router.push("/armari"); return; }
 
-    setIsUploading(true);
-    const fd = new FormData();
-    fd.append("file", imageFile);
-    fetch(`/api/garments/${newId}/image`, { method: "POST", body: fd })
-      .then((r) => { if (!r.ok) throw new Error(); })
-      .catch(() => setUploadError("La peça s'ha guardat però no s'ha pogut pujar la foto."))
-      .finally(() => { setIsUploading(false); router.push("/armari"); });
+    async function run() {
+      if (!imageFile) { router.push("/armari"); return; }
+      setIsUploading(true);
+      const fd = new FormData();
+      fd.append("file", imageFile);
+      try {
+        const r = await fetch(`/api/garments/${newId}/image`, { method: "POST", body: fd });
+        if (!r.ok) throw new Error();
+      } catch {
+        setUploadError("La peça s'ha guardat però no s'ha pogut pujar la foto.");
+      }
+      setIsUploading(false);
+      router.push("/armari");
+    }
+    run();
   }, [state, imageFile, router]);
 
   const fits = category ? FITS_BY_CATEGORY[category] : [];
@@ -151,6 +160,7 @@ export function AddForm() {
         <span className={FORM_STYLES.label}>Foto (opcional)</span>
         <div className="flex flex-col gap-3 mt-2">
           {previewUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={previewUrl} alt="Preview" className="w-32 h-32 object-cover" />
           )}
           <div className="flex items-center gap-3">

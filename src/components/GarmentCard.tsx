@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
 
@@ -21,11 +22,12 @@ export function GarmentCard({
     >
       <div className="relative flex aspect-[3/4] w-full overflow-hidden transition-transform duration-500 ease-out group-hover:-translate-y-1 group-active:translate-y-0 group-active:scale-[0.98]">
         {garment.image ? (
-          <img
+          <Image
             src={`/api/uploads/${garment.image}?v=${garment.updatedAt.getTime()}`}
             alt=""
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover"
+            fill
+            unoptimized
+            className="object-cover"
           />
         ) : (
           garment.colors.map((c) => (
