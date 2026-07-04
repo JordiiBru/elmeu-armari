@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { SHEET_EASE, useSheetState } from "@/lib/useSheetState";
 import { useSwipeToClose } from "@/lib/useSwipeToClose";
 
 type Palette = {
@@ -15,8 +15,6 @@ type Color = {
   combinations: number[];
 };
 
-const EASE_SPRING = "cubic-bezier(0.32, 0.72, 0, 1)";
-
 export default function PaletteSheet({
   color,
   palettes,
@@ -26,46 +24,18 @@ export default function PaletteSheet({
   palettes: Palette[];
   onClose: () => void;
 }) {
-  const [shown, setShown] = useState(false);
-  const [closing, setClosing] = useState(false);
-
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setShown(true));
-    document.body.style.overflow = "hidden";
-    return () => {
-      cancelAnimationFrame(raf);
-      document.body.style.overflow = "";
-    };
-  }, []);
-
-  const handleClose = () => {
-    if (closing) return;
-    setClosing(true);
-    setShown(false);
-    setTimeout(() => onClose(), 420);
-  };
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const open = shown && !closing;
-  const swipe = useSwipeToClose(handleClose);
+  const { open, close } = useSheetState(onClose);
+  const swipe = useSwipeToClose(close);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
-        onClick={handleClose}
+        onClick={close}
         className="absolute inset-0 bg-foreground/40"
         style={{
           opacity: open ? 1 : 0,
-          transition: `opacity 380ms ${EASE_SPRING}`,
+          transition: `opacity 380ms ${SHEET_EASE}`,
           backdropFilter: open ? "blur(2px)" : "blur(0px)",
           WebkitBackdropFilter: open ? "blur(2px)" : "blur(0px)",
         }}
@@ -82,7 +52,7 @@ export default function PaletteSheet({
           opacity: open ? 1 : 0,
           transition: swipe.dragging
             ? "none"
-            : `transform 520ms ${EASE_SPRING}, opacity 380ms ${EASE_SPRING}`,
+            : `transform 520ms ${SHEET_EASE}, opacity 380ms ${SHEET_EASE}`,
           willChange: "transform, opacity",
         }}
       >
@@ -106,7 +76,7 @@ export default function PaletteSheet({
           style={{
             opacity: open ? 1 : 0,
             transform: open ? "translateY(0)" : "translateY(8px)",
-            transition: `opacity 400ms ${EASE_SPRING} 120ms, transform 400ms ${EASE_SPRING} 120ms`,
+            transition: `opacity 400ms ${SHEET_EASE} 120ms, transform 400ms ${SHEET_EASE} 120ms`,
           }}
         >
           {/* Header */}
@@ -129,7 +99,7 @@ export default function PaletteSheet({
             </div>
             <button
               type="button"
-              onClick={handleClose}
+              onClick={close}
               className="text-foreground-secondary hover:text-foreground text-xl leading-none flex-shrink-0 -mr-1 -mt-1 h-8 w-8 flex items-center justify-center transition-colors active:scale-95"
               aria-label="Tancar"
             >
