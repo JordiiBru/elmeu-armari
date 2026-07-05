@@ -6,6 +6,7 @@ import {
   OKLCH_DISTANCE_THRESHOLD,
   OKLCH_TIGHT_MATCH_THRESHOLD,
   MAX_EXTRA_PALETTES,
+  MAX_UNMATCHED_CHROMATIC,
 } from "./color-matching";
 
 const EXCLUDED_CATEGORIES = new Set(["SOCKS", "SHOES"]);
@@ -168,15 +169,16 @@ function findCombinationsForPalette(
     const hasTop = categories.has("SHIRT") || categories.has("SWEATER");
     if (!hasPants || !hasTop) return;
 
-    // Cobertura cromatica: tots els colors NO-neutres de la paleta han
-    // d'estar coberts per alguna peça cromatica de l'outfit. Sinó la
-    // paleta te colors vius que no es reflecteixen en cap peça i
-    // visualment queda desconnectada.
+    // Cobertura cromatica: els colors NO-neutres de la paleta han d'estar
+    // coberts per peces cromatiques de l'outfit. Es tolera un maxim de
+    // MAX_UNMATCHED_CHROMATIC color unmatched com a "accent per afegir".
     const chromaticMatched = new Set(core.assignments.map((a) => a.colorIndex));
+    let unmatched = 0;
     for (let i = 0; i < palette.colores.length; i++) {
       if (isNeutralHex(palette.colores[i])) continue;
-      if (!chromaticMatched.has(i)) return;
+      if (!chromaticMatched.has(i)) unmatched++;
     }
+    if (unmatched > MAX_UNMATCHED_CHROMATIC) return;
 
     const ids = allGarments.map((g) => g.id).sort();
     const key = ids.join(",");
