@@ -27,7 +27,14 @@ export const MAX_EXTRA_PALETTES = 4;
  * lluminositat, tot i ser visualment molt diferents. Per evitar-ho, exigim
  * que els neutres matchegin nomes amb altres neutres.
  */
-export const NEUTRAL_CHROMA_THRESHOLD = 0.03;
+/**
+ * Els usuaris trien colors amb un picker: rarament seleccionaran valors
+ * super saturats. Un "verd" real pot acabar a chroma 0.05-0.08, un beige
+ * viu a 0.04. Un llindar generos de neutralitat evita que aquests colors
+ * pateixin el bug de matcher-hue-per-chroma-baixa i que un beige apagat
+ * es tracti diferent d'un gris.
+ */
+export const NEUTRAL_CHROMA_THRESHOLD = 0.05;
 
 /**
  * Multiplicador aplicat a la distancia quan un color es neutre i l'altre no.
