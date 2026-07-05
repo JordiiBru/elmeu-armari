@@ -1,7 +1,7 @@
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette, PaletteMatch, OutfitGroup } from "./types";
 import {
-  oklchDistance,
+  perceptualDistance,
   OKLCH_DISTANCE_THRESHOLD,
   OKLCH_TIGHT_MATCH_THRESHOLD,
   MAX_EXTRA_PALETTES,
@@ -25,10 +25,14 @@ function matchGarmentToPalette(
   // La peça nomes es compatible si TOTS els seus colors tenen algun color de
   // la paleta a distancia raonable. Aixi evitem recomanar una peça bicolor
   // (p.e. blau + blanc) contra una paleta que nomes te el blau.
+  //
+  // `perceptualDistance` penalitza matches neutre↔saturat per corregir
+  // l'artefacte OKLCH on un gris (chroma ~0) queda a distancia baixa d'un
+  // marro/oliva de la mateixa lluminositat.
   for (const c of garment.colors) {
     let bestDist = Infinity;
     for (const paletteHex of palette.colores) {
-      const d = oklchDistance(c.hex, paletteHex);
+      const d = perceptualDistance(c.hex, paletteHex);
       if (d < bestDist) bestDist = d;
     }
     if (bestDist >= OKLCH_DISTANCE_THRESHOLD) return [];
@@ -38,7 +42,7 @@ function matchGarmentToPalette(
   const primaryHex = garment.colors[0].hex;
   const matches: GarmentPaletteMatch[] = [];
   for (let i = 0; i < palette.colores.length; i++) {
-    const dist = oklchDistance(primaryHex, palette.colores[i]);
+    const dist = perceptualDistance(primaryHex, palette.colores[i]);
     if (dist < OKLCH_DISTANCE_THRESHOLD) {
       matches.push({ garment, colorIndex: i, distance: dist });
     }
