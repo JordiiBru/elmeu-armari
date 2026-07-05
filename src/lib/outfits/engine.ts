@@ -16,16 +16,28 @@ function matchGarmentToPalette(
   palette: SanzoPalette
 ): GarmentPaletteMatch[] {
   if (garment.colors.length === 0) return [];
-  const garmentHex = garment.colors[0].hex;
-  const matches: GarmentPaletteMatch[] = [];
 
+  // La peça nomes es compatible si TOTS els seus colors tenen algun color de
+  // la paleta a distancia raonable. Aixi evitem recomanar una peça bicolor
+  // (p.e. blau + blanc) contra una paleta que nomes te el blau.
+  for (const c of garment.colors) {
+    let bestDist = Infinity;
+    for (const paletteHex of palette.colores) {
+      const d = oklchDistance(c.hex, paletteHex);
+      if (d < bestDist) bestDist = d;
+    }
+    if (bestDist >= OKLCH_DISTANCE_THRESHOLD) return [];
+  }
+
+  // Peça compatible. Ranking basat en el color principal (colors[0]).
+  const primaryHex = garment.colors[0].hex;
+  const matches: GarmentPaletteMatch[] = [];
   for (let i = 0; i < palette.colores.length; i++) {
-    const dist = oklchDistance(garmentHex, palette.colores[i]);
+    const dist = oklchDistance(primaryHex, palette.colores[i]);
     if (dist < OKLCH_DISTANCE_THRESHOLD) {
       matches.push({ garment, colorIndex: i, distance: dist });
     }
   }
-
   return matches;
 }
 

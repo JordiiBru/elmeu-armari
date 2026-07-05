@@ -4,7 +4,7 @@
  * then computes deltaE as Euclidean distance in OKLCH space.
  */
 
-export const OKLCH_DISTANCE_THRESHOLD = 18;
+export const OKLCH_DISTANCE_THRESHOLD = 14;
 
 interface OKLCH {
   L: number;
