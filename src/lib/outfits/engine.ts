@@ -1,6 +1,11 @@
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette, PaletteMatch, OutfitGroup } from "./types";
-import { oklchDistance, OKLCH_DISTANCE_THRESHOLD } from "./color-matching";
+import {
+  oklchDistance,
+  OKLCH_DISTANCE_THRESHOLD,
+  OKLCH_TIGHT_MATCH_THRESHOLD,
+  MAX_EXTRA_PALETTES,
+} from "./color-matching";
 
 const EXCLUDED_CATEGORIES = new Set(["SOCKS", "SHOES"]);
 const MIN_PIECES = 2;
@@ -176,6 +181,16 @@ function generateOutfitGroupsInternal(
 
   for (const group of allGroups) {
     group.palettes.sort((a, b) => a.totalDistance - b.totalDistance);
+    // La primera (millor) es la principal. Les addicionals han de ser
+    // visualment consistents: cada assignacio peça-color per sota d'un
+    // threshold estricte. I limitades en nombre.
+    const [primary, ...rest] = group.palettes;
+    const tightExtras = rest
+      .filter((pm) =>
+        pm.colorAssignments.every((a) => a.distance < OKLCH_TIGHT_MATCH_THRESHOLD)
+      )
+      .slice(0, MAX_EXTRA_PALETTES);
+    group.palettes = [primary, ...tightExtras];
   }
 
   return { groups: allGroups };
