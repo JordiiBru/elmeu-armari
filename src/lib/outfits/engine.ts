@@ -168,6 +168,16 @@ function findCombinationsForPalette(
     const hasTop = categories.has("SHIRT") || categories.has("SWEATER");
     if (!hasPants || !hasTop) return;
 
+    // Cobertura cromatica: tots els colors NO-neutres de la paleta han
+    // d'estar coberts per alguna peça cromatica de l'outfit. Sinó la
+    // paleta te colors vius que no es reflecteixen en cap peça i
+    // visualment queda desconnectada.
+    const chromaticMatched = new Set(core.assignments.map((a) => a.colorIndex));
+    for (let i = 0; i < palette.colores.length; i++) {
+      if (isNeutralHex(palette.colores[i])) continue;
+      if (!chromaticMatched.has(i)) return;
+    }
+
     const ids = allGarments.map((g) => g.id).sort();
     const key = ids.join(",");
     if (seen.has(key)) return;
