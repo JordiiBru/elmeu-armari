@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { addGarment, findAllGarments, deleteGarment } from "@/lib/prendas/service";
 import { CATEGORIES, TEXTURES, PATTERNS, SEASONS, FITS_BY_CATEGORY, SUBTYPES_BY_CATEGORY } from "@/lib/prendas/types";
 import { isHex } from "@/lib/prendas/validation";
@@ -91,6 +92,10 @@ export async function POST(req: NextRequest) {
       })
     )
   );
+
+  revalidatePath("/armari");
+  revalidatePath("/stats");
+  revalidatePath("/settings");
 
   return NextResponse.json({ imported: created.length });
 }

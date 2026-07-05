@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { addGarment } from "@/lib/prendas/service";
 import { validateGarmentForm } from "@/lib/prendas/validation";
 import type { Season } from "@/lib/prendas/types";
@@ -16,6 +17,10 @@ export async function createGarmentAction(
 
   const { category, texture, pattern, fit, subtype, size, notes, seasons, hexColors } = result.data;
   const garment = await addGarment({ category, texture, pattern, fit, subtype, size, notes, seasons: seasons as Season[], hexColors });
+
+  revalidatePath("/armari");
+  revalidatePath("/stats");
+  revalidatePath("/settings");
 
   if (formData.get("_hasImage") === "1") {
     return { newId: garment.id };

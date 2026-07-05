@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { saveGarmentImage, deleteGarmentImage, getUploadMaxMb } from "@/lib/uploads";
 
@@ -42,6 +43,8 @@ export async function POST(
 
   await prisma.garment.update({ where: { id }, data: { image: filename } });
 
+  revalidatePath("/armari");
+
   return NextResponse.json({ image: filename });
 }
 
@@ -58,6 +61,8 @@ export async function DELETE(
 
   await deleteGarmentImage(id);
   await prisma.garment.update({ where: { id }, data: { image: null } });
+
+  revalidatePath("/armari");
 
   return NextResponse.json({ ok: true });
 }
