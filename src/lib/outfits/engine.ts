@@ -2,11 +2,9 @@ import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette, PaletteMatch, OutfitGroup } from "./types";
 import {
   perceptualDistance,
-  isNeutralHex,
   OKLCH_DISTANCE_THRESHOLD,
   OKLCH_TIGHT_MATCH_THRESHOLD,
   MAX_EXTRA_PALETTES,
-  MAX_UNMATCHED_CHROMATIC,
 } from "./color-matching";
 
 const EXCLUDED_CATEGORIES = new Set(["SOCKS", "SHOES"]);
@@ -18,20 +16,21 @@ interface GarmentPaletteMatch {
   distance: number;
 }
 
-function isNeutralGarment(garment: GarmentWithColors): boolean {
-  return garment.colors.length > 0 && garment.colors.every((c) => isNeutralHex(c.hex));
-}
-
 /**
- * Match d'una peça cromatica (amb almenys un color no-neutre) contra una
- * paleta. Es exigent: tots els colors de la peça han de tenir algun color
- * de la paleta a distancia < threshold, i el color principal genera els
- * matches indexats per assignacio al backtrack.
+ * Match d'una peça contra una paleta:
+ * - Tots els colors de la peça han de tenir algun color de la paleta a
+ *   distancia perceptual < threshold. `perceptualDistance` penalitza
+ *   matches neutre↔saturat (corregeix el bug OKLCH on un gris quedaria
+ *   "prop" d'un marro o rosa apagat).
+ * - Retorna un match per cada color de la paleta on el color principal
+ *   de la peça encaixa.
  */
-function matchChromaticGarment(
+function matchGarmentToPalette(
   garment: GarmentWithColors,
   palette: SanzoPalette
 ): GarmentPaletteMatch[] {
+  if (garment.colors.length === 0) return [];
+
   for (const c of garment.colors) {
     let bestDist = Infinity;
     for (const paletteHex of palette.colores) {
@@ -52,49 +51,15 @@ function matchChromaticGarment(
   return matches;
 }
 
-/**
- * Threshold generos per acceptar una peça neutra sobre una paleta. El
- * corpus Sanzo Wada quasi no te grisos mid-tone; permetre distancies mes
- * altes per neutres compensa aixo mantenint el sentit visual (un gris fosc
- * sobre paleta clara segueix "funcionant" com a color universal).
- */
-const NEUTRAL_ACCEPTANCE = OKLCH_DISTANCE_THRESHOLD * 2;
-
-/**
- * Distancia mitjana d'una peça neutra a la paleta (millor color per cada
- * color de la peça). Infinity si algun color queda massa lluny.
- */
-function neutralDistanceToPalette(
-  garment: GarmentWithColors,
-  palette: SanzoPalette
-): number {
-  let sum = 0;
-  for (const c of garment.colors) {
-    let best = Infinity;
-    for (const p of palette.colores) {
-      const d = perceptualDistance(c.hex, p);
-      if (d < best) best = d;
-    }
-    if (best >= NEUTRAL_ACCEPTANCE) return Infinity;
-    sum += best;
-  }
-  return sum / garment.colors.length;
-}
-
 function findCombinationsForPalette(
   garments: GarmentWithColors[],
   palette: SanzoPalette
 ): { key: string; garments: GarmentWithColors[]; paletteMatch: PaletteMatch }[] {
-  const eligible = garments.filter((g) => !EXCLUDED_CATEGORIES.has(g.category));
-
-  // Peces neutres actuen com a wildcards: sempre compatibles, no ocupen slot
-  // de la paleta. Es "poden posar sobre" qualsevol outfit cromatic.
-  const neutralGarments = eligible.filter(isNeutralGarment);
-  const chromaticGarments = eligible.filter((g) => !isNeutralGarment(g));
-
   const colorToGarments = new Map<number, GarmentPaletteMatch[]>();
-  for (const garment of chromaticGarments) {
-    const matches = matchChromaticGarment(garment, palette);
+
+  for (const garment of garments) {
+    if (EXCLUDED_CATEGORIES.has(garment.category)) continue;
+    const matches = matchGarmentToPalette(garment, palette);
     for (const m of matches) {
       const existing = colorToGarments.get(m.colorIndex) ?? [];
       existing.push(m);
@@ -103,134 +68,64 @@ function findCombinationsForPalette(
   }
 
   const matchedIndices = Array.from(colorToGarments.keys()).sort();
+  if (matchedIndices.length < MIN_PIECES) return [];
+
   const allIndices = Array.from({ length: palette.colores.length }, (_, i) => i);
+  const results: { key: string; garments: GarmentWithColors[]; paletteMatch: PaletteMatch }[] = [];
+  const seen = new Set<string>();
 
-  // Cores cromatics: possibles subconjunts de peces cromatiques amb colors
-  // distints. Retornem "cores" (incloent el core buit) que despres extendrem
-  // amb neutrals.
-  interface Core {
-    assignments: GarmentPaletteMatch[];
-    usedCategories: Set<string>;
-  }
-  const cores: Core[] = [{ assignments: [], usedCategories: new Set() }];
-
-  function backtrackChromatic(
+  function backtrack(
     idx: number,
     current: GarmentPaletteMatch[],
     usedCategories: Set<string>
   ) {
     if (idx === matchedIndices.length) {
-      if (current.length > 0) {
-        cores.push({
-          assignments: [...current],
-          usedCategories: new Set(usedCategories),
+      const categories = new Set(current.map((c) => c.garment.category));
+      const hasPants = categories.has("PANTS");
+      const hasTop = categories.has("SHIRT") || categories.has("SWEATER");
+      if (current.length >= MIN_PIECES && hasPants && hasTop) {
+        const ids = current.map((c) => c.garment.id).sort();
+        const key = ids.join(",");
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        const matchedColorIndices = new Set(current.map((c) => c.colorIndex));
+        const totalDistance = current.reduce((sum, c) => sum + c.distance, 0);
+
+        results.push({
+          key,
+          garments: current.map((c) => c.garment),
+          paletteMatch: {
+            palette,
+            colorAssignments: current.map((c) => ({
+              garmentId: c.garment.id,
+              paletteColorIndex: c.colorIndex,
+              distance: c.distance,
+            })),
+            unmatchedColors: allIndices.filter((i) => !matchedColorIndices.has(i)),
+            totalDistance,
+          },
         });
       }
       return;
     }
+
     const colorIdx = matchedIndices[idx];
     const candidates = colorToGarments.get(colorIdx) ?? [];
-    backtrackChromatic(idx + 1, current, usedCategories);
+
+    backtrack(idx + 1, current, usedCategories);
+
     for (const candidate of candidates) {
       if (usedCategories.has(candidate.garment.category)) continue;
       usedCategories.add(candidate.garment.category);
       current.push(candidate);
-      backtrackChromatic(idx + 1, current, usedCategories);
+      backtrack(idx + 1, current, usedCategories);
       current.pop();
       usedCategories.delete(candidate.garment.category);
     }
   }
-  backtrackChromatic(0, [], new Set());
 
-  const results: { key: string; garments: GarmentWithColors[]; paletteMatch: PaletteMatch }[] = [];
-  const seen = new Set<string>();
-
-  // Per cada core, generar variants afegint qualsevol subset de neutrals amb
-  // categories no usades. Aixi outfits com "gris + negre + top saturat" o
-  // "negre + negre" (2 neutres sense core cromatic) apareixen.
-  const neutralDist = new Map<string, number>();
-  const compatibleNeutrals: GarmentWithColors[] = [];
-  for (const n of neutralGarments) {
-    const d = neutralDistanceToPalette(n, palette);
-    if (Number.isFinite(d)) {
-      neutralDist.set(n.id, d);
-      compatibleNeutrals.push(n);
-    }
-  }
-
-  function finalize(
-    core: Core,
-    neutrals: GarmentWithColors[]
-  ) {
-    const allGarments = [...core.assignments.map((a) => a.garment), ...neutrals];
-    if (allGarments.length < MIN_PIECES) return;
-    const categories = new Set(allGarments.map((g) => g.category));
-    const hasPants = categories.has("PANTS");
-    const hasTop = categories.has("SHIRT") || categories.has("SWEATER");
-    if (!hasPants || !hasTop) return;
-
-    // Cobertura cromatica: els colors NO-neutres de la paleta han d'estar
-    // coberts per peces cromatiques de l'outfit. Es tolera un maxim de
-    // MAX_UNMATCHED_CHROMATIC color unmatched com a "accent per afegir".
-    const chromaticMatched = new Set(core.assignments.map((a) => a.colorIndex));
-    let unmatched = 0;
-    for (let i = 0; i < palette.colores.length; i++) {
-      if (isNeutralHex(palette.colores[i])) continue;
-      if (!chromaticMatched.has(i)) unmatched++;
-    }
-    if (unmatched > MAX_UNMATCHED_CHROMATIC) return;
-
-    const ids = allGarments.map((g) => g.id).sort();
-    const key = ids.join(",");
-    if (seen.has(key)) return;
-    seen.add(key);
-
-    const colorAssignments = [
-      ...core.assignments.map((a) => ({
-        garmentId: a.garment.id,
-        paletteColorIndex: a.colorIndex,
-        distance: a.distance,
-      })),
-      ...neutrals.map((g) => ({
-        garmentId: g.id,
-        paletteColorIndex: -1,
-        distance: neutralDist.get(g.id) ?? 0,
-      })),
-    ];
-    const matchedColorIndices = new Set(
-      core.assignments.map((a) => a.colorIndex)
-    );
-    const totalDistance = colorAssignments.reduce((s, a) => s + a.distance, 0);
-
-    results.push({
-      key,
-      garments: allGarments,
-      paletteMatch: {
-        palette,
-        colorAssignments,
-        unmatchedColors: allIndices.filter((i) => !matchedColorIndices.has(i)),
-        totalDistance,
-      },
-    });
-  }
-
-  function extendWithNeutrals(
-    core: Core,
-    startIdx: number,
-    picked: GarmentWithColors[]
-  ) {
-    finalize(core, picked);
-    for (let i = startIdx; i < compatibleNeutrals.length; i++) {
-      const n = compatibleNeutrals[i];
-      if (core.usedCategories.has(n.category)) continue;
-      if (picked.some((p) => p.category === n.category)) continue;
-      picked.push(n);
-      extendWithNeutrals(core, i + 1, picked);
-      picked.pop();
-    }
-  }
-
-  for (const core of cores) extendWithNeutrals(core, 0, []);
+  backtrack(0, [], new Set());
   return results;
 }
 

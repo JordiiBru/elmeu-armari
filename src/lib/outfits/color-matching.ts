@@ -19,13 +19,6 @@ export const OKLCH_TIGHT_MATCH_THRESHOLD = 9;
 export const MAX_EXTRA_PALETTES = 4;
 
 /**
- * Nombre maxim de colors no-neutres de la paleta que poden quedar sense
- * coberts per una peça de l'outfit. Un valor 1 tolera un "color accent
- * de la paleta que no tens al armari pero podries afegir".
- */
-export const MAX_UNMATCHED_CHROMATIC = 1;
-
-/**
  * Un color amb chroma per sota d'aixo es considera neutre (blanc/negre/gris/beige apagat).
  * En OKLCH, la distancia de hue es ponderada per la chroma mitjana:
  *   dH = 2 * avgC * sin(dHue / 2)
