@@ -23,7 +23,7 @@ export function GarmentCard({
       <div className="relative flex aspect-[3/4] w-full overflow-hidden transition-transform duration-500 ease-out group-hover:-translate-y-1 group-active:translate-y-0 group-active:scale-[0.98]">
         {garment.image ? (
           <Image
-            src={`/api/uploads/${garment.image}?v=${garment.updatedAt.getTime()}`}
+            src={`/api/uploads/${garment.id}-thumb.webp?v=${garment.updatedAt.getTime()}`}
             alt=""
             fill
             unoptimized

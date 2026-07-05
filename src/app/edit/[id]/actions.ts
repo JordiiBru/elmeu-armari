@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { editGarment } from "@/lib/prendas/service";
 import { validateGarmentForm } from "@/lib/prendas/validation";
 import type { Season } from "@/lib/prendas/types";
@@ -17,5 +18,10 @@ export async function updateGarmentAction(
 
   const { category, texture, pattern, fit, subtype, size, notes, seasons, hexColors } = result.data;
   await editGarment(id, { category, texture, pattern, fit, subtype, size, notes, seasons: seasons as Season[], hexColors });
+
+  revalidatePath("/armari");
+  revalidatePath("/stats");
+  revalidatePath("/settings");
+
   redirect("/armari");
 }
