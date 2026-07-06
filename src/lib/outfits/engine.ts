@@ -1,6 +1,12 @@
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette, PaletteMatch, OutfitGroup } from "./types";
-import { oklchDistance, OKLCH_DISTANCE_THRESHOLD } from "./color-matching";
+import {
+  perceptualDistance,
+  isNeutralHex,
+  OKLCH_DISTANCE_THRESHOLD,
+  OKLCH_TIGHT_MATCH_THRESHOLD,
+  MAX_EXTRA_PALETTES,
+} from "./color-matching";
 
 const EXCLUDED_CATEGORIES = new Set(["SOCKS", "SHOES"]);
 const MIN_PIECES = 2;
@@ -11,21 +17,38 @@ interface GarmentPaletteMatch {
   distance: number;
 }
 
+/**
+ * Match d'una peça contra una paleta:
+ * - Tots els colors de la peça han de tenir algun color de la paleta a
+ *   distancia perceptual < threshold. `perceptualDistance` penalitza
+ *   matches neutre↔saturat (corregeix el bug OKLCH on un gris quedaria
+ *   "prop" d'un marro o rosa apagat).
+ * - Retorna un match per cada color de la paleta on el color principal
+ *   de la peça encaixa.
+ */
 function matchGarmentToPalette(
   garment: GarmentWithColors,
   palette: SanzoPalette
 ): GarmentPaletteMatch[] {
   if (garment.colors.length === 0) return [];
-  const garmentHex = garment.colors[0].hex;
-  const matches: GarmentPaletteMatch[] = [];
 
+  for (const c of garment.colors) {
+    let bestDist = Infinity;
+    for (const paletteHex of palette.colores) {
+      const d = perceptualDistance(c.hex, paletteHex);
+      if (d < bestDist) bestDist = d;
+    }
+    if (bestDist >= OKLCH_DISTANCE_THRESHOLD) return [];
+  }
+
+  const primaryHex = garment.colors[0].hex;
+  const matches: GarmentPaletteMatch[] = [];
   for (let i = 0; i < palette.colores.length; i++) {
-    const dist = oklchDistance(garmentHex, palette.colores[i]);
+    const dist = perceptualDistance(primaryHex, palette.colores[i]);
     if (dist < OKLCH_DISTANCE_THRESHOLD) {
       matches.push({ garment, colorIndex: i, distance: dist });
     }
   }
-
   return matches;
 }
 
@@ -54,7 +77,7 @@ function findCombinationsForPalette(
 
   function backtrack(
     idx: number,
-    current: { garment: GarmentWithColors; colorIndex: number; distance: number }[],
+    current: GarmentPaletteMatch[],
     usedCategories: Set<string>
   ) {
     if (idx === matchedIndices.length) {
@@ -62,12 +85,20 @@ function findCombinationsForPalette(
       const hasPants = categories.has("PANTS");
       const hasTop = categories.has("SHIRT") || categories.has("SWEATER");
       if (current.length >= MIN_PIECES && hasPants && hasTop) {
+        // Cobertura: cada color no-neutre de la paleta ha d'estar cobert
+        // per una peça de l'outfit. Sino la paleta te colors accent que
+        // no reflecteixen cap peça de l'outfit i el match sembla forçat.
+        const matchedColorIndices = new Set(current.map((c) => c.colorIndex));
+        for (let i = 0; i < palette.colores.length; i++) {
+          if (isNeutralHex(palette.colores[i])) continue;
+          if (!matchedColorIndices.has(i)) return;
+        }
+
         const ids = current.map((c) => c.garment.id).sort();
         const key = ids.join(",");
         if (seen.has(key)) return;
         seen.add(key);
 
-        const matchedColorIndices = new Set(current.map((c) => c.colorIndex));
         const totalDistance = current.reduce((sum, c) => sum + c.distance, 0);
 
         results.push({
@@ -164,6 +195,13 @@ function generateOutfitGroupsInternal(
 
   for (const group of allGroups) {
     group.palettes.sort((a, b) => a.totalDistance - b.totalDistance);
+    const [primary, ...rest] = group.palettes;
+    const tightExtras = rest
+      .filter((pm) =>
+        pm.colorAssignments.every((a) => a.distance < OKLCH_TIGHT_MATCH_THRESHOLD)
+      )
+      .slice(0, MAX_EXTRA_PALETTES);
+    group.palettes = [primary, ...tightExtras];
   }
 
   return { groups: allGroups };

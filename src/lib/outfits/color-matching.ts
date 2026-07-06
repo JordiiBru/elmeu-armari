@@ -4,7 +4,60 @@
  * then computes deltaE as Euclidean distance in OKLCH space.
  */
 
-export const OKLCH_DISTANCE_THRESHOLD = 18;
+export const OKLCH_DISTANCE_THRESHOLD = 14;
+
+/**
+ * Threshold estricte per paletes "addicionals" mostrades sota la principal.
+ * Cada assignacio peça-color ha de complir aquest per garantir que la paleta
+ * conte visualment els colors de l'outfit, no aproximacions llunyanes.
+ */
+export const OKLCH_TIGHT_MATCH_THRESHOLD = 9;
+
+/**
+ * Nombre maxim de paletes addicionals mostrades per outfit.
+ */
+export const MAX_EXTRA_PALETTES = 4;
+
+/**
+ * Un color amb chroma per sota d'aixo es considera neutre (blanc/negre/gris/beige apagat).
+ * En OKLCH, la distancia de hue es ponderada per la chroma mitjana:
+ *   dH = 2 * avgC * sin(dHue / 2)
+ * Amb un dels dos colors neutre, avgC ~ 0 i la hue no penalitza gairebe res —
+ * un gris queda a distancia moderada d'un marro o oliva de la mateixa
+ * lluminositat, tot i ser visualment molt diferents. Per evitar-ho, exigim
+ * que els neutres matchegin nomes amb altres neutres.
+ */
+/**
+ * Els usuaris trien colors amb un picker: rarament seleccionaran valors
+ * super saturats. Un "verd" real pot acabar a chroma 0.05-0.08, un beige
+ * viu a 0.04. Un llindar generos de neutralitat evita que aquests colors
+ * pateixin el bug de matcher-hue-per-chroma-baixa i que un beige apagat
+ * es tracti diferent d'un gris.
+ */
+export const NEUTRAL_CHROMA_THRESHOLD = 0.05;
+
+/**
+ * Multiplicador aplicat a la distancia quan un color es neutre i l'altre no.
+ * Un gris (C~0) i un marro fosc (C~0.05) de la mateixa lluminositat tenen
+ * distancia OKLCH baixa per artefacte matematic (avgC ~ 0 → dH ~ 0). Aplicar
+ * aquest multiplicador els empeny per sobre del threshold general.
+ */
+export const NEUTRAL_MISMATCH_PENALTY = 1.6;
+
+export function isNeutralHex(hex: string): boolean {
+  return hexToOklch(hex).C < NEUTRAL_CHROMA_THRESHOLD;
+}
+
+/**
+ * Distancia perceptual amb penalitzacio si un color es neutre i l'altre no.
+ * Usa aixo en lloc de `oklchDistance` per matching peça-paleta.
+ */
+export function perceptualDistance(hex1: string, hex2: string): number {
+  const raw = oklchDistance(hex1, hex2);
+  return isNeutralHex(hex1) !== isNeutralHex(hex2)
+    ? raw * NEUTRAL_MISMATCH_PENALTY
+    : raw;
+}
 
 interface OKLCH {
   L: number;
