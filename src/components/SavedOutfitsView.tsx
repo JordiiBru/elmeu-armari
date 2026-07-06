@@ -2,8 +2,10 @@
 
 import { useState, useTransition, useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { deleteOutfitAction } from "@/app/outfits/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
+import { bucketOf } from "@/lib/outfits/buckets";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 
@@ -91,6 +93,16 @@ export function SavedOutfitsView({
   );
 }
 
+function buildEmprovadorHref(garments: SavedOutfit["garments"]): string {
+  const params = new URLSearchParams();
+  for (const og of garments) {
+    const b = bucketOf(og.garment.category);
+    if (b && !params.has(b)) params.set(b, og.garment.id);
+  }
+  const qs = params.toString();
+  return qs ? `/emprovador?${qs}` : "/emprovador";
+}
+
 function SavedGroupCard({
   group,
   index,
@@ -99,6 +111,7 @@ function SavedGroupCard({
   index: number;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const emprovadorHref = buildEmprovadorHref(group.garments);
 
   return (
     <div className="py-8">
@@ -147,6 +160,12 @@ function SavedGroupCard({
         data-open={expanded}
       >
         <div className="flex flex-col gap-4">
+          <Link
+            href={emprovadorHref}
+            className="self-start font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors duration-200 active:scale-[0.98] underline-offset-4 hover:underline"
+          >
+            emprovar
+          </Link>
           {group.entries.map((entry) => (
             <SavedPaletteRow key={entry.outfitId} entry={entry} />
           ))}
