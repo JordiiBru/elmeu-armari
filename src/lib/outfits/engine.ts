@@ -2,6 +2,7 @@ import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette, PaletteMatch, OutfitGroup } from "./types";
 import {
   perceptualDistance,
+  isNeutralHex,
   OKLCH_DISTANCE_THRESHOLD,
   OKLCH_TIGHT_MATCH_THRESHOLD,
   MAX_EXTRA_PALETTES,
@@ -84,12 +85,20 @@ function findCombinationsForPalette(
       const hasPants = categories.has("PANTS");
       const hasTop = categories.has("SHIRT") || categories.has("SWEATER");
       if (current.length >= MIN_PIECES && hasPants && hasTop) {
+        // Cobertura: cada color no-neutre de la paleta ha d'estar cobert
+        // per una peça de l'outfit. Sino la paleta te colors accent que
+        // no reflecteixen cap peça de l'outfit i el match sembla forçat.
+        const matchedColorIndices = new Set(current.map((c) => c.colorIndex));
+        for (let i = 0; i < palette.colores.length; i++) {
+          if (isNeutralHex(palette.colores[i])) continue;
+          if (!matchedColorIndices.has(i)) return;
+        }
+
         const ids = current.map((c) => c.garment.id).sort();
         const key = ids.join(",");
         if (seen.has(key)) return;
         seen.add(key);
 
-        const matchedColorIndices = new Set(current.map((c) => c.colorIndex));
         const totalDistance = current.reduce((sum, c) => sum + c.distance, 0);
 
         results.push({
