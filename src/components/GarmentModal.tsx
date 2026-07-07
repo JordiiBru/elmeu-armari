@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { SHEET_EASE, useSheetState } from "@/lib/useSheetState";
 import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { deleteGarmentAction } from "@/app/armari/actions";
@@ -15,6 +14,7 @@ import {
   SEASON_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
+import { PieceThumb } from "./PieceThumb";
 
 interface Props {
   garment: GarmentWithColors;
@@ -65,26 +65,8 @@ export function GarmentModal({ garment, onClose }: Props) {
         </div>
 
         {/* Franja visual — foto o swatches. Swipe zone. */}
-        <div className="relative flex h-40 flex-shrink-0 touch-none overflow-hidden" {...swipe.handlers}>
-          {garment.image ? (
-            <Image
-              src={`/api/uploads/${garment.image}?v=${garment.updatedAt.getTime()}`}
-              alt=""
-              fill
-              unoptimized
-              className="object-cover"
-              priority
-            />
-          ) : (
-            garment.colors.map((c) => (
-              <div
-                key={c.id}
-                className="flex-1"
-                style={{ backgroundColor: c.hex }}
-                title={c.hex}
-              />
-            ))
-          )}
+        <div className="h-40 flex-shrink-0 touch-none" {...swipe.handlers}>
+          <PieceThumb garment={garment} priority className="h-full w-full" />
         </div>
 
         <div className="overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6">

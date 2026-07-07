@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
+import { PieceThumb } from "./PieceThumb";
 
 /** Ratio 3:4 amb tira de swatches. Card editorial reusable. */
 export function GarmentCard({
@@ -20,27 +20,12 @@ export function GarmentCard({
       onClick={() => onClick(garment)}
       className="cv-auto group flex flex-col text-left outline-none focus-visible:ring-1 focus-visible:ring-foreground/30 focus-visible:ring-offset-4 focus-visible:ring-offset-background"
     >
-      <div className="relative flex aspect-[3/4] w-full overflow-hidden transition-transform duration-500 ease-out group-hover:-translate-y-1 group-active:translate-y-0 group-active:scale-[0.98]">
-        {garment.image ? (
-          <Image
-            src={`/api/uploads/${garment.id}-thumb.webp?v=${garment.updatedAt.getTime()}`}
-            alt=""
-            fill
-            unoptimized
-            className="object-cover"
-            loading={index < 4 ? "eager" : "lazy"}
-          />
-        ) : (
-          garment.colors.map((c) => (
-            <div
-              key={c.id}
-              className="flex-1"
-              style={{ backgroundColor: c.hex }}
-              title={c.hex}
-            />
-          ))
-        )}
-      </div>
+      <PieceThumb
+        garment={garment}
+        thumb
+        loading={index < 4 ? "eager" : "lazy"}
+        className="aspect-[3/4] w-full transition-transform duration-500 ease-out group-hover:-translate-y-1 group-active:translate-y-0 group-active:scale-[0.98]"
+      />
       <div className="flex items-baseline justify-between pt-3">
         <span className="font-serif text-base leading-tight">
           {CATEGORY_LABELS[garment.category]}

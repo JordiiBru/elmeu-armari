@@ -1,17 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import type { OutfitGroup, PaletteMatch } from "@/lib/outfits/types";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
+import { PieceThumb } from "./PieceThumb";
 
 const CATEGORY_ORDER: Category[] = ["SHIRT", "SWEATER", "PANTS", "SOCKS", "SHOES"];
 
 function sortedGarments(garments: OutfitGroup["garments"]) {
   return [...garments].sort((a, b) => {
-    const ai = CATEGORY_ORDER.indexOf(a.category as Category);
-    const bi = CATEGORY_ORDER.indexOf(b.category as Category);
+    const ai = CATEGORY_ORDER.indexOf(a.category);
+    const bi = CATEGORY_ORDER.indexOf(b.category);
     return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
   });
 }
@@ -19,23 +19,7 @@ function sortedGarments(garments: OutfitGroup["garments"]) {
 function GarmentTile({ garment }: { garment: GarmentWithColors }) {
   return (
     <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
-      <div className="relative h-20 w-20 overflow-hidden">
-        {garment.image ? (
-          <Image
-            src={`/api/uploads/${garment.image}?v=${garment.updatedAt.getTime()}`}
-            alt=""
-            fill
-            unoptimized
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full">
-            {garment.colors.map((c) => (
-              <div key={c.id} className="flex-1" style={{ backgroundColor: c.hex }} title={c.hex} />
-            ))}
-          </div>
-        )}
-      </div>
+      <PieceThumb garment={garment} className="h-20 w-20" />
       <span className="text-[10px] tracking-[0.15em] uppercase text-foreground-secondary">
         {CATEGORY_LABELS[garment.category]}
       </span>
