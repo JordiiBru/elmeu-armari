@@ -1,72 +1,134 @@
 # elmeu-armari
 
-Gestor personal de roba. Registra les teves peces, filtra per categoria i temporada, i troba combinacions de colors amb les paletes de Sanzo Wada.
+A personal wardrobe manager. Catalogue your clothes with colours and photos, then discover which of the 348 Sanzo Wada colour palettes match combinations of the pieces you actually own.
+
+> UI is in Catalan by design. Everything else in this repo — code, docs, comments — is in English.
+
+![Next.js](https://img.shields.io/badge/Next.js-16.2-black) ![React](https://img.shields.io/badge/React-19-blue) ![Prisma](https://img.shields.io/badge/Prisma-7-2D3748) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6) ![Tailwind](https://img.shields.io/badge/Tailwind-v4-06B6D4)
+
+---
+
+## Features
+
+- **Garment catalogue** (`/armari`) — grid with filters by category and season, tabs for pieces / combinations / saved outfits.
+- **Add & edit** (`/add`, `/edit/[id]`) — form with multi-colour picker, seasons multi-select, texture / pattern / fit / size, optional photo upload.
+- **Photo pipeline** — uploads re-encoded to WebP 800px @ q80 via `sharp`, EXIF stripped, thumbnails generated. Photos live on the filesystem, not in SQLite.
+- **Outfit builder** (`/armari` → `Combinar`) — pick a piece, get Sanzo Wada palettes that contain its colours, browse matching pieces per palette colour, save the outfit.
+- **Saved outfits** (`/armari` → `Desats`) — grouped by piece set, each entry linked to the palette it was saved with. Delete inline.
+- **Sanzo Wada palettes** (`/paleta`) — browse all 348 historical palettes; opening one shows the pieces you own that match it.
+- **Statistics** (`/stats`) — breakdown by category, season, fit and texture.
+- **Import / export** (`/settings`) — download all garments as JSON, upload a previously exported file to restore.
+- **PWA manifest** — installable on mobile, custom icon and theme.
+
+---
 
 ## Stack
 
-- **Next.js 16.2** (App Router, React Server Components) + TypeScript
-- **Tailwind CSS v4** — sense preprocessor
-- **Prisma 7** + SQLite via `@prisma/adapter-better-sqlite3`
-- **React 19** — Server Actions, `useActionState`
+| Layer | Choice | Notes |
+|---|---|---|
+| Framework | **Next.js 16.2** | App Router, React Server Components, Turbopack. Read `AGENTS.md` — this is not the Next.js from your training data. |
+| Runtime | **React 19** | Server Actions, `useActionState`. **No `useEffect` for data fetching.** |
+| Styling | **Tailwind CSS v4** | No config file; theming via CSS custom properties and `@theme`. |
+| DB | **SQLite** | Single file, mounted volume in prod. |
+| ORM | **Prisma 7** | Uses `@prisma/adapter-better-sqlite3` driver adapter — **not** the standard Prisma client. |
+| Language | **TypeScript 5** | Strict mode. |
+| Images | **sharp** | Server-side WebP re-encoding + thumbnail generation. |
 
-## Estructura
+---
+
+## Project layout
 
 ```
 src/
-  app/
-    /               Homepage
-    /add            Formulari nova peça
-    /armari         Grid de peces amb filtres
-    /edit/[id]      Editar peça
-    /paleta         348 paletes Sanzo Wada
-  components/
-    AddForm.tsx           Formulari client (useActionState + errors)
-    EditForm.tsx          Formulari edició client
-    ArmariGrid.tsx        Grid filtrable (categoria + temporada)
-    ColorPickers.tsx      Selector de colors múltiple
-    TemporadaCheckboxes.tsx
+  app/                       App Router routes
+    page.tsx                 Home
+    add/                     New garment
+    armari/                  Wardrobe grid + tabs (pieces / combine / saved)
+    edit/[id]/               Edit garment
+    outfits/actions.ts       Server actions: save / delete outfit
+    paleta/                  Sanzo Wada browser
+    settings/                Import / export
+    stats/                   Aggregates
+    api/
+      export/                GET  JSON dump of all garments
+      import/                POST JSON restore
+      uploads/[filename]/    GET  serve stored garment photo
+      garments/[id]/image/   PATCH/DELETE upload/remove photo
+  components/                React components (kebab-cased UI role, PascalCase file)
   lib/
+    colors/
+      index.ts               Sanzo Wada loader (348 palettes, named colours)
+      sanzo-wada.json        Palette dataset (colour combinations)
+      sanzo-colors.json      Individual named colours dataset
+    outfits/
+      types.ts               Domain types
+      color-matching.ts      OKLCH perceptual distance, neutral-handling
+      engine.ts              Outfit-generation algorithm
+      repository.ts          Prisma access (outfits + outfit_garments)
+      service.ts             Business logic
     prendas/
-      labels.ts     Labels localitzats (font única)
-      types.ts      Enums, constants, PrendaConColores
-      service.ts    Lògica de negoci
-      repository.ts Accés a dades (Prisma)
-    colores/
-      sanzo-wada.json  348 combinacions reals
-    prisma.ts       Singleton Prisma amb adapter SQLite
+      types.ts               Enums, category constants, GarmentWithColors
+      labels.ts              Localised UI labels (single source of truth)
+      filtering.ts           Grid filter predicates
+      validation.ts          Form validation
+      ui-strings.ts          Copy strings for forms/errors
+      repository.ts          Prisma access (garments + colors + seasons)
+      service.ts             Business logic
+    prisma.ts                Prisma singleton (better-sqlite3 driver adapter)
+    uploads.ts               Filesystem paths + sharp pipeline
+    useSheetState.ts         Bottom-sheet open/close state hook
+    useSwipeToClose.ts       Swipe-down gesture hook
+    ui.ts                    Small UI utilities
 prisma/
-  schema.prisma     Model de dades
-  migrations/       Migracions SQL
+  schema.prisma              Data model
+  migrations/                SQL migrations
 ```
 
-## Model de dades
-
-Cada peça: `categoria`, N colors (hex, taula `Color` separada), `textura`, `dibuix`, `temporada` (JSON array), `talla`, `fit`, `nota` opcional.
+### Data model
 
 ```
-Prenda (1) ──── (*) Color
+Garment ─┬─ (1..N) Color         hex per colour, separate row
+         ├─ (1..N) GarmentSeason enum: SPRING | SUMMER | AUTUMN | WINTER | ALL_YEAR
+         └─ (0..N) OutfitGarment link table
+
+Outfit  ── (0..N) OutfitGarment  paletteId is a foreign key into the Sanzo Wada JSON, not a DB table
 ```
 
-## Desenvolupament local
+Photos are stored on disk under `UPLOAD_DIR`, referenced by the `Garment.image` filename column.
+
+---
+
+## Getting started
 
 ```bash
 npm install
-npx prisma migrate dev
-npm run dev
-# → http://localhost:3000
+npx prisma migrate dev        # create dev.db + client
+npm run dev                   # http://localhost:3000
 ```
 
-Per accedir des d'un altre dispositiu de la xarxa:
+To reach it from another device on the same network:
 
 ```bash
-# Troba la teva IP local
 ip route get 1 | awk '{print $7; exit}'
-# → http://<ip>:3000
+# → open http://<ip>:3000 on your phone
 ```
+
+### Scripts
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start the dev server (Turbopack). |
+| `npm run build` | Production build. Requires `prisma migrate deploy` first. |
+| `npm run start` | Serve the production build. |
+| `npm run lint` | ESLint. |
+| `npm run typecheck` | `tsc --noEmit`. |
+| `npm run check` | Lint + typecheck + build. Run before opening a PR. |
+
+---
 
 ## Docker
 
-### Una sola comanda (build local)
+### One-shot local build
 
 ```bash
 docker build -t elmeu-armari .
@@ -76,29 +138,19 @@ docker run -d \
   -p 3000:3000 \
   -v elmeu-armari-data:/data \
   elmeu-armari
-# → http://localhost:3000
 ```
 
-### Docker Compose (recomanat)
+### Docker Compose
 
 ```bash
-# Arrancar (build + migracions automàtiques)
-docker compose up -d
-
-# Logs
+docker compose up -d          # build + run + auto-migrate
 docker compose logs -f
-
-# Aturar
-docker compose down
-
-# Aturar i esborrar dades (destructiu)
-docker compose down -v
-
-# Rebuild després de canvis
-docker compose up -d --build
+docker compose down           # stop
+docker compose down -v        # stop + wipe volumes (destructive)
+docker compose up -d --build  # rebuild after changes
 ```
 
-### Imatge prebuilt (GHCR)
+### Prebuilt image (GHCR)
 
 ```bash
 docker run -d \
@@ -108,67 +160,59 @@ docker run -d \
   ghcr.io/jordiiibru/elmeu-armari:latest
 ```
 
-### Variables d'entorn
+The entrypoint runs `prisma migrate deploy` before starting the server.
 
-| Variable | Defecte | Descripció |
+### Environment variables
+
+| Variable | Default | Purpose |
 |---|---|---|
-| `DATABASE_URL` | `file:/data/prod.db` | Ruta del fitxer SQLite |
-| `UPLOAD_DIR` | `/data/uploads` | Directori on es guarden les fotos de les peces |
-| `UPLOAD_MAX_MB` | `10` | Mida màxima del fitxer pujat (abans del resize) |
-| `PORT` | `3000` | Port HTTP |
+| `DATABASE_URL` | `file:/data/prod.db` | SQLite file path |
+| `UPLOAD_DIR` | `/data/uploads` | Where garment photos are written |
+| `UPLOAD_MAX_MB` | `10` | Max upload size (pre-resize) |
+| `PORT` | `3000` | HTTP port |
 
-## Fotos de prenda (opcional)
+---
 
-Cada prenda pot tenir una foto que substitueix els quadres de color a la targeta. Es opcional: sense foto, la targeta mostra els colors com fins ara.
+## Garment photos
 
-### Setup
+Each garment can carry an optional photo, replacing the coloured stripes on its card.
 
-Les imatges es guarden al filesystem, no dins la SQLite, per evitar que la db creixi. El volum `/data` ja inclou les fotos i la base de dades — cal fer-ne backup conjuntament.
+- **Accepted formats**: JPEG, PNG, WebP. iOS's HEIC is usually converted automatically by the file picker — if not, convert before upload.
+- **Re-encoding**: on upload, `sharp` resizes to 800 px on the longest side and writes WebP at quality 80. EXIF (including GPS) is dropped.
+- **Storage**: files under `UPLOAD_DIR`; the DB only stores the filename.
+- **Backup**: copy the entire `/data` volume (DB + uploads) as one unit.
 
-### Formats
+### Preparing a clean shot with an AI helper
 
-Nomes s'accepten `JPEG`, `PNG` i `WebP`. Els mobils iOS que pugen HEIC solen convertir a JPEG automaticament en usar el selector de fitxers; si no, converteix-la abans de pujar-la.
+Paste this into ChatGPT / Claude / Gemini with the raw photo to get a catalogue-ready render:
 
-Les imatges es re-encoden a WebP 800px (costat major) amb qualitat 80. Les fotos originals no es guarden: metadata EXIF (GPS inclos) queda eliminada.
+> I need to prepare this photo of a garment for cataloguing in my digital wardrobe. Please retouch it with these constraints:
+> - Uniform white or very light grey background, no harsh shadows.
+> - Garment centred, laid flat or hung, filling ~80% of the frame.
+> - Colours faithful to the original (do not saturate).
+> - No text, watermarks, or surrounding objects.
+> - 1:1 square format.
+> - 800–1200 px per side.
+> - Export as JPEG or PNG.
 
-### Backup
+---
 
-Fer copia del volum `/data` sencer (conte db + uploads). Restaurar es copiar-lo de tornada.
+## CI/CD
 
-### Prompt per retocar la foto amb IA abans de pujar-la
+- **CI** (`.github/workflows/ci.yml`) — lint + typecheck, `npm audit`, Trivy filesystem scan, build, Lighthouse. Build requires `prisma migrate deploy` first because `/armari` reads the DB. Lighthouse runs against a local server with a migrated empty DB.
+- **Release** (`.github/workflows/release.yml`) — pushing a `v*.*.*` tag builds a Docker image and pushes to `ghcr.io/jordiiibru/elmeu-armari` with semver tags.
+- **Renovate** — weekly updates on Mondays before 07:00, immediate automerge for security advisories, grouped for the Next.js / Prisma / Tailwind / GitHub Actions ecosystems, digest pinning for base Docker images.
 
-Si vols una foto neta i uniforme (fons blanc, prenda centrada), pots passar-la per ChatGPT/Claude/Gemini amb aquest prompt:
+---
 
-> Necessito preparar aquesta foto d'una peca de roba per catalogar-la al meu armari digital. Retoca-la amb aquests criteris:
-> - Fons blanc o gris molt clar, uniforme, sense ombres fortes.
-> - La peca centrada, ben plana o penjada, ocupant aproximadament el 80% del marc.
-> - Colors fidels al original (no saturis).
-> - Sense text, marques d'aigua, ni objectes al voltant.
-> - Format quadrat 1:1.
-> - Resolucio final entre 800 i 1200 px per costat.
-> - Exporta com a JPEG o PNG.
+## Contributing
 
-Un cop retocada, puja-la des del formulari d'afegir/editar prenda.
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for local setup, branch naming, PR flow and code conventions.
 
-## Rutes
+If you are (or run) an AI agent, read [`CLAUDE.md`](./CLAUDE.md) and [`AGENTS.md`](./AGENTS.md) first — they explain non-obvious constraints of this codebase.
 
-| Ruta | Descripció |
-|---|---|
-| `/` | Homepage |
-| `/armari` | Grid de peces, filtre per categoria i temporada |
-| `/add` | Nova peça |
-| `/edit/[id]` | Editar peça |
-| `/paleta` | 348 paletes Sanzo Wada |
+---
 
-## Issues oberts (post-MVP)
+## Licence
 
-| # | Feature |
-|---|---|
-| [#13](https://github.com/JordiiBru/elmeu-armari/issues/13) | PWA manifest — instal·lable al mòbil |
-| [#14](https://github.com/JordiiBru/elmeu-armari/issues/14) | Deploy k3s (Helm + ArgoCD) |
-| [#15](https://github.com/JordiiBru/elmeu-armari/issues/15) | Pàgina de detall de peça |
-| [#16](https://github.com/JordiiBru/elmeu-armari/issues/16) | Upload foto |
-| [#17](https://github.com/JordiiBru/elmeu-armari/issues/17) | Outfit builder amb Sanzo Wada |
-| [#18](https://github.com/JordiiBru/elmeu-armari/issues/18) | Estadístiques |
-| [#19](https://github.com/JordiiBru/elmeu-armari/issues/19) | Filtres multi-select i cerca |
-| [#20](https://github.com/JordiiBru/elmeu-armari/issues/20) | Export / import JSON |
+MIT — see [`LICENSE`](./LICENSE).
