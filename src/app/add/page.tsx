@@ -1,17 +1,15 @@
 import { AddForm } from "@/components/AddForm";
+import { PageContainer, SectionHeader } from "@/components/ui";
 
 export default function AddPage() {
   return (
-    <div className="max-w-lg mx-auto w-full px-6 md:px-10 pb-24">
-      <header className="pt-2 pb-8 flex flex-col gap-2">
-        <span className="type-caption">
-          nova peça
-        </span>
-        <h1 className="font-serif text-4xl md:text-5xl tracking-tight leading-[0.95]">
-          afegir al catàleg
-        </h1>
-      </header>
+    <PageContainer width="narrow">
+      <SectionHeader
+        eyebrow="nova peça"
+        title="afegir al catàleg"
+        level="title-xl"
+      />
       <AddForm />
-    </div>
+    </PageContainer>
   );
 }

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { findGarmentById } from "@/lib/prendas/service";
 import { EditForm } from "@/components/EditForm";
+import { PageContainer, SectionHeader } from "@/components/ui";
 
 export default async function EditPage({
   params,
@@ -12,20 +13,17 @@ export default async function EditPage({
   if (!garment) notFound();
 
   return (
-    <div className="max-w-lg mx-auto w-full px-6 md:px-10 pb-24">
-      <header className="pt-2 pb-8 flex flex-col gap-2">
-        <span className="type-caption">
-          editar peça
-        </span>
-        <h1 className="font-serif text-4xl md:text-5xl tracking-tight leading-[0.95]">
-          revisar la fitxa
-        </h1>
-      </header>
+    <PageContainer width="narrow">
+      <SectionHeader
+        eyebrow="editar peça"
+        title="revisar la fitxa"
+        level="title-xl"
+      />
       <EditForm
         garment={garment}
         defaultSeasons={garment.seasons.map((s) => s.season)}
         defaultHexColors={garment.colors.map((c) => c.hex)}
       />
-    </div>
+    </PageContainer>
   );
 }
