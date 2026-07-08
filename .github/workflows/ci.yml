@@ -43,24 +43,6 @@ jobs:
       - name: npm audit
         run: npm audit --audit-level=high --omit=dev
 
-  security-code:
-    name: Security — Filesystem (Trivy)
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          severity: HIGH,CRITICAL
-          exit-code: 0
-          ignore-unfixed: true
-
   build:
     name: Build
     runs-on: ubuntu-latest

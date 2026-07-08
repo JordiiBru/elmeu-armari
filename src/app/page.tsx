@@ -1,7 +1,5 @@
 import Link from "next/link";
-import { findAllGarments } from "@/lib/prendas/service";
-import { findAllOutfits } from "@/lib/outfits/service";
-import { PieceThumb } from "@/components/PieceThumb";
+import { palettes } from "@/lib/colors";
 import { Stack, Text, Heading } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -16,52 +14,40 @@ const SECONDARY = [
   { href: "/settings", label: "configuració" },
 ];
 
-export default async function HomePage() {
-  const [garments, outfits] = await Promise.all([
-    findAllGarments(),
-    findAllOutfits(),
-  ]);
+function pickPalette() {
+  const i = Math.floor(Math.random() * palettes.length);
+  return palettes[i];
+}
 
-  const recent = garments.slice(0, 5);
-  const empty = garments.length === 0;
+export default function HomePage() {
+  const palette = pickPalette();
 
   return (
     <div className="flex-1 grid grid-rows-[1fr_auto_1fr] px-6 py-12 md:py-20">
       <Stack as="section" gap={5} align="center" className="self-end text-center">
-        <Heading level="display-xl">
-          el meu armari
-        </Heading>
+        <Heading level="display-xl">el meu armari</Heading>
         <Text variant="subtitle" tone="secondary" italic as="p">
           un estudi d&apos;harmonia visual
         </Text>
       </Stack>
 
-      <Stack gap={5} align="center" className="py-16 md:py-24">
-        <div className="h-px w-16 bg-border" aria-hidden />
-        {!empty && (
-          <>
-            <Text variant="caption" tabular>
-              {garments.length} peces · {outfits.length}{" "}
-              {outfits.length === 1 ? "outfit desat" : "outfits desats"}
-            </Text>
-            {recent.length > 0 && (
+      <div className="flex justify-center py-16 md:py-24">
+        <Link
+          href="/paleta"
+          aria-label={`Paleta ${palette.nombre}`}
+          className="group block w-40 md:w-56 outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+        >
+          <div className="flex h-4 md:h-6 overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-spring)] group-hover:-translate-y-0.5">
+            {palette.colores.map((hex, i) => (
               <div
-                className="flex items-end gap-3"
-                aria-label="Peces recents"
-              >
-                {recent.map((g) => (
-                  <PieceThumb
-                    key={g.id}
-                    garment={g}
-                    thumb
-                    className="h-14 w-11 md:h-16 md:w-12"
-                  />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </Stack>
+                key={i}
+                className="flex-1"
+                style={{ backgroundColor: hex }}
+              />
+            ))}
+          </div>
+        </Link>
+      </div>
 
       <Stack as="section" gap={7} align="center" className="self-start">
         <nav className="flex flex-col items-center gap-4">
@@ -81,12 +67,6 @@ export default async function HomePage() {
             </Link>
           ))}
         </nav>
-
-        {empty && (
-          <Text variant="small" italic tone="secondary" as="p" className="font-serif max-w-xs text-center">
-            l&apos;armari encara és buit. comença afegint una peça.
-          </Text>
-        )}
 
         <nav className="flex items-center gap-6 font-serif italic type-small text-text-secondary">
           {SECONDARY.map((entry, i) => (

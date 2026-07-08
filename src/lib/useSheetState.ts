@@ -49,5 +49,3 @@ export function useSheetState(onClose: () => void, exitMs = 420) {
   return { open: shown && !closing, close };
 }
 
-/** Easing spring tipus iOS. Compartit entre sheets. */
-export const SHEET_EASE = "cubic-bezier(0.32, 0.72, 0, 1)";
