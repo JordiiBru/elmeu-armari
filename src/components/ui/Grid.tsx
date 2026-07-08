@@ -38,9 +38,11 @@ interface Props extends ComponentPropsWithoutRef<"div"> {
 }
 
 const COLS_CLASS = {
-  editorial: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
+  // Editorial density: fewer columns at wide breakpoints so each piece
+  // has real presence instead of feeling like a thumbnail wall.
+  editorial: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4",
   stats: "grid grid-cols-4 sm:grid-cols-8",
-  palette: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
+  palette: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5",
 } as const;
 
 export function Grid({

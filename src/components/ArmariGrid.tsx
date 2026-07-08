@@ -232,7 +232,7 @@ export function ArmariGrid({ garments }: Props) {
       </div>
 
       {filtered.length === 0 && !hasFilters ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-16">
           <AddGarmentCard />
         </div>
       ) : filtered.length === 0 ? (
@@ -240,7 +240,7 @@ export function ArmariGrid({ garments }: Props) {
           {UI.grid.noResults}
         </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-16">
           <AddGarmentCard />
           {filtered.map((garment, i) => (
             <GarmentCard

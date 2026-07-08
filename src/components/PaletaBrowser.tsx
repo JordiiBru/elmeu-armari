@@ -55,7 +55,7 @@ export default function PaletaBrowser({
           cap color coincideix.
         </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-12">
           {filtered.map((c) => (
             <Card
               key={c.index}

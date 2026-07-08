@@ -80,7 +80,7 @@ export function OutfitBuilder({
           No hi ha peces per a aquesta temporada.
         </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-16">
           {filtered.map((g, i) => (
             <GarmentCard
               key={g.id}
