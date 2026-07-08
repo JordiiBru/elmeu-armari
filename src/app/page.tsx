@@ -35,9 +35,9 @@ export default function HomePage() {
         <Link
           href="/paleta"
           aria-label={`Paleta ${palette.nombre}`}
-          className="group block w-full max-w-md md:max-w-lg outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+          className="group block w-40 md:w-56 outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
         >
-          <div className="flex h-14 md:h-20 overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-spring)] group-hover:-translate-y-0.5">
+          <div className="flex h-4 md:h-6 overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-spring)] group-hover:-translate-y-0.5">
             {palette.colores.map((hex, i) => (
               <div
                 key={i}
