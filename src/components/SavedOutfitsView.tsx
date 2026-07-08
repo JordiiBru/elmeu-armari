@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useTransition, useMemo } from "react";
-import Image from "next/image";
 import { deleteOutfitAction } from "@/app/outfits/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
+import { PieceThumb } from "./PieceThumb";
 
 interface SavedGroup {
   garmentKey: string;
@@ -42,26 +42,10 @@ function groupOutfits(outfits: SavedOutfit[], palettes: SanzoPalette[]): SavedGr
 
 function GarmentThumb({ garment }: { garment: GarmentWithColors }) {
   return (
-    <div
-      className="relative h-16 w-16 flex-shrink-0 overflow-hidden"
-      title={CATEGORY_LABELS[garment.category as keyof typeof CATEGORY_LABELS]}
-    >
-      {garment.image ? (
-        <Image
-          src={`/api/uploads/${garment.image}?v=${garment.updatedAt.getTime()}`}
-          alt=""
-          fill
-          unoptimized
-          className="object-cover"
-        />
-      ) : (
-        <div className="flex h-full w-full">
-          {garment.colors.map((c) => (
-            <div key={c.id} className="flex-1 h-full" style={{ backgroundColor: c.hex }} />
-          ))}
-        </div>
-      )}
-    </div>
+    <PieceThumb
+      garment={garment}
+      className="h-16 w-16 flex-shrink-0"
+    />
   );
 }
 
@@ -119,7 +103,7 @@ function SavedGroupCard({
           <div className="flex flex-col gap-0.5">
             <span className="font-serif text-base leading-tight text-foreground">
               {group.garments
-                .map((og) => CATEGORY_LABELS[og.garment.category as keyof typeof CATEGORY_LABELS])
+                .map((og) => CATEGORY_LABELS[og.garment.category])
                 .join(" · ")}
             </span>
             <span className="font-serif italic text-xs text-foreground-secondary">
