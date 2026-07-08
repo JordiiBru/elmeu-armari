@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { garmentImageSrc, garmentThumbSrc } from "@/lib/prendas/image";
 
@@ -21,6 +24,8 @@ interface Props {
  * Renders a garment's photo, or a fallback of vertical/horizontal colour
  * stripes when there is no photo. The wrapper is `relative` so the caller
  * only has to size it (`h-16 w-16`, `aspect-[3/4]`, etc.).
+ *
+ * Photos crossfade in on load via `opacity` — never a hard pop.
  */
 export function PieceThumb({
   garment,
@@ -32,9 +37,10 @@ export function PieceThumb({
   className,
 }: Props) {
   const src = thumb ? garmentThumbSrc(garment) : garmentImageSrc(garment);
+  const [loaded, setLoaded] = useState(false);
 
   return (
-    <div className={`relative overflow-hidden ${className ?? ""}`.trim()}>
+    <div className={`relative overflow-hidden bg-surface ${className ?? ""}`.trim()}>
       {src ? (
         <Image
           src={src}
@@ -42,13 +48,22 @@ export function PieceThumb({
           fill
           unoptimized
           sizes={sizes}
-          className="object-cover"
+          className={[
+            "object-cover",
+            "transition-opacity duration-[var(--duration-slow)] ease-[var(--ease-standard)]",
+            loaded ? "opacity-100" : "opacity-0",
+          ].join(" ")}
           loading={loading}
           priority={priority}
           draggable={false}
+          onLoad={() => setLoaded(true)}
         />
       ) : (
-        <div className={`flex h-full w-full ${fallbackDirection === "vertical" ? "flex-col" : ""}`}>
+        <div
+          className={`flex h-full w-full ${
+            fallbackDirection === "vertical" ? "flex-col" : ""
+          }`}
+        >
           {garment.colors.map((c) => (
             <div
               key={c.id}
