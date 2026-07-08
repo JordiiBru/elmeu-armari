@@ -9,6 +9,7 @@ import { SHEET_EASE, useSheetState } from "@/lib/useSheetState";
 import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { saveOutfitAction } from "@/app/outfits/actions";
 import { OutfitGroupCard } from "./OutfitCard";
+import { IconButton, TextButton } from "@/components/ui";
 
 const PAGE_SIZE = 6;
 
@@ -161,14 +162,15 @@ export function OutfitBottomSheet({
               {garment.notes && ` · ${garment.notes}`}
             </p>
           </div>
-          <button
+          <IconButton
             type="button"
             onClick={close}
-            className="text-foreground-secondary hover:text-foreground text-xl leading-none flex-shrink-0 -mr-1 -mt-1 h-8 w-8 flex items-center justify-center transition-colors active:scale-95"
-            aria-label="Tancar"
+            label="Tancar"
+            size="sm"
+            className="flex-shrink-0 -mr-1 -mt-1 text-xl leading-none"
           >
             ×
-          </button>
+          </IconButton>
         </div>
 
         {/* Filtres per nombre de peces */}
@@ -301,16 +303,8 @@ function LoadMoreButton({
   children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group relative self-center font-serif italic text-sm text-foreground active:scale-[0.98] mt-4"
-    >
-      <span>{children}</span>
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-foreground origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out will-change-transform"
-      />
-    </button>
+    <TextButton type="button" onClick={onClick} className="self-center mt-4">
+      {children}
+    </TextButton>
   );
 }

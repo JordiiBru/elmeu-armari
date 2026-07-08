@@ -15,6 +15,7 @@ import {
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
+import { IconButton, TextButton } from "@/components/ui";
 
 interface Props {
   garment: GarmentWithColors;
@@ -89,14 +90,15 @@ export function GarmentModal({ garment, onClose }: Props) {
                 {FIT_LABELS[garment.fit]} · talla {garment.size}
               </p>
             </div>
-            <button
+            <IconButton
               type="button"
               onClick={close}
-              className="text-foreground-secondary hover:text-foreground text-xl leading-none flex-shrink-0 -mr-1 -mt-1 h-8 w-8 flex items-center justify-center transition-colors active:scale-95"
-              aria-label="Tancar"
+              label="Tancar"
+              size="sm"
+              className="flex-shrink-0 -mr-1 -mt-1 text-xl leading-none"
             >
               ×
-            </button>
+            </IconButton>
           </div>
 
           {/* Meta */}
@@ -163,22 +165,22 @@ export function GarmentModal({ garment, onClose }: Props) {
           <div className="flex items-center justify-between pt-4 border-t border-border">
             <Link
               href={`/edit/${garment.id}`}
-              className="font-serif italic text-sm text-foreground hover:text-foreground-secondary transition-colors"
+              className="font-serif italic type-small text-text-primary hover:text-text-secondary transition-colors"
               onClick={close}
             >
               editar
             </Link>
             <form action={deleteGarmentAction}>
               <input type="hidden" name="id" value={garment.id} />
-              <button
+              <TextButton
                 type="submit"
-                className="font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors active:scale-95"
+                tone="danger"
                 onClick={(e) => {
                   if (!confirm(`${UI.buttons.delete} peça?`)) e.preventDefault();
                 }}
               >
                 eliminar
-              </button>
+              </TextButton>
             </form>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { PieceThumb } from "./PieceThumb";
+import { IconButton } from "@/components/ui";
 
 interface SavedGroup {
   garmentKey: string;
@@ -172,14 +173,15 @@ function SavedPaletteRow({
       <span className="font-serif italic text-sm text-foreground-secondary min-w-0 truncate">
         {entry.palette?.nombre ?? `paleta #${entry.outfitId}`}
       </span>
-      <button
+      <IconButton
         onClick={handleDelete}
         disabled={pending}
-        className="text-foreground-secondary hover:text-foreground disabled:opacity-40 transition-colors active:scale-95 shrink-0 h-6 w-6 flex items-center justify-center"
-        aria-label="Eliminar outfit"
+        label="Eliminar outfit"
+        size="sm"
+        className="shrink-0"
       >
         <span aria-hidden className="text-base leading-none">×</span>
-      </button>
+      </IconButton>
     </div>
   );
 }

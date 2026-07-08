@@ -24,6 +24,7 @@ import {
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import { FORM_STYLES } from "@/lib/ui";
+import { Button, TextButton } from "@/components/ui";
 
 interface Props {
   garment: GarmentWithColors;
@@ -179,22 +180,18 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
             </div>
           ) : null}
           <div className="flex items-center gap-3">
-            <button
+            <TextButton
               type="button"
+              tone="secondary"
               disabled={imageStatus === "uploading"}
               onClick={() => fileInputRef.current?.click()}
-              className="font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors disabled:opacity-40"
             >
               {imageStatus === "uploading" ? "pujant…" : currentImage ? "canviar foto" : "afegir foto"}
-            </button>
+            </TextButton>
             {currentImage && imageStatus !== "uploading" && (
-              <button
-                type="button"
-                onClick={handleDeleteImage}
-                className="font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors"
-              >
+              <TextButton type="button" tone="secondary" onClick={handleDeleteImage}>
                 treure foto
-              </button>
+              </TextButton>
             )}
           </div>
           {imageStatus === "error" && (
@@ -218,17 +215,16 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
         </p>
       )}
 
-      <button
+      <Button
         type="submit"
-        disabled={isPending}
-        className="group self-start relative font-serif italic text-lg text-foreground disabled:opacity-40 transition-opacity active:scale-[0.98] mt-2"
+        variant="primary"
+        size="lg"
+        loading={isPending}
+        loadingText="guardant…"
+        className="self-start mt-2"
       >
-        <span>{isPending ? "guardant…" : "guardar canvis"}</span>
-        <span
-          aria-hidden
-          className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-foreground origin-left transition-transform duration-500 ease-out scale-x-0 group-hover:scale-x-100"
-        />
-      </button>
+        guardar canvis
+      </Button>
     </form>
   );
 }

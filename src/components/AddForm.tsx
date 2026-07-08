@@ -24,6 +24,7 @@ import {
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import { FORM_STYLES } from "@/lib/ui";
+import { Button, TextButton } from "@/components/ui";
 
 export function AddForm() {
   const router = useRouter();
@@ -164,26 +165,26 @@ export function AddForm() {
             <img src={previewUrl} alt="Preview" className="w-32 h-32 object-cover" />
           )}
           <div className="flex items-center gap-3">
-            <button
+            <TextButton
               type="button"
+              tone="secondary"
               onClick={() => fileInputRef.current?.click()}
-              className="font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors"
             >
               {imageFile ? "canviar foto" : "afegir foto"}
-            </button>
+            </TextButton>
             {imageFile && (
-              <button
+              <TextButton
                 type="button"
+                tone="secondary"
                 onClick={() => {
                   setImageFile(null);
                   if (previewUrl) URL.revokeObjectURL(previewUrl);
                   setPreviewUrl(null);
                   if (fileInputRef.current) fileInputRef.current.value = "";
                 }}
-                className="font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors"
               >
                 treure
-              </button>
+              </TextButton>
             )}
           </div>
           <input
@@ -208,19 +209,16 @@ export function AddForm() {
         </p>
       )}
 
-      <button
+      <Button
         type="submit"
-        disabled={isPending || isUploading}
-        className="group self-start relative font-serif italic text-lg text-foreground disabled:opacity-40 transition-opacity active:scale-[0.98] mt-2"
+        variant="primary"
+        size="lg"
+        loading={isPending || isUploading}
+        loadingText={isUploading ? "pujant foto…" : "guardant…"}
+        className="self-start mt-2"
       >
-        <span>
-          {isUploading ? "pujant foto…" : isPending ? "guardant…" : "guardar peça"}
-        </span>
-        <span
-          aria-hidden
-          className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-foreground origin-left transition-transform duration-500 ease-out scale-x-0 group-hover:scale-x-100"
-        />
-      </button>
+        guardar peça
+      </Button>
     </form>
   );
 }

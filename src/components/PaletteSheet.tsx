@@ -2,6 +2,7 @@
 
 import { SHEET_EASE, useSheetState } from "@/lib/useSheetState";
 import { useSwipeToClose } from "@/lib/useSwipeToClose";
+import { IconButton } from "@/components/ui";
 
 type Palette = {
   id: number;
@@ -93,14 +94,15 @@ export default function PaletteSheet({
                 {palettes.length === 1 ? "combinació" : "combinacions"}
               </p>
             </div>
-            <button
+            <IconButton
               type="button"
               onClick={close}
-              className="text-foreground-secondary hover:text-foreground text-xl leading-none flex-shrink-0 -mr-1 -mt-1 h-8 w-8 flex items-center justify-center transition-colors active:scale-95"
-              aria-label="Tancar"
+              label="Tancar"
+              size="sm"
+              className="flex-shrink-0 -mr-1 -mt-1 text-xl leading-none"
             >
               ×
-            </button>
+            </IconButton>
           </div>
 
           {palettes.length === 0 ? (

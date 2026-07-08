@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button, TextButton } from "@/components/ui";
 
 export function ImportForm() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -81,29 +82,20 @@ export function ImportForm() {
           className="sr-only"
           onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
         />
-        <div className="flex items-baseline gap-6">
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="group relative font-serif italic text-base text-foreground active:scale-[0.98]"
-          >
-            <span>{fileName ?? "seleccionar fitxer"}</span>
-            <span
-              aria-hidden
-              className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-foreground origin-left transition-transform duration-500 ease-out scale-x-0 group-hover:scale-x-100"
-            />
-          </button>
-          <button
+        <div className="flex items-center gap-6">
+          <TextButton type="button" onClick={() => inputRef.current?.click()}>
+            {fileName ?? "seleccionar fitxer"}
+          </TextButton>
+          <Button
             type="submit"
-            disabled={loading || !fileName}
-            className="group relative font-serif italic text-base text-foreground disabled:opacity-40 active:scale-[0.98]"
+            variant="primary"
+            size="md"
+            disabled={!fileName}
+            loading={loading}
+            loadingText="important…"
           >
-            <span>{loading ? "important…" : "→ importar"}</span>
-            <span
-              aria-hidden
-              className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-foreground origin-left transition-transform duration-500 ease-out scale-x-0 group-hover:scale-x-100"
-            />
-          </button>
+            importar
+          </Button>
         </div>
       </div>
 
