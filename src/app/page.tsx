@@ -1,10 +1,5 @@
 import Link from "next/link";
-import { findAllGarments } from "@/lib/prendas/service";
-import { findAllOutfits } from "@/lib/outfits/service";
-import { palettes, paletteColors } from "@/lib/colors";
 import { Stack, Text, Heading } from "@/components/ui";
-
-export const dynamic = "force-dynamic";
 
 const PRIMARY = [
   { href: "/armari", label: "El meu armari" },
@@ -16,21 +11,7 @@ const SECONDARY = [
   { href: "/settings", label: "configuració" },
 ];
 
-function pickPalette() {
-  const i = Math.floor(Math.random() * palettes.length);
-  return palettes[i];
-}
-
-export default async function HomePage() {
-  const [garments, outfits] = await Promise.all([
-    findAllGarments(),
-    findAllOutfits(),
-  ]);
-
-  const empty = garments.length === 0;
-  const palette = pickPalette();
-  const colors = paletteColors(palette);
-
+export default function HomePage() {
   return (
     <div className="flex-1 grid grid-rows-[1fr_auto_1fr] px-6 py-12 md:py-20">
       <Stack as="section" gap={5} align="center" className="self-end text-center">
@@ -40,42 +21,9 @@ export default async function HomePage() {
         </Text>
       </Stack>
 
-      <Stack gap={6} align="center" className="py-16 md:py-24 w-full">
+      <div className="flex justify-center py-16 md:py-24">
         <div className="h-px w-16 bg-border" aria-hidden />
-
-        {!empty && (
-          <Text variant="caption" tabular>
-            {garments.length} peces · {outfits.length}{" "}
-            {outfits.length === 1 ? "outfit desat" : "outfits desats"}
-          </Text>
-        )}
-
-        <Link
-          href="/paleta"
-          aria-label={`Explorar paleta ${palette.nombre}`}
-          className="group w-full max-w-2xl flex flex-col gap-3"
-        >
-          <div className="flex h-20 md:h-28 w-full overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-0.5">
-            {palette.colores.map((hex, i) => (
-              <div
-                key={i}
-                className="flex-1"
-                style={{ backgroundColor: hex }}
-                title={colors[i]?.name ?? hex}
-              />
-            ))}
-          </div>
-          <div className="flex items-baseline justify-between">
-            <Text variant="caption">paleta d&apos;avui</Text>
-            <Text as="span" italic tone="secondary" className="font-serif type-small">
-              {palette.nombre}
-            </Text>
-            <Text variant="caption" tabular>
-              n{String(palette.id).padStart(3, "0")}
-            </Text>
-          </div>
-        </Link>
-      </Stack>
+      </div>
 
       <Stack as="section" gap={7} align="center" className="self-start">
         <nav className="flex flex-col items-center gap-4">
@@ -95,18 +43,6 @@ export default async function HomePage() {
             </Link>
           ))}
         </nav>
-
-        {empty && (
-          <Text
-            variant="small"
-            italic
-            tone="secondary"
-            as="p"
-            className="font-serif max-w-xs text-center"
-          >
-            l&apos;armari encara és buit. comença afegint una peça.
-          </Text>
-        )}
 
         <nav className="flex items-center gap-6 font-serif italic type-small text-text-secondary">
           {SECONDARY.map((entry, i) => (
