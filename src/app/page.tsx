@@ -28,28 +28,35 @@ function sample<T>(arr: T[], n: number): T[] {
   return copy.slice(0, Math.min(n, copy.length));
 }
 
-// Editorial size pattern: three tiers in a fixed, magazine-like
-// rhythm. Only the *selection* rotates — the composition stays calm.
+// Editorial size pattern: three tiers, every pair a strict 3:4
+// portrait ratio so object-cover never crops asymmetrically. Only
+// the *selection* rotates — the composition stays calm.
+//
+// Tiers (w × h in Tailwind units, all 3:4):
+//   sm: w-9  h-12   ( 36 × 48 )
+//   md: w-12 h-16   ( 48 × 64 )
+//   lg: w-15 h-20   ( 60 × 80 )
+//   xl: w-18 h-24   ( 72 × 96 )
 const MOBILE_SIZES = [
-  "h-14 w-11",
-  "h-16 w-12",
-  "h-14 w-11",
-  "h-12 w-9",
-  "h-16 w-12",
-  "h-14 w-11",
+  "w-9 h-12",
+  "w-12 h-16",
+  "w-9 h-12",
+  "w-9 h-12",
+  "w-12 h-16",
+  "w-9 h-12",
 ];
 
 const DESKTOP_SIZES = [
-  "md:h-16 md:w-12",
-  "md:h-24 md:w-[4.5rem]",
-  "md:h-14 md:w-11",
-  "md:h-20 md:w-15",
-  "md:h-16 md:w-12",
-  "md:h-12 md:w-9",
-  "md:h-22 md:w-16",
-  "md:h-16 md:w-12",
-  "md:h-14 md:w-11",
-  "md:h-18 md:w-14",
+  "md:w-12 md:h-16",
+  "md:w-18 md:h-24",
+  "md:w-9 md:h-12",
+  "md:w-15 md:h-20",
+  "md:w-12 md:h-16",
+  "md:w-9 md:h-12",
+  "md:w-18 md:h-24",
+  "md:w-12 md:h-16",
+  "md:w-9 md:h-12",
+  "md:w-15 md:h-20",
 ];
 
 function Strip({
