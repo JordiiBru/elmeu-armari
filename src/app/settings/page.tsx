@@ -1,54 +1,45 @@
 import { ImportForm } from "@/components/ImportForm";
 import { findAllGarments } from "@/lib/prendas/service";
+import { PageContainer, SectionHeader, Stack, Text, Icon } from "@/components/ui";
 
 export default async function SettingsPage() {
   const garments = await findAllGarments();
 
   return (
-    <div className="max-w-2xl mx-auto w-full px-6 md:px-10 pb-24">
-      <header className="pt-2 pb-8 flex flex-col gap-2">
-        <span className="text-[11px] tracking-[0.25em] uppercase text-foreground-secondary">
-          arxiu
-        </span>
-        <h1 className="font-serif text-4xl md:text-5xl tracking-tight leading-[0.95]">
-          configuració
-        </h1>
-      </header>
+    <PageContainer width="form">
+      <SectionHeader eyebrow="arxiu" title="configuració" level="title-xl" />
 
       <div className="flex flex-col divide-y divide-border">
-        <section className="flex flex-col gap-4 py-10">
-          <h2 className="text-[10px] tracking-[0.3em] uppercase text-foreground-secondary">
-            exportar
-          </h2>
-          <p className="font-serif italic text-base text-foreground-secondary max-w-md">
+        <Stack as="section" gap={4} className="py-10">
+          <Text variant="caption" as="h2">exportar</Text>
+          <Text variant="subtitle" tone="secondary" as="p" className="max-w-md">
             descarrega totes les teves peces en format json. útil com a còpia de seguretat o per migrar a un altre dispositiu.
-          </p>
-          <p className="text-[11px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+          </Text>
+          <Text variant="caption" tabular>
             {garments.length} peces a l&apos;arxiu
-          </p>
+          </Text>
           <a
             href="/api/export"
             download
-            className="group relative self-start font-serif italic text-base text-foreground active:scale-[0.98]"
+            className="group relative self-start type-subtitle text-text-primary inline-flex items-center gap-2 active:scale-[0.98]"
           >
-            <span>→ descarregar json</span>
+            <span>descarregar json</span>
+            <Icon name="arrow-right" size={14} />
             <span
               aria-hidden
-              className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-foreground origin-left transition-transform duration-500 ease-out scale-x-0 group-hover:scale-x-100"
+              className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-text-primary origin-left transition-transform duration-[var(--duration-slow)] ease-out scale-x-0 group-hover:scale-x-100"
             />
           </a>
-        </section>
+        </Stack>
 
-        <section className="flex flex-col gap-4 py-10">
-          <h2 className="text-[10px] tracking-[0.3em] uppercase text-foreground-secondary">
-            importar
-          </h2>
-          <p className="font-serif italic text-base text-foreground-secondary max-w-md">
+        <Stack as="section" gap={4} className="py-10">
+          <Text variant="caption" as="h2">importar</Text>
+          <Text variant="subtitle" tone="secondary" as="p" className="max-w-md">
             puja un fitxer json exportat prèviament.
-          </p>
+          </Text>
           <ImportForm />
-        </section>
+        </Stack>
       </div>
-    </div>
+    </PageContainer>
   );
 }

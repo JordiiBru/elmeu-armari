@@ -6,6 +6,7 @@ import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { PieceThumb } from "./PieceThumb";
+import { IconButton, useToast, Icon, EmptyState } from "@/components/ui";
 
 interface SavedGroup {
   garmentKey: string;
@@ -60,9 +61,15 @@ export function SavedOutfitsView({
 
   if (groups.length === 0) {
     return (
-      <p className="font-serif italic text-foreground-secondary text-center py-16 max-w-md mx-auto">
-        Encara no hi ha res desat. Ves a <span className="text-foreground">combinar</span> i guarda les paletes que t&apos;agradin.
-      </p>
+      <EmptyState
+        title="encara no hi ha res desat."
+        hint={
+          <>
+            passa per <span className="text-text-primary">combinar</span> i guarda les
+            paletes que t&apos;agradin.
+          </>
+        }
+      />
     );
   }
 
@@ -101,25 +108,26 @@ function SavedGroupCard({
 
         <div className="flex-1 min-w-0 flex items-baseline justify-between gap-4">
           <div className="flex flex-col gap-0.5">
-            <span className="font-serif text-base leading-tight text-foreground">
+            <span className="font-serif text-base leading-tight text-text-primary">
               {group.garments
                 .map((og) => CATEGORY_LABELS[og.garment.category])
                 .join(" · ")}
             </span>
-            <span className="font-serif italic text-xs text-foreground-secondary">
+            <span className="font-serif italic text-xs text-text-secondary">
               {group.entries.length}{" "}
               {group.entries.length === 1 ? "paleta desada" : "paletes desades"}
             </span>
           </div>
-          <span className="text-[10px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums shrink-0">
-            n{String(index + 1).padStart(3, "0")}
+          <span className="inline-flex items-center gap-3 shrink-0">
+            <span className="type-caption tabular-nums">
+              n{String(index + 1).padStart(3, "0")}
+            </span>
             <span
-              aria-hidden
-              className={`ml-3 inline-block transition-transform duration-500 ease-out ${
+              className={`inline-flex text-text-secondary transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] ${
                 expanded ? "rotate-180" : ""
               }`}
             >
-              ˅
+              <Icon name="chevron-down" size={12} />
             </span>
           </span>
         </div>
@@ -146,10 +154,12 @@ function SavedPaletteRow({
   entry: { outfitId: string; name: string | null; palette: SanzoPalette | null };
 }) {
   const [pending, startTransition] = useTransition();
+  const toast = useToast();
 
   const handleDelete = () => {
     startTransition(async () => {
       await deleteOutfitAction(entry.outfitId);
+      toast.show("outfit eliminat");
     });
   };
 
@@ -169,17 +179,18 @@ function SavedPaletteRow({
       ) : (
         <div />
       )}
-      <span className="font-serif italic text-sm text-foreground-secondary min-w-0 truncate">
+      <span className="font-serif italic text-sm text-text-secondary min-w-0 truncate">
         {entry.palette?.nombre ?? `paleta #${entry.outfitId}`}
       </span>
-      <button
+      <IconButton
         onClick={handleDelete}
         disabled={pending}
-        className="text-foreground-secondary hover:text-foreground disabled:opacity-40 transition-colors active:scale-95 shrink-0 h-6 w-6 flex items-center justify-center"
-        aria-label="Eliminar outfit"
+        label="Eliminar outfit"
+        size="sm"
+        className="shrink-0"
       >
-        <span aria-hidden className="text-base leading-none">×</span>
-      </button>
+        <Icon name="close" size={14} />
+      </IconButton>
     </div>
   );
 }

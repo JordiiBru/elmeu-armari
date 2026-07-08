@@ -3,6 +3,7 @@
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
 import { PieceThumb } from "./PieceThumb";
+import { Card, Text, Icon } from "@/components/ui";
 
 /** Ratio 3:4 amb tira de swatches. Card editorial reusable. */
 export function GarmentCard({
@@ -15,57 +16,52 @@ export function GarmentCard({
   onClick: (g: GarmentWithColors) => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={() => onClick(garment)}
-      className="cv-auto group flex flex-col text-left outline-none focus-visible:ring-1 focus-visible:ring-foreground/30 focus-visible:ring-offset-4 focus-visible:ring-offset-background"
-    >
+    <Card as="button" interactive="clickable" type="button" onClick={() => onClick(garment)}>
       <PieceThumb
         garment={garment}
         thumb
         loading={index < 4 ? "eager" : "lazy"}
-        className="aspect-[3/4] w-full transition-transform duration-500 ease-out group-hover:-translate-y-1 group-active:translate-y-0 group-active:scale-[0.98]"
+        className="aspect-[3/4] w-full transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0"
       />
       <div className="flex items-baseline justify-between pt-3">
-        <span className="font-serif text-base leading-tight">
+        <Text as="span" className="font-serif leading-tight">
           {CATEGORY_LABELS[garment.category]}
-        </span>
-        <span className="text-[10px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+        </Text>
+        <Text variant="caption" tabular>
           n{String(index + 1).padStart(3, "0")}
-        </span>
+        </Text>
       </div>
-      <span className="text-xs italic text-foreground-secondary mt-0.5">
+      <Text variant="small" italic tone="secondary" className="font-serif mt-0.5">
         {FIT_LABELS[garment.fit] ?? garment.fit} · {garment.size}
-      </span>
+      </Text>
       {garment.notes && (
-        <span className="text-xs text-foreground-secondary mt-0.5 truncate">
+        <Text variant="small" tone="secondary" truncate className="mt-0.5">
           {garment.notes}
-        </span>
+        </Text>
       )}
-    </button>
+    </Card>
   );
 }
 
 /** CTA visual: afegir peça al mateix ratio 3:4. */
 export function AddGarmentCard({ href = "/add" }: { href?: string }) {
   return (
-    <a
-      href={href}
-      className="group flex flex-col text-left outline-none"
-    >
-      <div className="relative flex aspect-[3/4] w-full items-center justify-center border border-dashed border-border transition-[border-color,transform,background-color] duration-500 ease-out group-hover:border-foreground group-hover:bg-card group-hover:-translate-y-1 group-active:translate-y-0 group-active:scale-[0.98]">
-        <span
-          aria-hidden
-          className="font-serif text-4xl text-foreground-secondary transition-colors duration-500 group-hover:text-foreground"
-        >
-          +
+    <Card as="a" interactive="clickable" href={href}>
+      <div className="relative flex aspect-[3/4] w-full items-center justify-center border border-dashed border-border transition-[border-color,transform,background-color] duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:border-text-primary group-hover:bg-elevated group-hover:-translate-y-1 group-active:translate-y-0">
+        <span className="text-text-secondary transition-colors duration-[var(--duration-slow)] group-hover:text-text-primary">
+          <Icon name="plus" size={28} />
         </span>
       </div>
       <div className="flex items-baseline justify-between pt-3">
-        <span className="font-serif italic text-base leading-tight text-foreground-secondary transition-colors duration-500 group-hover:text-foreground">
+        <Text
+          as="span"
+          italic
+          tone="secondary"
+          className="font-serif leading-tight transition-colors duration-[var(--duration-slow)] group-hover:text-text-primary"
+        >
           afegir una peça
-        </span>
+        </Text>
       </div>
-    </a>
+    </Card>
   );
 }

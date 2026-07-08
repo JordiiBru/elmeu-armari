@@ -6,6 +6,13 @@ import {
   TEXTURE_LABELS,
 } from "@/lib/prendas/labels";
 import { CATEGORIES, SEASONS, ALL_FITS, TEXTURES } from "@/lib/prendas/types";
+import {
+  PageContainer,
+  SectionHeader,
+  Stack,
+  Cluster,
+  Text,
+} from "@/components/ui";
 
 function pct(n: number, total: number) {
   if (total === 0) return "0%";
@@ -23,20 +30,20 @@ function Row({
 }) {
   const width = total === 0 ? 0 : Math.round((count / total) * 100);
   return (
-    <div className="flex flex-col gap-1.5 py-2">
-      <div className="flex items-baseline justify-between gap-4">
-        <span className="font-serif text-base text-foreground">{label}</span>
-        <span className="text-[11px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+    <Stack gap={2} className="py-2">
+      <Cluster justify="between" align="baseline" gap={4}>
+        <Text as="span" className="font-serif">{label}</Text>
+        <Text variant="caption" tabular>
           {count} · {pct(count, total)}
-        </span>
-      </div>
+        </Text>
+      </Cluster>
       <div className="w-full h-px bg-border relative overflow-hidden">
         <div
-          className="absolute inset-0 bg-foreground origin-left transition-transform duration-700 ease-out will-change-transform"
+          className="absolute inset-0 bg-text-primary origin-left transition-transform duration-[var(--duration-deliberate)] ease-out will-change-transform"
           style={{ transform: `scaleX(${width / 100})` }}
         />
       </div>
-    </div>
+    </Stack>
   );
 }
 
@@ -48,12 +55,12 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-2">
-      <h2 className="text-[10px] tracking-[0.3em] uppercase text-foreground-secondary pb-2 border-b border-border">
+    <Stack as="section" gap={2}>
+      <Text variant="caption" as="h2" className="pb-2 border-b border-border">
         {title}
-      </h2>
-      <div className="flex flex-col gap-3 pt-2">{children}</div>
-    </section>
+      </Text>
+      <Stack gap={3} className="pt-2">{children}</Stack>
+    </Stack>
   );
 }
 
@@ -63,19 +70,12 @@ export default async function StatsPage() {
 
   if (total === 0) {
     return (
-      <div className="max-w-2xl mx-auto w-full px-6 md:px-10 pb-24">
-        <header className="pt-2 pb-8 flex flex-col gap-2">
-          <span className="text-[11px] tracking-[0.25em] uppercase text-foreground-secondary">
-            arxiu
-          </span>
-          <h1 className="font-serif text-4xl md:text-5xl tracking-tight leading-[0.95]">
-            estadístiques
-          </h1>
-        </header>
-        <p className="font-serif italic text-foreground-secondary">
+      <PageContainer width="form">
+        <SectionHeader eyebrow="arxiu" title="estadístiques" level="title-xl" />
+        <Text variant="subtitle" tone="secondary" italic as="p">
           encara no hi ha peces a l&apos;armari.
-        </p>
-      </div>
+        </Text>
+      </PageContainer>
     );
   }
 
@@ -104,24 +104,17 @@ export default async function StatsPage() {
     .slice(0, 16);
 
   return (
-    <div className="max-w-2xl mx-auto w-full px-6 md:px-10 pb-24">
-      <header className="pt-2 pb-8 flex flex-col gap-2">
-        <span className="text-[11px] tracking-[0.25em] uppercase text-foreground-secondary">
-          arxiu
-        </span>
-        <h1 className="font-serif text-4xl md:text-5xl tracking-tight leading-[0.95]">
-          estadístiques
-        </h1>
-      </header>
+    <PageContainer width="form">
+      <SectionHeader eyebrow="arxiu" title="estadístiques" level="title-xl" />
 
-      <div className="flex items-baseline gap-3 pb-10 border-b border-border">
-        <span className="font-serif text-6xl leading-none tabular-nums">{total}</span>
-        <span className="font-serif italic text-base text-foreground-secondary">
+      <Cluster align="baseline" gap={3} className="pb-10 border-b border-border">
+        <span className="type-display tabular-nums leading-none">{total}</span>
+        <Text variant="subtitle" tone="secondary" italic>
           peces en total
-        </span>
-      </div>
+        </Text>
+      </Cluster>
 
-      <div className="flex flex-col gap-12 pt-10">
+      <Stack gap={7} className="pt-10">
         <Section title="categoria">
           {CATEGORIES.filter((c) => perCategory[c] > 0).map((c) => (
             <Row key={c} label={CATEGORY_LABELS[c]} count={perCategory[c]} total={total} />
@@ -147,27 +140,27 @@ export default async function StatsPage() {
         </Section>
 
         {topColors.length > 0 && (
-          <section className="flex flex-col gap-4">
-            <h2 className="text-[10px] tracking-[0.3em] uppercase text-foreground-secondary pb-2 border-b border-border">
+          <Stack as="section" gap={4}>
+            <Text variant="caption" as="h2" className="pb-2 border-b border-border">
               colors dominants
-            </h2>
+            </Text>
             <div className="grid grid-cols-4 sm:grid-cols-8 gap-x-2 gap-y-4">
               {topColors.map(([hex, count]) => (
-                <div key={hex} className="flex flex-col gap-1.5">
+                <Stack key={hex} gap={2}>
                   <span
                     className="block aspect-square w-full"
                     style={{ backgroundColor: hex }}
                     title={hex}
                   />
-                  <span className="text-[10px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+                  <Text variant="caption" tabular>
                     {count}
-                  </span>
-                </div>
+                  </Text>
+                </Stack>
               ))}
             </div>
-          </section>
+          </Stack>
         )}
-      </div>
-    </div>
+      </Stack>
+    </PageContainer>
   );
 }

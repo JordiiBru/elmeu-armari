@@ -23,7 +23,15 @@ import {
   SUBTYPE_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
-import { FORM_STYLES } from "@/lib/ui";
+import {
+  Button,
+  TextButton,
+  Field,
+  Input,
+  Select,
+  Text,
+  Stack,
+} from "@/components/ui";
 
 interface Props {
   garment: GarmentWithColors;
@@ -35,6 +43,22 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
   const boundAction = updateGarmentAction.bind(null, garment.id);
   const [state, formAction, isPending] = useActionState(boundAction, null);
   const [category, setCategory] = useState<Category>(garment.category);
+  const initialFits = FITS_BY_CATEGORY[garment.category];
+  const initialSubtypes = SUBTYPES_BY_CATEGORY[garment.category];
+  const initialSizes = SIZES_BY_CATEGORY[garment.category];
+  const [subtype, setSubtype] = useState<string>(
+    garment.subtype && initialSubtypes.includes(garment.subtype)
+      ? garment.subtype
+      : "",
+  );
+  const [texture, setTexture] = useState<string>(garment.texture);
+  const [pattern, setPattern] = useState<string>(garment.pattern);
+  const [size, setSize] = useState<string>(
+    initialSizes.includes(garment.size) ? garment.size : "",
+  );
+  const [fit, setFit] = useState<string>(
+    initialFits.includes(garment.fit) ? garment.fit : "",
+  );
   const [currentImage, setCurrentImage] = useState<string | null>(garment.image);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageStatus, setImageStatus] = useState<"idle" | "uploading" | "error">("idle");
@@ -48,7 +72,10 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
     setImageStatus("uploading");
     const fd = new FormData();
     fd.append("file", file);
-    const r = await fetch(`/api/garments/${garment.id}/image`, { method: "POST", body: fd });
+    const r = await fetch(`/api/garments/${garment.id}/image`, {
+      method: "POST",
+      body: fd,
+    });
     if (r.ok) {
       const data = await r.json();
       setCurrentImage(data.image);
@@ -60,7 +87,9 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
 
   async function handleDeleteImage() {
     setImageStatus("uploading");
-    const r = await fetch(`/api/garments/${garment.id}/image`, { method: "DELETE" });
+    const r = await fetch(`/api/garments/${garment.id}/image`, {
+      method: "DELETE",
+    });
     if (r.ok) {
       setCurrentImage(null);
       if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -74,161 +103,170 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
   const subtypes = SUBTYPES_BY_CATEGORY[category];
   const sizes = SIZES_BY_CATEGORY[category];
 
-  const defaultFit = fits.includes(garment.fit) ? garment.fit : "";
-  const defaultSubtype = garment.subtype && subtypes.includes(garment.subtype) ? garment.subtype : "";
-  const defaultSize = sizes.includes(garment.size) ? garment.size : "";
-
   return (
     <form action={formAction} className="flex flex-col gap-7">
-      <div>
-        <label htmlFor="category" className={FORM_STYLES.label}>{UI.form.category} {UI.form.required}</label>
-        <select
-          id="category"
+      <Field label={UI.form.category} required>
+        <Select
           name="category"
           required
-          className={FORM_STYLES.select}
           value={category}
-          onChange={(e) => setCategory(e.target.value as Category)}
-        >
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
-          ))}
-        </select>
-      </div>
+          onChange={(v) => {
+            const next = v as Category;
+            setCategory(next);
+            if (!SUBTYPES_BY_CATEGORY[next].includes(subtype)) setSubtype("");
+            if (!SIZES_BY_CATEGORY[next].includes(size)) setSize("");
+            if (!FITS_BY_CATEGORY[next].includes(fit)) setFit("");
+          }}
+          options={CATEGORIES.map((c) => ({
+            value: c,
+            label: CATEGORY_LABELS[c],
+          }))}
+        />
+      </Field>
 
       {subtypes.length > 0 && (
-        <div>
-          <label htmlFor="subtype" className={FORM_STYLES.label}>{UI.form.subtype} {UI.form.required}</label>
-          <select id="subtype" name="subtype" defaultValue={defaultSubtype} required className={FORM_STYLES.select}>
-            <option value="">Selecciona...</option>
-            {subtypes.map((s) => (
-              <option key={s} value={s}>{SUBTYPE_LABELS[s]}</option>
-            ))}
-          </select>
-        </div>
+        <Field label={UI.form.subtype} required>
+          <Select
+            name="subtype"
+            required
+            value={subtype}
+            onChange={setSubtype}
+            options={subtypes.map((s) => ({
+              value: s,
+              label: SUBTYPE_LABELS[s],
+            }))}
+          />
+        </Field>
       )}
 
-      <div>
-        <span className={FORM_STYLES.label}>{UI.form.colors} {UI.form.required}</span>
+      <Field label={UI.form.colors} required>
         <ColorPickers initialColors={defaultHexColors} />
-      </div>
+      </Field>
 
-      <div>
-        <label htmlFor="texture" className={FORM_STYLES.label}>{UI.form.texture} {UI.form.required}</label>
-        <select id="texture" name="texture" defaultValue={garment.texture} required className={FORM_STYLES.select}>
-          {TEXTURES.map((t) => (
-            <option key={t} value={t}>{TEXTURE_LABELS[t]}</option>
-          ))}
-        </select>
-      </div>
+      <Field label={UI.form.texture} required>
+        <Select
+          name="texture"
+          required
+          value={texture}
+          onChange={setTexture}
+          options={TEXTURES.map((t) => ({
+            value: t,
+            label: TEXTURE_LABELS[t],
+          }))}
+        />
+      </Field>
 
-      <div>
-        <label htmlFor="pattern" className={FORM_STYLES.label}>{UI.form.pattern} {UI.form.required}</label>
-        <select id="pattern" name="pattern" defaultValue={garment.pattern} required className={FORM_STYLES.select}>
-          {PATTERNS.map((p) => (
-            <option key={p} value={p}>{PATTERN_LABELS[p]}</option>
-          ))}
-        </select>
-      </div>
+      <Field label={UI.form.pattern} required>
+        <Select
+          name="pattern"
+          required
+          value={pattern}
+          onChange={setPattern}
+          options={PATTERNS.map((p) => ({
+            value: p,
+            label: PATTERN_LABELS[p],
+          }))}
+        />
+      </Field>
 
-      <div>
-        <span className={FORM_STYLES.label}>{UI.form.seasons} {UI.form.required}</span>
+      <Field label={UI.form.seasons} required>
         <SeasonCheckboxes defaultValues={defaultSeasons} />
-      </div>
+      </Field>
 
-      <div>
-        <label htmlFor="size" className={FORM_STYLES.label}>{UI.form.size} {UI.form.required}</label>
-        <select id="size" name="size" defaultValue={defaultSize} required className={FORM_STYLES.select}>
-          <option value="">Selecciona...</option>
-          {sizes.map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
-      </div>
+      <Field label={UI.form.size} required>
+        <Select
+          name="size"
+          required
+          value={size}
+          onChange={setSize}
+          options={sizes.map((s) => ({ value: s, label: s }))}
+        />
+      </Field>
 
-      <div>
-        <label htmlFor="fit" className={FORM_STYLES.label}>{UI.form.fit} {UI.form.required}</label>
-        <select id="fit" name="fit" defaultValue={defaultFit} required className={FORM_STYLES.select}>
-          <option value="">Selecciona...</option>
-          {fits.map((f) => (
-            <option key={f} value={f}>{FIT_LABELS[f]}</option>
-          ))}
-        </select>
-      </div>
+      <Field label={UI.form.fit} required>
+        <Select
+          name="fit"
+          required
+          value={fit}
+          onChange={setFit}
+          options={fits.map((f) => ({ value: f, label: FIT_LABELS[f] }))}
+        />
+      </Field>
 
-      <div>
-        <label htmlFor="notes" className={FORM_STYLES.label}>{UI.form.notes}</label>
-        <input id="notes" name="notes" defaultValue={garment.notes ?? ""} className={FORM_STYLES.input} />
-      </div>
+      <Field label={UI.form.notes} htmlFor="notes">
+        <Input
+          id="notes"
+          name="notes"
+          defaultValue={garment.notes ?? ""}
+          placeholder="opcional…"
+        />
+      </Field>
 
-      <div>
-        <span className={FORM_STYLES.label}>Foto (opcional)</span>
-        <div className="flex flex-col gap-3 mt-2">
-          {previewUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={previewUrl} alt="Preview" className="w-32 h-32 object-cover" />
-          ) : currentImage ? (
-            <div className="relative w-32 h-32">
-              <Image
-                src={`/api/uploads/${currentImage}?v=${garment.updatedAt.getTime()}`}
-                alt="Foto actual"
-                fill
-                unoptimized
-                className="object-cover"
-              />
-            </div>
-          ) : null}
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              disabled={imageStatus === "uploading"}
-              onClick={() => fileInputRef.current?.click()}
-              className="font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors disabled:opacity-40"
-            >
-              {imageStatus === "uploading" ? "pujant…" : currentImage ? "canviar foto" : "afegir foto"}
-            </button>
-            {currentImage && imageStatus !== "uploading" && (
-              <button
-                type="button"
-                onClick={handleDeleteImage}
-                className="font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors"
-              >
-                treure foto
-              </button>
-            )}
+      <Stack gap={3}>
+        <Text variant="caption" as="span">Foto (opcional)</Text>
+        {previewUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={previewUrl} alt="Preview" className="w-32 h-32 object-cover" />
+        ) : currentImage ? (
+          <div className="relative w-32 h-32">
+            <Image
+              src={`/api/uploads/${currentImage}?v=${garment.updatedAt.getTime()}`}
+              alt="Foto actual"
+              fill
+              unoptimized
+              className="object-cover"
+            />
           </div>
-          {imageStatus === "error" && (
-            <p className="font-serif italic text-xs text-foreground-secondary">
-              No s&apos;ha pogut pujar la foto. Torna-ho a provar.
-            </p>
+        ) : null}
+        <div className="flex items-center gap-4">
+          <TextButton
+            type="button"
+            tone="secondary"
+            disabled={imageStatus === "uploading"}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {imageStatus === "uploading"
+              ? "pujant…"
+              : currentImage
+                ? "canviar foto"
+                : "afegir foto"}
+          </TextButton>
+          {currentImage && imageStatus !== "uploading" && (
+            <TextButton type="button" tone="secondary" onClick={handleDeleteImage}>
+              treure foto
+            </TextButton>
           )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={handleFileChange}
-          />
         </div>
-      </div>
+        {imageStatus === "error" && (
+          <Text variant="small" italic tone="secondary" className="font-serif">
+            No s&apos;ha pogut pujar la foto. Torna-ho a provar.
+          </Text>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+      </Stack>
 
       {state?.error && (
-        <p className="font-serif italic text-sm text-foreground border-t border-foreground pt-3">
+        <Text variant="small" italic className="font-serif text-danger border-t border-danger pt-3">
           {state.error}
-        </p>
+        </Text>
       )}
 
-      <button
+      <Button
         type="submit"
-        disabled={isPending}
-        className="group self-start relative font-serif italic text-lg text-foreground disabled:opacity-40 transition-opacity active:scale-[0.98] mt-2"
+        variant="primary"
+        size="lg"
+        loading={isPending}
+        loadingText="guardant…"
+        className="self-start mt-2"
       >
-        <span>{isPending ? "guardant…" : "guardar canvis"}</span>
-        <span
-          aria-hidden
-          className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-foreground origin-left transition-transform duration-500 ease-out scale-x-0 group-hover:scale-x-100"
-        />
-      </button>
+        guardar canvis
+      </Button>
     </form>
   );
 }

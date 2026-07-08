@@ -14,6 +14,7 @@ import {
   TEXTURE_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
+import { Input, Icon, EmptyState, TextButton } from "@/components/ui";
 
 interface Props {
   garments: GarmentWithColors[];
@@ -36,15 +37,15 @@ function FilterTag({
       aria-pressed={active}
     >
       <span
-        className={`text-[11px] tracking-[0.15em] uppercase transition-colors ${
-          active ? "text-foreground" : "text-foreground-secondary group-hover:text-foreground"
+        className={`type-caption transition-colors ${
+          active ? "text-text-primary" : "text-text-secondary group-hover:text-text-primary"
         }`}
       >
         {children}
       </span>
       <span
         aria-hidden
-        className={`pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-foreground origin-left transition-transform duration-300 ease-out ${
+        className={`pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-text-primary origin-left transition-transform duration-[var(--duration-base)] ease-out ${
           active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
         }`}
       />
@@ -61,7 +62,7 @@ function FilterRow({
 }) {
   return (
     <div className="grid grid-cols-[100px_1fr] gap-6 items-baseline">
-      <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary pt-0.5">
+      <span className="type-caption pt-0.5">
         {label}
       </span>
       <div className="flex flex-wrap gap-x-5 gap-y-2">{children}</div>
@@ -134,25 +135,24 @@ export function ArmariGrid({ garments }: Props) {
           <button
             type="button"
             onClick={() => setFiltersOpen((v) => !v)}
-            className="group inline-flex items-baseline gap-3 text-[11px] tracking-[0.25em] uppercase text-foreground-secondary hover:text-foreground transition-colors"
+            className="group inline-flex items-baseline gap-3 type-caption hover:text-text-primary transition-colors"
             aria-expanded={filtersOpen}
           >
             <span>filtres</span>
             {activeCount > 0 && (
-              <span className="text-[10px] text-foreground tabular-nums">
+              <span className="type-caption-strong tabular-nums">
                 {activeCount}
               </span>
             )}
             <span
-              aria-hidden
-              className={`inline-block transition-transform duration-500 ease-out ${
+              className={`inline-flex transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] ${
                 filtersOpen ? "rotate-180" : ""
               }`}
             >
-              ˅
+              <Icon name="chevron-down" size={12} />
             </span>
           </button>
-          <span className="text-[11px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+          <span className="type-caption tabular-nums">
             {filtered.length} / {garments.length}
           </span>
         </div>
@@ -161,12 +161,11 @@ export function ArmariGrid({ garments }: Props) {
         <div className="collapse-panel" data-open={filtersOpen}>
           <div>
             <div className="flex flex-col gap-5 pt-4 pb-2">
-              <input
+              <Input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="cerca per talla o nota"
-                className="w-full bg-transparent border-0 border-b border-border pb-2 text-sm placeholder:text-foreground-secondary focus:outline-none focus:border-foreground transition-colors"
               />
 
               <FilterRow label="categoria">
@@ -221,7 +220,7 @@ export function ArmariGrid({ garments }: Props) {
                 <button
                   type="button"
                   onClick={clearAll}
-                  className="self-start font-serif italic text-sm text-foreground-secondary hover:text-foreground"
+                  className="self-start font-serif italic text-sm text-text-secondary hover:text-text-primary"
                 >
                   {UI.buttons.clearFilters}
                 </button>
@@ -232,15 +231,23 @@ export function ArmariGrid({ garments }: Props) {
       </div>
 
       {filtered.length === 0 && !hasFilters ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-16">
           <AddGarmentCard />
         </div>
       ) : filtered.length === 0 ? (
-        <p className="font-serif italic text-foreground-secondary text-center py-16">
-          {UI.grid.noResults}
-        </p>
+        <EmptyState
+          title={UI.grid.noResults}
+          hint="prova a retirar algun filtre."
+          action={
+            hasFilters && (
+              <TextButton type="button" onClick={clearAll} tone="secondary">
+                netejar filtres
+              </TextButton>
+            )
+          }
+        />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-16">
           <AddGarmentCard />
           {filtered.map((garment, i) => (
             <GarmentCard

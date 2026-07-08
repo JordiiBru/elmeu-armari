@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import PaletteSheet from "@/components/PaletteSheet";
+import { Input, Card, Text, EmptyState } from "@/components/ui";
 
 type ColorEntry = {
   index: number;
@@ -36,57 +37,58 @@ export default function PaletaBrowser({
   return (
     <>
       <div className="mb-10">
-        <input
+        <Input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="search a color — english (pink, ochre, cerulian…)"
-          className="w-full bg-transparent border-0 border-b border-border pb-2 text-sm placeholder:text-foreground-secondary placeholder:italic placeholder:font-serif focus:outline-none focus:border-foreground transition-colors"
         />
         <div className="flex items-baseline justify-between pt-2">
-          <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary tabular-nums">
+          <span className="type-caption tabular-nums">
             {filtered.length} / {colors.length} colors
           </span>
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <p className="font-serif italic text-foreground-secondary text-center py-16">
-          cap color coincideix.
-        </p>
+        <EmptyState
+          title="cap color coincideix."
+          hint="prova amb un altre nom en anglès."
+        />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-12">
           {filtered.map((c) => (
-            <button
+            <Card
               key={c.index}
+              as="button"
+              interactive="clickable"
               type="button"
               onClick={() => setSelected(c)}
-              className="cv-auto group flex flex-col text-left outline-none focus-visible:ring-1 focus-visible:ring-foreground/30 focus-visible:ring-offset-4 focus-visible:ring-offset-background"
             >
               <div
-                className="aspect-square w-full transition-transform duration-500 ease-out group-hover:-translate-y-1 group-active:translate-y-0 group-active:scale-[0.98]"
+                className="aspect-square w-full transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0"
                 style={{ backgroundColor: c.hex }}
               />
               <div className="flex items-baseline justify-between pt-3">
-                <span className="font-serif text-base leading-tight">
+                <Text as="span" className="font-serif leading-tight">
                   {c.name}
-                </span>
-                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+                </Text>
+                <Text variant="caption" tabular>
                   n{String(c.index).padStart(3, "0")}
-                </span>
+                </Text>
               </div>
               <div className="flex items-baseline justify-between mt-0.5">
-                <span className="font-mono text-xs text-foreground-secondary">
+                <Text variant="mono" tone="secondary" as="span">
                   {c.hex.toUpperCase()}
-                </span>
+                </Text>
                 {c.combinations.length > 0 && (
-                  <span className="font-serif italic text-xs text-foreground-secondary">
+                  <Text variant="small" italic tone="secondary" className="font-serif">
                     {c.combinations.length}{" "}
                     {c.combinations.length === 1 ? "combinació" : "combinacions"}
-                  </span>
+                  </Text>
                 )}
               </div>
-            </button>
+            </Card>
           ))}
         </div>
       )}

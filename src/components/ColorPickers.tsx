@@ -16,7 +16,7 @@ export function ColorPickers({ initialColors }: Props) {
       {colors.map((color, i) => (
         <div key={i} className="flex items-center gap-3">
           <label
-            className="relative h-10 w-14 cursor-pointer overflow-hidden border border-border transition-colors hover:border-foreground"
+            className="relative h-10 w-14 cursor-pointer overflow-hidden border border-border transition-colors hover:border-text-primary"
             style={{ backgroundColor: color }}
           >
             <input
@@ -31,7 +31,7 @@ export function ColorPickers({ initialColors }: Props) {
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
           </label>
-          <span className="font-mono text-xs text-foreground-secondary tabular-nums">
+          <span className="font-mono text-xs text-text-secondary tabular-nums">
             {color.toUpperCase()}
           </span>
           {colors.length > 1 && (
@@ -40,7 +40,7 @@ export function ColorPickers({ initialColors }: Props) {
               onClick={() =>
                 setColors((prev) => prev.filter((_, j) => j !== i))
               }
-              className="ml-auto text-[10px] tracking-[0.2em] uppercase text-foreground-secondary hover:text-foreground transition-colors active:scale-95"
+              className="ml-auto type-caption hover:text-text-primary transition-colors active:scale-95"
             >
               eliminar
             </button>
@@ -50,7 +50,7 @@ export function ColorPickers({ initialColors }: Props) {
       <button
         type="button"
         onClick={() => setColors((prev) => [...prev, "#000000"])}
-        className="group relative self-start font-serif italic text-sm text-foreground-secondary hover:text-foreground transition-colors mt-1 active:scale-[0.98]"
+        className="group relative self-start font-serif italic text-sm text-text-secondary hover:text-text-primary transition-colors mt-1 active:scale-[0.98]"
       >
         <span>+ afegir color</span>
       </button>

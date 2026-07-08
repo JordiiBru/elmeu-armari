@@ -5,10 +5,9 @@ import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette, OutfitGroup } from "@/lib/outfits/types";
 import { generateOutfitGroupsForGarment } from "@/lib/outfits/engine";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
-import { SHEET_EASE, useSheetState } from "@/lib/useSheetState";
-import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { saveOutfitAction } from "@/app/outfits/actions";
 import { OutfitGroupCard } from "./OutfitCard";
+import { Sheet, TextButton, Text, Stack, useToast, Icon } from "@/components/ui";
 
 const PAGE_SIZE = 6;
 
@@ -47,9 +46,7 @@ export function OutfitBottomSheet({
   const [loading, setLoading] = useState(false);
   const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set());
   const [pieceFilter, setPieceFilter] = useState<number | null>(null);
-
-  const { open, close } = useSheetState(onClose, 420);
-  const swipe = useSwipeToClose(close);
+  const toast = useToast();
 
   const availablePieceCounts = useMemo(
     () =>
@@ -85,6 +82,7 @@ export function OutfitBottomSheet({
     const key = [...garmentIds].sort().join(",") + "|" + paletteId;
     await saveOutfitAction(paletteId, garmentIds);
     setSavedKeys((prev) => new Set(prev).add(key));
+    toast.show("outfit desat", "success");
   };
 
   const getSavedPaletteIds = (group: OutfitGroup): Set<number> => {
@@ -99,44 +97,12 @@ export function OutfitBottomSheet({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      {/* Backdrop */}
-      <div
-        onClick={close}
-        className="absolute inset-0 bg-foreground/40"
-        style={{
-          opacity: open ? 1 : 0,
-          transition: `opacity 300ms ${SHEET_EASE}`,
-        }}
-      />
-
-      {/* Panell */}
-      <div
-        role="dialog"
-        aria-modal
-        className="relative bg-card w-full sm:max-w-lg max-h-[92vh] flex flex-col overflow-hidden"
-        style={{
-          transform: open
-            ? `translate3d(0, ${swipe.dragY}px, 0)`
-            : "translate3d(0, 100%, 0)",
-          opacity: open ? 1 : 0,
-          transition: swipe.dragging
-            ? "none"
-            : `transform 420ms ${SHEET_EASE}, opacity 300ms ${SHEET_EASE}`,
-          willChange: "transform, opacity",
-          contain: "layout paint",
-        }}
-      >
-        {/* Handle mobil (swipe zone) */}
-        <div
-          className="sm:hidden pt-3 pb-2 flex justify-center touch-none"
-          {...swipe.handlers}
-        >
-          <span className="block h-1 w-10 rounded-full bg-border" />
-        </div>
-
-        {/* Franja de swatches — protagonista + swipe zone */}
-        <div className="flex h-24 sm:h-32 flex-shrink-0 touch-none" {...swipe.handlers}>
+    <Sheet
+      onClose={onClose}
+      size="lg"
+      label={`Combinacions per ${CATEGORY_LABELS[garment.category]}`}
+      media={
+        <div className="flex h-full w-full">
           {garment.colors.map((c) => (
             <div
               key={c.id}
@@ -146,34 +112,23 @@ export function OutfitBottomSheet({
             />
           ))}
         </div>
-
-        {/* Header */}
-        <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-3 border-b border-border">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
-              combinar
-            </span>
-            <h2 className="font-serif text-xl leading-tight">
-              {CATEGORY_LABELS[garment.category]}
-            </h2>
-            <p className="font-serif italic text-xs text-foreground-secondary">
-              {FIT_LABELS[garment.fit]} · talla {garment.size}
-              {garment.notes && ` · ${garment.notes}`}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={close}
-            className="text-foreground-secondary hover:text-foreground text-xl leading-none flex-shrink-0 -mr-1 -mt-1 h-8 w-8 flex items-center justify-center transition-colors active:scale-95"
-            aria-label="Tancar"
-          >
-            ×
-          </button>
-        </div>
-
-        {/* Filtres per nombre de peces */}
-        {availablePieceCounts.length > 1 && (
-          <div className="flex-shrink-0 px-6 py-3 border-b border-border flex gap-5 overflow-x-auto">
+      }
+      mediaHeight="h-24 sm:h-32"
+      header={
+        <Stack gap={1}>
+          <Text variant="caption">combinar</Text>
+          <h2 className="type-title leading-tight">
+            {CATEGORY_LABELS[garment.category]}
+          </h2>
+          <Text variant="small" italic tone="secondary" className="font-serif">
+            {FIT_LABELS[garment.fit]} · talla {garment.size}
+            {garment.notes && ` · ${garment.notes}`}
+          </Text>
+        </Stack>
+      }
+      headerBelow={
+        availablePieceCounts.length > 1 && (
+          <div className="px-6 py-3 flex gap-5 overflow-x-auto">
             <PieceFilterTag
               active={pieceFilter === null}
               onClick={() => setPieceFilter(null)}
@@ -190,71 +145,77 @@ export function OutfitBottomSheet({
               </PieceFilterTag>
             ))}
           </div>
-        )}
-
-        {/* Results */}
-        <div className="overflow-y-auto overscroll-contain px-6 pt-5 pb-8 flex flex-col gap-4">
-          {visibleGroups.length === 0 && pieceFilter !== null ? (
-            <div className="py-8 text-center flex flex-col gap-4 items-center">
-              <p className="font-serif italic text-sm text-foreground-secondary">
-                no hi ha combinacions de {pieceFilter} peces carregades.
-              </p>
-              {hasMore && !loading && (
-                <LoadMoreButton onClick={() => loadMore(groups.length)}>
-                  carregar més
-                </LoadMoreButton>
-              )}
-            </div>
-          ) : groups.length === 0 ? (
-            <p className="font-serif italic text-foreground-secondary text-center py-8">
-              cap combinació trobada per a aquesta peça.
-            </p>
-          ) : (
-            <>
-              <p className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary tabular-nums">
-                {visibleGroups.length}{" "}
-                {visibleGroups.length === 1 ? "combinació" : "combinacions"}
-                {pieceFilter !== null && ` · ${pieceFilter} peces`}
-              </p>
-              <div className="flex flex-col gap-4">
-                {visibleGroups.map((group, i) => (
-                  <OutfitGroupCard
-                    key={
-                      group.garments
-                        .map((g) => g.id)
-                        .sort()
-                        .join(",") +
-                      "-" +
-                      i
-                    }
-                    group={group}
-                    onSave={(paletteId) => handleSave(group, paletteId)}
-                    savedPaletteIds={getSavedPaletteIds(group)}
-                  />
-                ))}
-              </div>
-
-              {loading && (
-                <div className="flex flex-col gap-3 pt-2">
-                  {Array.from({ length: 2 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-24 bg-background-secondary/40 animate-pulse"
-                    />
-                  ))}
-                </div>
-              )}
-
-              {hasMore && !loading && (
-                <LoadMoreButton onClick={() => loadMore(groups.length)}>
-                  → mostrar més combinacions
-                </LoadMoreButton>
-              )}
-            </>
+        )
+      }
+    >
+      {visibleGroups.length === 0 && pieceFilter !== null ? (
+        <div className="py-8 text-center flex flex-col gap-4 items-center">
+          <Text italic tone="secondary" className="font-serif">
+            no hi ha combinacions de {pieceFilter} peces carregades.
+          </Text>
+          {hasMore && !loading && (
+            <TextButton
+              type="button"
+              onClick={() => loadMore(groups.length)}
+              className="self-center mt-4"
+            >
+              carregar més
+            </TextButton>
           )}
         </div>
-      </div>
-    </div>
+      ) : groups.length === 0 ? (
+        <Text italic tone="secondary" className="font-serif text-center py-8">
+          cap combinació trobada per a aquesta peça.
+        </Text>
+      ) : (
+        <>
+          <Text variant="caption" tabular as="p">
+            {visibleGroups.length}{" "}
+            {visibleGroups.length === 1 ? "combinació" : "combinacions"}
+            {pieceFilter !== null && ` · ${pieceFilter} peces`}
+          </Text>
+          <div className="flex flex-col gap-4">
+            {visibleGroups.map((group, i) => (
+              <OutfitGroupCard
+                key={
+                  group.garments
+                    .map((g) => g.id)
+                    .sort()
+                    .join(",") +
+                  "-" +
+                  i
+                }
+                group={group}
+                onSave={(paletteId) => handleSave(group, paletteId)}
+                savedPaletteIds={getSavedPaletteIds(group)}
+              />
+            ))}
+          </div>
+
+          {loading && (
+            <div className="flex flex-col gap-3 pt-2">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-24 bg-surface/60 animate-pulse"
+                />
+              ))}
+            </div>
+          )}
+
+          {hasMore && !loading && (
+            <TextButton
+              type="button"
+              onClick={() => loadMore(groups.length)}
+              className="self-center mt-4 inline-flex items-center gap-2"
+            >
+              <span>mostrar més combinacions</span>
+              <Icon name="arrow-right" size={14} />
+            </TextButton>
+          )}
+        </>
+      )}
+    </Sheet>
   );
 }
 
@@ -271,45 +232,22 @@ function PieceFilterTag({
     <button
       type="button"
       onClick={onClick}
-      className="group relative inline-flex items-baseline whitespace-nowrap active:scale-[0.97]"
+      className={[
+        "group relative inline-flex items-baseline whitespace-nowrap outline-none",
+        "type-caption transition-colors active:scale-[0.97]",
+        active ? "text-text-primary" : "hover:text-text-primary",
+        "focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+      ].join(" ")}
       aria-pressed={active}
-    >
-      <span
-        className={`text-[11px] tracking-[0.15em] uppercase transition-colors ${
-          active
-            ? "text-foreground"
-            : "text-foreground-secondary group-hover:text-foreground"
-        }`}
-      >
-        {children}
-      </span>
-      <span
-        aria-hidden
-        className={`pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-foreground origin-left transition-transform duration-300 ease-out will-change-transform ${
-          active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-        }`}
-      />
-    </button>
-  );
-}
-
-function LoadMoreButton({
-  onClick,
-  children,
-}: {
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group relative self-center font-serif italic text-sm text-foreground active:scale-[0.98] mt-4"
     >
       <span>{children}</span>
       <span
         aria-hidden
-        className="pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-foreground origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out will-change-transform"
+        className={[
+          "pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-text-primary",
+          "origin-left transition-transform duration-[var(--duration-base)] ease-out will-change-transform",
+          active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+        ].join(" ")}
       />
     </button>
   );
