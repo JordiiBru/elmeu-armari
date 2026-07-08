@@ -1,5 +1,10 @@
 import Link from "next/link";
+import { findAllGarments } from "@/lib/prendas/service";
+import { findAllOutfits } from "@/lib/outfits/service";
+import { PieceThumb } from "@/components/PieceThumb";
 import { Stack, Text, Heading } from "@/components/ui";
+
+export const dynamic = "force-dynamic";
 
 const PRIMARY = [
   { href: "/armari", label: "El meu armari" },
@@ -11,11 +16,19 @@ const SECONDARY = [
   { href: "/settings", label: "configuració" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [garments, outfits] = await Promise.all([
+    findAllGarments(),
+    findAllOutfits(),
+  ]);
+
+  const recent = garments.slice(0, 5);
+  const empty = garments.length === 0;
+
   return (
     <div className="flex-1 grid grid-rows-[1fr_auto_1fr] px-6 py-12 md:py-20">
       <Stack as="section" gap={5} align="center" className="self-end text-center">
-        <Heading level="display-xl" className="md:type-display-xl">
+        <Heading level="display-xl">
           el meu armari
         </Heading>
         <Text variant="subtitle" tone="secondary" italic as="p">
@@ -23,9 +36,32 @@ export default function HomePage() {
         </Text>
       </Stack>
 
-      <div className="flex justify-center py-16 md:py-24">
+      <Stack gap={5} align="center" className="py-16 md:py-24">
         <div className="h-px w-16 bg-border" aria-hidden />
-      </div>
+        {!empty && (
+          <>
+            <Text variant="caption" tabular>
+              {garments.length} peces · {outfits.length}{" "}
+              {outfits.length === 1 ? "outfit desat" : "outfits desats"}
+            </Text>
+            {recent.length > 0 && (
+              <div
+                className="flex items-end gap-3"
+                aria-label="Peces recents"
+              >
+                {recent.map((g) => (
+                  <PieceThumb
+                    key={g.id}
+                    garment={g}
+                    thumb
+                    className="h-14 w-11 md:h-16 md:w-12"
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </Stack>
 
       <Stack as="section" gap={7} align="center" className="self-start">
         <nav className="flex flex-col items-center gap-4">
@@ -45,6 +81,12 @@ export default function HomePage() {
             </Link>
           ))}
         </nav>
+
+        {empty && (
+          <Text variant="small" italic tone="secondary" as="p" className="font-serif max-w-xs text-center">
+            l&apos;armari encara és buit. comença afegint una peça.
+          </Text>
+        )}
 
         <nav className="flex items-center gap-6 font-serif italic type-small text-text-secondary">
           {SECONDARY.map((entry, i) => (
