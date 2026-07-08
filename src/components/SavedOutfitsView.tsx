@@ -6,7 +6,7 @@ import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { PieceThumb } from "./PieceThumb";
-import { IconButton } from "@/components/ui";
+import { IconButton, useToast } from "@/components/ui";
 
 interface SavedGroup {
   garmentKey: string;
@@ -147,10 +147,12 @@ function SavedPaletteRow({
   entry: { outfitId: string; name: string | null; palette: SanzoPalette | null };
 }) {
   const [pending, startTransition] = useTransition();
+  const toast = useToast();
 
   const handleDelete = () => {
     startTransition(async () => {
       await deleteOutfitAction(entry.outfitId);
+      toast.show("outfit eliminat");
     });
   };
 

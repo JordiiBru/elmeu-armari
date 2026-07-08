@@ -1,8 +1,7 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { SHEET_EASE, useSheetState } from "@/lib/useSheetState";
-import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { deleteGarmentAction } from "@/app/armari/actions";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import {
@@ -15,7 +14,7 @@ import {
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
-import { IconButton, TextButton } from "@/components/ui";
+import { Sheet, Text, TextButton, Stack } from "@/components/ui";
 
 interface Props {
   garment: GarmentWithColors;
@@ -23,179 +22,124 @@ interface Props {
 }
 
 export function GarmentModal({ garment, onClose }: Props) {
-  const { open, close } = useSheetState(onClose, 420);
-  const swipe = useSwipeToClose(close);
+  const [confirming, setConfirming] = useState(false);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      {/* Backdrop */}
-      <div
-        onClick={close}
-        className="absolute inset-0 bg-foreground/40"
-        style={{
-          opacity: open ? 1 : 0,
-          transition: `opacity 380ms ${SHEET_EASE}`,
-          // backdrop-filter blur eliminat: era font principal de jank a Safari Mac.
-          // L'opacitat sola ja donava profunditat suficient.
-        }}
-      />
+    <Sheet
+      onClose={onClose}
+      size="md"
+      label={`Peça ${CATEGORY_LABELS[garment.category]}`}
+      media={<PieceThumb garment={garment} priority className="h-full w-full" />}
+      mediaHeight="h-40"
+      header={
+        <Stack gap={1}>
+          <Text variant="caption">peça</Text>
+          <h2 className="type-title">
+            {CATEGORY_LABELS[garment.category]}
+            {garment.subtype && (
+              <Text as="span" italic tone="secondary" className="font-serif">
+                {" "}· {SUBTYPE_LABELS[garment.subtype]}
+              </Text>
+            )}
+          </h2>
+          <Text variant="small" italic tone="secondary" className="font-serif">
+            {FIT_LABELS[garment.fit]} · talla {garment.size}
+          </Text>
+        </Stack>
+      }
+    >
+      <dl className="grid grid-cols-2 gap-y-4 gap-x-6">
+        <Meta label={UI.modal.texture} value={TEXTURE_LABELS[garment.texture]} />
+        <Meta label={UI.modal.pattern} value={PATTERN_LABELS[garment.pattern]} />
+      </dl>
 
-      {/* Panell */}
-      <div
-        role="dialog"
-        aria-modal
-        className="relative bg-card w-full sm:max-w-md max-h-[92vh] flex flex-col overflow-hidden"
-        style={{
-          transform: open
-            ? `translate3d(0, ${swipe.dragY}px, 0)`
-            : "translate3d(0, 100%, 0)",
-          opacity: open ? 1 : 0,
-          transition: swipe.dragging
-            ? "none"
-            : `transform 420ms ${SHEET_EASE}, opacity 300ms ${SHEET_EASE}`,
-          willChange: "transform, opacity",
-          contain: "layout paint",
-        }}
-      >
-        {/* Handle mobil (swipe zone) */}
-        <div
-          className="sm:hidden pt-3 pb-2 flex justify-center touch-none"
-          {...swipe.handlers}
-        >
-          <span className="block h-1 w-10 rounded-full bg-border" />
-        </div>
-
-        {/* Franja visual — foto o swatches. Swipe zone. */}
-        <div className="h-40 flex-shrink-0 touch-none" {...swipe.handlers}>
-          <PieceThumb garment={garment} priority className="h-full w-full" />
-        </div>
-
-        <div className="overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6">
-          {/* Titol */}
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex flex-col gap-1">
-              <span className="type-caption">
-                peça
-              </span>
-              <h2 className="font-serif text-2xl leading-tight">
-                {CATEGORY_LABELS[garment.category]}
-                {garment.subtype && (
-                  <span className="text-foreground-secondary italic">
-                    {" "}
-                    · {SUBTYPE_LABELS[garment.subtype]}
-                  </span>
-                )}
-              </h2>
-              <p className="font-serif italic text-sm text-foreground-secondary">
-                {FIT_LABELS[garment.fit]} · talla {garment.size}
-              </p>
+      <Stack gap={2}>
+        <Text variant="caption">{UI.modal.colors}</Text>
+        <div className="flex flex-wrap gap-x-4 gap-y-2">
+          {garment.colors.map((c) => (
+            <div key={c.id} className="flex items-center gap-2">
+              <span
+                className="inline-block h-4 w-4"
+                style={{ backgroundColor: c.hex }}
+              />
+              <Text variant="mono" tone="secondary" as="span">
+                {c.hex}
+              </Text>
             </div>
-            <IconButton
-              type="button"
-              onClick={close}
-              label="Tancar"
-              size="sm"
-              className="flex-shrink-0 -mr-1 -mt-1 text-xl leading-none"
-            >
-              ×
-            </IconButton>
-          </div>
+          ))}
+        </div>
+      </Stack>
 
-          {/* Meta */}
-          <dl className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
-            <Meta label={UI.modal.texture} value={TEXTURE_LABELS[garment.texture]} />
-            <Meta label={UI.modal.pattern} value={PATTERN_LABELS[garment.pattern]} />
-          </dl>
-
-          {/* Colors */}
-          <div className="flex flex-col gap-2">
-            <span className="type-caption">
-              {UI.modal.colors}
-            </span>
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {garment.colors.map((c) => (
-                <div key={c.id} className="flex items-center gap-2">
+      {garment.seasons.length > 0 && (
+        <Stack gap={2}>
+          <Text variant="caption">{UI.modal.seasons}</Text>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 font-serif italic">
+            {garment.seasons.map((s, i) => (
+              <span key={s.id} className="inline-flex items-center gap-4">
+                {i > 0 && (
                   <span
-                    className="inline-block h-4 w-4"
-                    style={{ backgroundColor: c.hex }}
+                    aria-hidden
+                    className="inline-block h-1 w-1 rounded-full bg-border"
                   />
-                  <span className="text-xs font-mono text-foreground-secondary">
-                    {c.hex}
-                  </span>
-                </div>
-              ))}
-            </div>
+                )}
+                {SEASON_LABELS[s.season]}
+              </span>
+            ))}
           </div>
+        </Stack>
+      )}
 
-          {/* Estacions */}
-          {garment.seasons.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <span className="type-caption">
-                {UI.modal.seasons}
-              </span>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-serif italic">
-                {garment.seasons.map((s, i) => (
-                  <span key={s.id} className="inline-flex items-center gap-4">
-                    {i > 0 && (
-                      <span
-                        aria-hidden
-                        className="inline-block h-1 w-1 rounded-full bg-border"
-                      />
-                    )}
-                    {SEASON_LABELS[s.season]}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+      {garment.notes && (
+        <Stack gap={1}>
+          <Text variant="caption">nota</Text>
+          <Text as="p" italic className="font-serif">
+            {garment.notes}
+          </Text>
+        </Stack>
+      )}
 
-          {/* Notes */}
-          {garment.notes && (
-            <div className="flex flex-col gap-1">
-              <span className="type-caption">
-                nota
-              </span>
-              <p className="font-serif italic text-sm text-foreground">
-                {garment.notes}
-              </p>
-            </div>
-          )}
-
-          {/* Accions */}
-          <div className="flex items-center justify-between pt-4 border-t border-border">
-            <Link
-              href={`/edit/${garment.id}`}
-              className="font-serif italic type-small text-text-primary hover:text-text-secondary transition-colors"
-              onClick={close}
+      <div className="flex items-center justify-between pt-4 border-t border-border">
+        <Link
+          href={`/edit/${garment.id}`}
+          className="font-serif italic type-small text-text-primary hover:text-text-secondary transition-colors"
+        >
+          editar
+        </Link>
+        {confirming ? (
+          <form action={deleteGarmentAction} className="flex items-center gap-4">
+            <input type="hidden" name="id" value={garment.id} />
+            <TextButton
+              type="button"
+              tone="secondary"
+              onClick={() => setConfirming(false)}
             >
-              editar
-            </Link>
-            <form action={deleteGarmentAction}>
-              <input type="hidden" name="id" value={garment.id} />
-              <TextButton
-                type="submit"
-                tone="danger"
-                onClick={(e) => {
-                  if (!confirm(`${UI.buttons.delete} peça?`)) e.preventDefault();
-                }}
-              >
-                eliminar
-              </TextButton>
-            </form>
-          </div>
-        </div>
+              cancel·lar
+            </TextButton>
+            <TextButton type="submit" tone="danger">
+              sí, {UI.buttons.delete.toLowerCase()}
+            </TextButton>
+          </form>
+        ) : (
+          <TextButton
+            type="button"
+            tone="danger"
+            onClick={() => setConfirming(true)}
+          >
+            eliminar
+          </TextButton>
+        )}
       </div>
-    </div>
+    </Sheet>
   );
 }
 
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-1">
-      <dt className="type-caption">
-        {label}
+      <dt>
+        <Text variant="caption" as="span">{label}</Text>
       </dt>
-      <dd className="font-serif text-sm text-foreground">{value}</dd>
+      <dd className="font-serif">{value}</dd>
     </div>
   );
 }

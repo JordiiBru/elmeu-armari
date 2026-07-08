@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter_Tight, Geist_Mono } from "next/font/google";
 import SiteHeader from "@/components/SiteHeader";
+import { ToastProvider } from "@/components/ui";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -35,9 +36,11 @@ export default function RootLayout({
       lang="ca"
       className={`${fraunces.variable} ${interTight.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
-        <SiteHeader />
-        <main className="flex-1 flex flex-col">{children}</main>
+      <body className="min-h-full flex flex-col bg-background text-text-primary">
+        <ToastProvider>
+          <SiteHeader />
+          <main className="flex-1 flex flex-col">{children}</main>
+        </ToastProvider>
       </body>
     </html>
   );
