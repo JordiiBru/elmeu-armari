@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { deleteGarmentAction } from "@/app/armari/actions";
 import type { GarmentWithColors } from "@/lib/prendas/types";
@@ -14,7 +14,7 @@ import {
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
-import { Sheet, Text, TextButton, Stack } from "@/components/ui";
+import { Sheet, Text, TextButton, Stack, useToast } from "@/components/ui";
 
 interface Props {
   garment: GarmentWithColors;
@@ -23,6 +23,19 @@ interface Props {
 
 export function GarmentModal({ garment, onClose }: Props) {
   const [confirming, setConfirming] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const toast = useToast();
+
+  const handleDelete = () => {
+    if (pending) return;
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.append("id", garment.id);
+      await deleteGarmentAction(fd);
+      toast.show("peça eliminada");
+      onClose();
+    });
+  };
 
   return (
     <Sheet
@@ -106,19 +119,24 @@ export function GarmentModal({ garment, onClose }: Props) {
           editar
         </Link>
         {confirming ? (
-          <form action={deleteGarmentAction} className="flex items-center gap-4">
-            <input type="hidden" name="id" value={garment.id} />
+          <div className="flex items-center gap-4">
             <TextButton
               type="button"
               tone="secondary"
               onClick={() => setConfirming(false)}
+              disabled={pending}
             >
               cancel·lar
             </TextButton>
-            <TextButton type="submit" tone="danger">
-              sí, {UI.buttons.delete.toLowerCase()}
+            <TextButton
+              type="button"
+              tone="danger"
+              onClick={handleDelete}
+              disabled={pending}
+            >
+              {pending ? "eliminant…" : `sí, ${UI.buttons.delete.toLowerCase()}`}
             </TextButton>
-          </form>
+          </div>
         ) : (
           <TextButton
             type="button"

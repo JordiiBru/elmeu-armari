@@ -102,6 +102,12 @@ export function ArmariGrid({ garments }: Props) {
     window.history.replaceState(null, "", next);
   }, [categories, seasons, fits, textures, query]);
 
+  // Defensive: if the currently opened piece is no longer in the list
+  // (deleted, revalidation), don't render a stale modal.
+  const activeSelected = selected
+    ? garments.find((g) => g.id === selected.id) ?? null
+    : null;
+
   const toggleIn = useCallback(
     <T extends string>(setter: React.Dispatch<React.SetStateAction<T[]>>, value: T) => {
       setter((prev) =>
@@ -260,8 +266,8 @@ export function ArmariGrid({ garments }: Props) {
         </div>
       )}
 
-      {selected && (
-        <GarmentModal garment={selected} onClose={() => setSelected(null)} />
+      {activeSelected && (
+        <GarmentModal garment={activeSelected} onClose={() => setSelected(null)} />
       )}
     </>
   );

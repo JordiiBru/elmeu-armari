@@ -86,5 +86,21 @@ export async function updateGarment(
 }
 
 export async function deleteGarment(id: string) {
-  return prisma.garment.delete({ where: { id } });
+  // A saved outfit is a specific curation of pieces; if one of its
+  // pieces disappears the outfit itself is no longer meaningful. So
+  // we drop every outfit that referenced the garment before deleting
+  // the garment. OutfitGarment rows go away by cascade in both steps.
+  return prisma.$transaction(async (tx) => {
+    const affectedOutfits = await tx.outfitGarment.findMany({
+      where: { garmentId: id },
+      select: { outfitId: true },
+    });
+    const outfitIds = Array.from(
+      new Set(affectedOutfits.map((o) => o.outfitId)),
+    );
+    if (outfitIds.length > 0) {
+      await tx.outfit.deleteMany({ where: { id: { in: outfitIds } } });
+    }
+    return tx.garment.delete({ where: { id } });
+  });
 }
