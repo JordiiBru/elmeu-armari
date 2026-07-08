@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { SHEET_EASE, useSheetState } from "@/lib/useSheetState";
+import { useSheetState } from "@/lib/useSheetState";
 import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { IconButton } from "./IconButton";
 import { Icon } from "./Icon";
@@ -69,7 +69,8 @@ export function Sheet({
         className="absolute inset-0 bg-overlay"
         style={{
           opacity: open ? 1 : 0,
-          transition: `opacity 380ms ${SHEET_EASE}`,
+          transition:
+            "opacity var(--duration-slow) var(--ease-spring)",
         }}
       />
 
@@ -85,7 +86,7 @@ export function Sheet({
           opacity: open ? 1 : 0,
           transition: swipe.dragging
             ? "none"
-            : `transform 420ms ${SHEET_EASE}, opacity 300ms ${SHEET_EASE}`,
+            : "transform var(--duration-slow) var(--ease-spring), opacity var(--duration-base) var(--ease-spring)",
           willChange: "transform, opacity",
           contain: "layout paint",
         }}
