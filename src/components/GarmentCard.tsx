@@ -3,7 +3,7 @@
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
 import { PieceThumb } from "./PieceThumb";
-import { Card, Text } from "@/components/ui";
+import { Card, Text, Icon } from "@/components/ui";
 
 /** Ratio 3:4 amb tira de swatches. Card editorial reusable. */
 export function GarmentCard({
@@ -48,11 +48,8 @@ export function AddGarmentCard({ href = "/add" }: { href?: string }) {
   return (
     <Card as="a" interactive="clickable" href={href}>
       <div className="relative flex aspect-[3/4] w-full items-center justify-center border border-dashed border-border transition-[border-color,transform,background-color] duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:border-text-primary group-hover:bg-elevated group-hover:-translate-y-1 group-active:translate-y-0">
-        <span
-          aria-hidden
-          className="font-serif text-4xl text-text-secondary transition-colors duration-[var(--duration-slow)] group-hover:text-text-primary"
-        >
-          +
+        <span className="text-text-secondary transition-colors duration-[var(--duration-slow)] group-hover:text-text-primary">
+          <Icon name="plus" size={28} />
         </span>
       </div>
       <div className="flex items-baseline justify-between pt-3">

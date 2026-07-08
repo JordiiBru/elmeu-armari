@@ -6,7 +6,7 @@ import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { PieceThumb } from "./PieceThumb";
-import { IconButton, useToast } from "@/components/ui";
+import { IconButton, useToast, Icon } from "@/components/ui";
 
 interface SavedGroup {
   garmentKey: string;
@@ -112,15 +112,16 @@ function SavedGroupCard({
               {group.entries.length === 1 ? "paleta desada" : "paletes desades"}
             </span>
           </div>
-          <span className="type-caption tabular-nums shrink-0">
-            n{String(index + 1).padStart(3, "0")}
+          <span className="inline-flex items-center gap-3 shrink-0">
+            <span className="type-caption tabular-nums">
+              n{String(index + 1).padStart(3, "0")}
+            </span>
             <span
-              aria-hidden
-              className={`ml-3 inline-block transition-transform duration-500 ease-out ${
+              className={`inline-flex text-text-secondary transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] ${
                 expanded ? "rotate-180" : ""
               }`}
             >
-              ˅
+              <Icon name="chevron-down" size={12} />
             </span>
           </span>
         </div>
@@ -182,7 +183,7 @@ function SavedPaletteRow({
         size="sm"
         className="shrink-0"
       >
-        <span aria-hidden className="text-base leading-none">×</span>
+        <Icon name="close" size={14} />
       </IconButton>
     </div>
   );

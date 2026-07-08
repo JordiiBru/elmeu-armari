@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Icon } from "@/components/ui";
 
 /**
  * Enllac "enrere" com a breadcrumb determinista.
@@ -14,11 +15,13 @@ export default function BackLink({
     <Link
       href={fallbackHref}
       aria-label="Enrere"
-      className="group relative inline-flex items-center justify-center h-8 w-8 -ml-1 text-foreground-secondary hover:text-foreground transition-colors active:scale-90"
+      className="group inline-flex items-center justify-center h-11 w-11 -ml-2 text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] active:scale-90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
-      <span aria-hidden className="font-serif text-xl leading-none transition-transform duration-300 ease-out group-hover:-translate-x-1">
-        ←
-      </span>
+      <Icon
+        name="chevron-left"
+        size={18}
+        className="transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] group-hover:-translate-x-0.5"
+      />
     </Link>
   );
 }

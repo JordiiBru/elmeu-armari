@@ -57,7 +57,7 @@ export function SegmentedControl<V extends string>({
               aria-hidden
               className={[
                 "pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-text-primary",
-                "origin-left transition-transform duration-500 ease-out will-change-transform",
+                "origin-left transition-transform duration-[var(--duration-slow)] ease-out will-change-transform",
                 active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
               ].join(" ")}
             />

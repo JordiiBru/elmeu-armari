@@ -39,7 +39,7 @@ function Row({
       </Cluster>
       <div className="w-full h-px bg-border relative overflow-hidden">
         <div
-          className="absolute inset-0 bg-text-primary origin-left transition-transform duration-700 ease-out will-change-transform"
+          className="absolute inset-0 bg-text-primary origin-left transition-transform duration-[var(--duration-deliberate)] ease-out will-change-transform"
           style={{ transform: `scaleX(${width / 100})` }}
         />
       </div>

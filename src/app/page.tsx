@@ -69,14 +69,14 @@ export default async function HomePage() {
             <Link
               key={entry.href}
               href={entry.href}
-              className="group relative font-serif text-xl text-text-primary transition-transform duration-200 active:scale-[0.96]"
+              className="group relative font-serif text-xl text-text-primary transition-transform duration-[var(--duration-fast)] active:scale-[0.96]"
             >
-              <span className="transition-opacity duration-200 group-active:opacity-70">
+              <span className="transition-opacity duration-[var(--duration-fast)] group-active:opacity-70">
                 {entry.label}
               </span>
               <span
                 aria-hidden
-                className="pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-text-primary origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out will-change-transform"
+                className="pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-text-primary origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-[var(--duration-slow)] ease-out will-change-transform"
               />
             </Link>
           ))}
@@ -99,7 +99,7 @@ export default async function HomePage() {
               )}
               <Link
                 href={entry.href}
-                className="hover:text-text-primary transition-colors duration-300"
+                className="hover:text-text-primary transition-colors duration-[var(--duration-base)]"
               >
                 {entry.label}
               </Link>

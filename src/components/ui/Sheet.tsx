@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { SHEET_EASE, useSheetState } from "@/lib/useSheetState";
 import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { IconButton } from "./IconButton";
+import { Icon } from "./Icon";
 
 type Size = "md" | "lg" | "xl";
 
@@ -113,9 +114,9 @@ export function Sheet({
               onClick={close}
               label="Tancar"
               size="sm"
-              className="flex-shrink-0 -mr-1 -mt-1 text-xl leading-none"
+              className="flex-shrink-0 -mr-1 -mt-1"
             >
-              ×
+              <Icon name="close" size={18} />
             </IconButton>
           </div>
         )}

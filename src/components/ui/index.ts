@@ -16,3 +16,4 @@ export { SegmentedControl } from "./SegmentedControl";
 export { Card } from "./Card";
 export { Sheet } from "./Sheet";
 export { ToastProvider, useToast } from "./toast";
+export { Icon, type IconName } from "./Icon";

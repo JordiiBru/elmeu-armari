@@ -14,7 +14,7 @@ import {
   TEXTURE_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
-import { Input } from "@/components/ui";
+import { Input, Icon } from "@/components/ui";
 
 interface Props {
   garments: GarmentWithColors[];
@@ -45,7 +45,7 @@ function FilterTag({
       </span>
       <span
         aria-hidden
-        className={`pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-foreground origin-left transition-transform duration-300 ease-out ${
+        className={`pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-foreground origin-left transition-transform duration-[var(--duration-base)] ease-out ${
           active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
         }`}
       />
@@ -145,12 +145,11 @@ export function ArmariGrid({ garments }: Props) {
               </span>
             )}
             <span
-              aria-hidden
-              className={`inline-block transition-transform duration-500 ease-out ${
+              className={`inline-flex transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] ${
                 filtersOpen ? "rotate-180" : ""
               }`}
             >
-              ˅
+              <Icon name="chevron-down" size={12} />
             </span>
           </button>
           <span className="type-caption tabular-nums">

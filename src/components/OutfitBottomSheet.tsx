@@ -7,7 +7,7 @@ import { generateOutfitGroupsForGarment } from "@/lib/outfits/engine";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
 import { saveOutfitAction } from "@/app/outfits/actions";
 import { OutfitGroupCard } from "./OutfitCard";
-import { Sheet, TextButton, Text, Stack, useToast } from "@/components/ui";
+import { Sheet, TextButton, Text, Stack, useToast, Icon } from "@/components/ui";
 
 const PAGE_SIZE = 6;
 
@@ -207,9 +207,10 @@ export function OutfitBottomSheet({
             <TextButton
               type="button"
               onClick={() => loadMore(groups.length)}
-              className="self-center mt-4"
+              className="self-center mt-4 inline-flex items-center gap-2"
             >
-              → mostrar més combinacions
+              <span>mostrar més combinacions</span>
+              <Icon name="arrow-right" size={14} />
             </TextButton>
           )}
         </>
@@ -244,7 +245,7 @@ function PieceFilterTag({
         aria-hidden
         className={[
           "pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-text-primary",
-          "origin-left transition-transform duration-300 ease-out will-change-transform",
+          "origin-left transition-transform duration-[var(--duration-base)] ease-out will-change-transform",
           active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
         ].join(" ")}
       />

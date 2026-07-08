@@ -8,6 +8,7 @@ import {
   useState,
   type KeyboardEvent,
 } from "react";
+import { Icon } from "./Icon";
 
 export interface SelectOption {
   value: string;
@@ -135,13 +136,12 @@ export function Select({
           {selected ? selected.label : placeholder}
         </span>
         <span
-          aria-hidden
           className={[
-            "ml-3 text-xs transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] text-text-secondary",
+            "ml-3 inline-flex text-text-secondary transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)]",
             open ? "rotate-180" : "",
           ].join(" ")}
         >
-          ˅
+          <Icon name="chevron-down" size={14} />
         </span>
       </button>
 
