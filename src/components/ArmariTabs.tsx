@@ -15,6 +15,12 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+/** Minimum horizontal distance to count as an intentional swipe. */
+const SWIPE_THRESHOLD_PX = 60;
+/** Ignore the gesture if the vertical drift exceeded this ratio — user was
+ *  scrolling, not swiping. */
+const SWIPE_VERTICAL_TOLERANCE = 0.6;
+
 export function ArmariTabs({
   garments,
   palettes,
@@ -42,6 +48,35 @@ export function ArmariTabs({
     const rect = active.getBoundingClientRect();
     setIndicator({ x: rect.left - containerRect.left, w: rect.width });
   }, [tab]);
+
+  const goToIndex = (i: number) => {
+    if (i < 0 || i >= TABS.length) return;
+    setTab(TABS[i].id);
+  };
+
+  // Touch gesture — swipe left goes forward, swipe right goes backward.
+  // Only fires on touch devices; click keeps working everywhere.
+  const touchRef = useRef<{ x: number; y: number } | null>(null);
+
+  const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const t = e.touches[0];
+    if (!t) return;
+    touchRef.current = { x: t.clientX, y: t.clientY };
+  };
+
+  const onTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    const start = touchRef.current;
+    touchRef.current = null;
+    if (!start) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < SWIPE_THRESHOLD_PX) return;
+    if (Math.abs(dy) > Math.abs(dx) * SWIPE_VERTICAL_TOLERANCE) return;
+    const currentIndex = TABS.findIndex((t) => t.id === tab);
+    goToIndex(currentIndex + (dx < 0 ? 1 : -1));
+  };
 
   return (
     <div className="flex flex-col gap-10">
@@ -93,9 +128,11 @@ export function ArmariTabs({
         />
       </div>
 
-      {tab === "peces" && <ArmariGrid garments={garments} />}
-      {tab === "combinar" && <OutfitBuilder garments={garments} palettes={palettes} />}
-      {tab === "desats" && <SavedOutfitsView outfits={savedOutfits} palettes={palettes} />}
+      <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        {tab === "peces" && <ArmariGrid garments={garments} />}
+        {tab === "combinar" && <OutfitBuilder garments={garments} palettes={palettes} />}
+        {tab === "desats" && <SavedOutfitsView outfits={savedOutfits} palettes={palettes} />}
+      </div>
     </div>
   );
 }
