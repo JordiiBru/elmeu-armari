@@ -2,7 +2,14 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, TextButton } from "@/components/ui";
+import {
+  Button,
+  TextButton,
+  Field,
+  Text,
+  Stack,
+  SegmentedControl,
+} from "@/components/ui";
 
 export function ImportForm() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -50,30 +57,27 @@ export function ImportForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3">
-        <span className="type-caption">
-          mode
-        </span>
-        <div className="flex flex-col gap-2">
-          <ModeOption
-            checked={mode === "merge"}
-            onSelect={() => setMode("merge")}
-            title="fusionar"
-            description="afegeix les peces sense esborrar les existents."
-          />
-          <ModeOption
-            checked={mode === "replace"}
-            onSelect={() => setMode("replace")}
-            title="reemplaçar"
-            description="esborra tot l'arxiu i el reimporta des de zero."
-          />
-        </div>
-      </div>
+      <Field
+        label="mode"
+        hint={
+          mode === "merge"
+            ? "afegeix les peces sense esborrar les existents."
+            : "esborra tot l'arxiu i el reimporta des de zero."
+        }
+      >
+        <SegmentedControl
+          value={mode}
+          onChange={setMode}
+          ariaLabel="Mode d'importació"
+          options={[
+            { value: "merge", label: "fusionar" },
+            { value: "replace", label: "reemplaçar" },
+          ]}
+        />
+      </Field>
 
-      <div className="flex flex-col gap-3">
-        <span className="type-caption">
-          fitxer
-        </span>
+      <Stack gap={3}>
+        <Text variant="caption" as="span">fitxer</Text>
         <input
           ref={inputRef}
           type="file"
@@ -97,55 +101,19 @@ export function ImportForm() {
             importar
           </Button>
         </div>
-      </div>
+      </Stack>
 
       {status && (
-        <p className="font-serif italic text-sm text-foreground border-t border-foreground pt-3">
-          {status.msg}
-        </p>
-      )}
-    </form>
-  );
-}
-
-function ModeOption({
-  checked,
-  onSelect,
-  title,
-  description,
-}: {
-  checked: boolean;
-  onSelect: () => void;
-  title: string;
-  description: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className="flex items-start gap-3 text-left active:scale-[0.99] transition-transform"
-      aria-pressed={checked}
-    >
-      <span
-        aria-hidden
-        className={`mt-1.5 h-2.5 w-2.5 rounded-full border transition-colors ${
-          checked
-            ? "bg-foreground border-foreground"
-            : "bg-transparent border-border"
-        }`}
-      />
-      <span className="flex flex-col gap-0.5">
-        <span
-          className={`font-serif text-base ${
-            checked ? "text-foreground" : "text-foreground-secondary"
+        <Text
+          variant="small"
+          italic
+          className={`font-serif border-t pt-3 ${
+            status.type === "error" ? "text-danger border-danger" : "border-border-strong"
           }`}
         >
-          {title}
-        </span>
-        <span className="font-serif italic text-sm text-foreground-secondary">
-          {description}
-        </span>
-      </span>
-    </button>
+          {status.msg}
+        </Text>
+      )}
+    </form>
   );
 }

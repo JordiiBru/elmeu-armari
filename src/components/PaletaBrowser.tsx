@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import PaletteSheet from "@/components/PaletteSheet";
+import { Input } from "@/components/ui";
 
 type ColorEntry = {
   index: number;
@@ -36,12 +37,11 @@ export default function PaletaBrowser({
   return (
     <>
       <div className="mb-10">
-        <input
+        <Input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="search a color — english (pink, ochre, cerulian…)"
-          className="w-full bg-transparent border-0 border-b border-border pb-2 text-sm placeholder:text-foreground-secondary placeholder:italic placeholder:font-serif focus:outline-none focus:border-foreground transition-colors"
         />
         <div className="flex items-baseline justify-between pt-2">
           <span className="type-caption tabular-nums">

@@ -14,6 +14,7 @@ import {
   TEXTURE_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
+import { Input } from "@/components/ui";
 
 interface Props {
   garments: GarmentWithColors[];
@@ -161,12 +162,11 @@ export function ArmariGrid({ garments }: Props) {
         <div className="collapse-panel" data-open={filtersOpen}>
           <div>
             <div className="flex flex-col gap-5 pt-4 pb-2">
-              <input
+              <Input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="cerca per talla o nota"
-                className="w-full bg-transparent border-0 border-b border-border pb-2 text-sm placeholder:text-foreground-secondary focus:outline-none focus:border-foreground transition-colors"
               />
 
               <FilterRow label="categoria">
