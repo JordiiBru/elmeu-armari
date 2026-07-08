@@ -40,7 +40,7 @@ export function ColorPickers({ initialColors }: Props) {
               onClick={() =>
                 setColors((prev) => prev.filter((_, j) => j !== i))
               }
-              className="ml-auto text-[10px] tracking-[0.2em] uppercase text-foreground-secondary hover:text-foreground transition-colors active:scale-95"
+              className="ml-auto type-caption hover:text-foreground transition-colors active:scale-95"
             >
               eliminar
             </button>

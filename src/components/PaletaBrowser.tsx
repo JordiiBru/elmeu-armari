@@ -44,7 +44,7 @@ export default function PaletaBrowser({
           className="w-full bg-transparent border-0 border-b border-border pb-2 text-sm placeholder:text-foreground-secondary placeholder:italic placeholder:font-serif focus:outline-none focus:border-foreground transition-colors"
         />
         <div className="flex items-baseline justify-between pt-2">
-          <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary tabular-nums">
+          <span className="type-caption tabular-nums">
             {filtered.length} / {colors.length} colors
           </span>
         </div>
@@ -71,7 +71,7 @@ export default function PaletaBrowser({
                 <span className="font-serif text-base leading-tight">
                   {c.name}
                 </span>
-                <span className="text-[10px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+                <span className="type-caption tabular-nums">
                   n{String(c.index).padStart(3, "0")}
                 </span>
               </div>

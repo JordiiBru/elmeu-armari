@@ -44,7 +44,7 @@ export function ArmariTabs({
                 {t.label}
               </span>
               {t.id === "desats" && savedOutfits.length > 0 && (
-                <span className="ml-2 text-[10px] tracking-widest text-foreground-secondary align-super">
+                <span className="type-caption ml-2 align-super">
                   {savedOutfits.length}
                 </span>
               )}

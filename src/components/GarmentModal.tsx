@@ -73,7 +73,7 @@ export function GarmentModal({ garment, onClose }: Props) {
           {/* Titol */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+              <span className="type-caption">
                 peça
               </span>
               <h2 className="font-serif text-2xl leading-tight">
@@ -107,7 +107,7 @@ export function GarmentModal({ garment, onClose }: Props) {
 
           {/* Colors */}
           <div className="flex flex-col gap-2">
-            <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+            <span className="type-caption">
               {UI.modal.colors}
             </span>
             <div className="flex flex-wrap gap-x-4 gap-y-2">
@@ -128,7 +128,7 @@ export function GarmentModal({ garment, onClose }: Props) {
           {/* Estacions */}
           {garment.seasons.length > 0 && (
             <div className="flex flex-col gap-2">
-              <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+              <span className="type-caption">
                 {UI.modal.seasons}
               </span>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-serif italic">
@@ -150,7 +150,7 @@ export function GarmentModal({ garment, onClose }: Props) {
           {/* Notes */}
           {garment.notes && (
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+              <span className="type-caption">
                 nota
               </span>
               <p className="font-serif italic text-sm text-foreground">
@@ -190,7 +190,7 @@ export function GarmentModal({ garment, onClose }: Props) {
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-1">
-      <dt className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+      <dt className="type-caption">
         {label}
       </dt>
       <dd className="font-serif text-sm text-foreground">{value}</dd>

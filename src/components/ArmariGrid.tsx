@@ -36,7 +36,7 @@ function FilterTag({
       aria-pressed={active}
     >
       <span
-        className={`text-[11px] tracking-[0.15em] uppercase transition-colors ${
+        className={`type-caption transition-colors ${
           active ? "text-foreground" : "text-foreground-secondary group-hover:text-foreground"
         }`}
       >
@@ -61,7 +61,7 @@ function FilterRow({
 }) {
   return (
     <div className="grid grid-cols-[100px_1fr] gap-6 items-baseline">
-      <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary pt-0.5">
+      <span className="type-caption pt-0.5">
         {label}
       </span>
       <div className="flex flex-wrap gap-x-5 gap-y-2">{children}</div>
@@ -134,12 +134,12 @@ export function ArmariGrid({ garments }: Props) {
           <button
             type="button"
             onClick={() => setFiltersOpen((v) => !v)}
-            className="group inline-flex items-baseline gap-3 text-[11px] tracking-[0.25em] uppercase text-foreground-secondary hover:text-foreground transition-colors"
+            className="group inline-flex items-baseline gap-3 type-caption hover:text-foreground transition-colors"
             aria-expanded={filtersOpen}
           >
             <span>filtres</span>
             {activeCount > 0 && (
-              <span className="text-[10px] text-foreground tabular-nums">
+              <span className="type-caption-strong tabular-nums">
                 {activeCount}
               </span>
             )}
@@ -152,7 +152,7 @@ export function ArmariGrid({ garments }: Props) {
               ˅
             </span>
           </button>
-          <span className="text-[11px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+          <span className="type-caption tabular-nums">
             {filtered.length} / {garments.length}
           </span>
         </div>

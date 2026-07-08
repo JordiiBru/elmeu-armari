@@ -150,7 +150,7 @@ export function OutfitBottomSheet({
         {/* Header */}
         <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-3 border-b border-border">
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+            <span className="type-caption">
               combinar
             </span>
             <h2 className="font-serif text-xl leading-tight">
@@ -211,7 +211,7 @@ export function OutfitBottomSheet({
             </p>
           ) : (
             <>
-              <p className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary tabular-nums">
+              <p className="type-caption tabular-nums">
                 {visibleGroups.length}{" "}
                 {visibleGroups.length === 1 ? "combinació" : "combinacions"}
                 {pieceFilter !== null && ` · ${pieceFilter} peces`}
@@ -275,7 +275,7 @@ function PieceFilterTag({
       aria-pressed={active}
     >
       <span
-        className={`text-[11px] tracking-[0.15em] uppercase transition-colors ${
+        className={`type-caption transition-colors ${
           active
             ? "text-foreground"
             : "text-foreground-secondary group-hover:text-foreground"

@@ -35,10 +35,10 @@ export function OutfitBuilder({
       {/* Selector de temporada — mateix llenguatge que els filtres */}
       <div className="flex flex-col gap-4">
         <div className="flex items-baseline justify-between">
-          <span className="text-[11px] tracking-[0.25em] uppercase text-foreground-secondary">
+          <span className="type-caption">
             temporada
           </span>
-          <span className="text-[11px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+          <span className="type-caption tabular-nums">
             {filtered.length} peces
           </span>
         </div>
@@ -49,7 +49,7 @@ export function OutfitBuilder({
               <button
                 key={s}
                 onClick={() => setSeason(s)}
-                className={`inline-flex items-center gap-1.5 text-[11px] tracking-[0.15em] uppercase transition-colors active:scale-[0.98] ${
+                className={`inline-flex items-center gap-1.5 type-caption transition-colors active:scale-[0.98] ${
                   active
                     ? "text-foreground"
                     : "text-foreground-secondary hover:text-foreground"

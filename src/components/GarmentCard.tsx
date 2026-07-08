@@ -30,7 +30,7 @@ export function GarmentCard({
         <span className="font-serif text-base leading-tight">
           {CATEGORY_LABELS[garment.category]}
         </span>
-        <span className="text-[10px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+        <span className="type-caption tabular-nums">
           n{String(index + 1).padStart(3, "0")}
         </span>
       </div>

@@ -20,7 +20,7 @@ function GarmentTile({ garment }: { garment: GarmentWithColors }) {
   return (
     <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
       <PieceThumb garment={garment} className="h-20 w-20" />
-      <span className="text-[10px] tracking-[0.15em] uppercase text-foreground-secondary">
+      <span className="type-caption">
         {CATEGORY_LABELS[garment.category]}
       </span>
     </div>

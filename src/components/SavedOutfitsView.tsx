@@ -111,7 +111,7 @@ function SavedGroupCard({
               {group.entries.length === 1 ? "paleta desada" : "paletes desades"}
             </span>
           </div>
-          <span className="text-[10px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums shrink-0">
+          <span className="type-caption tabular-nums shrink-0">
             n{String(index + 1).padStart(3, "0")}
             <span
               aria-hidden

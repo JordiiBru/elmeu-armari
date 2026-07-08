@@ -1,54 +1,213 @@
 @import "tailwindcss";
 
-/* -------------------------------------------------------------------------- */
-/* Paleta base — neutra calida. Mai canvia.                                   */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   Design tokens — Phase 1.
+   Semantic layer. Every component uses these. Never a hex, never a raw size.
+
+   Reference: DESIGN-BIBLE.md
+   ========================================================================== */
 
 :root {
-  /* Paleta cream MUJI — mes calida, tirant al paper vintage japones */
-  --background: #f5edcd;
-  --card: #faf3d9;
-  --background-secondary: #e8dcb0;
-  --border: #cdc196;
-  --foreground: #2f2f2d;
-  --foreground-secondary: #6f6a63;
+  /* ---- Cromatica base — cream MUJI. No es un token semantic, es materia. --- */
+  --_cream-050: #faf3d9;
+  --_cream-100: #f5edcd;
+  --_cream-200: #e8dcb0;
+  --_cream-300: #cdc196;
+  --_cream-400: #a89d76;
+  --_graphite-900: #2f2f2d;
+  --_graphite-700: #4a4844;
+  --_graphite-500: #6f6a63;
+  --_graphite-400: #8a857c;
 
-  --ring: var(--border);
-  --input: var(--border);
+  /* Tintes editorials — usats amb comptagotes. */
+  --_ink-terracotta: #8a3e2a;
+  --_ink-moss: #55603a;
+  --_ink-ochre: #9c7a2d;
 
-  /* Permet animar height: auto (Chrome 129+, Safari 17.4+, Firefox 129+) */
+  /* ---- Superficies -------------------------------------------------------- */
+  --color-background: var(--_cream-100);
+  --color-surface: var(--_cream-050);
+  --color-elevated: var(--_cream-050);
+  --color-floating: var(--_cream-050);
+  --color-overlay: rgb(47 47 45 / 0.42);
+
+  /* ---- Text --------------------------------------------------------------- */
+  --color-text-primary: var(--_graphite-900);
+  --color-text-secondary: var(--_graphite-500);
+  --color-text-muted: var(--_graphite-400);
+  --color-text-inverse: var(--_cream-050);
+
+  /* ---- Bordes (hairline) -------------------------------------------------- */
+  --color-border: var(--_cream-300);
+  --color-border-strong: var(--_graphite-900);
+  --color-border-subtle: var(--_cream-200);
+
+  /* ---- Acents ------------------------------------------------------------- */
+  --color-accent: var(--_graphite-900);
+  --color-success: var(--_ink-moss);
+  --color-warning: var(--_ink-ochre);
+  --color-danger: var(--_ink-terracotta);
+
+  /* ---- Interactius -------------------------------------------------------- */
+  --color-interactive: var(--_graphite-900);
+  --color-interactive-hover: var(--_graphite-700);
+  --color-interactive-pressed: var(--_graphite-900);
+  --color-focus-ring: rgb(47 47 45 / 0.35);
+  --opacity-disabled: 0.4;
+
+  /* ---- Profunditat -------------------------------------------------------- */
+  --shadow-1: 0 1px 0 rgb(47 47 45 / 0.04);
+  --shadow-2: 0 1px 2px rgb(47 47 45 / 0.06), 0 2px 8px rgb(47 47 45 / 0.04);
+  --shadow-3: 0 2px 4px rgb(47 47 45 / 0.08), 0 12px 32px rgb(47 47 45 / 0.10);
+
+  /* ---- Tipografia — escala Major Third (1.25) ----------------------------- */
+  /* Base 16px. size(n) = round(16 * 1.25^n). */
+  --font-size-caption: 0.6875rem;     /* 11px */
+  --font-size-small: 0.8125rem;       /* 13px */
+  --font-size-body: 1rem;             /* 16px */
+  --font-size-subtitle: 1.125rem;     /* 18px */
+  --font-size-title: 1.5rem;          /* 24px */
+  --font-size-title-xl: 2rem;         /* 32px */
+  --font-size-hero: 3rem;             /* 48px */
+  --font-size-display: 4.5rem;        /* 72px */
+  --font-size-display-xl: 6rem;       /* 96px */
+
+  --leading-tight: 1.05;
+  --leading-snug: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  --tracking-caption: 0.22em;          /* Unic tracking de microcaps. */
+  --tracking-title: -0.01em;
+  --tracking-normal: 0;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+
+  /* ---- Espaiat — progressio 4pt ------------------------------------------- */
+  --space-1: 0.25rem;   /*  4 */
+  --space-2: 0.5rem;    /*  8 */
+  --space-3: 0.75rem;   /* 12 */
+  --space-4: 1rem;      /* 16 */
+  --space-5: 1.5rem;    /* 24 */
+  --space-6: 2rem;      /* 32 */
+  --space-7: 3rem;      /* 48 */
+  --space-8: 4rem;      /* 64 */
+  --space-9: 6rem;      /* 96 */
+
+  /* ---- Motion — un unic sistema ------------------------------------------- */
+  --duration-instant: 100ms;
+  --duration-fast: 180ms;
+  --duration-base: 260ms;
+  --duration-slow: 420ms;
+  --duration-deliberate: 600ms;
+
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Chrome 129+, Safari 17.4+, Firefox 129+. Anima height:auto. */
   interpolate-size: allow-keywords;
 }
 
-/* Panell col·lapsable amb height nadiu — molt mes fluid que grid-template-rows */
-.collapse-panel {
-  display: grid;
-  height: 0;
-  overflow: hidden;
-  transition: height 400ms cubic-bezier(0.25, 0.1, 0.25, 1);
-}
-.collapse-panel[data-open="true"] {
-  height: auto;
+/* ==========================================================================
+   Mode obscur — grafit calid, no gris fred.
+   Es la mateixa temperatura del cream, pero baixada.
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #1a1917;
+    --color-surface: #23211e;
+    --color-elevated: #2b2925;
+    --color-floating: #2b2925;
+    --color-overlay: rgb(0 0 0 / 0.55);
+
+    --color-text-primary: var(--_cream-050);
+    --color-text-secondary: #a8a196;
+    --color-text-muted: #7a7469;
+    --color-text-inverse: var(--_graphite-900);
+
+    --color-border: #3a3732;
+    --color-border-strong: var(--_cream-050);
+    --color-border-subtle: #2f2c28;
+
+    --color-accent: var(--_cream-050);
+
+    --color-interactive: var(--_cream-050);
+    --color-interactive-hover: #d8d0b8;
+    --color-interactive-pressed: var(--_cream-050);
+    --color-focus-ring: rgb(250 243 217 / 0.35);
+
+    --shadow-1: 0 1px 0 rgb(0 0 0 / 0.20);
+    --shadow-2: 0 1px 2px rgb(0 0 0 / 0.30), 0 2px 8px rgb(0 0 0 / 0.20);
+    --shadow-3: 0 2px 4px rgb(0 0 0 / 0.40), 0 12px 32px rgb(0 0 0 / 0.35);
+  }
 }
 
+/* Override explicit via [data-theme] — permet toggle futur sense refactor. */
+[data-theme="light"] {
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* ==========================================================================
+   Registre a Tailwind v4.
+   Els tokens semantics es publiquen com a utility classes:
+     bg-background, bg-surface, bg-elevated, bg-floating
+     text-text-primary, text-text-secondary, text-text-muted, text-text-inverse
+     border-border, border-border-strong, border-border-subtle
+     bg-accent, text-accent, bg-success, text-danger, ...
+   ========================================================================== */
+
 @theme inline {
-  --color-background: var(--background);
-  --color-background-secondary: var(--background-secondary);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-foreground-secondary: var(--foreground-secondary);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-elevated: var(--color-elevated);
+  --color-floating: var(--color-floating);
+  --color-overlay: var(--color-overlay);
+
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-inverse: var(--color-text-inverse);
+
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-border-subtle: var(--color-border-subtle);
+
+  --color-accent: var(--color-accent);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+
+  --color-interactive: var(--color-interactive);
+  --color-interactive-hover: var(--color-interactive-hover);
+  --color-interactive-pressed: var(--color-interactive-pressed);
+  --color-focus-ring: var(--color-focus-ring);
+
+  /* Backward-compat aliases — s'aniran retirant per fases.
+     Mantinguts perque codi existent no es trenqui abans de migrar. */
+  --color-foreground: var(--color-text-primary);
+  --color-foreground-secondary: var(--color-text-secondary);
+  --color-card: var(--color-elevated);
+  --color-background-secondary: var(--color-surface);
+  --color-input: var(--color-border);
+  --color-ring: var(--color-focus-ring);
 
   --font-sans: var(--font-inter-tight);
   --font-serif: var(--font-fraunces);
   --font-mono: var(--font-geist-mono);
 }
 
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
 @layer base {
   * {
-    @apply border-border;
+    border-color: var(--color-border);
   }
 
   html {
@@ -56,31 +215,137 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    color-scheme: light dark;
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
     font-feature-settings: "ss01", "cv11";
   }
 
   h1, h2, h3, h4, h5 {
     font-family: var(--font-serif), ui-serif, Georgia, serif;
-    font-weight: 400;
-    letter-spacing: -0.01em;
+    font-weight: var(--weight-regular);
+    letter-spacing: var(--tracking-title);
   }
 }
 
-/* Salta el pintat de peces off-screen — millora dramatica a grids llargs
-   (Chrome/Firefox suportats). Contain-intrinsic-size dona una alcada
-   estimada perque el scroll no salti. */
+/* ==========================================================================
+   Utility classes — tipografia semantica.
+   Us: <span class="type-caption">arxiu</span>
+   ========================================================================== */
+
+@layer components {
+  .type-caption {
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--font-size-caption);
+    letter-spacing: var(--tracking-caption);
+    text-transform: uppercase;
+    line-height: var(--leading-snug);
+    color: var(--color-text-secondary);
+  }
+  .type-caption-strong {
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--font-size-caption);
+    letter-spacing: var(--tracking-caption);
+    text-transform: uppercase;
+    line-height: var(--leading-snug);
+    color: var(--color-text-primary);
+  }
+
+  .type-body {
+    font-size: var(--font-size-body);
+    line-height: var(--leading-normal);
+  }
+  .type-small {
+    font-size: var(--font-size-small);
+    line-height: var(--leading-normal);
+  }
+
+  .type-subtitle {
+    font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-style: italic;
+    font-size: var(--font-size-subtitle);
+    line-height: var(--leading-snug);
+  }
+  .type-title {
+    font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-size: var(--font-size-title);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-title);
+  }
+  .type-title-xl {
+    font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-size: var(--font-size-title-xl);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-title);
+  }
+  .type-hero {
+    font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-size: var(--font-size-hero);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-title);
+  }
+  .type-display {
+    font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-size: var(--font-size-display);
+    line-height: 0.95;
+    letter-spacing: var(--tracking-title);
+  }
+  .type-display-xl {
+    font-family: var(--font-serif), ui-serif, Georgia, serif;
+    font-size: var(--font-size-display-xl);
+    line-height: 0.95;
+    letter-spacing: var(--tracking-title);
+  }
+  .type-mono {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: var(--font-size-small);
+    letter-spacing: 0;
+  }
+}
+
+/* ==========================================================================
+   Micro-transicions globals als elements interactius.
+   Un unic sistema — no locals sense motiu.
+   ========================================================================== */
+
+button, a, input, textarea, select {
+  transition-property: background-color, border-color, color, opacity, transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-standard);
+}
+
+/* ==========================================================================
+   prefers-reduced-motion — obligatori.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Patrons utilitaris — molt limitat, nomes els que sostenen microinteraccions
+   ja existents (collapse) i que no tenen equivalent en Tailwind.
+   ========================================================================== */
+
+.collapse-panel {
+  display: grid;
+  height: 0;
+  overflow: hidden;
+  transition: height var(--duration-slow) var(--ease-standard);
+}
+.collapse-panel[data-open="true"] {
+  height: auto;
+}
+
 .cv-auto {
   content-visibility: auto;
   contain-intrinsic-size: auto 320px;
-}
-
-/* Micro-transicions calmades a tots els elements interactius */
-button, a, input, textarea, select {
-  transition-property: background-color, border-color, color, opacity, transform;
-  transition-duration: 250ms;
-  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 }

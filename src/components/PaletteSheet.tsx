@@ -78,7 +78,7 @@ export default function PaletteSheet({
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+              <span className="type-caption">
                 color
               </span>
               <h2 className="font-serif text-2xl md:text-3xl leading-tight">
@@ -137,7 +137,7 @@ function SheetPaletteRow({
   return (
     <article className="flex flex-col gap-3 py-6">
       <div className="flex items-baseline justify-end">
-        <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary tabular-nums">
+        <span className="type-caption tabular-nums">
           n{String(palette.id).padStart(3, "0")}
         </span>
       </div>
@@ -166,7 +166,7 @@ function SheetPaletteRow({
               >
                 {c.name ?? "sense nom"}
               </span>
-              <span className="font-mono text-[10px] text-foreground-secondary">
+              <span className="type-mono text-text-secondary">
                 {c.hex.toUpperCase()}
               </span>
             </div>

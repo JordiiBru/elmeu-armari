@@ -7,7 +7,7 @@ export default async function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto w-full px-6 md:px-10 pb-24">
       <header className="pt-2 pb-8 flex flex-col gap-2">
-        <span className="text-[11px] tracking-[0.25em] uppercase text-foreground-secondary">
+        <span className="type-caption">
           arxiu
         </span>
         <h1 className="font-serif text-4xl md:text-5xl tracking-tight leading-[0.95]">
@@ -17,13 +17,13 @@ export default async function SettingsPage() {
 
       <div className="flex flex-col divide-y divide-border">
         <section className="flex flex-col gap-4 py-10">
-          <h2 className="text-[10px] tracking-[0.3em] uppercase text-foreground-secondary">
+          <h2 className="type-caption">
             exportar
           </h2>
           <p className="font-serif italic text-base text-foreground-secondary max-w-md">
             descarrega totes les teves peces en format json. útil com a còpia de seguretat o per migrar a un altre dispositiu.
           </p>
-          <p className="text-[11px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+          <p className="type-caption tabular-nums">
             {garments.length} peces a l&apos;arxiu
           </p>
           <a
@@ -40,7 +40,7 @@ export default async function SettingsPage() {
         </section>
 
         <section className="flex flex-col gap-4 py-10">
-          <h2 className="text-[10px] tracking-[0.3em] uppercase text-foreground-secondary">
+          <h2 className="type-caption">
             importar
           </h2>
           <p className="font-serif italic text-base text-foreground-secondary max-w-md">

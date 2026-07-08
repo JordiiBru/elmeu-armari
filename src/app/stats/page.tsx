@@ -26,7 +26,7 @@ function Row({
     <div className="flex flex-col gap-1.5 py-2">
       <div className="flex items-baseline justify-between gap-4">
         <span className="font-serif text-base text-foreground">{label}</span>
-        <span className="text-[11px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+        <span className="type-caption tabular-nums">
           {count} · {pct(count, total)}
         </span>
       </div>
@@ -49,7 +49,7 @@ function Section({
 }) {
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-[10px] tracking-[0.3em] uppercase text-foreground-secondary pb-2 border-b border-border">
+      <h2 className="type-caption pb-2 border-b border-border">
         {title}
       </h2>
       <div className="flex flex-col gap-3 pt-2">{children}</div>
@@ -65,7 +65,7 @@ export default async function StatsPage() {
     return (
       <div className="max-w-2xl mx-auto w-full px-6 md:px-10 pb-24">
         <header className="pt-2 pb-8 flex flex-col gap-2">
-          <span className="text-[11px] tracking-[0.25em] uppercase text-foreground-secondary">
+          <span className="type-caption">
             arxiu
           </span>
           <h1 className="font-serif text-4xl md:text-5xl tracking-tight leading-[0.95]">
@@ -106,7 +106,7 @@ export default async function StatsPage() {
   return (
     <div className="max-w-2xl mx-auto w-full px-6 md:px-10 pb-24">
       <header className="pt-2 pb-8 flex flex-col gap-2">
-        <span className="text-[11px] tracking-[0.25em] uppercase text-foreground-secondary">
+        <span className="type-caption">
           arxiu
         </span>
         <h1 className="font-serif text-4xl md:text-5xl tracking-tight leading-[0.95]">
@@ -148,7 +148,7 @@ export default async function StatsPage() {
 
         {topColors.length > 0 && (
           <section className="flex flex-col gap-4">
-            <h2 className="text-[10px] tracking-[0.3em] uppercase text-foreground-secondary pb-2 border-b border-border">
+            <h2 className="type-caption pb-2 border-b border-border">
               colors dominants
             </h2>
             <div className="grid grid-cols-4 sm:grid-cols-8 gap-x-2 gap-y-4">
@@ -159,7 +159,7 @@ export default async function StatsPage() {
                     style={{ backgroundColor: hex }}
                     title={hex}
                   />
-                  <span className="text-[10px] tracking-[0.2em] uppercase text-foreground-secondary tabular-nums">
+                  <span className="type-caption tabular-nums">
                     {count}
                   </span>
                 </div>

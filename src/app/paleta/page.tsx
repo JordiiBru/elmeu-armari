@@ -20,7 +20,7 @@ export default function PaletaPage() {
   return (
     <div className="max-w-5xl mx-auto w-full px-6 md:px-10 pb-24">
       <header className="pt-2 pb-8 flex flex-col gap-2">
-        <span className="text-[11px] tracking-[0.25em] uppercase text-foreground-secondary">
+        <span className="type-caption">
           catàleg cromàtic
         </span>
         <h1 className="font-serif text-5xl md:text-6xl tracking-tight leading-[0.95]">

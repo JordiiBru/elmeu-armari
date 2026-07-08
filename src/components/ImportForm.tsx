@@ -50,7 +50,7 @@ export function ImportForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
-        <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+        <span className="type-caption">
           mode
         </span>
         <div className="flex flex-col gap-2">
@@ -70,7 +70,7 @@ export function ImportForm() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <span className="text-[10px] tracking-[0.25em] uppercase text-foreground-secondary">
+        <span className="type-caption">
           fitxer
         </span>
         <input
