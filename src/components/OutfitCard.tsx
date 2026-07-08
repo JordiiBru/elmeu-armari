@@ -58,14 +58,14 @@ export function OutfitGroupCard({
           <button
             onClick={() => onSave(mainPalette.palette.id)}
             disabled={mainSaved}
-            className="font-serif italic text-sm text-foreground disabled:text-foreground-secondary transition-colors active:scale-95 disabled:cursor-default"
+            className="font-serif italic text-sm text-text-primary disabled:text-text-secondary transition-colors active:scale-95 disabled:cursor-default"
           >
             {mainSaved ? "desat" : "desar outfit"}
           </button>
           {extraPalettes.length > 0 && (
             <button
               onClick={() => setExpanded((e) => !e)}
-              className="font-serif italic text-xs text-foreground-secondary hover:text-foreground transition-colors"
+              className="font-serif italic text-xs text-text-secondary hover:text-text-primary transition-colors"
             >
               {expanded ? "menys" : `+${extraPalettes.length} paletes`}
             </button>
@@ -105,7 +105,7 @@ function PaletteHero({ pm }: { pm: PaletteMatch }) {
           );
         })}
       </div>
-      <span className="font-serif italic text-sm text-foreground-secondary">{pm.palette.nombre}</span>
+      <span className="font-serif italic text-sm text-text-secondary">{pm.palette.nombre}</span>
     </div>
   );
 }
@@ -134,13 +134,13 @@ function PaletteRow({
           );
         })}
       </div>
-      <span className="font-serif italic text-xs text-foreground-secondary min-w-0 truncate">
+      <span className="font-serif italic text-xs text-text-secondary min-w-0 truncate">
         {pm.palette.nombre}
       </span>
       <button
         onClick={onSave}
         disabled={saved}
-        className="font-serif italic text-xs text-foreground-secondary hover:text-foreground disabled:opacity-40 transition-colors active:scale-95 shrink-0"
+        className="font-serif italic text-xs text-text-secondary hover:text-text-primary disabled:opacity-40 transition-colors active:scale-95 shrink-0"
         aria-label={saved ? "Ja desat" : "Desar paleta"}
       >
         {saved ? "desat" : "desar"}

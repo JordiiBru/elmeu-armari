@@ -6,7 +6,7 @@ import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { PieceThumb } from "./PieceThumb";
-import { IconButton, useToast, Icon } from "@/components/ui";
+import { IconButton, useToast, Icon, EmptyState } from "@/components/ui";
 
 interface SavedGroup {
   garmentKey: string;
@@ -61,9 +61,15 @@ export function SavedOutfitsView({
 
   if (groups.length === 0) {
     return (
-      <p className="font-serif italic text-foreground-secondary text-center py-16 max-w-md mx-auto">
-        Encara no hi ha res desat. Ves a <span className="text-foreground">combinar</span> i guarda les paletes que t&apos;agradin.
-      </p>
+      <EmptyState
+        title="encara no hi ha res desat."
+        hint={
+          <>
+            passa per <span className="text-text-primary">combinar</span> i guarda les
+            paletes que t&apos;agradin.
+          </>
+        }
+      />
     );
   }
 
@@ -102,12 +108,12 @@ function SavedGroupCard({
 
         <div className="flex-1 min-w-0 flex items-baseline justify-between gap-4">
           <div className="flex flex-col gap-0.5">
-            <span className="font-serif text-base leading-tight text-foreground">
+            <span className="font-serif text-base leading-tight text-text-primary">
               {group.garments
                 .map((og) => CATEGORY_LABELS[og.garment.category])
                 .join(" · ")}
             </span>
-            <span className="font-serif italic text-xs text-foreground-secondary">
+            <span className="font-serif italic text-xs text-text-secondary">
               {group.entries.length}{" "}
               {group.entries.length === 1 ? "paleta desada" : "paletes desades"}
             </span>
@@ -173,7 +179,7 @@ function SavedPaletteRow({
       ) : (
         <div />
       )}
-      <span className="font-serif italic text-sm text-foreground-secondary min-w-0 truncate">
+      <span className="font-serif italic text-sm text-text-secondary min-w-0 truncate">
         {entry.palette?.nombre ?? `paleta #${entry.outfitId}`}
       </span>
       <IconButton

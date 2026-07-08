@@ -5,7 +5,7 @@ import { findAllGarments } from "@/lib/prendas/service";
 import { findAllOutfits } from "@/lib/outfits/service";
 import { palettes } from "@/lib/colors";
 import { ArmariTabs } from "@/components/ArmariTabs";
-import { PageContainer, SectionHeader } from "@/components/ui";
+import { PageContainer, SectionHeader, GridSkeleton } from "@/components/ui";
 
 export default async function ArmariPage() {
   const [garments, outfits] = await Promise.all([
@@ -35,7 +35,7 @@ export default async function ArmariPage() {
         }
       />
 
-      <Suspense>
+      <Suspense fallback={<GridSkeleton />}>
         <ArmariTabs
           garments={garments}
           palettes={palettes}

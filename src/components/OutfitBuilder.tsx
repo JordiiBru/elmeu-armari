@@ -6,6 +6,7 @@ import type { SanzoPalette } from "@/lib/outfits/types";
 import { SEASON_LABELS } from "@/lib/prendas/labels";
 import { GarmentCard } from "./GarmentCard";
 import { OutfitBottomSheet } from "./OutfitBottomSheet";
+import { EmptyState } from "@/components/ui";
 
 const EXCLUDED_CATEGORIES = new Set(["SOCKS", "SHOES"]);
 const SEASONS: Season[] = ["SPRING", "SUMMER", "AUTUMN", "WINTER"];
@@ -51,15 +52,15 @@ export function OutfitBuilder({
                 onClick={() => setSeason(s)}
                 className={`inline-flex items-center gap-1.5 type-caption transition-colors active:scale-[0.98] ${
                   active
-                    ? "text-foreground"
-                    : "text-foreground-secondary hover:text-foreground"
+                    ? "text-text-primary"
+                    : "text-text-secondary hover:text-text-primary"
                 }`}
                 aria-pressed={active}
               >
                 <span
                   aria-hidden
                   className={`inline-block h-1 w-1 rounded-full transition-colors ${
-                    active ? "bg-foreground" : "bg-border"
+                    active ? "bg-text-primary" : "bg-border"
                   }`}
                 />
                 {SEASON_LABELS[s]}
@@ -70,15 +71,16 @@ export function OutfitBuilder({
       </div>
 
       {/* Ajuda breu */}
-      <p className="font-serif italic text-sm text-foreground-secondary">
+      <p className="font-serif italic text-sm text-text-secondary">
         Tria una peça per veure les paletes de Sanzo Wada que hi combinen.
       </p>
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <p className="font-serif italic text-foreground-secondary text-center py-16">
-          No hi ha peces per a aquesta temporada.
-        </p>
+        <EmptyState
+          title="cap peça registrada per aquesta temporada."
+          hint="canvia de temporada o afegeix noves peces al catàleg."
+        />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-16">
           {filtered.map((g, i) => (

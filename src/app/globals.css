@@ -187,15 +187,6 @@
   --color-interactive-pressed: var(--color-interactive-pressed);
   --color-focus-ring: var(--color-focus-ring);
 
-  /* Backward-compat aliases — s'aniran retirant per fases.
-     Mantinguts perque codi existent no es trenqui abans de migrar. */
-  --color-foreground: var(--color-text-primary);
-  --color-foreground-secondary: var(--color-text-secondary);
-  --color-card: var(--color-elevated);
-  --color-background-secondary: var(--color-surface);
-  --color-input: var(--color-border);
-  --color-ring: var(--color-focus-ring);
-
   --font-sans: var(--font-inter-tight);
   --font-serif: var(--font-fraunces);
   --font-mono: var(--font-geist-mono);

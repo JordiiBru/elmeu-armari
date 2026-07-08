@@ -14,7 +14,7 @@ import {
   TEXTURE_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
-import { Input, Icon } from "@/components/ui";
+import { Input, Icon, EmptyState, TextButton } from "@/components/ui";
 
 interface Props {
   garments: GarmentWithColors[];
@@ -38,14 +38,14 @@ function FilterTag({
     >
       <span
         className={`type-caption transition-colors ${
-          active ? "text-foreground" : "text-foreground-secondary group-hover:text-foreground"
+          active ? "text-text-primary" : "text-text-secondary group-hover:text-text-primary"
         }`}
       >
         {children}
       </span>
       <span
         aria-hidden
-        className={`pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-foreground origin-left transition-transform duration-[var(--duration-base)] ease-out ${
+        className={`pointer-events-none absolute left-0 right-0 -bottom-1 h-px bg-text-primary origin-left transition-transform duration-[var(--duration-base)] ease-out ${
           active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
         }`}
       />
@@ -135,7 +135,7 @@ export function ArmariGrid({ garments }: Props) {
           <button
             type="button"
             onClick={() => setFiltersOpen((v) => !v)}
-            className="group inline-flex items-baseline gap-3 type-caption hover:text-foreground transition-colors"
+            className="group inline-flex items-baseline gap-3 type-caption hover:text-text-primary transition-colors"
             aria-expanded={filtersOpen}
           >
             <span>filtres</span>
@@ -220,7 +220,7 @@ export function ArmariGrid({ garments }: Props) {
                 <button
                   type="button"
                   onClick={clearAll}
-                  className="self-start font-serif italic text-sm text-foreground-secondary hover:text-foreground"
+                  className="self-start font-serif italic text-sm text-text-secondary hover:text-text-primary"
                 >
                   {UI.buttons.clearFilters}
                 </button>
@@ -235,9 +235,17 @@ export function ArmariGrid({ garments }: Props) {
           <AddGarmentCard />
         </div>
       ) : filtered.length === 0 ? (
-        <p className="font-serif italic text-foreground-secondary text-center py-16">
-          {UI.grid.noResults}
-        </p>
+        <EmptyState
+          title={UI.grid.noResults}
+          hint="prova a retirar algun filtre."
+          action={
+            hasFilters && (
+              <TextButton type="button" onClick={clearAll} tone="secondary">
+                netejar filtres
+              </TextButton>
+            )
+          }
+        />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-16">
           <AddGarmentCard />

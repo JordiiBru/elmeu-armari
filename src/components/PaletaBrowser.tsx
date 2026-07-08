@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import PaletteSheet from "@/components/PaletteSheet";
-import { Input, Card, Text } from "@/components/ui";
+import { Input, Card, Text, EmptyState } from "@/components/ui";
 
 type ColorEntry = {
   index: number;
@@ -51,9 +51,10 @@ export default function PaletaBrowser({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="font-serif italic text-foreground-secondary text-center py-16">
-          cap color coincideix.
-        </p>
+        <EmptyState
+          title="cap color coincideix."
+          hint="prova amb un altre nom en anglès."
+        />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-12">
           {filtered.map((c) => (
