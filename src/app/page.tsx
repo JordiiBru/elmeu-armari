@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { palettes } from "@/lib/colors";
 import { Stack, Text, Heading } from "@/components/ui";
+
+export const dynamic = "force-dynamic";
 
 const PRIMARY = [
   { href: "/armari", label: "El meu armari" },
@@ -11,7 +14,14 @@ const SECONDARY = [
   { href: "/settings", label: "configuració" },
 ];
 
+function pickPalette() {
+  const i = Math.floor(Math.random() * palettes.length);
+  return palettes[i];
+}
+
 export default function HomePage() {
+  const palette = pickPalette();
+
   return (
     <div className="flex-1 grid grid-rows-[1fr_auto_1fr] px-6 py-12 md:py-20">
       <Stack as="section" gap={5} align="center" className="self-end text-center">
@@ -22,7 +32,21 @@ export default function HomePage() {
       </Stack>
 
       <div className="flex justify-center py-16 md:py-24">
-        <div className="h-px w-16 bg-border" aria-hidden />
+        <Link
+          href="/paleta"
+          aria-label={`Paleta ${palette.nombre}`}
+          className="group block w-full max-w-md md:max-w-lg outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+        >
+          <div className="flex h-14 md:h-20 overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-spring)] group-hover:-translate-y-0.5">
+            {palette.colores.map((hex, i) => (
+              <div
+                key={i}
+                className="flex-1"
+                style={{ backgroundColor: hex }}
+              />
+            ))}
+          </div>
+        </Link>
       </div>
 
       <Stack as="section" gap={7} align="center" className="self-start">
