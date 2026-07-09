@@ -22,7 +22,10 @@ export function filterGarments(
 
     if (seasons.length > 0) {
       const garmentSeasons = g.seasons.map((s) => s.season);
-      if (!seasons.some((s) => garmentSeasons.includes(s))) return false;
+      const passesSeason =
+        garmentSeasons.includes("ALL_YEAR") ||
+        seasons.some((s) => garmentSeasons.includes(s));
+      if (!passesSeason) return false;
     }
 
     if (q) {
