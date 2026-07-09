@@ -15,6 +15,7 @@ export const UI = {
     seasons: "Temporada",
     size: "Talla",
     subtype: "Tipus",
+    length: "Llargada",
     fit: "Tall",
     notes: "Notes",
     required: "*",

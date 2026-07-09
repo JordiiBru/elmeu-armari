@@ -16,6 +16,7 @@ export async function addGarment(data: {
   seasons: Season[];
   size: string;
   subtype: string | null;
+  length: string | null;
   fit: string;
   notes?: string;
   hexColors: string[];
@@ -32,6 +33,7 @@ export async function editGarment(
     seasons: Season[];
     size: string;
     subtype: string | null;
+    length: string | null;
     fit: string;
     notes?: string;
     hexColors: string[];

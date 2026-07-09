@@ -5,6 +5,7 @@ export interface GarmentFilters {
   seasons: Season[];
   fits: string[];
   textures: Texture[];
+  lengths: string[];
   query: string;
 }
 
@@ -12,13 +13,14 @@ export function filterGarments(
   garments: GarmentWithColors[],
   filters: GarmentFilters
 ): GarmentWithColors[] {
-  const { categories, seasons, fits, textures, query } = filters;
+  const { categories, seasons, fits, textures, lengths, query } = filters;
   const q = query.toLowerCase().trim();
 
   return garments.filter((g) => {
     if (categories.length > 0 && !categories.includes(g.category)) return false;
     if (fits.length > 0 && !fits.includes(g.fit)) return false;
     if (textures.length > 0 && !textures.includes(g.texture)) return false;
+    if (lengths.length > 0 && (!g.length || !lengths.includes(g.length))) return false;
 
     if (seasons.length > 0) {
       const garmentSeasons = g.seasons.map((s) => s.season);

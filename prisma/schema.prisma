@@ -16,6 +16,7 @@ model Garment {
   pattern   Pattern
   size      String
   subtype   String?
+  length    String?
   fit       String
   notes     String?
   image     String?

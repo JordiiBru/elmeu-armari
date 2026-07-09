@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { addGarment, findAllGarments, deleteGarment } from "@/lib/prendas/service";
-import { CATEGORIES, TEXTURES, PATTERNS, SEASONS, FITS_BY_CATEGORY, SUBTYPES_BY_CATEGORY } from "@/lib/prendas/types";
+import { CATEGORIES, TEXTURES, PATTERNS, SEASONS, FITS_BY_CATEGORY, SUBTYPES_BY_CATEGORY, LENGTHS_BY_CATEGORY } from "@/lib/prendas/types";
 import { isHex } from "@/lib/prendas/validation";
 import type { Category, Texture, Pattern, Season } from "@/lib/prendas/types";
 
@@ -13,6 +13,7 @@ interface GarmentImport {
   size: string;
   fit: string;
   subtype?: string | null;
+  length?: string | null;
   notes?: string | null;
   colors: string[];
 }
@@ -45,6 +46,10 @@ function validate(body: unknown): { ok: true; payload: ImportPayload } | { ok: f
     const subtype = gr.subtype as string | null | undefined;
     if (validSubtypes.length > 0 && subtype && !validSubtypes.includes(subtype))
       return { ok: false, error: `Peça ${i}: subtype invàlid per categoria ${category}` };
+    const validLengths = LENGTHS_BY_CATEGORY[category];
+    const length = gr.length as string | null | undefined;
+    if (length && (validLengths.length === 0 || !validLengths.includes(length)))
+      return { ok: false, error: `Peça ${i}: length invàlida per categoria ${category}` };
   }
 
   return { ok: true, payload: b as unknown as ImportPayload };
@@ -86,6 +91,7 @@ export async function POST(req: NextRequest) {
         seasons: g.seasons,
         size: g.size,
         subtype: g.subtype ?? null,
+        length: g.length ?? null,
         fit: g.fit,
         notes: g.notes ?? undefined,
         hexColors: g.colors,
