@@ -68,6 +68,13 @@ function isAchromatic(hex: string): boolean {
 const EXCLUDED_CATEGORIES = new Set(["SOCKS", "SHOES"]);
 const MIN_PIECES = 2;
 
+// A palette is a meaningful anchor for an outfit only if the outfit
+// actually wears at least this many distinct palette slots. Otherwise
+// the outfit is monochrome-ish (e.g. black shirt + black pants) and
+// the palette shown next to it — a "black + accent" combination — is
+// misleading because the accent is not worn.
+const MIN_DISTINCT_PALETTE_COLORS = 2;
+
 // Order in which garments should be laid out in a rendered outfit.
 const CATEGORY_LAYOUT_ORDER = ["SHIRT", "SWEATER", "PANTS"] as const;
 
@@ -223,6 +230,8 @@ function paletteMatchFor(
     });
     totalDistance += primary.distance;
   }
+
+  if (matchedIndices.size < MIN_DISTINCT_PALETTE_COLORS) return null;
 
   const unmatchedColors: number[] = [];
   for (let i = 0; i < palette.colores.length; i++) {
