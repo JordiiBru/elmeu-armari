@@ -98,6 +98,85 @@ Photos are stored on disk under `UPLOAD_DIR`, referenced by the `Garment.image` 
 
 ---
 
+## How the colour engine picks outfits
+
+The **Combinar** tab suggests outfits by matching a garment against the Sanzo Wada
+_Dictionary of Color Combinations_ (348 curated palettes, 157 canonical colours). The
+algorithm lives in [`src/lib/outfits/engine.ts`](src/lib/outfits/engine.ts) and is
+_canonical-first_: it never invents a combination, it always cites a page of the book.
+
+### 1 · Snap each garment colour to the catalogue
+
+For every hex on a garment the engine finds **all** Sanzo Wada canonicals within an
+OKLCH perceptual distance of `14` — not just the nearest. Two thousand plausible
+readings beat one arbitrary pick: `#d4c48e` is close to Ecru **and** Ivory Buff, and
+we keep both.
+
+Two special cases keep the snap intuitive:
+
+- **Pure achromatics** (chroma < 0.02 — pure greys, black, white, warm off-whites)
+  snap only within a hand-picked whitelist of six "grey family" canonicals
+  (Black, White, Warm Gray, Neutral Gray, Mineral Gray, Fawn). Otherwise a mid grey
+  could route through Plumbeous (a blue-grey) and be labelled as a hue.
+- **Quasi-neutrals** (chroma between 0.02 and 0.05) snap among all low-chroma
+  canonicals so tinted greys and dusty olives don't jump into saturated territory.
+
+Saturated colours use the full 157-colour vocabulary through `perceptualDistance`,
+which applies a `×1.6` penalty when comparing a neutral against a saturated colour
+to prevent hue collapse near the grey axis.
+
+### 2 · Compute each garment's palette membership
+
+Every canonical colour in `sanzo-colors.json` carries its own `combinations` array —
+the ids of the Sanzo Wada palettes that include it. A garment "lives in" a palette
+when, for every one of its colours, at least one plausible canonical is on that
+palette's list.
+
+Formally, `paletteIds = ⋂_i (⋃_c ∈ candidates_i  c.combinations)` — a garment's
+palettes are the intersection over its colours of the union over its candidate
+canonicals.
+
+### 3 · Compose valid outfits
+
+Two or more garments form a valid outfit when:
+
+1. Their `paletteIds` sets intersect (they share at least one Sanzo Wada page).
+2. The intersection contains at least one palette whose slots are covered by **≥ 2
+   distinct canonicals** in the outfit. This rejects monochrome pairings like
+   _black shirt + black pants_ that would otherwise inherit any "Black + accent"
+   palette without wearing the accent.
+3. Category constraints: exactly one bottom (`PANTS`) plus at least one top
+   (`SHIRT` or `SWEATER`), no repeated categories. Socks and shoes are excluded
+   from colour matching (see issue #57 for adding them as post-hoc extras).
+
+There is **no coverage rule** requiring an outfit to wear every non-neutral accent
+a palette suggests. If Sanzo Wada's Combination 190 lists five colours and you're
+only wearing two, that's still a valid Combination 190 outfit — you're just not
+wearing the other accents.
+
+### 4 · Rank
+
+Outfits are ordered by piece count ascending, then by total canonical distance
+(the sum of how far each garment's anchor was from its Sanzo Wada canonical) —
+so tighter matches surface first.
+
+For each outfit the engine returns a primary palette plus up to four extra
+palettes whose per-garment distance is **strictly** under `9` (a tighter threshold
+than the initial snap), so alternative readings only appear when they're
+noticeably close.
+
+### Why greys, black and beiges combine again
+
+A common failure mode of a purely per-palette matcher is: Sanzo Wada contains only
+one entirely-neutral palette (Combination 69, warm-gray + black). Every other
+palette carries a saturated accent. Under a strict coverage rule a grey garment
+could never fill a saturated slot, so it never combined with anything. The
+canonical-first model + the grey-family whitelist restore the intuition that
+neutrals go with neutrals via Combination 69 (and its cousins 198, 221) while
+still routing beige-yellows through Ivory Buff into Combination 190, and so on.
+
+---
+
 ## Getting started
 
 ```bash
