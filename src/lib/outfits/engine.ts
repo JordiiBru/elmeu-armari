@@ -78,10 +78,20 @@ const MIN_DISTINCT_PALETTE_COLORS = 2;
 // Order in which garments should be laid out in a rendered outfit.
 const CATEGORY_LAYOUT_ORDER = ["SHIRT", "SWEATER", "PANTS"] as const;
 
-/** Result of snapping one garment colour to its canonical anchor. */
-interface Snap {
+/** A candidate canonical reading of one garment colour. */
+interface Candidate {
   canonical: NamedColor;
   distance: number;
+}
+
+/**
+ * All plausible canonical readings of one garment colour, ordered by
+ * distance. The nearest is the display anchor; the rest widen the set
+ * of palettes the colour is willing to live in.
+ */
+interface Snap {
+  best: Candidate;
+  candidates: Candidate[];
 }
 
 /**
@@ -97,60 +107,58 @@ interface Ctx {
   totalDistance: number;
 }
 
-function snapColour(hex: string): Snap | null {
-  // Neutral pieces (mid grey, charcoal, off-white) do not map naturally
-  // to Sanzo Wada's vocabulary because the catalogue's only greys are
-  // Warm Gray, Neutral Gray and Fawn — all light and slightly tinted.
-  // A #7a7a7a mid grey would otherwise snap to Plumbeous (a violet)
-  // just because it happens to be the nearest saturated colour.
-  // Force neutral hexes to snap only to neutral canonicals, using raw
-  // OKLCH distance (no penalty) and no threshold: a neutral will
-  // always find its nearest neutral home.
-  if (isAchromatic(hex)) {
-    // Anchor only among the whitelisted grey family (Black, White,
-    // Warm Gray, Neutral Gray, Mineral Gray, Fawn). The deep slates
-    // and Plumbeous would otherwise steal pure greys and route them
-    // toward palettes with clear hue.
-    let best: Snap | null = null;
-    let bestDist = Infinity;
-    for (const c of namedColors) {
-      if (!GREY_FAMILY_HEXES.has(c.hex.toLowerCase())) continue;
-      const d = oklchDistance(hex, c.hex);
-      if (d < bestDist) {
-        bestDist = d;
-        best = { canonical: c, distance: d };
-      }
-    }
-    return best;
-  }
-
-  if (isNeutralHex(hex)) {
-    // Tinted quasi-neutrals (chroma between 0.02 and 0.05, e.g. dusty
-    // olives, muted denims) get snapped among ALL neutral canonicals —
-    // wider vocabulary than pure achromatic pieces.
-    let best: Snap | null = null;
-    let bestDist = Infinity;
-    for (const c of namedColors) {
-      if (!isNeutralHex(c.hex)) continue;
-      const d = oklchDistance(hex, c.hex);
-      if (d < bestDist) {
-        bestDist = d;
-        best = { canonical: c, distance: d };
-      }
-    }
-    return best;
-  }
-
-  let best: Snap | null = null;
-  let bestDist = OKLCH_DISTANCE_THRESHOLD;
+function collectCandidates(
+  hex: string,
+  filter: (c: NamedColor) => boolean,
+  distanceOf: (c: NamedColor) => number,
+  threshold: number,
+): Snap | null {
+  const found: Candidate[] = [];
   for (const c of namedColors) {
-    const d = perceptualDistance(hex, c.hex);
-    if (d < bestDist) {
-      bestDist = d;
-      best = { canonical: c, distance: d };
-    }
+    if (!filter(c)) continue;
+    const d = distanceOf(c);
+    if (d < threshold) found.push({ canonical: c, distance: d });
   }
-  return best;
+  if (found.length === 0) return null;
+  found.sort((a, b) => a.distance - b.distance);
+  return { best: found[0], candidates: found };
+}
+
+function snapColour(hex: string): Snap | null {
+  // Achromatic pieces snap only within the grey family whitelist, so
+  // a pure grey never routes through Plumbeous (blue) or Deep Slate
+  // (green). No perceptual threshold — the nearest grey-family entry
+  // always wins.
+  if (isAchromatic(hex)) {
+    return collectCandidates(
+      hex,
+      (c) => GREY_FAMILY_HEXES.has(c.hex.toLowerCase()),
+      (c) => oklchDistance(hex, c.hex),
+      Infinity,
+    );
+  }
+
+  // Quasi-neutrals (0.02 ≤ C < 0.05, e.g. tinted greys, dusty
+  // olives) snap among all neutral canonicals with raw OKLCH.
+  if (isNeutralHex(hex)) {
+    return collectCandidates(
+      hex,
+      (c) => isNeutralHex(c.hex),
+      (c) => oklchDistance(hex, c.hex),
+      Infinity,
+    );
+  }
+
+  // Saturated pieces: gather every canonical inside the perceptual
+  // threshold. Multiple plausible readings are all kept — the piece
+  // then belongs to any palette containing any of them. The nearest
+  // stays as the display anchor.
+  return collectCandidates(
+    hex,
+    () => true,
+    (c) => perceptualDistance(hex, c.hex),
+    OKLCH_DISTANCE_THRESHOLD,
+  );
 }
 
 function intersectSets(sets: Set<number>[]): Set<number> {
@@ -182,11 +190,19 @@ function buildContext(g: GarmentWithColors): Ctx | null {
     snaps.push(s);
   }
 
-  const perColour = snaps.map((s) => new Set(s.canonical.combinations));
+  // A garment lives in the intersection over its colours of the union
+  // of palette sets of each plausible canonical for that colour.
+  const perColour = snaps.map((s) => {
+    const union = new Set<number>();
+    for (const cand of s.candidates) {
+      for (const pid of cand.canonical.combinations) union.add(pid);
+    }
+    return union;
+  });
   const paletteIds = intersectSets(perColour);
   if (paletteIds.size === 0) return null;
 
-  const totalDistance = snaps.reduce((sum, s) => sum + s.distance, 0);
+  const totalDistance = snaps.reduce((sum, s) => sum + s.best.distance, 0);
   return { garment: g, snaps, paletteIds, totalDistance };
 }
 
@@ -215,20 +231,25 @@ function paletteMatchFor(
   let totalDistance = 0;
 
   for (const c of ctxs) {
-    // Assign each garment's primary colour to its slot in the palette
-    // via its canonical hex. Every snap.canonical for a garment that
-    // belongs to this palette *must* be present in the palette by
-    // definition (that's how we computed paletteIds).
+    // Pick the candidate canonical that actually belongs to this
+    // palette (closest first). That's the anchor for this garment
+    // inside this palette.
     const primary = c.snaps[0];
-    const idx = paletteHexLower.indexOf(primary.canonical.hex.toLowerCase());
-    if (idx < 0) continue;
-    matchedIndices.add(idx);
-    colorAssignments.push({
-      garmentId: c.garment.id,
-      paletteColorIndex: idx,
-      distance: primary.distance,
-    });
-    totalDistance += primary.distance;
+    let anchor: Candidate | null = null;
+    for (const cand of primary.candidates) {
+      const i = paletteHexLower.indexOf(cand.canonical.hex.toLowerCase());
+      if (i >= 0) {
+        anchor = cand;
+        matchedIndices.add(i);
+        colorAssignments.push({
+          garmentId: c.garment.id,
+          paletteColorIndex: i,
+          distance: cand.distance,
+        });
+        break;
+      }
+    }
+    if (anchor) totalDistance += anchor.distance;
   }
 
   if (matchedIndices.size < MIN_DISTINCT_PALETTE_COLORS) return null;
