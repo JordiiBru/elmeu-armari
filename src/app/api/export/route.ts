@@ -11,6 +11,8 @@ export async function GET() {
     pattern: g.pattern,
     seasons: g.seasons.map((s) => s.season),
     size: g.size,
+    subtype: g.subtype,
+    length: g.length,
     fit: g.fit,
     notes: g.notes,
     colors: g.colors.map((c) => c.hex),

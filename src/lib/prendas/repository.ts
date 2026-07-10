@@ -22,6 +22,7 @@ export async function createGarment(data: {
   seasons: Season[];
   size: string;
   subtype: string | null;
+  length: string | null;
   fit: string;
   notes?: string;
   hexColors: string[];
@@ -33,6 +34,7 @@ export async function createGarment(data: {
       pattern: data.pattern,
       size: data.size,
       subtype: data.subtype,
+      length: data.length,
       fit: data.fit,
       notes: data.notes ?? null,
       colors: {

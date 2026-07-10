@@ -15,6 +15,20 @@ export const SUBTYPES_BY_CATEGORY: Record<Category, string[]> = {
   SHOES:   ["SNEAKER", "BOTA", "LOAFER", "SANDALIA", "OXFORD"],
 };
 
+// Length is orthogonal to subtype: a chino can be SHORT or LONG.
+// Only defined for categories where it changes seasonal fit.
+export const LENGTHS_BY_CATEGORY: Record<Category, string[]> = {
+  SWEATER: [],
+  SHIRT:   [],
+  PANTS:   ["SHORT", "LONG"],
+  SOCKS:   [],
+  SHOES:   [],
+};
+
+export const ALL_LENGTHS: string[] = [
+  ...new Set(Object.values(LENGTHS_BY_CATEGORY).flat()),
+];
+
 export const FITS_BY_CATEGORY: Record<Category, string[]> = {
   SWEATER: ["REGULAR", "OVERSIZED", "CROPPED"],
   SHIRT:   ["REGULAR", "SLIM", "OVERSIZED", "CROPPED"],
@@ -46,6 +60,7 @@ export interface GarmentWithColors {
   pattern: Pattern;
   size: string;
   subtype: string | null;
+  length: string | null;
   fit: string;
   notes: string | null;
   image: string | null;

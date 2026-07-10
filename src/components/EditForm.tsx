@@ -13,6 +13,7 @@ import {
   FITS_BY_CATEGORY,
   SUBTYPES_BY_CATEGORY,
   SIZES_BY_CATEGORY,
+  LENGTHS_BY_CATEGORY,
 } from "@/lib/prendas/types";
 import type { GarmentWithColors, Season, Category } from "@/lib/prendas/types";
 import {
@@ -21,6 +22,7 @@ import {
   PATTERN_LABELS,
   FIT_LABELS,
   SUBTYPE_LABELS,
+  LENGTH_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import {
@@ -46,9 +48,15 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
   const initialFits = FITS_BY_CATEGORY[garment.category];
   const initialSubtypes = SUBTYPES_BY_CATEGORY[garment.category];
   const initialSizes = SIZES_BY_CATEGORY[garment.category];
+  const initialLengths = LENGTHS_BY_CATEGORY[garment.category];
   const [subtype, setSubtype] = useState<string>(
     garment.subtype && initialSubtypes.includes(garment.subtype)
       ? garment.subtype
+      : "",
+  );
+  const [length, setLength] = useState<string>(
+    garment.length && initialLengths.includes(garment.length)
+      ? garment.length
       : "",
   );
   const [texture, setTexture] = useState<string>(garment.texture);
@@ -102,6 +110,7 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
   const fits = FITS_BY_CATEGORY[category];
   const subtypes = SUBTYPES_BY_CATEGORY[category];
   const sizes = SIZES_BY_CATEGORY[category];
+  const lengths = LENGTHS_BY_CATEGORY[category];
 
   return (
     <form action={formAction} className="flex flex-col gap-7">
@@ -114,6 +123,7 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
             const next = v as Category;
             setCategory(next);
             if (!SUBTYPES_BY_CATEGORY[next].includes(subtype)) setSubtype("");
+            if (!LENGTHS_BY_CATEGORY[next].includes(length)) setLength("");
             if (!SIZES_BY_CATEGORY[next].includes(size)) setSize("");
             if (!FITS_BY_CATEGORY[next].includes(fit)) setFit("");
           }}
@@ -134,6 +144,21 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
             options={subtypes.map((s) => ({
               value: s,
               label: SUBTYPE_LABELS[s],
+            }))}
+          />
+        </Field>
+      )}
+
+      {lengths.length > 0 && (
+        <Field label={UI.form.length} required>
+          <Select
+            name="length"
+            required
+            value={length}
+            onChange={setLength}
+            options={lengths.map((l) => ({
+              value: l,
+              label: LENGTH_LABELS[l],
             }))}
           />
         </Field>
