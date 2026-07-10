@@ -4,9 +4,11 @@ import {
   findOutfitByGarmentsAndPalette,
   deleteOutfit,
   countOutfits,
+  addOutfitExtras,
+  removeOutfitExtra,
 } from "./repository";
 
-export { findAllOutfits, deleteOutfit };
+export { findAllOutfits, deleteOutfit, addOutfitExtras, removeOutfitExtra };
 
 export async function saveOutfit(data: {
   paletteId: number;

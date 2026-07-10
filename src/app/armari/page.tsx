@@ -20,6 +20,7 @@ export default async function ArmariPage() {
     createdAt: o.createdAt,
     garments: o.garments.map((og) => ({
       id: og.id,
+      role: (og.role === "extra" ? "extra" : "primary") as "primary" | "extra",
       garment: og.garment,
     })),
   }));

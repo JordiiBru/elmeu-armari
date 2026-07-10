@@ -1,17 +1,34 @@
 "use client";
 
 import { useState, useTransition, useMemo } from "react";
-import { deleteOutfitAction } from "@/app/outfits/actions";
+import {
+  deleteOutfitAction,
+  addOutfitExtrasAction,
+  removeOutfitExtraAction,
+} from "@/app/outfits/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { PieceThumb } from "./PieceThumb";
-import { IconButton, useToast, Icon, EmptyState } from "@/components/ui";
+import { IconButton, Sheet, TextButton, Text, useToast, Icon, EmptyState } from "@/components/ui";
+
+// Categories whose pieces are excluded from the colour engine but that
+// the user still wants to record on a saved outfit.
+const EXTRA_CATEGORIES = new Set(["SHOES", "SOCKS"]);
+
+type SavedGarment = SavedOutfit["garments"][number];
+
+interface SavedEntry {
+  outfitId: string;
+  name: string | null;
+  palette: SanzoPalette | null;
+  extras: SavedGarment[];
+}
 
 interface SavedGroup {
   garmentKey: string;
-  garments: SavedOutfit["garments"];
-  entries: { outfitId: string; name: string | null; palette: SanzoPalette | null }[];
+  primaryGarments: SavedGarment[];
+  entries: SavedEntry[];
 }
 
 function groupOutfits(outfits: SavedOutfit[], palettes: SanzoPalette[]): SavedGroup[] {
@@ -19,12 +36,15 @@ function groupOutfits(outfits: SavedOutfit[], palettes: SanzoPalette[]): SavedGr
   const groups = new Map<string, SavedGroup>();
 
   for (const outfit of outfits) {
-    const key = outfit.garments.map((g) => g.garment.id).sort().join(",");
+    const primary = outfit.garments.filter((g) => g.role === "primary");
+    const extras = outfit.garments.filter((g) => g.role === "extra");
+    const key = primary.map((g) => g.garment.id).sort().join(",");
     const existing = groups.get(key);
-    const entry = {
+    const entry: SavedEntry = {
       outfitId: outfit.id,
       name: outfit.name,
       palette: paletteMap.get(outfit.paletteId) ?? null,
+      extras,
     };
 
     if (existing) {
@@ -32,7 +52,7 @@ function groupOutfits(outfits: SavedOutfit[], palettes: SanzoPalette[]): SavedGr
     } else {
       groups.set(key, {
         garmentKey: key,
-        garments: outfit.garments,
+        primaryGarments: primary,
         entries: [entry],
       });
     }
@@ -41,11 +61,17 @@ function groupOutfits(outfits: SavedOutfit[], palettes: SanzoPalette[]): SavedGr
   return Array.from(groups.values());
 }
 
-function GarmentThumb({ garment }: { garment: GarmentWithColors }) {
+function GarmentThumb({
+  garment,
+  muted = false,
+}: {
+  garment: GarmentWithColors;
+  muted?: boolean;
+}) {
   return (
     <PieceThumb
       garment={garment}
-      className="h-16 w-16 flex-shrink-0"
+      className={`h-16 w-16 flex-shrink-0 ${muted ? "opacity-60" : ""}`}
     />
   );
 }
@@ -53,11 +79,18 @@ function GarmentThumb({ garment }: { garment: GarmentWithColors }) {
 export function SavedOutfitsView({
   outfits,
   palettes,
+  allGarments,
 }: {
   outfits: SavedOutfit[];
   palettes: SanzoPalette[];
+  allGarments: GarmentWithColors[];
 }) {
   const groups = useMemo(() => groupOutfits(outfits, palettes), [outfits, palettes]);
+
+  const extraCandidates = useMemo(
+    () => allGarments.filter((g) => EXTRA_CATEGORIES.has(g.category)),
+    [allGarments],
+  );
 
   if (groups.length === 0) {
     return (
@@ -76,7 +109,12 @@ export function SavedOutfitsView({
   return (
     <div className="flex flex-col divide-y divide-border">
       {groups.map((group, i) => (
-        <SavedGroupCard key={group.garmentKey} group={group} index={i} />
+        <SavedGroupCard
+          key={group.garmentKey}
+          group={group}
+          index={i}
+          extraCandidates={extraCandidates}
+        />
       ))}
     </div>
   );
@@ -85,9 +123,11 @@ export function SavedOutfitsView({
 function SavedGroupCard({
   group,
   index,
+  extraCandidates,
 }: {
   group: SavedGroup;
   index: number;
+  extraCandidates: GarmentWithColors[];
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -99,9 +139,8 @@ function SavedGroupCard({
         className="group w-full flex items-center gap-4 text-left outline-none"
         aria-expanded={expanded}
       >
-        {/* Tiles de peces */}
         <div className="flex gap-2 flex-shrink-0">
-          {group.garments.map((og) => (
+          {group.primaryGarments.map((og) => (
             <GarmentThumb key={og.garment.id} garment={og.garment} />
           ))}
         </div>
@@ -109,7 +148,7 @@ function SavedGroupCard({
         <div className="flex-1 min-w-0 flex items-baseline justify-between gap-4">
           <div className="flex flex-col gap-0.5">
             <span className="font-serif text-base leading-tight text-text-primary">
-              {group.garments
+              {group.primaryGarments
                 .map((og) => CATEGORY_LABELS[og.garment.category])
                 .join(" · ")}
             </span>
@@ -133,14 +172,17 @@ function SavedGroupCard({
         </div>
       </button>
 
-      {/* Panel expandit */}
       <div
         className={`collapse-panel ${expanded ? "mt-6" : ""}`}
         data-open={expanded}
       >
         <div className="flex flex-col gap-4">
           {group.entries.map((entry) => (
-            <SavedPaletteRow key={entry.outfitId} entry={entry} />
+            <SavedPaletteRow
+              key={entry.outfitId}
+              entry={entry}
+              extraCandidates={extraCandidates}
+            />
           ))}
         </div>
       </div>
@@ -150,10 +192,13 @@ function SavedGroupCard({
 
 function SavedPaletteRow({
   entry,
+  extraCandidates,
 }: {
-  entry: { outfitId: string; name: string | null; palette: SanzoPalette | null };
+  entry: SavedEntry;
+  extraCandidates: GarmentWithColors[];
 }) {
   const [pending, startTransition] = useTransition();
+  const [pickerOpen, setPickerOpen] = useState(false);
   const toast = useToast();
 
   const handleDelete = () => {
@@ -163,34 +208,175 @@ function SavedPaletteRow({
     });
   };
 
+  const handleRemoveExtra = (garmentId: string) => {
+    startTransition(async () => {
+      await removeOutfitExtraAction(entry.outfitId, garmentId);
+      toast.show("extra tret");
+    });
+  };
+
+  const existingExtraIds = new Set(entry.extras.map((e) => e.garment.id));
+  const pickableCandidates = extraCandidates.filter(
+    (g) => !existingExtraIds.has(g.id),
+  );
+
   return (
-    <div className="grid grid-cols-[auto_1fr_auto] gap-3 items-center">
-      {entry.palette ? (
-        <div className="flex gap-0 shrink-0">
-          {entry.palette.colores.map((color, i) => (
-            <span
-              key={i}
-              className="inline-block h-5 w-5"
-              style={{ backgroundColor: color }}
-              title={color}
-            />
+    <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-[auto_1fr_auto] gap-3 items-center">
+        {entry.palette ? (
+          <div className="flex gap-0 shrink-0">
+            {entry.palette.colores.map((color, i) => (
+              <span
+                key={i}
+                className="inline-block h-5 w-5"
+                style={{ backgroundColor: color }}
+                title={color}
+              />
+            ))}
+          </div>
+        ) : (
+          <div />
+        )}
+        <span className="font-serif italic text-sm text-text-secondary min-w-0 truncate">
+          {entry.palette?.nombre ?? `paleta #${entry.outfitId}`}
+        </span>
+        <IconButton
+          onClick={handleDelete}
+          disabled={pending}
+          label="Eliminar outfit"
+          size="sm"
+          className="shrink-0"
+        >
+          <Icon name="close" size={14} />
+        </IconButton>
+      </div>
+
+      <div className="flex items-end justify-between gap-3 pl-1">
+        <div className="flex flex-wrap gap-2">
+          {entry.extras.map((og) => (
+            <div key={og.garment.id} className="relative group/extra">
+              <GarmentThumb garment={og.garment} muted />
+              <button
+                type="button"
+                onClick={() => handleRemoveExtra(og.garment.id)}
+                disabled={pending}
+                aria-label={`Treure ${CATEGORY_LABELS[og.garment.category]}`}
+                className="absolute -top-1 -right-1 bg-background border border-border rounded-full p-0.5 opacity-0 group-hover/extra:opacity-100 focus:opacity-100 transition-opacity"
+              >
+                <Icon name="close" size={10} />
+              </button>
+            </div>
           ))}
         </div>
-      ) : (
-        <div />
+        <TextButton
+          type="button"
+          tone="secondary"
+          onClick={() => setPickerOpen(true)}
+          disabled={pending || pickableCandidates.length === 0}
+        >
+          + sabates / accessoris
+        </TextButton>
+      </div>
+
+      {pickerOpen && (
+        <ExtrasPicker
+          outfitId={entry.outfitId}
+          candidates={pickableCandidates}
+          onClose={() => setPickerOpen(false)}
+        />
       )}
-      <span className="font-serif italic text-sm text-text-secondary min-w-0 truncate">
-        {entry.palette?.nombre ?? `paleta #${entry.outfitId}`}
-      </span>
-      <IconButton
-        onClick={handleDelete}
-        disabled={pending}
-        label="Eliminar outfit"
-        size="sm"
-        className="shrink-0"
-      >
-        <Icon name="close" size={14} />
-      </IconButton>
     </div>
+  );
+}
+
+function ExtrasPicker({
+  outfitId,
+  candidates,
+  onClose,
+}: {
+  outfitId: string;
+  candidates: GarmentWithColors[];
+  onClose: () => void;
+}) {
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [pending, startTransition] = useTransition();
+  const toast = useToast();
+
+  const toggle = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleConfirm = () => {
+    if (selected.size === 0) return;
+    startTransition(async () => {
+      await addOutfitExtrasAction(outfitId, Array.from(selected));
+      toast.show("extras afegits", "success");
+      onClose();
+    });
+  };
+
+  return (
+    <Sheet
+      onClose={onClose}
+      size="md"
+      label="Afegir sabates o accessoris"
+      header={
+        <div className="flex flex-col gap-1">
+          <Text variant="caption">extres</Text>
+          <h2 className="type-title">sabates i accessoris</h2>
+          <Text variant="small" italic tone="secondary" className="font-serif">
+            no participen al matching cromàtic.
+          </Text>
+        </div>
+      }
+    >
+      {candidates.length === 0 ? (
+        <Text variant="small" italic tone="secondary" className="font-serif">
+          no queden peces d&apos;aquest tipus per afegir.
+        </Text>
+      ) : (
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+          {candidates.map((g) => {
+            const isSelected = selected.has(g.id);
+            return (
+              <button
+                key={g.id}
+                type="button"
+                onClick={() => toggle(g.id)}
+                aria-pressed={isSelected}
+                className={`flex flex-col gap-1 p-2 border transition-colors text-left ${
+                  isSelected
+                    ? "border-text-primary bg-elevated"
+                    : "border-border hover:border-text-secondary"
+                }`}
+              >
+                <PieceThumb garment={g} className="aspect-square w-full" />
+                <span className="font-serif text-xs leading-tight">
+                  {CATEGORY_LABELS[g.category]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between pt-4 border-t border-border">
+        <TextButton type="button" tone="secondary" onClick={onClose} disabled={pending}>
+          cancel·lar
+        </TextButton>
+        <TextButton
+          type="button"
+          onClick={handleConfirm}
+          disabled={pending || selected.size === 0}
+        >
+          {pending ? "afegint…" : `afegir (${selected.size})`}
+        </TextButton>
+      </div>
+    </Sheet>
   );
 }

@@ -38,6 +38,10 @@ model OutfitGarment {
   id        String  @id @default(cuid())
   outfitId  String
   garmentId String
+  // "primary": part of the palette-matched core.
+  // "extra":   added manually (shoes / socks / accessories),
+  //            outside the colour engine.
+  role      String  @default("primary")
   outfit    Outfit  @relation(fields: [outfitId], references: [id], onDelete: Cascade)
   garment   Garment @relation(fields: [garmentId], references: [id], onDelete: Cascade)
 
