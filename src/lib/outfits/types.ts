@@ -33,6 +33,8 @@ export interface OutfitResult {
   unmatchedColors: number[];
 }
 
+export type OutfitGarmentRole = "primary" | "extra";
+
 export interface SavedOutfit {
   id: string;
   name: string | null;
@@ -40,6 +42,7 @@ export interface SavedOutfit {
   createdAt: Date;
   garments: {
     id: string;
+    role: OutfitGarmentRole;
     garment: GarmentWithColors;
   }[];
 }

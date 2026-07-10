@@ -95,7 +95,13 @@ export function ArmariTabs({
 
       {tab === "peces" && <ArmariGrid garments={garments} />}
       {tab === "combinar" && <OutfitBuilder garments={garments} palettes={palettes} />}
-      {tab === "desats" && <SavedOutfitsView outfits={savedOutfits} palettes={palettes} />}
+      {tab === "desats" && (
+        <SavedOutfitsView
+          outfits={savedOutfits}
+          palettes={palettes}
+          allGarments={garments}
+        />
+      )}
     </div>
   );
 }
