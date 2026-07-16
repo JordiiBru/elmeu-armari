@@ -10,6 +10,7 @@ import {
   PATTERN_LABELS,
   FIT_LABELS,
   SUBTYPE_LABELS,
+  LENGTH_LABELS,
   SEASON_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
@@ -52,6 +53,11 @@ export function GarmentModal({ garment, onClose }: Props) {
             {garment.subtype && (
               <Text as="span" italic tone="secondary" className="font-serif">
                 {" "}· {SUBTYPE_LABELS[garment.subtype]}
+              </Text>
+            )}
+            {garment.length && (
+              <Text as="span" italic tone="secondary" className="font-serif">
+                {" "}· {LENGTH_LABELS[garment.length]}
               </Text>
             )}
           </h2>

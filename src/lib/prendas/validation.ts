@@ -1,5 +1,5 @@
 import type { Category, Pattern, Texture, Season } from "./types";
-import { CATEGORIES, TEXTURES, PATTERNS, SEASONS, FITS_BY_CATEGORY, SUBTYPES_BY_CATEGORY, SIZES_BY_CATEGORY } from "./types";
+import { CATEGORIES, TEXTURES, PATTERNS, SEASONS, FITS_BY_CATEGORY, SUBTYPES_BY_CATEGORY, SIZES_BY_CATEGORY, LENGTHS_BY_CATEGORY } from "./types";
 import { UI } from "./ui-strings";
 
 export interface GarmentFormData {
@@ -8,6 +8,7 @@ export interface GarmentFormData {
   pattern: Pattern;
   fit: string;
   subtype: string | null;
+  length: string | null;
   size: string;
   seasons: Season[];
   hexColors: string[];
@@ -27,6 +28,7 @@ export function validateGarmentForm(formData: FormData): ValidationResult {
   const pattern = formData.get("pattern") as Pattern;
   const fit = formData.get("fit") as string;
   const subtype = (formData.get("subtype") as string) || null;
+  const length = (formData.get("length") as string) || null;
   const size = (formData.get("size") as string)?.trim();
   const notes = (formData.get("notes") as string) || undefined;
   const seasons = formData.getAll("season") as Season[];
@@ -43,10 +45,18 @@ export function validateGarmentForm(formData: FormData): ValidationResult {
     return { ok: false, error: UI.errors.requiredFields };
   }
 
+  const validLengths = LENGTHS_BY_CATEGORY[category];
+  if (validLengths.length > 0 && !validLengths.includes(length ?? "")) {
+    return { ok: false, error: UI.errors.requiredFields };
+  }
+  if (validLengths.length === 0 && length !== null) {
+    return { ok: false, error: UI.errors.requiredFields };
+  }
+
   if (seasons.length === 0) return { ok: false, error: UI.errors.minOneSeason };
   if (!seasons.every((s) => SEASONS.includes(s))) return { ok: false, error: UI.errors.minOneSeason };
   if (hexColors.length === 0) return { ok: false, error: UI.errors.minOneColor };
   if (!hexColors.every(isHex)) return { ok: false, error: UI.errors.invalidColor };
 
-  return { ok: true, data: { category, texture, pattern, fit, subtype, size, notes, seasons, hexColors } };
+  return { ok: true, data: { category, texture, pattern, fit, subtype, length, size, notes, seasons, hexColors } };
 }

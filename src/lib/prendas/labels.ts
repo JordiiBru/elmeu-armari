@@ -65,6 +65,11 @@ export const SUBTYPE_LABELS: Record<string, string> = {
   OXFORD:   "Oxford",
 };
 
+export const LENGTH_LABELS: Record<string, string> = {
+  SHORT: "Curts",
+  LONG:  "Llargs",
+};
+
 export const SEASON_LABELS: Record<Season, string> = {
   SPRING:   "Primavera",
   SUMMER:   "Estiu",

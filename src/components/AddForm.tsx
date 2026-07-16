@@ -13,6 +13,7 @@ import {
   FITS_BY_CATEGORY,
   SUBTYPES_BY_CATEGORY,
   SIZES_BY_CATEGORY,
+  LENGTHS_BY_CATEGORY,
 } from "@/lib/prendas/types";
 import type { Category } from "@/lib/prendas/types";
 import {
@@ -21,6 +22,7 @@ import {
   PATTERN_LABELS,
   FIT_LABELS,
   SUBTYPE_LABELS,
+  LENGTH_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import {
@@ -41,6 +43,7 @@ export function AddForm() {
   );
   const [category, setCategory] = useState<Category | "">("");
   const [subtype, setSubtype] = useState("");
+  const [length, setLength] = useState("");
   const [texture, setTexture] = useState("");
   const [pattern, setPattern] = useState("");
   const [size, setSize] = useState("");
@@ -83,6 +86,7 @@ export function AddForm() {
   const fits = category ? FITS_BY_CATEGORY[category] : [];
   const subtypes = category ? SUBTYPES_BY_CATEGORY[category] : [];
   const sizes = category ? SIZES_BY_CATEGORY[category] : [];
+  const lengths = category ? LENGTHS_BY_CATEGORY[category] : [];
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -103,6 +107,7 @@ export function AddForm() {
           onChange={(v) => {
             setCategory(v as Category);
             setSubtype("");
+            setLength("");
             setSize("");
             setFit("");
           }}
@@ -123,6 +128,21 @@ export function AddForm() {
             options={subtypes.map((s) => ({
               value: s,
               label: SUBTYPE_LABELS[s],
+            }))}
+          />
+        </Field>
+      )}
+
+      {category && lengths.length > 0 && (
+        <Field label={UI.form.length} required>
+          <Select
+            name="length"
+            required
+            value={length}
+            onChange={setLength}
+            options={lengths.map((l) => ({
+              value: l,
+              label: LENGTH_LABELS[l],
             }))}
           />
         </Field>

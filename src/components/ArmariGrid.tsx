@@ -6,12 +6,13 @@ import { GarmentModal } from "@/components/GarmentModal";
 import { GarmentCard, AddGarmentCard } from "@/components/GarmentCard";
 import { filterGarments } from "@/lib/prendas/filtering";
 import type { GarmentWithColors, Category, Texture, Season } from "@/lib/prendas/types";
-import { CATEGORIES, SEASONS, ALL_FITS, TEXTURES } from "@/lib/prendas/types";
+import { CATEGORIES, SEASONS, ALL_FITS, TEXTURES, ALL_LENGTHS } from "@/lib/prendas/types";
 import {
   CATEGORY_LABELS,
   SEASON_LABELS,
   FIT_LABELS,
   TEXTURE_LABELS,
+  LENGTH_LABELS,
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import { Input, Icon, EmptyState, TextButton } from "@/components/ui";
@@ -85,10 +86,13 @@ export function ArmariGrid({ garments }: Props) {
   const [textures, setTextures] = useState<Texture[]>(
     () => initialParams.getAll("tex") as Texture[]
   );
+  const [lengths, setLengths] = useState<string[]>(
+    () => initialParams.getAll("len")
+  );
   const [query, setQuery] = useState<string>(() => initialParams.get("q") ?? "");
 
   const hasFilters =
-    categories.length > 0 || seasons.length > 0 || fits.length > 0 || textures.length > 0 || query !== "";
+    categories.length > 0 || seasons.length > 0 || fits.length > 0 || textures.length > 0 || lengths.length > 0 || query !== "";
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -96,11 +100,12 @@ export function ArmariGrid({ garments }: Props) {
     seasons.forEach((s) => params.append("season", s));
     fits.forEach((f) => params.append("fit", f));
     textures.forEach((t) => params.append("tex", t));
+    lengths.forEach((l) => params.append("len", l));
     if (query) params.set("q", query);
     const qs = params.toString();
     const next = qs ? `?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", next);
-  }, [categories, seasons, fits, textures, query]);
+  }, [categories, seasons, fits, textures, lengths, query]);
 
   // Defensive: if the currently opened piece is no longer in the list
   // (deleted, revalidation), don't render a stale modal.
@@ -122,16 +127,17 @@ export function ArmariGrid({ garments }: Props) {
     setSeasons([]);
     setFits([]);
     setTextures([]);
+    setLengths([]);
     setQuery("");
   }, []);
 
   const filtered = useMemo(
-    () => filterGarments(garments, { categories, seasons, fits, textures, query }),
-    [garments, categories, seasons, fits, textures, query]
+    () => filterGarments(garments, { categories, seasons, fits, textures, lengths, query }),
+    [garments, categories, seasons, fits, textures, lengths, query]
   );
 
   const activeCount =
-    categories.length + seasons.length + fits.length + textures.length + (query ? 1 : 0);
+    categories.length + seasons.length + fits.length + textures.length + lengths.length + (query ? 1 : 0);
 
   return (
     <>
@@ -218,6 +224,18 @@ export function ArmariGrid({ garments }: Props) {
                     onClick={() => toggleIn(setTextures, t)}
                   >
                     {TEXTURE_LABELS[t]}
+                  </FilterTag>
+                ))}
+              </FilterRow>
+
+              <FilterRow label="llargada">
+                {ALL_LENGTHS.map((l) => (
+                  <FilterTag
+                    key={l}
+                    active={lengths.includes(l)}
+                    onClick={() => toggleIn(setLengths, l)}
+                  >
+                    {LENGTH_LABELS[l]}
                   </FilterTag>
                 ))}
               </FilterRow>
