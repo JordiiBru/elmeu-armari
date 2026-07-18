@@ -2,7 +2,6 @@
 
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { GarmentModal } from "@/components/GarmentModal";
 import { GarmentCard, AddGarmentCard } from "@/components/GarmentCard";
 import { filterGarments } from "@/lib/prendas/filtering";
 import type { GarmentWithColors, Category, Texture, Season } from "@/lib/prendas/types";
@@ -73,7 +72,6 @@ function FilterRow({
 
 export function ArmariGrid({ garments }: Props) {
   const initialParams = useSearchParams();
-  const [selected, setSelected] = useState<GarmentWithColors | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [categories, setCategories] = useState<Category[]>(
@@ -106,12 +104,6 @@ export function ArmariGrid({ garments }: Props) {
     const next = qs ? `?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", next);
   }, [categories, seasons, fits, textures, lengths, query]);
-
-  // Defensive: if the currently opened piece is no longer in the list
-  // (deleted, revalidation), don't render a stale modal.
-  const activeSelected = selected
-    ? garments.find((g) => g.id === selected.id) ?? null
-    : null;
 
   const toggleIn = useCallback(
     <T extends string>(setter: React.Dispatch<React.SetStateAction<T[]>>, value: T) => {
@@ -274,18 +266,9 @@ export function ArmariGrid({ garments }: Props) {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-16">
           <AddGarmentCard />
           {filtered.map((garment, i) => (
-            <GarmentCard
-              key={garment.id}
-              garment={garment}
-              index={i}
-              onClick={setSelected}
-            />
+            <GarmentCard key={garment.id} garment={garment} index={i} />
           ))}
         </div>
-      )}
-
-      {activeSelected && (
-        <GarmentModal garment={activeSelected} onClose={() => setSelected(null)} />
       )}
     </>
   );

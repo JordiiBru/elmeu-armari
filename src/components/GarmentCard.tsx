@@ -1,22 +1,13 @@
-"use client";
-
+import Link from "next/link";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
 import { PieceThumb } from "./PieceThumb";
 import { Card, Text, Icon } from "@/components/ui";
 
-/** Ratio 3:4 amb tira de swatches. Card editorial reusable. */
-export function GarmentCard({
-  garment,
-  index,
-  onClick,
-}: {
-  garment: GarmentWithColors;
-  index: number;
-  onClick: (g: GarmentWithColors) => void;
-}) {
+/** Thumbnail + label block shared by every card ratio 3:4 in the catalog. */
+function GarmentCardContent({ garment, index }: { garment: GarmentWithColors; index: number }) {
   return (
-    <Card as="button" interactive="clickable" type="button" data-testid="garment-card" onClick={() => onClick(garment)}>
+    <>
       <PieceThumb
         garment={garment}
         thumb
@@ -39,6 +30,54 @@ export function GarmentCard({
           {garment.notes}
         </Text>
       )}
+    </>
+  );
+}
+
+/**
+ * Ratio 3:4 amb tira de swatches. Card editorial reusable.
+ * Server Component: a plain `Link` to `/armari/[id]`. The garment modal
+ * opens via that route (intercepted from `/armari`, see `@modal`) rather
+ * than local client state, so this card doesn't need "use client".
+ */
+export function GarmentCard({
+  garment,
+  index,
+}: {
+  garment: GarmentWithColors;
+  index: number;
+}) {
+  return (
+    <Card as={Link} href={`/armari/${garment.id}`} interactive="clickable" data-testid="garment-card">
+      <GarmentCardContent garment={garment} index={index} />
+    </Card>
+  );
+}
+
+/**
+ * Same visual card, but a click callback instead of navigation — used by
+ * the outfit builder ("combinar" tab) to pick a garment and open the
+ * palette-matching sheet, which is unrelated to the `/armari/[id]` detail
+ * modal. Kept client-only since it needs a real event handler.
+ */
+export function SelectableGarmentCard({
+  garment,
+  index,
+  onClick,
+}: {
+  garment: GarmentWithColors;
+  index: number;
+  onClick: (g: GarmentWithColors) => void;
+}) {
+  return (
+    <Card
+      as="button"
+      type="button"
+      interactive="clickable"
+      data-testid="garment-card"
+      onClick={() => onClick(garment)}
+    >
+      <GarmentCardContent garment={garment} index={index} />
     </Card>
   );
 }
