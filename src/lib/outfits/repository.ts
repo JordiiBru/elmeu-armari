@@ -14,7 +14,13 @@ export async function findOutfitByGarmentsAndPalette(
 ) {
   const sorted = [...garmentIds].sort();
   const outfits = await prisma.outfit.findMany({
-    where: { paletteId },
+    // Narrow in SQL to outfits of this palette wearing at least one of the
+    // target garments as a primary piece; exact set-equality over primaries
+    // stays in JS below because relational filters can't express it.
+    where: {
+      paletteId,
+      garments: { some: { garmentId: { in: sorted }, role: "primary" } },
+    },
     include: OUTFIT_INCLUDE,
   });
   // Duplicate-detection is scoped to primary pieces: two saves of the

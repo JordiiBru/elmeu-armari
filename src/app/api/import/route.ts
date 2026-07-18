@@ -117,7 +117,9 @@ export async function POST(req: NextRequest) {
       length: g.length ?? null,
       fit: g.fit,
       notes: g.notes ?? undefined,
-      hexColors: g.colors,
+      // Dedupe like validateGarmentForm does — the Color [garmentId, hex]
+      // unique constraint would abort the import on a duplicate otherwise.
+      hexColors: [...new Set(g.colors.map((c) => c.toLowerCase()))],
     });
     imported++;
   }
