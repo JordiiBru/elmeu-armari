@@ -82,7 +82,7 @@ Individual gates: `npm run lint`, `npm run typecheck`, `npm run build`.
 
 ## Photos
 
-- Upload path: `/api/garments/[id]/image` (PATCH / DELETE).
+- Upload path: `/api/garments/[id]/image` (POST for upload, DELETE to remove).
 - Serve path: `/api/uploads/[filename]` — the filename regex is a security-relevant allowlist (`[a-z0-9]+(?:-thumb)?\.webp`). Do not loosen it without a security review.
 - `sharp` re-encodes to WebP 800 px @ q80, strips EXIF, generates a `-thumb` companion.
 

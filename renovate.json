@@ -57,6 +57,7 @@
         "postcss"
       ],
       "groupName": "Tailwind CSS",
+      "matchUpdateTypes": ["patch", "minor"],
       "automerge": true
     },
     {
