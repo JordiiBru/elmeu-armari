@@ -55,15 +55,32 @@ function validate(body: unknown): { ok: true; payload: ImportPayload } | { ok: f
   return { ok: true, payload: b as unknown as ImportPayload };
 }
 
-export async function POST(req: NextRequest) {
+function checkAuth(req: NextRequest): NextResponse | null {
   const importSecret = process.env.IMPORT_SECRET;
-  if (importSecret) {
-    const auth = req.headers.get("Authorization");
-    const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
-    if (token !== importSecret) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // In production, IMPORT_SECRET is required. An unconfigured prod deploy
+  // would otherwise expose a destructive endpoint to anyone on the network.
+  if (!importSecret) {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { error: "IMPORT_SECRET env var not set. Configure it to enable import." },
+        { status: 503 }
+      );
     }
+    return null; // dev: open
   }
+
+  const auth = req.headers.get("Authorization");
+  const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
+  if (token !== importSecret) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return null;
+}
+
+export async function POST(req: NextRequest) {
+  const authError = checkAuth(req);
+  if (authError) return authError;
 
   const mode = req.nextUrl.searchParams.get("mode") ?? "merge";
 
@@ -77,31 +94,37 @@ export async function POST(req: NextRequest) {
   const result = validate(body);
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 422 });
 
+  const garments = result.payload.garments;
+
   if (mode === "replace") {
+    // Delete + insert in one logical operation. Sequential inserts avoid
+    // lock contention on the single-writer SQLite adapter.
     const existing = await findAllGarments();
-    await Promise.all(existing.map((g) => deleteGarment(g.id)));
+    for (const g of existing) {
+      await deleteGarment(g.id);
+    }
   }
 
-  const created = await Promise.all(
-    result.payload.garments.map((g) =>
-      addGarment({
-        category: g.category,
-        texture: g.texture,
-        pattern: g.pattern,
-        seasons: g.seasons,
-        size: g.size,
-        subtype: g.subtype ?? null,
-        length: g.length ?? null,
-        fit: g.fit,
-        notes: g.notes ?? undefined,
-        hexColors: g.colors,
-      })
-    )
-  );
+  let imported = 0;
+  for (const g of garments) {
+    await addGarment({
+      category: g.category,
+      texture: g.texture,
+      pattern: g.pattern,
+      seasons: g.seasons,
+      size: g.size,
+      subtype: g.subtype ?? null,
+      length: g.length ?? null,
+      fit: g.fit,
+      notes: g.notes ?? undefined,
+      hexColors: g.colors,
+    });
+    imported++;
+  }
 
   revalidatePath("/armari");
   revalidatePath("/stats");
   revalidatePath("/settings");
 
-  return NextResponse.json({ imported: created.length });
+  return NextResponse.json({ imported });
 }
