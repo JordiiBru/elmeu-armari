@@ -46,5 +46,9 @@ export function validateGarmentForm(formData: FormData): ValidationResult {
   if (hexColors.length === 0) return { ok: false, error: UI.errors.minOneColor, field: "hexColors" };
   if (!hexColors.every(isHex)) return { ok: false, error: UI.errors.invalidColor, field: "hexColors" };
 
-  return { ok: true, data: { category, texture, pattern, fit, subtype, length, size, notes, seasons, hexColors } };
+  // Normalize + dedupe so the Color [garmentId, hex] unique constraint
+  // can never fail at write time from picker duplicates or case variants.
+  const uniqueHexColors = [...new Set(hexColors.map((h) => h.toLowerCase()))];
+
+  return { ok: true, data: { category, texture, pattern, fit, subtype, length, size, notes, seasons, hexColors: uniqueHexColors } };
 }

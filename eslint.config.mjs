@@ -13,6 +13,30 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    // Layering rule from CLAUDE.md: repository.ts is the only place the
+    // prisma client is imported. Enums/types from @/generated/prisma/enums
+    // stay importable everywhere.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/lib/**/repository.ts", "src/lib/prisma.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@/lib/prisma",
+              message: "prisma may only be imported from src/lib/**/repository.ts",
+            },
+            {
+              name: "@/generated/prisma/client",
+              message: "prisma may only be imported from src/lib/**/repository.ts (via @/lib/prisma)",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;
