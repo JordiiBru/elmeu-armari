@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import type { GarmentWithColors, Season } from "@/lib/prendas/types";
 import type { SanzoPalette } from "@/lib/outfits/types";
 import { SEASON_LABELS } from "@/lib/prendas/labels";
-import { GarmentCard } from "./GarmentCard";
+import { SelectableGarmentCard } from "./GarmentCard";
 import { OutfitBottomSheet } from "./OutfitBottomSheet";
 import { EmptyState } from "@/components/ui";
 
@@ -84,7 +84,7 @@ export function OutfitBuilder({
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-16">
           {filtered.map((g, i) => (
-            <GarmentCard
+            <SelectableGarmentCard
               key={g.id}
               garment={g}
               index={i}
