@@ -1,22 +1,8 @@
-import type { Category, Pattern, Texture, Season } from "./types";
+import type { GarmentInput, Category, Texture, Pattern, Season } from "./types";
 import { CATEGORIES, TEXTURES, PATTERNS, SEASONS, FITS_BY_CATEGORY, SUBTYPES_BY_CATEGORY, SIZES_BY_CATEGORY, LENGTHS_BY_CATEGORY } from "./types";
 import { UI } from "./ui-strings";
 
-export interface GarmentFormData {
-  category: Category;
-  texture: Texture;
-  pattern: Pattern;
-  fit: string;
-  subtype: string | null;
-  length: string | null;
-  size: string;
-  seasons: Season[];
-  hexColors: string[];
-  notes?: string;
-}
-
-export type ValidationError = { error: string };
-export type ValidationResult = { ok: true; data: GarmentFormData } | { ok: false; error: string };
+export type ValidationResult = { ok: true; data: GarmentInput } | { ok: false; error: string };
 
 export function isHex(s: string): boolean {
   return /^#[0-9a-fA-F]{6}$/.test(s);

@@ -5,7 +5,7 @@ import { CATEGORIES, TEXTURES, PATTERNS, SEASONS, FITS_BY_CATEGORY, SUBTYPES_BY_
 import { isHex } from "@/lib/prendas/validation";
 import type { Category, Texture, Pattern, Season } from "@/lib/prendas/types";
 
-interface GarmentImport {
+interface GarmentImport extends Record<string, unknown> {
   category: Category;
   texture: Texture;
   pattern: Pattern;

@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { editGarment } from "@/lib/prendas/service";
 import { validateGarmentForm } from "@/lib/prendas/validation";
-import type { Season } from "@/lib/prendas/types";
 
 export type ActionState = { error: string } | null;
 
@@ -16,8 +15,7 @@ export async function updateGarmentAction(
   const result = validateGarmentForm(formData);
   if (!result.ok) return { error: result.error };
 
-  const { category, texture, pattern, fit, subtype, length, size, notes, seasons, hexColors } = result.data;
-  await editGarment(id, { category, texture, pattern, fit, subtype, length, size, notes, seasons: seasons as Season[], hexColors });
+  await editGarment(id, result.data);
 
   revalidatePath("/armari");
   revalidatePath("/stats");
