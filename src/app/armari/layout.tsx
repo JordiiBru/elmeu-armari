@@ -15,7 +15,8 @@ export default function ArmariLayout({
 }: {
   children: ReactNode;
   modal: ReactNode;
-}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} & any) {
   return (
     <>
       {children}
