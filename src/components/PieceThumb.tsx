@@ -46,7 +46,7 @@ export function PieceThumb({
           src={src}
           alt=""
           fill
-          unoptimized
+          unoptimized // sharp already produces final WebP; re-encoding would lose quality
           sizes={sizes}
           className={[
             "object-cover",
