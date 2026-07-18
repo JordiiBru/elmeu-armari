@@ -4,10 +4,11 @@ import {
   createGarment,
   updateGarment,
   deleteGarment,
+  setGarmentImage,
 } from "./repository";
 import type { GarmentInput } from "./types";
 
-export { findAllGarments, findGarmentById, deleteGarment };
+export { findAllGarments, findGarmentById, deleteGarment, setGarmentImage };
 
 export async function addGarment(data: GarmentInput) {
   return createGarment(data);

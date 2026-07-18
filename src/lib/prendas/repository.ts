@@ -64,6 +64,10 @@ export async function updateGarment(id: string, data: GarmentInput) {
   });
 }
 
+export async function setGarmentImage(id: string, filename: string | null) {
+  return prisma.garment.update({ where: { id }, data: { image: filename } });
+}
+
 export async function deleteGarment(id: string) {
   // A saved outfit is a specific curation of pieces; if one of its
   // pieces disappears the outfit itself is no longer meaningful. So

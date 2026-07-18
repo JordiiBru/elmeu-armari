@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
+import { findGarmentById, setGarmentImage } from "@/lib/prendas/service";
 import { saveGarmentImage, deleteGarmentImage, getUploadMaxMb } from "@/lib/uploads";
 
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -33,7 +33,7 @@ export async function POST(
     );
   }
 
-  const garment = await prisma.garment.findUnique({ where: { id } });
+  const garment = await findGarmentById(id);
   if (!garment) {
     return NextResponse.json({ error: "Garment not found" }, { status: 404 });
   }
@@ -41,7 +41,7 @@ export async function POST(
   const buffer = Buffer.from(await file.arrayBuffer());
   const filename = await saveGarmentImage(buffer, id);
 
-  await prisma.garment.update({ where: { id }, data: { image: filename } });
+  await setGarmentImage(id, filename);
 
   revalidatePath("/armari");
 
@@ -54,13 +54,13 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const garment = await prisma.garment.findUnique({ where: { id } });
+  const garment = await findGarmentById(id);
   if (!garment) {
     return NextResponse.json({ error: "Garment not found" }, { status: 404 });
   }
 
   await deleteGarmentImage(id);
-  await prisma.garment.update({ where: { id }, data: { image: null } });
+  await setGarmentImage(id, null);
 
   revalidatePath("/armari");
 
