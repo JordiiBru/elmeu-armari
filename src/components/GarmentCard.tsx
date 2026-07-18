@@ -16,7 +16,7 @@ export function GarmentCard({
   onClick: (g: GarmentWithColors) => void;
 }) {
   return (
-    <Card as="button" interactive="clickable" type="button" onClick={() => onClick(garment)}>
+    <Card as="button" interactive="clickable" type="button" data-testid="garment-card" onClick={() => onClick(garment)}>
       <PieceThumb
         garment={garment}
         thumb
