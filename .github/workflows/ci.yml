@@ -85,6 +85,10 @@ jobs:
             .next
             !.next/cache
           retention-days: 1
+          # .next is a dot-directory; without this the action uploads
+          # nothing (hidden files are excluded by default since v4.4)
+          # and the downstream download-artifact steps fail.
+          include-hidden-files: true
 
   docker-build:
     name: Docker build
