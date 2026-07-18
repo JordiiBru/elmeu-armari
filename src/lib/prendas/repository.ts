@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { Category, Pattern, Texture, Season } from "@/generated/prisma/enums";
+import type { GarmentInput } from "./types";
 
 export async function findAllGarments() {
   return prisma.garment.findMany({
@@ -15,18 +15,7 @@ export async function findGarmentById(id: string) {
   });
 }
 
-export async function createGarment(data: {
-  category: Category;
-  texture: Texture;
-  pattern: Pattern;
-  seasons: Season[];
-  size: string;
-  subtype: string | null;
-  length: string | null;
-  fit: string;
-  notes?: string;
-  hexColors: string[];
-}) {
+export async function createGarment(data: GarmentInput) {
   return prisma.garment.create({
     data: {
       category: data.category,
@@ -48,20 +37,7 @@ export async function createGarment(data: {
   });
 }
 
-export async function updateGarment(
-  id: string,
-  data: {
-    category: Category;
-    texture: Texture;
-    pattern: Pattern;
-    seasons: Season[];
-    size: string;
-    subtype: string | null;
-    fit: string;
-    notes?: string;
-    hexColors: string[];
-  }
-) {
+export async function updateGarment(id: string, data: GarmentInput) {
   return prisma.$transaction(async (tx) => {
     await tx.color.deleteMany({ where: { garmentId: id } });
     await tx.garmentSeason.deleteMany({ where: { garmentId: id } });
@@ -73,6 +49,7 @@ export async function updateGarment(
         pattern: data.pattern,
         size: data.size,
         subtype: data.subtype,
+        length: data.length,
         fit: data.fit,
         notes: data.notes ?? null,
         colors: {

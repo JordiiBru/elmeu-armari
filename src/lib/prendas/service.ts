@@ -5,39 +5,14 @@ import {
   updateGarment,
   deleteGarment,
 } from "./repository";
-import type { Category, Pattern, Texture, Season } from "./types";
+import type { GarmentInput } from "./types";
 
 export { findAllGarments, findGarmentById, deleteGarment };
 
-export async function addGarment(data: {
-  category: Category;
-  texture: Texture;
-  pattern: Pattern;
-  seasons: Season[];
-  size: string;
-  subtype: string | null;
-  length: string | null;
-  fit: string;
-  notes?: string;
-  hexColors: string[];
-}) {
+export async function addGarment(data: GarmentInput) {
   return createGarment(data);
 }
 
-export async function editGarment(
-  id: string,
-  data: {
-    category: Category;
-    texture: Texture;
-    pattern: Pattern;
-    seasons: Season[];
-    size: string;
-    subtype: string | null;
-    length: string | null;
-    fit: string;
-    notes?: string;
-    hexColors: string[];
-  }
-) {
+export async function editGarment(id: string, data: GarmentInput) {
   return updateGarment(id, data);
 }

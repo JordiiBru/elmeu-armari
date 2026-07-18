@@ -53,6 +53,19 @@ export const ALL_SUBTYPES: string[] = [
   ...new Set(Object.values(SUBTYPES_BY_CATEGORY).flat()),
 ];
 
+export interface GarmentInput {
+  category: Category;
+  texture: Texture;
+  pattern: Pattern;
+  fit: string;
+  subtype: string | null;
+  length: string | null;
+  size: string;
+  seasons: Season[];
+  hexColors: string[];
+  notes?: string;
+}
+
 export interface GarmentWithColors {
   id: string;
   category: Category;
