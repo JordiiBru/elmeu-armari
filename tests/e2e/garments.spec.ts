@@ -1,17 +1,38 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+// These specs share one wardrobe against the same running server/DB and
+// assume earlier tests' state (add → edit → delete → import), so they
+// cannot run concurrently with each other — count-based assertions
+// (e.g. delete) would race against parallel inserts from other tests.
+test.describe.configure({ mode: "serial" });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+/**
+ * The design system's `Select` (src/components/ui/Select.tsx) is not a
+ * native `<select>` — it emits `<input type="hidden" name>` for form
+ * submission next to a `role="combobox"` button + `role="listbox"`
+ * popover. `page.selectOption` cannot drive it; open the popover and
+ * click the option by its visible (Catalan) label instead.
+ */
+async function selectCustom(page: Page, name: string, optionLabel: string) {
+  await page.locator(`input[name="${name}"] + button[role="combobox"]`).click();
+  await page.getByRole("option", { name: optionLabel, exact: true }).click();
+}
+
 /** Fills the garment add/edit form with a minimal valid SHIRT payload. */
-async function fillShirtForm(page: import("@playwright/test").Page) {
-  await page.selectOption('[name="category"]', "SHIRT");
-  await page.selectOption('[name="subtype"]', "TEE");
-  await page.selectOption('[name="texture"]', "COTTON");
-  await page.selectOption('[name="pattern"]', "PLAIN");
-  await page.getByLabel("Temporada").first();
-  await page.getByRole("checkbox", { name: "Tot l'any" }).check();
-  await page.selectOption('[name="size"]', "M");
-  await page.selectOption('[name="fit"]', "REGULAR");
+async function fillShirtForm(page: Page) {
+  await selectCustom(page, "category", "Samarreta");
+  await selectCustom(page, "subtype", "Samarreta");
+  await selectCustom(page, "texture", "Cotó");
+  await selectCustom(page, "pattern", "Llis");
+  // Checkbox.tsx puts the real <input> inside sr-only styling with a
+  // decorative overlay <span> on top of it; clicking the visible label
+  // text (as a real user would) forwards the click via the wrapping
+  // <label>, whereas targeting the input's own box gets intercepted.
+  await page.getByText("Tot l'any", { exact: true }).click();
+  await selectCustom(page, "size", "M");
+  await selectCustom(page, "fit", "Regular");
   // inject a colour via hidden input (ColorPickers renders them)
   // ColorPickers appends <input name="color" type="hidden" value="#rrggbb">
   // Easier: inject the hidden input directly.
@@ -26,18 +47,19 @@ async function fillShirtForm(page: import("@playwright/test").Page) {
 }
 
 /** Fills the garment form with a minimal valid PANTS payload including length. */
-async function fillPantsForm(
-  page: import("@playwright/test").Page,
-  length: "SHORT" | "LONG",
-) {
-  await page.selectOption('[name="category"]', "PANTS");
-  await page.selectOption('[name="subtype"]', "CHINO");
-  await page.selectOption('[name="length"]', length);
-  await page.selectOption('[name="texture"]', "COTTON");
-  await page.selectOption('[name="pattern"]', "PLAIN");
-  await page.getByRole("checkbox", { name: "Tot l'any" }).check();
-  await page.selectOption('[name="size"]', "32");
-  await page.selectOption('[name="fit"]', "STRAIGHT");
+async function fillPantsForm(page: Page, length: "SHORT" | "LONG") {
+  await selectCustom(page, "category", "Pantalons");
+  await selectCustom(page, "subtype", "Chino");
+  await selectCustom(page, "length", length === "SHORT" ? "Curts" : "Llargs");
+  await selectCustom(page, "texture", "Cotó");
+  await selectCustom(page, "pattern", "Llis");
+  // Checkbox.tsx puts the real <input> inside sr-only styling with a
+  // decorative overlay <span> on top of it; clicking the visible label
+  // text (as a real user would) forwards the click via the wrapping
+  // <label>, whereas targeting the input's own box gets intercepted.
+  await page.getByText("Tot l'any", { exact: true }).click();
+  await selectCustom(page, "size", "32");
+  await selectCustom(page, "fit", "Straight");
   await page.evaluate(() => {
     const form = document.querySelector("form")!;
     const input = document.createElement("input");
@@ -56,7 +78,11 @@ test.describe("wardrobe — add garment", () => {
     await fillShirtForm(page);
     await page.getByRole("button", { name: /guardar peça/i }).click();
     await page.waitForURL("/armari");
-    await expect(page.getByText("Samarreta")).toBeVisible();
+    // "Samarreta" is both the SHIRT category label and the TEE subtype
+    // label, and also appears in nav — scope to the grid card.
+    await expect(
+      page.locator('[data-testid="garment-card"]').filter({ hasText: "Samarreta" }).first(),
+    ).toBeVisible();
   });
 });
 
@@ -73,21 +99,21 @@ test.describe("wardrobe — length regression (H1)", () => {
     // 2. Open the garment via the first card in the grid.
     await page.locator('[data-testid="garment-card"]').first().click();
 
-    // 3. Click edit inside the modal.
-    await page.getByRole("button", { name: /editar/i }).click();
+    // 3. Click edit inside the modal — "editar" is a Link, not a button.
+    await page.getByRole("link", { name: /editar/i }).click();
     await page.waitForURL(/\/edit\/.+/);
 
     // 4. Verify current length is SHORT, change to LONG, save.
-    await expect(page.locator('[name="length"]')).toHaveValue("SHORT");
-    await page.selectOption('[name="length"]', "LONG");
+    await expect(page.locator('input[name="length"]')).toHaveValue("SHORT");
+    await selectCustom(page, "length", "Llargs");
     await page.getByRole("button", { name: /guardar canvis/i }).click();
     await page.waitForURL("/armari");
 
     // 5. Re-open the garment and confirm the length change persisted.
     await page.locator('[data-testid="garment-card"]').first().click();
-    await page.getByRole("button", { name: /editar/i }).click();
+    await page.getByRole("link", { name: /editar/i }).click();
     await page.waitForURL(/\/edit\/.+/);
-    await expect(page.locator('[name="length"]')).toHaveValue("LONG");
+    await expect(page.locator('input[name="length"]')).toHaveValue("LONG");
   });
 });
 
@@ -101,13 +127,22 @@ test.describe("wardrobe — delete garment", () => {
       return;
     }
 
-    // Open first card → modal → delete.
+    // Open first card → modal → delete. "eliminar" arms a confirm state
+    // (label becomes "sí, eliminar") before the actual delete fires.
     await page.locator('[data-testid="garment-card"]').first().click();
-    await page.getByRole("button", { name: /eliminar/i }).click();
+    await page.getByRole("button", { name: "eliminar" }).click();
+    await page.getByRole("button", { name: /sí, eliminar/i }).click();
 
+    // handleDelete awaits the server action then calls onClose() (router.back()).
+    // waitForURL resolves as soon as the URL changes, which can race the RSC
+    // revalidation fetch that actually updates the grid — wait for the modal
+    // dialog to fully close (confirms the transition settled) before counting.
     await page.waitForURL("/armari");
-    const after = await page.locator('[data-testid="garment-card"]').count();
-    expect(after).toBe(before - 1);
+    await expect(page.getByRole("dialog")).toBeHidden();
+    await expect(async () => {
+      const after = await page.locator('[data-testid="garment-card"]').count();
+      expect(after).toBe(before - 1);
+    }).toPass();
   });
 });
 
@@ -128,8 +163,12 @@ test.describe("export / import round-trip", () => {
       return;
     }
 
-    // Import (merge mode — safe to call in any order).
-    const importRes = await request.post("/api/import", { data: payload });
+    // Import (merge mode — safe to call in any order). H7 requires this
+    // Bearer token in production; matches playwright.config.ts webServer.env.
+    const importRes = await request.post("/api/import", {
+      data: payload,
+      headers: { Authorization: "Bearer e2e-test-secret" },
+    });
     expect(importRes.ok()).toBeTruthy();
     const result = await importRes.json();
     expect(result.imported).toBeGreaterThan(0);
