@@ -5,6 +5,7 @@ import {
   deleteOutfitAction,
   addOutfitExtrasAction,
   removeOutfitExtraAction,
+  setOutfitFavoriteAction,
 } from "@/app/outfits/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
@@ -23,12 +24,14 @@ interface SavedEntry {
   name: string | null;
   palette: SanzoPalette | null;
   extras: SavedGarment[];
+  favorite: boolean;
 }
 
 interface SavedGroup {
   garmentKey: string;
   primaryGarments: SavedGarment[];
   entries: SavedEntry[];
+  favorite: boolean;
 }
 
 function groupOutfits(outfits: SavedOutfit[], palettes: SanzoPalette[]): SavedGroup[] {
@@ -45,20 +48,29 @@ function groupOutfits(outfits: SavedOutfit[], palettes: SanzoPalette[]): SavedGr
       name: outfit.name,
       palette: paletteMap.get(outfit.paletteId) ?? null,
       extras,
+      favorite: outfit.favorite,
     };
 
     if (existing) {
       existing.entries.push(entry);
+      existing.favorite = existing.favorite || entry.favorite;
     } else {
       groups.set(key, {
         garmentKey: key,
         primaryGarments: primary,
         entries: [entry],
+        favorite: entry.favorite,
       });
     }
   }
 
-  return Array.from(groups.values());
+  for (const group of groups.values()) {
+    group.entries.sort((a, b) => Number(b.favorite) - Number(a.favorite));
+  }
+
+  return Array.from(groups.values()).sort(
+    (a, b) => Number(b.favorite) - Number(a.favorite),
+  );
 }
 
 function GarmentThumb({
@@ -208,6 +220,13 @@ function SavedPaletteRow({
     });
   };
 
+  const handleToggleFavorite = () => {
+    startTransition(async () => {
+      await setOutfitFavoriteAction(entry.outfitId, !entry.favorite);
+      toast.show(entry.favorite ? "tret de preferits" : "afegit a preferits");
+    });
+  };
+
   const handleRemoveExtra = (garmentId: string) => {
     startTransition(async () => {
       await removeOutfitExtraAction(entry.outfitId, garmentId);
@@ -240,15 +259,30 @@ function SavedPaletteRow({
         <span className="font-serif italic text-sm text-text-secondary min-w-0 truncate">
           {entry.palette?.nombre ?? `paleta #${entry.outfitId}`}
         </span>
-        <IconButton
-          onClick={handleDelete}
-          disabled={pending}
-          label="Eliminar outfit"
-          size="sm"
-          className="shrink-0"
-        >
-          <Icon name="close" size={14} />
-        </IconButton>
+        <span className="flex items-center gap-1 shrink-0">
+          <IconButton
+            onClick={handleToggleFavorite}
+            disabled={pending}
+            label={entry.favorite ? "Treure de preferits" : "Afegir a preferits"}
+            aria-pressed={entry.favorite}
+            size="sm"
+            className={entry.favorite ? "text-text-primary" : ""}
+          >
+            <Icon
+              name="star"
+              size={14}
+              className={entry.favorite ? "fill-current" : "fill-none"}
+            />
+          </IconButton>
+          <IconButton
+            onClick={handleDelete}
+            disabled={pending}
+            label="Eliminar outfit"
+            size="sm"
+          >
+            <Icon name="close" size={14} />
+          </IconButton>
+        </span>
       </div>
 
       <div className="flex items-end justify-between gap-3 pl-1">

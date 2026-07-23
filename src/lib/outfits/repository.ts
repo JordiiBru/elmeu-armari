@@ -68,8 +68,12 @@ export async function removeOutfitExtra(outfitId: string, garmentId: string) {
 export async function findAllOutfits() {
   return prisma.outfit.findMany({
     include: OUTFIT_INCLUDE,
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ favorite: "desc" }, { createdAt: "desc" }],
   });
+}
+
+export async function setOutfitFavorite(id: string, favorite: boolean) {
+  return prisma.outfit.update({ where: { id }, data: { favorite } });
 }
 
 export async function deleteOutfit(id: string) {

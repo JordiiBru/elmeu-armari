@@ -29,6 +29,7 @@ model Outfit {
   id        String          @id @default(cuid())
   name      String?
   paletteId Int
+  favorite  Boolean         @default(false)
   garments  OutfitGarment[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt

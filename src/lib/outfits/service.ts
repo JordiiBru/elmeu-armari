@@ -6,10 +6,17 @@ import {
   countOutfits,
   addOutfitExtras,
   removeOutfitExtra,
+  setOutfitFavorite,
 } from "./repository";
 import { palettes } from "@/lib/colors";
 
-export { findAllOutfits, deleteOutfit, addOutfitExtras, removeOutfitExtra };
+export {
+  findAllOutfits,
+  deleteOutfit,
+  addOutfitExtras,
+  removeOutfitExtra,
+  setOutfitFavorite,
+};
 
 // Outfit.paletteId is an unchecked FK into sanzo-wada.json (no Palette
 // table), so writes must validate it here or orphan palettes slip in.

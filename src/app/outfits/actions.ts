@@ -1,6 +1,12 @@
 "use server";
 
-import { saveOutfit, deleteOutfit, addOutfitExtras, removeOutfitExtra } from "@/lib/outfits/service";
+import {
+  saveOutfit,
+  deleteOutfit,
+  addOutfitExtras,
+  removeOutfitExtra,
+  setOutfitFavorite,
+} from "@/lib/outfits/service";
 import { revalidatePath } from "next/cache";
 
 export async function saveOutfitAction(paletteId: number, garmentIds: string[]) {
@@ -21,5 +27,10 @@ export async function addOutfitExtrasAction(outfitId: string, garmentIds: string
 
 export async function removeOutfitExtraAction(outfitId: string, garmentId: string) {
   await removeOutfitExtra(outfitId, garmentId);
+  revalidatePath("/armari");
+}
+
+export async function setOutfitFavoriteAction(outfitId: string, favorite: boolean) {
+  await setOutfitFavorite(outfitId, favorite);
   revalidatePath("/armari");
 }
