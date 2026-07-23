@@ -7,7 +7,8 @@ export type IconName =
   | "arrow-right"
   | "plus"
   | "close"
-  | "check";
+  | "check"
+  | "star";
 
 interface Props extends Omit<SVGProps<SVGSVGElement>, "children"> {
   name: IconName;
@@ -68,4 +69,7 @@ const PATHS: Record<IconName, ReactElement> = {
     </>
   ),
   check: <polyline points="4 12 10 18 20 6" />,
+  star: (
+    <polygon points="12 3 14.7 9.2 21.5 9.9 16.4 14.5 17.8 21.2 12 17.8 6.2 21.2 7.6 14.5 2.5 9.9 9.3 9.2" />
+  ),
 };

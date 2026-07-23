@@ -39,6 +39,7 @@ export interface SavedOutfit {
   id: string;
   name: string | null;
   paletteId: number;
+  favorite: boolean;
   createdAt: Date;
   garments: {
     id: string;
