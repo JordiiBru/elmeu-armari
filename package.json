@@ -35,5 +35,20 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "eslint": {
+      "brace-expansion": "^1.1.16"
+    },
+    "prisma": {
+      "@prisma/dev": {
+        "@hono/node-server": "^2.0.11",
+        "@prisma/streams-local": {
+          "ajv": {
+            "fast-uri": "^3.1.4"
+          }
+        }
+      }
+    }
   }
 }
