@@ -18,18 +18,32 @@ export default async function SettingsPage() {
           <Text variant="caption" tabular>
             {garments.length} peces a l&apos;arxiu
           </Text>
-          <a
-            href="/api/export"
-            download
-            className="group relative self-start type-subtitle text-text-primary inline-flex items-center gap-2 active:scale-[0.98]"
-          >
-            <span>descarregar json</span>
-            <Icon name="arrow-right" size={14} />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-text-primary origin-left transition-transform duration-[var(--duration-slow)] ease-out scale-x-0 group-hover:scale-x-100"
-            />
-          </a>
+          <div className="flex flex-col gap-3">
+            <a
+              href="/api/export"
+              download
+              className="group relative self-start type-subtitle text-text-primary inline-flex items-center gap-2 active:scale-[0.98]"
+            >
+              <span>descarregar json</span>
+              <Icon name="arrow-right" size={14} />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-text-primary origin-left transition-transform duration-[var(--duration-slow)] ease-out scale-x-0 group-hover:scale-x-100"
+              />
+            </a>
+            <a
+              href="/api/export/zip"
+              download
+              className="group relative self-start type-subtitle text-text-primary inline-flex items-center gap-2 active:scale-[0.98]"
+            >
+              <span>descarregar zip (amb fotos)</span>
+              <Icon name="arrow-right" size={14} />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute left-0 -bottom-1 h-px w-full bg-text-primary origin-left transition-transform duration-[var(--duration-slow)] ease-out scale-x-0 group-hover:scale-x-100"
+              />
+            </a>
+          </div>
         </Stack>
 
         <Stack as="section" gap={4} className="py-10">
