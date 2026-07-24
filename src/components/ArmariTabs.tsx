@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
-import type { GarmentWithColors } from "@/lib/prendas/types";
+import type { GarmentWithColors, Season } from "@/lib/prendas/types";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import { ArmariGrid } from "./ArmariGrid";
 import { OutfitBuilder } from "./OutfitBuilder";
@@ -19,10 +19,12 @@ export function ArmariTabs({
   garments,
   palettes,
   savedOutfits,
+  defaultSeason,
 }: {
   garments: GarmentWithColors[];
   palettes: SanzoPalette[];
   savedOutfits: SavedOutfit[];
+  defaultSeason?: Season;
 }) {
   const [tab, setTab] = useState<TabId>("peces");
   const listRef = useRef<HTMLDivElement>(null);
@@ -93,7 +95,7 @@ export function ArmariTabs({
         />
       </div>
 
-      {tab === "peces" && <ArmariGrid garments={garments} />}
+      {tab === "peces" && <ArmariGrid garments={garments} defaultSeason={defaultSeason} />}
       {tab === "combinar" && <OutfitBuilder garments={garments} palettes={palettes} />}
       {tab === "desats" && (
         <SavedOutfitsView
