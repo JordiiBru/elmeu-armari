@@ -26,13 +26,24 @@ model Garment {
 }
 
 model Outfit {
-  id        String          @id @default(cuid())
-  name      String?
-  paletteId Int
-  favorite  Boolean         @default(false)
-  garments  OutfitGarment[]
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  id         String          @id @default(cuid())
+  name       String?
+  paletteId  Int
+  favorite   Boolean         @default(false)
+  garments   OutfitGarment[]
+  wornEvents WornEvent[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+model WornEvent {
+  id       String   @id @default(cuid())
+  outfitId String
+  date     DateTime @default(now())
+  outfit   Outfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+
+  @@index([outfitId])
+  @@index([date])
 }
 
 model OutfitGarment {

@@ -6,6 +6,10 @@ const OUTFIT_INCLUDE = {
       garment: { include: { colors: true, seasons: true } },
     },
   },
+  wornEvents: {
+    orderBy: { date: "desc" },
+    take: 1,
+  },
 } as const;
 
 export async function findOutfitByGarmentsAndPalette(
@@ -74,6 +78,10 @@ export async function findAllOutfits() {
 
 export async function setOutfitFavorite(id: string, favorite: boolean) {
   return prisma.outfit.update({ where: { id }, data: { favorite } });
+}
+
+export async function logWornEvent(outfitId: string) {
+  return prisma.wornEvent.create({ data: { outfitId } });
 }
 
 export async function deleteOutfit(id: string) {

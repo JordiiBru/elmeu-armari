@@ -6,6 +6,7 @@ import {
   addOutfitExtrasAction,
   removeOutfitExtraAction,
   setOutfitFavoriteAction,
+  logWornEventAction,
 } from "@/app/outfits/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
@@ -25,6 +26,24 @@ interface SavedEntry {
   palette: SanzoPalette | null;
   extras: SavedGarment[];
   favorite: boolean;
+  lastWornAt: Date | null;
+}
+
+/**
+ * Never-worn outfits rank before any dated one; among dated ones the
+ * oldest date wins. Used both to pick the "menys portat" suggestion
+ * and to render "fa X dies" / "mai portat".
+ */
+function wornRank(date: Date | null): number {
+  return date === null ? -Infinity : date.getTime();
+}
+
+function formatLastWorn(date: Date | null): string {
+  if (date === null) return "mai portat";
+  const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+  if (days <= 0) return "portat avui";
+  if (days === 1) return "portat fa 1 dia";
+  return `portat fa ${days} dies`;
 }
 
 interface SavedGroup {
@@ -49,6 +68,7 @@ function groupOutfits(outfits: SavedOutfit[], palettes: SanzoPalette[]): SavedGr
       palette: paletteMap.get(outfit.paletteId) ?? null,
       extras,
       favorite: outfit.favorite,
+      lastWornAt: outfit.lastWornAt,
     };
 
     if (existing) {
@@ -104,6 +124,15 @@ export function SavedOutfitsView({
     [allGarments],
   );
 
+  // "Menys portat": the outfit most overdue for a rewear, surfaced as a
+  // gentle daily-use nudge rather than a strict ranking of the whole list.
+  const suggestedOutfitId = useMemo(() => {
+    if (outfits.length === 0) return null;
+    return outfits.reduce((least, o) =>
+      wornRank(o.lastWornAt) < wornRank(least.lastWornAt) ? o : least,
+    ).id;
+  }, [outfits]);
+
   if (groups.length === 0) {
     return (
       <EmptyState
@@ -126,6 +155,7 @@ export function SavedOutfitsView({
           group={group}
           index={i}
           extraCandidates={extraCandidates}
+          suggestedOutfitId={suggestedOutfitId}
         />
       ))}
     </div>
@@ -136,10 +166,12 @@ function SavedGroupCard({
   group,
   index,
   extraCandidates,
+  suggestedOutfitId,
 }: {
   group: SavedGroup;
   index: number;
   extraCandidates: GarmentWithColors[];
+  suggestedOutfitId: string | null;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -194,6 +226,7 @@ function SavedGroupCard({
               key={entry.outfitId}
               entry={entry}
               extraCandidates={extraCandidates}
+              suggested={entry.outfitId === suggestedOutfitId}
             />
           ))}
         </div>
@@ -205,9 +238,11 @@ function SavedGroupCard({
 function SavedPaletteRow({
   entry,
   extraCandidates,
+  suggested,
 }: {
   entry: SavedEntry;
   extraCandidates: GarmentWithColors[];
+  suggested: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -224,6 +259,13 @@ function SavedPaletteRow({
     startTransition(async () => {
       await setOutfitFavoriteAction(entry.outfitId, !entry.favorite);
       toast.show(entry.favorite ? "tret de preferits" : "afegit a preferits");
+    });
+  };
+
+  const handleLogWorn = () => {
+    startTransition(async () => {
+      await logWornEventAction(entry.outfitId);
+      toast.show("marcat com portat avui", "success");
     });
   };
 
@@ -261,6 +303,14 @@ function SavedPaletteRow({
         </span>
         <span className="flex items-center gap-1 shrink-0">
           <IconButton
+            onClick={handleLogWorn}
+            disabled={pending}
+            label="Marcar com portat avui"
+            size="sm"
+          >
+            <Icon name="check" size={14} />
+          </IconButton>
+          <IconButton
             onClick={handleToggleFavorite}
             disabled={pending}
             label={entry.favorite ? "Treure de preferits" : "Afegir a preferits"}
@@ -283,6 +333,17 @@ function SavedPaletteRow({
             <Icon name="close" size={14} />
           </IconButton>
         </span>
+      </div>
+
+      <div className="flex items-center gap-3 pl-1">
+        <span className="font-serif italic text-xs text-text-secondary">
+          {formatLastWorn(entry.lastWornAt)}
+        </span>
+        {suggested && (
+          <span className="type-caption text-text-primary">
+            suggerit — el que fa més temps que no portes
+          </span>
+        )}
       </div>
 
       <div className="flex items-end justify-between gap-3 pl-1">
