@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { findAllGarments } from "@/lib/prendas/service";
 import { findAllOutfits } from "@/lib/outfits/service";
+import { getCurrentSeason } from "@/lib/prendas/season";
 import { palettes } from "@/lib/colors";
 import { ArmariTabs } from "@/components/ArmariTabs";
 import { PageContainer, SectionHeader, GridSkeleton } from "@/components/ui";
@@ -46,6 +47,7 @@ export async function ArmariPageBody() {
           garments={garments}
           palettes={palettes}
           savedOutfits={savedOutfits}
+          defaultSeason={getCurrentSeason()}
         />
       </Suspense>
     </PageContainer>

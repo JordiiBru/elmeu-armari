@@ -18,6 +18,7 @@ import { Input, Icon, EmptyState, TextButton } from "@/components/ui";
 
 interface Props {
   garments: GarmentWithColors[];
+  defaultSeason?: Season;
 }
 
 function FilterTag({
@@ -70,15 +71,19 @@ function FilterRow({
   );
 }
 
-export function ArmariGrid({ garments }: Props) {
+export function ArmariGrid({ garments, defaultSeason }: Props) {
   const initialParams = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [categories, setCategories] = useState<Category[]>(
     () => initialParams.getAll("cat") as Category[]
   );
-  const [seasons, setSeasons] = useState<Season[]>(
-    () => initialParams.getAll("season") as Season[]
+  const [seasons, setSeasons] = useState<Season[]>(() =>
+    initialParams.has("season")
+      ? (initialParams.getAll("season") as Season[])
+      : defaultSeason
+        ? [defaultSeason]
+        : []
   );
   const [fits, setFits] = useState<string[]>(() => initialParams.getAll("fit"));
   const [textures, setTextures] = useState<Texture[]>(
@@ -88,6 +93,9 @@ export function ArmariGrid({ garments }: Props) {
     () => initialParams.getAll("len")
   );
   const [query, setQuery] = useState<string>(() => initialParams.get("q") ?? "");
+  const [isAutoSeason, setIsAutoSeason] = useState(
+    () => !initialParams.has("season") && !!defaultSeason
+  );
 
   const hasFilters =
     categories.length > 0 || seasons.length > 0 || fits.length > 0 || textures.length > 0 || lengths.length > 0 || query !== "";
@@ -114,6 +122,11 @@ export function ArmariGrid({ garments }: Props) {
     []
   );
 
+  const toggleSeason = useCallback((value: Season) => {
+    setIsAutoSeason(false);
+    toggleIn(setSeasons, value);
+  }, [toggleIn]);
+
   const clearAll = useCallback(() => {
     setCategories([]);
     setSeasons([]);
@@ -121,6 +134,7 @@ export function ArmariGrid({ garments }: Props) {
     setTextures([]);
     setLengths([]);
     setQuery("");
+    setIsAutoSeason(false);
   }, []);
 
   const filtered = useMemo(
@@ -156,8 +170,15 @@ export function ArmariGrid({ garments }: Props) {
               <Icon name="chevron-down" size={12} />
             </span>
           </button>
-          <span className="type-caption tabular-nums">
-            {filtered.length} / {garments.length}
+          <span className="inline-flex items-baseline gap-2">
+            {isAutoSeason && (
+              <span className="font-serif italic text-xs text-text-secondary">
+                temporada actual
+              </span>
+            )}
+            <span className="type-caption tabular-nums">
+              {filtered.length} / {garments.length}
+            </span>
           </span>
         </div>
 
@@ -189,7 +210,7 @@ export function ArmariGrid({ garments }: Props) {
                   <FilterTag
                     key={s}
                     active={seasons.includes(s)}
-                    onClick={() => toggleIn(setSeasons, s)}
+                    onClick={() => toggleSeason(s)}
                   >
                     {SEASON_LABELS[s]}
                   </FilterTag>
