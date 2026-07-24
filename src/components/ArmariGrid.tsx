@@ -92,13 +92,20 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
   const [lengths, setLengths] = useState<string[]>(
     () => initialParams.getAll("len")
   );
+  const [colors, setColors] = useState<string[]>(() => initialParams.getAll("color"));
   const [query, setQuery] = useState<string>(() => initialParams.get("q") ?? "");
   const [isAutoSeason, setIsAutoSeason] = useState(
     () => !initialParams.has("season") && !!defaultSeason
   );
 
   const hasFilters =
-    categories.length > 0 || seasons.length > 0 || fits.length > 0 || textures.length > 0 || lengths.length > 0 || query !== "";
+    categories.length > 0 ||
+    seasons.length > 0 ||
+    fits.length > 0 ||
+    textures.length > 0 ||
+    lengths.length > 0 ||
+    colors.length > 0 ||
+    query !== "";
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -107,11 +114,12 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
     fits.forEach((f) => params.append("fit", f));
     textures.forEach((t) => params.append("tex", t));
     lengths.forEach((l) => params.append("len", l));
+    colors.forEach((c) => params.append("color", c));
     if (query) params.set("q", query);
     const qs = params.toString();
     const next = qs ? `?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", next);
-  }, [categories, seasons, fits, textures, lengths, query]);
+  }, [categories, seasons, fits, textures, lengths, colors, query]);
 
   const toggleIn = useCallback(
     <T extends string>(setter: React.Dispatch<React.SetStateAction<T[]>>, value: T) => {
@@ -133,17 +141,38 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
     setFits([]);
     setTextures([]);
     setLengths([]);
+    setColors([]);
     setQuery("");
     setIsAutoSeason(false);
   }, []);
 
+  const uniqueColors = useMemo(() => {
+    const seen = new Set<string>();
+    const hexes: string[] = [];
+    for (const g of garments) {
+      for (const c of g.colors) {
+        if (!seen.has(c.hex)) {
+          seen.add(c.hex);
+          hexes.push(c.hex);
+        }
+      }
+    }
+    return hexes;
+  }, [garments]);
+
   const filtered = useMemo(
-    () => filterGarments(garments, { categories, seasons, fits, textures, lengths, query }),
-    [garments, categories, seasons, fits, textures, lengths, query]
+    () => filterGarments(garments, { categories, seasons, fits, textures, lengths, colors, query }),
+    [garments, categories, seasons, fits, textures, lengths, colors, query]
   );
 
   const activeCount =
-    categories.length + seasons.length + fits.length + textures.length + lengths.length + (query ? 1 : 0);
+    categories.length +
+    seasons.length +
+    fits.length +
+    textures.length +
+    lengths.length +
+    colors.length +
+    (query ? 1 : 0);
 
   return (
     <>
@@ -252,6 +281,30 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
                   </FilterTag>
                 ))}
               </FilterRow>
+
+              {uniqueColors.length > 0 && (
+                <FilterRow label="color">
+                  {uniqueColors.map((hex) => {
+                    const active = colors.includes(hex);
+                    return (
+                      <button
+                        key={hex}
+                        type="button"
+                        onClick={() => toggleIn(setColors, hex)}
+                        aria-pressed={active}
+                        aria-label={`Color ${hex}`}
+                        title={hex}
+                        className={`inline-block h-5 w-5 shrink-0 transition-[box-shadow] duration-[var(--duration-base)] ease-[var(--ease-standard)] ${
+                          active
+                            ? "ring-2 ring-text-primary ring-offset-2 ring-offset-background"
+                            : "ring-1 ring-border hover:ring-text-secondary"
+                        }`}
+                        style={{ backgroundColor: hex }}
+                      />
+                    );
+                  })}
+                </FilterRow>
+              )}
 
               {hasFilters && (
                 <button

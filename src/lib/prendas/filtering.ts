@@ -1,4 +1,5 @@
 import type { GarmentWithColors, Category, Texture, Season } from "./types";
+import { perceptualDistance, OKLCH_DISTANCE_THRESHOLD } from "@/lib/outfits/color-matching";
 
 export interface GarmentFilters {
   categories: Category[];
@@ -6,6 +7,7 @@ export interface GarmentFilters {
   fits: string[];
   textures: Texture[];
   lengths: string[];
+  colors: string[];
   query: string;
 }
 
@@ -13,7 +15,7 @@ export function filterGarments(
   garments: GarmentWithColors[],
   filters: GarmentFilters
 ): GarmentWithColors[] {
-  const { categories, seasons, fits, textures, lengths, query } = filters;
+  const { categories, seasons, fits, textures, lengths, colors, query } = filters;
   const q = query.toLowerCase().trim();
 
   return garments.filter((g) => {
@@ -28,6 +30,13 @@ export function filterGarments(
         garmentSeasons.includes("ALL_YEAR") ||
         seasons.some((s) => garmentSeasons.includes(s));
       if (!passesSeason) return false;
+    }
+
+    if (colors.length > 0) {
+      const passesColor = g.colors.some((c) =>
+        colors.some((target) => perceptualDistance(c.hex, target) < OKLCH_DISTANCE_THRESHOLD)
+      );
+      if (!passesColor) return false;
     }
 
     if (q) {

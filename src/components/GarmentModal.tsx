@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { deleteGarmentAction } from "@/app/armari/actions";
 import type { GarmentWithColors } from "@/lib/prendas/types";
+import type { SanzoPalette } from "@/lib/outfits/types";
+import { OutfitBottomSheet } from "./OutfitBottomSheet";
 import {
   CATEGORY_LABELS,
   TEXTURE_LABELS,
@@ -19,11 +21,14 @@ import { Sheet, Text, TextButton, Stack, useToast } from "@/components/ui";
 
 interface Props {
   garment: GarmentWithColors;
+  allGarments: GarmentWithColors[];
+  palettes: SanzoPalette[];
   onClose: () => void;
 }
 
-export function GarmentModal({ garment, onClose }: Props) {
+export function GarmentModal({ garment, allGarments, palettes, onClose }: Props) {
   const [confirming, setConfirming] = useState(false);
+  const [combineOpen, setCombineOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const toast = useToast();
 
@@ -87,6 +92,16 @@ export function GarmentModal({ garment, onClose }: Props) {
             </div>
           ))}
         </div>
+        {garment.colors.length > 0 && (
+          <TextButton
+            type="button"
+            tone="secondary"
+            onClick={() => setCombineOpen(true)}
+            className="self-start"
+          >
+            què hi combina
+          </TextButton>
+        )}
       </Stack>
 
       {garment.seasons.length > 0 && (
@@ -153,6 +168,15 @@ export function GarmentModal({ garment, onClose }: Props) {
           </TextButton>
         )}
       </div>
+
+      {combineOpen && (
+        <OutfitBottomSheet
+          garment={garment}
+          allGarments={allGarments}
+          palettes={palettes}
+          onClose={() => setCombineOpen(false)}
+        />
+      )}
     </Sheet>
   );
 }
