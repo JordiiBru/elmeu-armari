@@ -7,6 +7,7 @@ import {
   addOutfitExtras,
   removeOutfitExtra,
   setOutfitFavorite,
+  logWornEvent,
 } from "./repository";
 import { palettes } from "@/lib/colors";
 
@@ -16,6 +17,7 @@ export {
   addOutfitExtras,
   removeOutfitExtra,
   setOutfitFavorite,
+  logWornEvent,
 };
 
 // Outfit.paletteId is an unchecked FK into sanzo-wada.json (no Palette

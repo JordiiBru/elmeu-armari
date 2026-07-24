@@ -6,6 +6,7 @@ import {
   addOutfitExtras,
   removeOutfitExtra,
   setOutfitFavorite,
+  logWornEvent,
 } from "@/lib/outfits/service";
 import { revalidatePath } from "next/cache";
 
@@ -32,5 +33,10 @@ export async function removeOutfitExtraAction(outfitId: string, garmentId: strin
 
 export async function setOutfitFavoriteAction(outfitId: string, favorite: boolean) {
   await setOutfitFavorite(outfitId, favorite);
+  revalidatePath("/armari");
+}
+
+export async function logWornEventAction(outfitId: string) {
+  await logWornEvent(outfitId);
   revalidatePath("/armari");
 }
