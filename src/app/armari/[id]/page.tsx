@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { findGarmentById } from "@/lib/prendas/service";
+import { findGarmentById, findAllGarments } from "@/lib/prendas/service";
+import { palettes } from "@/lib/colors";
 import { GarmentModalRoute } from "@/components/GarmentModalRoute";
 import { ArmariPageBody } from "../ArmariPageBody";
 
@@ -17,13 +18,16 @@ export default async function GarmentDirectPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const garment = await findGarmentById(id);
+  const [garment, allGarments] = await Promise.all([
+    findGarmentById(id),
+    findAllGarments(),
+  ]);
   if (!garment) notFound();
 
   return (
     <>
       <ArmariPageBody />
-      <GarmentModalRoute garment={garment} />
+      <GarmentModalRoute garment={garment} allGarments={allGarments} palettes={palettes} />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { findGarmentById } from "@/lib/prendas/service";
+import { findGarmentById, findAllGarments } from "@/lib/prendas/service";
+import { palettes } from "@/lib/colors";
 import { GarmentModalRoute } from "@/components/GarmentModalRoute";
 
 export const dynamic = "force-dynamic";
@@ -15,8 +16,13 @@ export default async function InterceptedGarmentModal({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const garment = await findGarmentById(id);
+  const [garment, allGarments] = await Promise.all([
+    findGarmentById(id),
+    findAllGarments(),
+  ]);
   if (!garment) notFound();
 
-  return <GarmentModalRoute garment={garment} />;
+  return (
+    <GarmentModalRoute garment={garment} allGarments={allGarments} palettes={palettes} />
+  );
 }
