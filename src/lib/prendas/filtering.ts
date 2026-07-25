@@ -20,8 +20,8 @@ export function filterGarments(
 
   return garments.filter((g) => {
     if (categories.length > 0 && !categories.includes(g.category)) return false;
-    if (fits.length > 0 && !fits.includes(g.fit)) return false;
-    if (textures.length > 0 && !textures.includes(g.texture)) return false;
+    if (fits.length > 0 && (!g.fit || !fits.includes(g.fit))) return false;
+    if (textures.length > 0 && (!g.texture || !textures.includes(g.texture))) return false;
     if (lengths.length > 0 && (!g.length || !lengths.includes(g.length))) return false;
 
     if (seasons.length > 0) {
@@ -41,7 +41,7 @@ export function filterGarments(
 
     if (q) {
       const inNotes = g.notes?.toLowerCase().includes(q) ?? false;
-      const inSize = g.size.toLowerCase().includes(q);
+      const inSize = g.size?.toLowerCase().includes(q) ?? false;
       if (!inNotes && !inSize) return false;
     }
 

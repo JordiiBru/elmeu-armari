@@ -6,6 +6,7 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   PANTS:   "Pantalons",
   SOCKS:   "Mitjons",
   SHOES:   "Sabates",
+  ACCESSORI: "Accessori",
 };
 
 export const TEXTURE_LABELS: Record<Texture, string> = {
@@ -63,6 +64,13 @@ export const SUBTYPE_LABELS: Record<string, string> = {
   LOAFER:   "Loafer",
   SANDALIA: "Sandàlia",
   OXFORD:   "Oxford",
+  ANELL:    "Anell",
+  RELLOTGE: "Rellotge",
+  CINTURO:  "Cinturó",
+  BOSSA:    "Bossa",
+  BARRET:   "Barret",
+  BUFANDA:  "Bufanda",
+  ULLERES:  "Ulleres",
 };
 
 export const LENGTH_LABELS: Record<string, string> = {

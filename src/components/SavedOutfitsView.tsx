@@ -10,16 +10,13 @@ import {
   setOutfitFavoriteAction,
   assignOutfitToDayAction,
 } from "@/app/outfits/actions";
-import { CATEGORY_LABELS } from "@/lib/prendas/labels";
+import { CATEGORY_LABELS, SUBTYPE_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
+import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { dayToISO } from "@/lib/outfits/week";
 import { PieceThumb } from "./PieceThumb";
 import { Card, Icon, Sheet, Stack, Text, TextButton, useToast, EmptyState } from "@/components/ui";
-
-// Categories whose pieces are excluded from the colour engine but that
-// the user still wants to record on a saved outfit.
-const EXTRA_CATEGORIES = new Set(["SHOES", "SOCKS"]);
 
 type WornEvent = SavedOutfit["wornEvents"][number];
 
@@ -47,23 +44,22 @@ function formatWornDate(date: Date): string {
   return `fa ${days} dies`;
 }
 
-/** Deduped category labels of an outfit's extras — used to tell variants
+/** An accessory is more useful identified by its subtype ("bossa", "anell")
+ * than by its category — every accessory shares the same category label. */
+function pieceLabel(garment: GarmentWithColors): string {
+  if (garment.category === "ACCESSORI" && garment.subtype) {
+    return SUBTYPE_LABELS[garment.subtype] ?? CATEGORY_LABELS.ACCESSORI;
+  }
+  return CATEGORY_LABELS[garment.category];
+}
+
+/** Deduped piece labels of an outfit's extras — used to tell variants
  * of the same core+palette apart in the grid ("amb Sabates"). */
 export function extraLabelsOf(outfit: SavedOutfit): string[] {
   const labels = outfit.garments
     .filter((g) => g.role === "extra")
-    .map((g) => CATEGORY_LABELS[g.garment.category]);
+    .map((g) => pieceLabel(g.garment));
   return Array.from(new Set(labels));
-}
-
-function pickableExtras(
-  outfit: SavedOutfit,
-  extraCandidates: GarmentWithColors[],
-): GarmentWithColors[] {
-  const existingIds = new Set(
-    outfit.garments.filter((g) => g.role === "extra").map((g) => g.garment.id),
-  );
-  return extraCandidates.filter((g) => !existingIds.has(g.id));
 }
 
 /** Tiled photo composite: the outfit's own garments, not swatches/icons. */
@@ -217,7 +213,10 @@ export function SavedOutfitsView({
       {openOutfit && extrasPickerOpen && (
         <ExtrasPicker
           outfitId={openOutfit.id}
-          candidates={pickableExtras(openOutfit, extraCandidates)}
+          candidates={extraCandidates}
+          currentExtraIds={openOutfit.garments
+            .filter((g) => g.role === "extra")
+            .map((g) => g.garment.id)}
           onClose={() => setExtrasPickerOpen(false)}
         />
       )}
@@ -367,7 +366,7 @@ function SavedOutfitSheet({
   const handleDuplicate = () => {
     startTransition(async () => {
       const variant = await duplicateOutfitAction(outfit.id);
-      toast.show("variant creada — afegeix-hi altres sabates", "success");
+      toast.show("variant creada — afegeix-hi altres sabates o accessoris", "success");
       onDuplicated(variant.id);
     });
   };
@@ -436,7 +435,7 @@ function SavedOutfitSheet({
         <div className="flex items-baseline justify-between">
           <Text variant="caption">sabates i accessoris</Text>
           <TextButton type="button" tone="secondary" onClick={onOpenExtras} disabled={pending}>
-            + afegir
+            editar
           </TextButton>
         </div>
         {extras.length === 0 ? (
@@ -455,7 +454,7 @@ function SavedOutfitSheet({
                   type="button"
                   onClick={() => handleRemoveExtra(og.garment.id)}
                   disabled={pending}
-                  aria-label={`Treure ${CATEGORY_LABELS[og.garment.category]}`}
+                  aria-label={`Treure ${pieceLabel(og.garment)}`}
                   className="absolute -top-1 -right-1 rounded-full border border-border bg-background p-0.5 opacity-0 transition-opacity focus:opacity-100 group-hover/extra:opacity-100"
                 >
                   <Icon name="close" size={10} />
@@ -465,21 +464,12 @@ function SavedOutfitSheet({
                   tone="secondary"
                   className="font-serif text-center leading-tight"
                 >
-                  {CATEGORY_LABELS[og.garment.category]}
+                  {pieceLabel(og.garment)}
                 </Text>
               </div>
             ))}
           </div>
         )}
-        <TextButton
-          type="button"
-          tone="secondary"
-          onClick={handleDuplicate}
-          disabled={pending}
-          className="self-start"
-        >
-          duplicar amb altres sabates
-        </TextButton>
       </Stack>
 
       <Stack gap={2}>
@@ -516,14 +506,24 @@ function SavedOutfitSheet({
       </Stack>
 
       <div className="flex items-center justify-between pt-4 border-t border-border">
-        <TextButton
-          type="button"
-          tone="secondary"
-          onClick={handleToggleFavorite}
-          disabled={pending}
-        >
-          {outfit.favorite ? "treure de preferits" : "afegir a preferits"}
-        </TextButton>
+        <div className="flex items-center gap-4">
+          <TextButton
+            type="button"
+            tone="secondary"
+            onClick={handleToggleFavorite}
+            disabled={pending}
+          >
+            {outfit.favorite ? "treure de preferits" : "afegir a preferits"}
+          </TextButton>
+          <TextButton
+            type="button"
+            tone="secondary"
+            onClick={handleDuplicate}
+            disabled={pending}
+          >
+            duplicar
+          </TextButton>
+        </div>
         {confirmingDelete ? (
           <div className="flex items-center gap-4">
             <TextButton
@@ -548,21 +548,93 @@ function SavedOutfitSheet({
   );
 }
 
+function PickableCard({
+  garment,
+  selected,
+  onClick,
+}: {
+  garment: GarmentWithColors;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={`flex flex-col gap-1 p-2 border transition-colors text-left ${
+        selected
+          ? "border-text-primary bg-elevated"
+          : "border-border hover:border-text-secondary"
+      }`}
+    >
+      <PieceThumb garment={garment} className="aspect-square w-full" />
+      <span className="font-serif text-xs leading-tight">
+        {pieceLabel(garment)}
+      </span>
+    </button>
+  );
+}
+
+function ExtrasSection({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Stack gap={3}>
+      <div className="flex flex-col gap-0.5">
+        <Text variant="caption">{title}</Text>
+        {hint && (
+          <Text variant="small" italic tone="secondary" className="font-serif">
+            {hint}
+          </Text>
+        )}
+      </div>
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">{children}</div>
+    </Stack>
+  );
+}
+
 function ExtrasPicker({
   outfitId,
   candidates,
+  currentExtraIds,
   onClose,
 }: {
   outfitId: string;
   candidates: GarmentWithColors[];
+  currentExtraIds: string[];
   onClose: () => void;
 }) {
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const shoes = candidates.filter((g) => g.category === "SHOES");
+  const accessories = candidates.filter((g) => g.category === "ACCESSORI");
+  // SOCKS today — any other future EXTRA_CATEGORIES member that isn't
+  // shoes or accessories lands here, unlimited like accessories.
+  const others = candidates.filter(
+    (g) => g.category !== "SHOES" && g.category !== "ACCESSORI",
+  );
+
+  const currentIds = useMemo(() => new Set(currentExtraIds), [currentExtraIds]);
+
+  const [selectedShoe, setSelectedShoe] = useState<string | null>(
+    () => shoes.find((g) => currentIds.has(g.id))?.id ?? null,
+  );
+  const [selectedAccessories, setSelectedAccessories] = useState<Set<string>>(
+    () => new Set(accessories.filter((g) => currentIds.has(g.id)).map((g) => g.id)),
+  );
+  const [selectedOthers, setSelectedOthers] = useState<Set<string>>(
+    () => new Set(others.filter((g) => currentIds.has(g.id)).map((g) => g.id)),
+  );
   const [pending, startTransition] = useTransition();
   const toast = useToast();
 
-  const toggle = (id: string) => {
-    setSelected((prev) => {
+  const toggleIn = (setter: React.Dispatch<React.SetStateAction<Set<string>>>, id: string) => {
+    setter((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -570,11 +642,23 @@ function ExtrasPicker({
     });
   };
 
+  const selectedIds = new Set([
+    ...(selectedShoe ? [selectedShoe] : []),
+    ...selectedAccessories,
+    ...selectedOthers,
+  ]);
+  const toAdd = [...selectedIds].filter((id) => !currentIds.has(id));
+  const toRemove = [...currentIds].filter((id) => !selectedIds.has(id));
+  const hasChanges = toAdd.length > 0 || toRemove.length > 0;
+
   const handleConfirm = () => {
-    if (selected.size === 0) return;
+    if (!hasChanges) return;
     startTransition(async () => {
-      await addOutfitExtrasAction(outfitId, Array.from(selected));
-      toast.show("extras afegits", "success");
+      await Promise.all([
+        toAdd.length > 0 ? addOutfitExtrasAction(outfitId, toAdd) : null,
+        ...toRemove.map((id) => removeOutfitExtraAction(outfitId, id)),
+      ]);
+      toast.show("canvis desats", "success");
       onClose();
     });
   };
@@ -583,45 +667,64 @@ function ExtrasPicker({
     <Sheet
       onClose={onClose}
       size="md"
-      label="Afegir sabates o accessoris"
+      label="Editar sabates i accessoris"
       header={
         <div className="flex flex-col gap-1">
           <Text variant="caption">extres</Text>
           <h2 className="type-title">sabates i accessoris</h2>
           <Text variant="small" italic tone="secondary" className="font-serif">
-            no participen al matching cromàtic.
+            no participen al matching cromàtic. desmarca per treure&apos;ls.
           </Text>
         </div>
       }
     >
       {candidates.length === 0 ? (
         <Text variant="small" italic tone="secondary" className="font-serif">
-          no queden peces d&apos;aquest tipus per afegir.
+          encara no tens cap sabata, mitjó o accessori al catàleg.
         </Text>
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-          {candidates.map((g) => {
-            const isSelected = selected.has(g.id);
-            return (
-              <button
-                key={g.id}
-                type="button"
-                onClick={() => toggle(g.id)}
-                aria-pressed={isSelected}
-                className={`flex flex-col gap-1 p-2 border transition-colors text-left ${
-                  isSelected
-                    ? "border-text-primary bg-elevated"
-                    : "border-border hover:border-text-secondary"
-                }`}
-              >
-                <PieceThumb garment={g} className="aspect-square w-full" />
-                <span className="font-serif text-xs leading-tight">
-                  {CATEGORY_LABELS[g.category]}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <Stack gap={6}>
+          {shoes.length > 0 && (
+            <ExtrasSection title="sabates" hint="només pots triar-ne un parell.">
+              {shoes.map((g) => (
+                <PickableCard
+                  key={g.id}
+                  garment={g}
+                  selected={selectedShoe === g.id}
+                  onClick={() =>
+                    setSelectedShoe((prev) => (prev === g.id ? null : g.id))
+                  }
+                />
+              ))}
+            </ExtrasSection>
+          )}
+
+          {accessories.length > 0 && (
+            <ExtrasSection title="accessoris">
+              {accessories.map((g) => (
+                <PickableCard
+                  key={g.id}
+                  garment={g}
+                  selected={selectedAccessories.has(g.id)}
+                  onClick={() => toggleIn(setSelectedAccessories, g.id)}
+                />
+              ))}
+            </ExtrasSection>
+          )}
+
+          {others.length > 0 && (
+            <ExtrasSection title="mitjons">
+              {others.map((g) => (
+                <PickableCard
+                  key={g.id}
+                  garment={g}
+                  selected={selectedOthers.has(g.id)}
+                  onClick={() => toggleIn(setSelectedOthers, g.id)}
+                />
+              ))}
+            </ExtrasSection>
+          )}
+        </Stack>
       )}
 
       <div className="flex items-center justify-between pt-4 border-t border-border">
@@ -631,9 +734,9 @@ function ExtrasPicker({
         <TextButton
           type="button"
           onClick={handleConfirm}
-          disabled={pending || selected.size === 0}
+          disabled={pending || !hasChanges}
         >
-          {pending ? "afegint…" : `afegir (${selected.size})`}
+          {pending ? "desant…" : "desar canvis"}
         </TextButton>
       </div>
     </Sheet>

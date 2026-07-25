@@ -1,23 +1,24 @@
 import { notFound } from "next/navigation";
-import { findGarmentById, findAllGarments } from "@/lib/prendas/service";
+import { findGarmentByIdSuffix, findAllGarments } from "@/lib/prendas/service";
+import { idSuffixFromSlug } from "@/lib/prendas/slug";
 import { palettes } from "@/lib/colors";
 import { GarmentModalRoute } from "@/components/GarmentModalRoute";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Intercepts client-side navigation from `/armari` to `/armari/[id]`
+ * Intercepts client-side navigation from `/armari` to `/armari/[slug]`
  * (the `(.)` marker matches the segment at the same level as `@modal`)
  * and renders the garment as an overlay instead of swapping the page.
  */
 export default async function InterceptedGarmentModal({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { id } = await params;
+  const { slug } = await params;
   const [garment, allGarments] = await Promise.all([
-    findGarmentById(id),
+    findGarmentByIdSuffix(idSuffixFromSlug(slug)),
     findAllGarments(),
   ]);
   if (!garment) notFound();

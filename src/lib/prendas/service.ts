@@ -1,6 +1,7 @@
 import {
   findAllGarments,
   findGarmentById,
+  findGarmentByIdSuffix,
   createGarment,
   updateGarment,
   deleteGarment,
@@ -8,7 +9,7 @@ import {
 } from "./repository";
 import type { GarmentInput } from "./types";
 
-export { findAllGarments, findGarmentById, deleteGarment, setGarmentImage };
+export { findAllGarments, findGarmentById, findGarmentByIdSuffix, deleteGarment, setGarmentImage };
 
 export async function addGarment(data: GarmentInput) {
   return createGarment(data);

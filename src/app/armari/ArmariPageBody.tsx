@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { findAllGarments } from "@/lib/prendas/service";
-import { findAllOutfits, findTodayOutfitId, toSavedOutfit } from "@/lib/outfits/service";
+import { findAllOutfits, findTodayOutfitId, toSavedOutfit, sortOutfitsByTop } from "@/lib/outfits/service";
 import { getCurrentSeason } from "@/lib/prendas/season";
 import { palettes } from "@/lib/colors";
 import { ArmariTabs } from "@/components/ArmariTabs";
@@ -8,7 +8,7 @@ import { PageContainer, SectionHeader, GridSkeleton } from "@/components/ui";
 
 /**
  * Shared body of `/armari`. Rendered both by the plain list route and by
- * `/armari/[id]` (the non-intercepted fallback for direct/deep links to a
+ * `/armari/[slug]` (the non-intercepted fallback for direct/deep links to a
  * garment) so a hard refresh on a garment URL shows the same list-behind-
  * modal layout as a client-side navigation into the intercepted route.
  */
@@ -19,7 +19,7 @@ export async function ArmariPageBody() {
     findTodayOutfitId(),
   ]);
 
-  const savedOutfits = outfits.map(toSavedOutfit);
+  const savedOutfits = sortOutfitsByTop(outfits.map(toSavedOutfit));
 
   return (
     <PageContainer width="wide">

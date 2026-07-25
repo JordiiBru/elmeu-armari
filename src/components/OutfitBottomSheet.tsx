@@ -127,8 +127,13 @@ export function OutfitBottomSheet({
             {CATEGORY_LABELS[garment.category]}
           </h2>
           <Text variant="small" italic tone="secondary" className="font-serif">
-            {FIT_LABELS[garment.fit]} · talla {garment.size}
-            {garment.notes && ` · ${garment.notes}`}
+            {[
+              garment.fit ? FIT_LABELS[garment.fit] : null,
+              garment.size ? `talla ${garment.size}` : null,
+              garment.notes,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           </Text>
         </Stack>
       }

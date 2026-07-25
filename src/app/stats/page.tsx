@@ -89,8 +89,8 @@ export default async function StatsPage() {
 
   for (const g of raw) {
     perCategory[g.category] = (perCategory[g.category] ?? 0) + 1;
-    perFit[g.fit] = (perFit[g.fit] ?? 0) + 1;
-    perTexture[g.texture] = (perTexture[g.texture] ?? 0) + 1;
+    if (g.fit) perFit[g.fit] = (perFit[g.fit] ?? 0) + 1;
+    if (g.texture) perTexture[g.texture] = (perTexture[g.texture] ?? 0) + 1;
 
     for (const s of g.seasons) {
       if (s.season in perSeason) perSeason[s.season]++;

@@ -8,14 +8,15 @@ import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
 import { updateGarmentAction } from "@/app/edit/[id]/actions";
 import {
   CATEGORIES,
-  TEXTURES,
-  PATTERNS,
   FITS_BY_CATEGORY,
   SUBTYPES_BY_CATEGORY,
   SIZES_BY_CATEGORY,
   LENGTHS_BY_CATEGORY,
+  TEXTURES_BY_CATEGORY,
+  PATTERNS_BY_CATEGORY,
+  CATEGORIES_WITH_OPTIONAL_COLOR,
 } from "@/lib/prendas/types";
-import type { GarmentWithColors, Season, Category } from "@/lib/prendas/types";
+import type { GarmentWithColors, Season, Category, Texture, Pattern } from "@/lib/prendas/types";
 import {
   CATEGORY_LABELS,
   TEXTURE_LABELS,
@@ -49,6 +50,8 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
   const initialSubtypes = SUBTYPES_BY_CATEGORY[garment.category];
   const initialSizes = SIZES_BY_CATEGORY[garment.category];
   const initialLengths = LENGTHS_BY_CATEGORY[garment.category];
+  const initialTextures = TEXTURES_BY_CATEGORY[garment.category];
+  const initialPatterns = PATTERNS_BY_CATEGORY[garment.category];
   const [subtype, setSubtype] = useState<string>(
     garment.subtype && initialSubtypes.includes(garment.subtype)
       ? garment.subtype
@@ -59,13 +62,17 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
       ? garment.length
       : "",
   );
-  const [texture, setTexture] = useState<string>(garment.texture);
-  const [pattern, setPattern] = useState<string>(garment.pattern);
+  const [texture, setTexture] = useState<string>(
+    garment.texture && initialTextures.includes(garment.texture) ? garment.texture : "",
+  );
+  const [pattern, setPattern] = useState<string>(
+    garment.pattern && initialPatterns.includes(garment.pattern) ? garment.pattern : "",
+  );
   const [size, setSize] = useState<string>(
-    initialSizes.includes(garment.size) ? garment.size : "",
+    garment.size && initialSizes.includes(garment.size) ? garment.size : "",
   );
   const [fit, setFit] = useState<string>(
-    initialFits.includes(garment.fit) ? garment.fit : "",
+    garment.fit && initialFits.includes(garment.fit) ? garment.fit : "",
   );
   const [currentImage, setCurrentImage] = useState<string | null>(garment.image);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -111,6 +118,9 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
   const subtypes = SUBTYPES_BY_CATEGORY[category];
   const sizes = SIZES_BY_CATEGORY[category];
   const lengths = LENGTHS_BY_CATEGORY[category];
+  const textures = TEXTURES_BY_CATEGORY[category];
+  const patterns = PATTERNS_BY_CATEGORY[category];
+  const colorsRequired = !CATEGORIES_WITH_OPTIONAL_COLOR.has(category);
 
   return (
     <form action={formAction} className="flex flex-col gap-7">
@@ -126,6 +136,8 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
             if (!LENGTHS_BY_CATEGORY[next].includes(length)) setLength("");
             if (!SIZES_BY_CATEGORY[next].includes(size)) setSize("");
             if (!FITS_BY_CATEGORY[next].includes(fit)) setFit("");
+            if (!TEXTURES_BY_CATEGORY[next].includes(texture as Texture)) setTexture("");
+            if (!PATTERNS_BY_CATEGORY[next].includes(pattern as Pattern)) setPattern("");
           }}
           options={CATEGORIES.map((c) => ({
             value: c,
@@ -164,59 +176,67 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
         </Field>
       )}
 
-      <Field label={UI.form.colors} required>
+      <Field label={UI.form.colors} required={colorsRequired}>
         <ColorPickers initialColors={defaultHexColors} />
       </Field>
 
-      <Field label={UI.form.texture} required>
-        <Select
-          name="texture"
-          required
-          value={texture}
-          onChange={setTexture}
-          options={TEXTURES.map((t) => ({
-            value: t,
-            label: TEXTURE_LABELS[t],
-          }))}
-        />
-      </Field>
+      {textures.length > 0 && (
+        <Field label={UI.form.texture} required>
+          <Select
+            name="texture"
+            required
+            value={texture}
+            onChange={setTexture}
+            options={textures.map((t) => ({
+              value: t,
+              label: TEXTURE_LABELS[t],
+            }))}
+          />
+        </Field>
+      )}
 
-      <Field label={UI.form.pattern} required>
-        <Select
-          name="pattern"
-          required
-          value={pattern}
-          onChange={setPattern}
-          options={PATTERNS.map((p) => ({
-            value: p,
-            label: PATTERN_LABELS[p],
-          }))}
-        />
-      </Field>
+      {patterns.length > 0 && (
+        <Field label={UI.form.pattern} required>
+          <Select
+            name="pattern"
+            required
+            value={pattern}
+            onChange={setPattern}
+            options={patterns.map((p) => ({
+              value: p,
+              label: PATTERN_LABELS[p],
+            }))}
+          />
+        </Field>
+      )}
 
       <Field label={UI.form.seasons} required>
         <SeasonCheckboxes defaultValues={defaultSeasons} />
       </Field>
 
-      <Field label={UI.form.size} required>
-        <Select
-          name="size"
-          required
-          value={size}
-          onChange={setSize}
-          options={sizes.map((s) => ({ value: s, label: s }))}
-        />
-      </Field>
+      {sizes.length > 0 && (
+        <Field label={UI.form.size} required>
+          <Select
+            name="size"
+            required
+            value={size}
+            onChange={setSize}
+            options={sizes.map((s) => ({ value: s, label: s }))}
+          />
+        </Field>
+      )}
 
-      <Field label={UI.form.fit} required>
-        <Select
-          name="fit"
-          required
-          value={fit}
-          onChange={setFit}
-          options={fits.map((f) => ({ value: f, label: FIT_LABELS[f] }))}
-        />
-      </Field>
+      {fits.length > 0 && (
+        <Field label={UI.form.fit} required>
+          <Select
+            name="fit"
+            required
+            value={fit}
+            onChange={setFit}
+            options={fits.map((f) => ({ value: f, label: FIT_LABELS[f] }))}
+          />
+        </Field>
+      )}
 
       <Field label={UI.form.notes} htmlFor="notes">
         <Input

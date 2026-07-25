@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { deleteGarmentAction } from "@/app/armari/actions";
 import type { GarmentWithColors } from "@/lib/prendas/types";
+import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import type { SanzoPalette } from "@/lib/outfits/types";
 import { OutfitBottomSheet } from "./OutfitBottomSheet";
 import {
@@ -66,16 +67,22 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
               </Text>
             )}
           </h2>
-          <Text variant="small" italic tone="secondary" className="font-serif">
-            {FIT_LABELS[garment.fit]} · talla {garment.size}
-          </Text>
+          {(garment.fit || garment.size) && (
+            <Text variant="small" italic tone="secondary" className="font-serif">
+              {garment.fit && FIT_LABELS[garment.fit]}
+              {garment.fit && garment.size && " · "}
+              {garment.size && `talla ${garment.size}`}
+            </Text>
+          )}
         </Stack>
       }
     >
-      <dl className="grid grid-cols-2 gap-y-4 gap-x-6">
-        <Meta label={UI.modal.texture} value={TEXTURE_LABELS[garment.texture]} />
-        <Meta label={UI.modal.pattern} value={PATTERN_LABELS[garment.pattern]} />
-      </dl>
+      {(garment.texture || garment.pattern) && (
+        <dl className="grid grid-cols-2 gap-y-4 gap-x-6">
+          {garment.texture && <Meta label={UI.modal.texture} value={TEXTURE_LABELS[garment.texture]} />}
+          {garment.pattern && <Meta label={UI.modal.pattern} value={PATTERN_LABELS[garment.pattern]} />}
+        </dl>
+      )}
 
       <Stack gap={2}>
         <Text variant="caption">{UI.modal.colors}</Text>
@@ -92,7 +99,7 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
             </div>
           ))}
         </div>
-        {garment.colors.length > 0 && (
+        {garment.colors.length > 0 && !EXTRA_CATEGORIES.has(garment.category) && (
           <TextButton
             type="button"
             tone="secondary"
