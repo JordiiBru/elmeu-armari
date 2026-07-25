@@ -45,6 +45,16 @@ function formatWornDate(date: Date): string {
   return `fa ${days} dies`;
 }
 
+function pickableExtras(
+  outfit: SavedOutfit,
+  extraCandidates: GarmentWithColors[],
+): GarmentWithColors[] {
+  const existingIds = new Set(
+    outfit.garments.filter((g) => g.role === "extra").map((g) => g.garment.id),
+  );
+  return extraCandidates.filter((g) => !existingIds.has(g.id));
+}
+
 /** Tiled photo composite: the outfit's own garments, not swatches/icons. */
 function OutfitCollage({
   garments,
@@ -95,6 +105,7 @@ export function SavedOutfitsView({
   );
 
   const [openOutfitId, setOpenOutfitId] = useState<string | null>(null);
+  const [extrasPickerOpen, setExtrasPickerOpen] = useState(false);
 
   // "Menys portat": the outfit most overdue for a rewear, surfaced as a
   // gentle daily-use nudge. Only worth a banner once there's a choice.
@@ -149,8 +160,23 @@ export function SavedOutfitsView({
         <SavedOutfitSheet
           outfit={openOutfit}
           palette={paletteMap.get(openOutfit.paletteId) ?? null}
-          extraCandidates={extraCandidates}
-          onClose={() => setOpenOutfitId(null)}
+          onClose={() => {
+            setOpenOutfitId(null);
+            setExtrasPickerOpen(false);
+          }}
+          onOpenExtras={() => setExtrasPickerOpen(true)}
+        />
+      )}
+
+      {/* Sibling of SavedOutfitSheet, not nested inside it — the detail
+          sheet's panel has a transform (containing block for fixed
+          descendants) and clips overflow, so a Sheet mounted inside it
+          gets visually broken on the second open. */}
+      {openOutfit && extrasPickerOpen && (
+        <ExtrasPicker
+          outfitId={openOutfit.id}
+          candidates={pickableExtras(openOutfit, extraCandidates)}
+          onClose={() => setExtrasPickerOpen(false)}
         />
       )}
     </div>
@@ -252,25 +278,21 @@ function SavedOutfitCard({
 function SavedOutfitSheet({
   outfit,
   palette,
-  extraCandidates,
   onClose,
+  onOpenExtras,
 }: {
   outfit: SavedOutfit;
   palette: SanzoPalette | null;
-  extraCandidates: GarmentWithColors[];
   onClose: () => void;
+  onOpenExtras: () => void;
 }) {
   const [pending, startTransition] = useTransition();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const [pickerOpen, setPickerOpen] = useState(false);
   const toast = useToast();
 
   const primary = outfit.garments.filter((g) => g.role === "primary");
   const extras = outfit.garments.filter((g) => g.role === "extra");
   const title = primary.map((og) => CATEGORY_LABELS[og.garment.category]).join(" · ");
-
-  const existingExtraIds = new Set(extras.map((e) => e.garment.id));
-  const pickableCandidates = extraCandidates.filter((g) => !existingExtraIds.has(g.id));
 
   const handleToggleFavorite = () => {
     startTransition(async () => {
@@ -370,12 +392,7 @@ function SavedOutfitSheet({
       <Stack gap={2}>
         <div className="flex items-baseline justify-between">
           <Text variant="caption">sabates i accessoris</Text>
-          <TextButton
-            type="button"
-            tone="secondary"
-            onClick={() => setPickerOpen(true)}
-            disabled={pending || pickableCandidates.length === 0}
-          >
+          <TextButton type="button" tone="secondary" onClick={onOpenExtras} disabled={pending}>
             + afegir
           </TextButton>
         </div>
@@ -474,14 +491,6 @@ function SavedOutfitSheet({
           </TextButton>
         )}
       </div>
-
-      {pickerOpen && (
-        <ExtrasPicker
-          outfitId={outfit.id}
-          candidates={pickableCandidates}
-          onClose={() => setPickerOpen(false)}
-        />
-      )}
     </Sheet>
   );
 }
