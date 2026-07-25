@@ -237,7 +237,7 @@ docker run -d \
   --name elmeu-armari \
   -p 3000:3000 \
   -v elmeu-armari-data:/data \
-  ghcr.io/jordiiibru/elmeu-armari:latest
+  ghcr.io/jordiibru/elmeu-armari:latest
 ```
 
 The entrypoint runs `prisma migrate deploy` before starting the server.
@@ -280,7 +280,7 @@ Paste this into ChatGPT / Claude / Gemini with the raw photo to get a catalogue-
 ## CI/CD
 
 - **CI** (`.github/workflows/ci.yml`) — lint + typecheck, `npm audit`, Trivy filesystem scan, build, Lighthouse. Build requires `prisma migrate deploy` first because `/armari` reads the DB. Lighthouse runs against a local server with a migrated empty DB.
-- **Release** (`.github/workflows/release.yml`) — pushing a `v*.*.*` tag builds a Docker image and pushes to `ghcr.io/jordiiibru/elmeu-armari` with semver tags.
+- **Release** (`.github/workflows/release.yml`) — pushing a `v*.*.*` tag builds a Docker image and pushes to `ghcr.io/jordiibru/elmeu-armari` with semver tags.
 - **Renovate** — weekly updates on Mondays before 07:00, immediate automerge for security advisories, grouped for the Next.js / Prisma / Tailwind / GitHub Actions ecosystems, digest pinning for base Docker images.
 
 ---
