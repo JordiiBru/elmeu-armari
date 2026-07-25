@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import BackLink from "@/components/BackLink";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 /**
  * Fallback per rutes que teoricament sempre vindran d'un lloc concret.
@@ -15,11 +16,12 @@ function fallbackFor(pathname: string): string {
 
 export default function SiteHeader() {
   const pathname = usePathname();
-  if (pathname === "/") return null;
+  const isHome = pathname === "/";
 
   return (
-    <header className="w-full px-6 md:px-10 pt-6 pb-4">
-      <BackLink fallbackHref={fallbackFor(pathname)} />
+    <header className="w-full px-6 md:px-10 pt-6 pb-4 flex items-center justify-between">
+      {isHome ? <span /> : <BackLink fallbackHref={fallbackFor(pathname)} />}
+      <ThemeToggle />
     </header>
   );
 }

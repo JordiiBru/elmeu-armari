@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* dark: apunta a [data-theme="dark"] (fixat pel toggle), no a prefers-color-scheme. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* ==========================================================================
    Design tokens — Phase 1.
    Semantic layer. Every component uses these. Never a hex, never a raw size.
@@ -114,8 +117,10 @@
    Es la mateixa temperatura del cream, pero baixada.
    ========================================================================== */
 
+/* No-JS fallback: segueix el sistema si encara no hi ha triat explicit.
+   Amb JS, el toggle sempre fixa [data-theme] i aquest bloc queda inert. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --color-background: #1a1917;
     --color-surface: #23211e;
     --color-elevated: #2b2925;
@@ -144,12 +149,38 @@
   }
 }
 
-/* Override explicit via [data-theme] — permet toggle futur sense refactor. */
+/* Toggle explicit via [data-theme], fixat pel botó (next-themes). */
 [data-theme="light"] {
   color-scheme: light;
 }
 [data-theme="dark"] {
   color-scheme: dark;
+
+  --color-background: #1a1917;
+  --color-surface: #23211e;
+  --color-elevated: #2b2925;
+  --color-floating: #2b2925;
+  --color-overlay: rgb(0 0 0 / 0.55);
+
+  --color-text-primary: var(--_cream-050);
+  --color-text-secondary: #a8a196;
+  --color-text-muted: #7a7469;
+  --color-text-inverse: var(--_graphite-900);
+
+  --color-border: #3a3732;
+  --color-border-strong: var(--_cream-050);
+  --color-border-subtle: #2f2c28;
+
+  --color-accent: var(--_cream-050);
+
+  --color-interactive: var(--_cream-050);
+  --color-interactive-hover: #d8d0b8;
+  --color-interactive-pressed: var(--_cream-050);
+  --color-focus-ring: rgb(250 243 217 / 0.35);
+
+  --shadow-1: 0 1px 0 rgb(0 0 0 / 0.20);
+  --shadow-2: 0 1px 2px rgb(0 0 0 / 0.30), 0 2px 8px rgb(0 0 0 / 0.20);
+  --shadow-3: 0 2px 4px rgb(0 0 0 / 0.40), 0 12px 32px rgb(0 0 0 / 0.35);
 }
 
 /* ==========================================================================
