@@ -38,15 +38,21 @@ export async function findOutfitByGarmentsAndPalette(
     },
     include: outfitInclude(),
   });
-  // Duplicate-detection is scoped to primary pieces: two saves of the
-  // same palette + same core garments are the same outfit, even if
-  // extras (shoes / accessories) differ.
+  // Duplicate-detection is scoped to primary pieces, but only matches a
+  // "bare" outfit (no extras yet) — Combinar never sets extras itself, so
+  // re-saving the same core+palette should reuse a blank match, but once
+  // shoes/accessories have been attached to that outfit (from Desats) it
+  // reads as a distinct variant. Re-saving then creates a fresh bare
+  // outfit instead of returning the now-decorated one, which is what lets
+  // the same core+palette exist as several shoe variants without an
+  // explicit "duplicate" step.
   return outfits.find((o) => {
     const ids = o.garments
       .filter((g) => g.role === "primary")
       .map((g) => g.garmentId)
       .sort();
-    return ids.length === sorted.length && ids.every((id, i) => id === sorted[i]);
+    const isBare = !o.garments.some((g) => g.role === "extra");
+    return isBare && ids.length === sorted.length && ids.every((id, i) => id === sorted[i]);
   }) ?? null;
 }
 
@@ -108,6 +114,13 @@ export async function setWornDay(outfitId: string, day: Date) {
 
 export async function clearWornDay(day: Date) {
   await prisma.wornEvent.deleteMany({ where: { date: day } });
+}
+
+export async function findWornEventForDay(day: Date) {
+  return prisma.wornEvent.findUnique({
+    where: { date: day },
+    include: { outfit: { include: OUTFIT_GARMENTS_INCLUDE } },
+  });
 }
 
 export async function findWornEventsInRange(start: Date, end: Date) {

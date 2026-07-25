@@ -8,10 +8,12 @@ import {
   addOutfitExtrasAction,
   removeOutfitExtraAction,
   setOutfitFavoriteAction,
+  assignOutfitToDayAction,
 } from "@/app/outfits/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
+import { dayToISO } from "@/lib/outfits/week";
 import { PieceThumb } from "./PieceThumb";
 import { Card, Icon, Sheet, Stack, Text, TextButton, useToast, EmptyState } from "@/components/ui";
 
@@ -113,10 +115,12 @@ export function SavedOutfitsView({
   outfits,
   palettes,
   allGarments,
+  todayOutfitId,
 }: {
   outfits: SavedOutfit[];
   palettes: SanzoPalette[];
   allGarments: GarmentWithColors[];
+  todayOutfitId: string | null;
 }) {
   const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
 
@@ -156,7 +160,19 @@ export function SavedOutfitsView({
 
   return (
     <div className="flex flex-col gap-10">
-      {suggestedOutfit && (
+      <div className="flex items-center justify-end">
+        <Link
+          href="/calendari"
+          className="inline-flex items-center gap-1 font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors"
+        >
+          veure calendari
+          <Icon name="arrow-right" size={12} />
+        </Link>
+      </div>
+
+      {/* Only worth surfacing if today isn't already decided — once an
+          outfit is assigned to today, the nudge has done its job. */}
+      {suggestedOutfit && !todayOutfitId && (
         <SuggestionBanner
           outfit={suggestedOutfit}
           palette={paletteMap.get(suggestedOutfit.paletteId) ?? null}
@@ -181,6 +197,7 @@ export function SavedOutfitsView({
         <SavedOutfitSheet
           outfit={openOutfit}
           palette={paletteMap.get(openOutfit.paletteId) ?? null}
+          isToday={openOutfit.id === todayOutfitId}
           onClose={() => {
             setOpenOutfitId(null);
             setExtrasPickerOpen(false);
@@ -305,12 +322,14 @@ function SavedOutfitCard({
 function SavedOutfitSheet({
   outfit,
   palette,
+  isToday,
   onClose,
   onOpenExtras,
   onDuplicated,
 }: {
   outfit: SavedOutfit;
   palette: SanzoPalette | null;
+  isToday: boolean;
   onClose: () => void;
   onOpenExtras: () => void;
   onDuplicated: (newOutfitId: string) => void;
@@ -350,6 +369,13 @@ function SavedOutfitSheet({
       const variant = await duplicateOutfitAction(outfit.id);
       toast.show("variant creada — afegeix-hi altres sabates", "success");
       onDuplicated(variant.id);
+    });
+  };
+
+  const handleWearToday = () => {
+    startTransition(async () => {
+      await assignOutfitToDayAction(outfit.id, dayToISO(new Date()));
+      toast.show("assignat per avui", "success");
     });
   };
 
@@ -473,11 +499,25 @@ function SavedOutfitSheet({
             ))}
           </ul>
         )}
+        {isToday ? (
+          <Text variant="small" italic tone="secondary" className="font-serif">
+            ja el portes avui.
+          </Text>
+        ) : (
+          <TextButton
+            type="button"
+            onClick={handleWearToday}
+            disabled={pending}
+            className="self-start"
+          >
+            {pending ? "assignant…" : "portar-lo avui"}
+          </TextButton>
+        )}
         <Link
           href="/calendari"
-          className="self-start font-serif italic type-small text-text-primary hover:text-text-secondary transition-colors"
+          className="self-start font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors"
         >
-          planificar a la setmana
+          veure calendari
         </Link>
       </Stack>
 

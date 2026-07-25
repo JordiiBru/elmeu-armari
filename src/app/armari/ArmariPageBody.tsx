@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { findAllGarments } from "@/lib/prendas/service";
-import { findAllOutfits, toSavedOutfit } from "@/lib/outfits/service";
+import { findAllOutfits, findTodayOutfitId, toSavedOutfit } from "@/lib/outfits/service";
 import { getCurrentSeason } from "@/lib/prendas/season";
 import { palettes } from "@/lib/colors";
 import { ArmariTabs } from "@/components/ArmariTabs";
@@ -13,9 +13,10 @@ import { PageContainer, SectionHeader, GridSkeleton } from "@/components/ui";
  * modal layout as a client-side navigation into the intercepted route.
  */
 export async function ArmariPageBody() {
-  const [garments, outfits] = await Promise.all([
+  const [garments, outfits, todayOutfitId] = await Promise.all([
     findAllGarments(),
     findAllOutfits(),
+    findTodayOutfitId(),
   ]);
 
   const savedOutfits = outfits.map(toSavedOutfit);
@@ -36,6 +37,7 @@ export async function ArmariPageBody() {
           garments={garments}
           palettes={palettes}
           savedOutfits={savedOutfits}
+          todayOutfitId={todayOutfitId}
           defaultSeason={getCurrentSeason()}
         />
       </Suspense>

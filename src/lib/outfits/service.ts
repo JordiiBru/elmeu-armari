@@ -11,6 +11,7 @@ import {
   setWornDay,
   clearWornDay,
   findWornEventsInRange,
+  findWornEventForDay,
 } from "./repository";
 import { palettes } from "@/lib/colors";
 import { dayKey, addDays, dayToISO } from "./week";
@@ -57,6 +58,14 @@ export async function assignOutfitToDay(outfitId: string, date: Date) {
 
 export async function unassignDay(date: Date) {
   return clearWornDay(dayKey(date));
+}
+
+/** The outfit assigned to today, if any — used to hide the "menys portat"
+ * suggestion once today is already decided, and to let a saved outfit's
+ * own sheet offer a one-click "portar-lo avui". */
+export async function findTodayOutfitId(): Promise<string | null> {
+  const event = await findWornEventForDay(dayKey(new Date()));
+  return event?.outfitId ?? null;
 }
 
 /** Always returns exactly 7 entries, Monday first, one per day of the
