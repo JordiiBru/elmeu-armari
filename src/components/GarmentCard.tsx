@@ -48,7 +48,13 @@ export function GarmentCard({
   index: number;
 }) {
   return (
-    <Card as={Link} href={`/armari/${garment.id}`} interactive="clickable" data-testid="garment-card">
+    <Card
+      as={Link}
+      href={`/armari/${garment.id}`}
+      scroll={false}
+      interactive="clickable"
+      data-testid="garment-card"
+    >
       <GarmentCardContent garment={garment} index={index} />
     </Card>
   );

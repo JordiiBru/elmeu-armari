@@ -31,10 +31,12 @@ export function OutfitGroupCard({
   group,
   onSave,
   savedPaletteIds,
+  pending = false,
 }: {
   group: OutfitGroup;
   onSave: (paletteId: number) => void;
   savedPaletteIds: Set<number>;
+  pending?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const mainPalette = group.palettes[0];
@@ -57,10 +59,10 @@ export function OutfitGroupCard({
         <div className="flex items-center gap-3">
           <button
             onClick={() => onSave(mainPalette.palette.id)}
-            disabled={mainSaved}
+            disabled={mainSaved || pending}
             className="font-serif italic text-sm text-text-primary disabled:text-text-secondary transition-colors active:scale-95 disabled:cursor-default"
           >
-            {mainSaved ? "desat" : "desar outfit"}
+            {mainSaved ? "desat" : pending ? "desant…" : "desar outfit"}
           </button>
           {extraPalettes.length > 0 && (
             <button
@@ -80,6 +82,7 @@ export function OutfitGroupCard({
                 pm={pm}
                 onSave={() => onSave(pm.palette.id)}
                 saved={savedPaletteIds.has(pm.palette.id)}
+                pending={pending}
               />
             ))}
           </div>
@@ -114,10 +117,12 @@ function PaletteRow({
   pm,
   onSave,
   saved,
+  pending = false,
 }: {
   pm: PaletteMatch;
   onSave: () => void;
   saved: boolean;
+  pending?: boolean;
 }) {
   return (
     <div className="grid grid-cols-[auto_1fr_auto] gap-3 items-center">
@@ -139,7 +144,7 @@ function PaletteRow({
       </span>
       <button
         onClick={onSave}
-        disabled={saved}
+        disabled={saved || pending}
         className="font-serif italic text-xs text-text-secondary hover:text-text-primary disabled:opacity-40 transition-colors active:scale-95 shrink-0"
         aria-label={saved ? "Ja desat" : "Desar paleta"}
       >
