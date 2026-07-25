@@ -71,20 +71,32 @@ export function OutfitCollage({
     return <PieceThumb garment={garments[0]} thumb={thumb} className={className} />;
   }
   const shown = garments.slice(0, 4);
+  const hidden = garments.length - shown.length;
   return (
-    <div
-      className={`grid grid-cols-2 gap-0.5 ${shown.length > 2 ? "grid-rows-2" : ""} ${className ?? ""}`}
-    >
-      {shown.map((g, i) => (
-        <PieceThumb
-          key={g.id}
-          garment={g}
-          thumb={thumb}
-          className={`h-full w-full ${shown.length === 3 && i === 0 ? "row-span-2" : ""}`}
-        />
-      ))}
+    <div className={`relative ${className ?? ""}`}>
+      <div
+        className={`grid h-full w-full grid-cols-2 gap-0.5 ${shown.length > 2 ? "grid-rows-2" : ""}`}
+      >
+        {shown.map((g, i) => (
+          <PieceThumb
+            key={g.id}
+            garment={g}
+            thumb={thumb}
+            className={`h-full w-full ${shown.length === 3 && i === 0 ? "row-span-2" : ""}`}
+          />
+        ))}
+      </div>
+      {hidden > 0 && (
+        <span className="absolute bottom-1.5 right-1.5 type-caption bg-elevated px-1.5 py-0.5">
+          +{hidden}
+        </span>
+      )}
     </div>
   );
+}
+
+export function allGarmentsOf(outfit: SavedOutfit): GarmentWithColors[] {
+  return outfit.garments.map((g) => g.garment);
 }
 
 export function SavedOutfitsView({
@@ -191,10 +203,10 @@ function SuggestionBanner({
   palette: SanzoPalette | null;
   onOpen: () => void;
 }) {
-  const primaryGarments = outfit.garments
+  const title = outfit.garments
     .filter((g) => g.role === "primary")
-    .map((g) => g.garment);
-  const title = primaryGarments.map((g) => CATEGORY_LABELS[g.category]).join(" · ");
+    .map((g) => CATEGORY_LABELS[g.garment.category])
+    .join(" · ");
 
   return (
     <button
@@ -202,7 +214,7 @@ function SuggestionBanner({
       onClick={onOpen}
       className="group flex items-center gap-4 border border-border p-4 text-left outline-none transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:border-text-primary focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
-      <OutfitCollage garments={primaryGarments} className="h-16 w-16 flex-shrink-0" />
+      <OutfitCollage garments={allGarmentsOf(outfit)} className="h-16 w-16 flex-shrink-0" />
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
         <Text variant="caption">suggerit — el que fa més temps que no portes</Text>
         <Text as="span" className="font-serif truncate">
@@ -232,10 +244,10 @@ function SavedOutfitCard({
   suggested: boolean;
   onOpen: () => void;
 }) {
-  const primaryGarments = outfit.garments
+  const title = outfit.garments
     .filter((g) => g.role === "primary")
-    .map((g) => g.garment);
-  const title = primaryGarments.map((g) => CATEGORY_LABELS[g.category]).join(" · ");
+    .map((g) => CATEGORY_LABELS[g.garment.category])
+    .join(" · ");
   const subtitle = palette?.nombre ?? outfit.name ?? `outfit #${index + 1}`;
 
   return (
@@ -247,7 +259,7 @@ function SavedOutfitCard({
       data-testid="saved-outfit-card"
     >
       <div className="relative aspect-[3/4] w-full overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0">
-        <OutfitCollage garments={primaryGarments} className="h-full w-full" />
+        <OutfitCollage garments={allGarmentsOf(outfit)} className="h-full w-full" />
         {outfit.favorite && (
           <span className="absolute top-2 right-2 inline-flex bg-elevated p-1">
             <Icon name="star" size={12} className="fill-current text-text-primary" />
@@ -320,13 +332,7 @@ function SavedOutfitSheet({
       onClose={onClose}
       size="md"
       label={`Outfit ${title}`}
-      media={
-        <OutfitCollage
-          garments={primary.map((og) => og.garment)}
-          thumb={false}
-          className="h-full w-full"
-        />
-      }
+      media={<OutfitCollage garments={allGarmentsOf(outfit)} thumb={false} className="h-full w-full" />}
       mediaHeight="h-40"
       header={
         <Stack gap={1}>

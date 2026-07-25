@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { assignOutfitToDayAction, unassignDayAction } from "@/app/outfits/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit, WeekDayPlan } from "@/lib/outfits/types";
-import { OutfitCollage } from "./SavedOutfitsView";
+import { OutfitCollage, allGarmentsOf } from "./SavedOutfitsView";
 import { Card, Icon, Sheet, Text, TextButton, useToast, EmptyState } from "@/components/ui";
 
 const WEEKDAY_LABELS = ["dl", "dt", "dc", "dj", "dv", "ds", "dg"];
@@ -109,7 +109,7 @@ function DayCell({
         }`}
       >
         {day.outfit ? (
-          <OutfitCollage garments={primaryGarments} className="h-full w-full" />
+          <OutfitCollage garments={allGarmentsOf(day.outfit)} className="h-full w-full" />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-surface text-text-secondary">
             <Icon name="plus" size={16} />
@@ -199,7 +199,7 @@ function DayPickerSheet({
                   : "border-border hover:border-text-secondary"
               }`}
             >
-              <OutfitCollage garments={primaryGarmentsOf(outfit)} className="aspect-[3/4] w-full" />
+              <OutfitCollage garments={allGarmentsOf(outfit)} className="aspect-[3/4] w-full" />
               <Text variant="small" tone="secondary" className="font-serif leading-tight truncate">
                 {paletteMap.get(outfit.paletteId)?.nombre ?? outfit.name ?? "outfit"}
               </Text>

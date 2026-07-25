@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { dayKey } from "./week";
 
 const OUTFIT_GARMENTS_INCLUDE = {
   garments: {
@@ -8,13 +9,19 @@ const OUTFIT_GARMENTS_INCLUDE = {
   },
 } as const;
 
-const OUTFIT_INCLUDE = {
-  ...OUTFIT_GARMENTS_INCLUDE,
-  wornEvents: {
-    orderBy: { date: "desc" },
-    take: 3,
-  },
-} as const;
+// A future calendar assignment is a plan, not history — "portat" (Desats)
+// must only ever surface days that have actually happened, or a planned
+// outfit reads as worn before you've worn it.
+function outfitInclude() {
+  return {
+    ...OUTFIT_GARMENTS_INCLUDE,
+    wornEvents: {
+      where: { date: { lte: dayKey(new Date()) } },
+      orderBy: { date: "desc" },
+      take: 3,
+    },
+  } as const;
+}
 
 export async function findOutfitByGarmentsAndPalette(
   garmentIds: string[],
@@ -29,7 +36,7 @@ export async function findOutfitByGarmentsAndPalette(
       paletteId,
       garments: { some: { garmentId: { in: sorted }, role: "primary" } },
     },
-    include: OUTFIT_INCLUDE,
+    include: outfitInclude(),
   });
   // Duplicate-detection is scoped to primary pieces: two saves of the
   // same palette + same core garments are the same outfit, even if
@@ -56,7 +63,7 @@ export async function createOutfit(data: {
         create: data.garmentIds.map((garmentId) => ({ garmentId, role: "primary" })),
       },
     },
-    include: OUTFIT_INCLUDE,
+    include: outfitInclude(),
   });
 }
 
@@ -75,7 +82,7 @@ export async function removeOutfitExtra(outfitId: string, garmentId: string) {
 
 export async function findAllOutfits() {
   return prisma.outfit.findMany({
-    include: OUTFIT_INCLUDE,
+    include: outfitInclude(),
     orderBy: [{ favorite: "desc" }, { createdAt: "desc" }],
   });
 }
