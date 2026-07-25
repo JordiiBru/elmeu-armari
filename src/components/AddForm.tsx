@@ -8,12 +8,13 @@ import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
 import { createGarmentAction } from "@/app/add/actions";
 import {
   CATEGORIES,
-  TEXTURES,
-  PATTERNS,
   FITS_BY_CATEGORY,
   SUBTYPES_BY_CATEGORY,
   SIZES_BY_CATEGORY,
   LENGTHS_BY_CATEGORY,
+  TEXTURES_BY_CATEGORY,
+  PATTERNS_BY_CATEGORY,
+  CATEGORIES_WITH_OPTIONAL_COLOR,
 } from "@/lib/prendas/types";
 import type { Category } from "@/lib/prendas/types";
 import {
@@ -87,6 +88,9 @@ export function AddForm() {
   const subtypes = category ? SUBTYPES_BY_CATEGORY[category] : [];
   const sizes = category ? SIZES_BY_CATEGORY[category] : [];
   const lengths = category ? LENGTHS_BY_CATEGORY[category] : [];
+  const textures = category ? TEXTURES_BY_CATEGORY[category] : [];
+  const patterns = category ? PATTERNS_BY_CATEGORY[category] : [];
+  const colorsRequired = !category || !CATEGORIES_WITH_OPTIONAL_COLOR.has(category);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -110,6 +114,8 @@ export function AddForm() {
             setLength("");
             setSize("");
             setFit("");
+            setTexture("");
+            setPattern("");
           }}
           options={CATEGORIES.map((c) => ({
             value: c,
@@ -148,61 +154,67 @@ export function AddForm() {
         </Field>
       )}
 
-      <Field label={UI.form.colors} required>
+      <Field label={UI.form.colors} required={colorsRequired}>
         <ColorPickers />
       </Field>
 
-      <Field label={UI.form.texture} required>
-        <Select
-          name="texture"
-          required
-          value={texture}
-          onChange={setTexture}
-          options={TEXTURES.map((t) => ({
-            value: t,
-            label: TEXTURE_LABELS[t],
-          }))}
-        />
-      </Field>
+      {category && textures.length > 0 && (
+        <Field label={UI.form.texture} required>
+          <Select
+            name="texture"
+            required
+            value={texture}
+            onChange={setTexture}
+            options={textures.map((t) => ({
+              value: t,
+              label: TEXTURE_LABELS[t],
+            }))}
+          />
+        </Field>
+      )}
 
-      <Field label={UI.form.pattern} required>
-        <Select
-          name="pattern"
-          required
-          value={pattern}
-          onChange={setPattern}
-          options={PATTERNS.map((p) => ({
-            value: p,
-            label: PATTERN_LABELS[p],
-          }))}
-        />
-      </Field>
+      {category && patterns.length > 0 && (
+        <Field label={UI.form.pattern} required>
+          <Select
+            name="pattern"
+            required
+            value={pattern}
+            onChange={setPattern}
+            options={patterns.map((p) => ({
+              value: p,
+              label: PATTERN_LABELS[p],
+            }))}
+          />
+        </Field>
+      )}
 
       <Field label={UI.form.seasons} required>
         <SeasonCheckboxes />
       </Field>
 
-      <Field label={UI.form.size} required>
-        <Select
-          name="size"
-          required
-          value={size}
-          onChange={setSize}
-          disabled={!category}
-          options={sizes.map((s) => ({ value: s, label: s }))}
-        />
-      </Field>
+      {category && sizes.length > 0 && (
+        <Field label={UI.form.size} required>
+          <Select
+            name="size"
+            required
+            value={size}
+            onChange={setSize}
+            options={sizes.map((s) => ({ value: s, label: s }))}
+          />
+        </Field>
+      )}
 
-      <Field label={UI.form.fit} required>
-        <Select
-          name="fit"
-          required
-          value={fit}
-          onChange={setFit}
-          disabled={!category}
-          options={fits.map((f) => ({ value: f, label: FIT_LABELS[f] }))}
-        />
-      </Field>
+      {category && fits.length > 0 && (
+        <Field label={UI.form.fit} required>
+          <Select
+            name="fit"
+            required
+            value={fit}
+            onChange={setFit}
+            options={fits.map((f) => ({ value: f, label: FIT_LABELS[f] }))}
+          />
+        </Field>
+      )}
 
       <Field label={UI.form.notes} htmlFor="notes">
         <Input id="notes" name="notes" placeholder="opcional…" />

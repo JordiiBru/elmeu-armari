@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
+import { garmentSlug } from "@/lib/prendas/slug";
 import { PieceThumb } from "./PieceThumb";
 import { Card, Text, Icon } from "@/components/ui";
 
@@ -22,9 +23,13 @@ function GarmentCardContent({ garment, index }: { garment: GarmentWithColors; in
           n{String(index + 1).padStart(3, "0")}
         </Text>
       </div>
-      <Text variant="small" italic tone="secondary" className="font-serif mt-0.5">
-        {FIT_LABELS[garment.fit] ?? garment.fit} · {garment.size}
-      </Text>
+      {(garment.fit || garment.size) && (
+        <Text variant="small" italic tone="secondary" className="font-serif mt-0.5">
+          {[garment.fit ? (FIT_LABELS[garment.fit] ?? garment.fit) : null, garment.size]
+            .filter(Boolean)
+            .join(" · ")}
+        </Text>
+      )}
       {garment.notes && (
         <Text variant="small" tone="secondary" truncate className="mt-0.5">
           {garment.notes}
@@ -36,7 +41,7 @@ function GarmentCardContent({ garment, index }: { garment: GarmentWithColors; in
 
 /**
  * Ratio 3:4 amb tira de swatches. Card editorial reusable.
- * Server Component: a plain `Link` to `/armari/[id]`. The garment modal
+ * Server Component: a plain `Link` to `/armari/[slug]`. The garment modal
  * opens via that route (intercepted from `/armari`, see `@modal`) rather
  * than local client state, so this card doesn't need "use client".
  */
@@ -50,7 +55,7 @@ export function GarmentCard({
   return (
     <Card
       as={Link}
-      href={`/armari/${garment.id}`}
+      href={`/armari/${garmentSlug(garment)}`}
       scroll={false}
       interactive="clickable"
       data-testid="garment-card"
@@ -63,7 +68,7 @@ export function GarmentCard({
 /**
  * Same visual card, but a click callback instead of navigation — used by
  * the outfit builder ("combinar" tab) to pick a garment and open the
- * palette-matching sheet, which is unrelated to the `/armari/[id]` detail
+ * palette-matching sheet, which is unrelated to the `/armari/[slug]` detail
  * modal. Kept client-only since it needs a real event handler.
  */
 export function SelectableGarmentCard({

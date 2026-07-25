@@ -2,48 +2,86 @@ import type { Category, Pattern, Texture, Season } from "@/generated/prisma/enum
 
 export type { Category, Pattern, Texture, Season };
 
-export const CATEGORIES: Category[] = ["SWEATER", "SHIRT", "PANTS", "SOCKS", "SHOES"];
+export const CATEGORIES: Category[] = ["SWEATER", "SHIRT", "PANTS", "SOCKS", "SHOES", "ACCESSORI"];
 export const TEXTURES: Texture[] = ["KNIT", "DENIM", "LINEN", "COTTON", "POLYESTER", "LEATHER", "SYNTHETIC"];
 export const PATTERNS: Pattern[] = ["PLAIN", "STRIPES", "CHECKS", "FLORAL", "PRINTED", "GEOMETRIC"];
 export const SEASONS: Season[] = ["SPRING", "SUMMER", "AUTUMN", "WINTER", "ALL_YEAR"];
 
 export const SUBTYPES_BY_CATEGORY: Record<Category, string[]> = {
-  SWEATER: ["PULLOVER", "ZIP", "HOODIE", "CARDIGAN"],
-  SHIRT:   ["TEE", "POLO", "CAMISA"],
-  PANTS:   ["VAQUERS", "CHINO", "JOGGER", "CARGO"],
-  SOCKS:   [],
-  SHOES:   ["SNEAKER", "BOTA", "LOAFER", "SANDALIA", "OXFORD"],
+  SWEATER:   ["PULLOVER", "ZIP", "HOODIE", "CARDIGAN"],
+  SHIRT:     ["TEE", "POLO", "CAMISA"],
+  PANTS:     ["VAQUERS", "CHINO", "JOGGER", "CARGO"],
+  SOCKS:     [],
+  SHOES:     ["SNEAKER", "BOTA", "LOAFER", "SANDALIA", "OXFORD"],
+  ACCESSORI: ["ANELL", "RELLOTGE", "CINTURO", "BOSSA", "BARRET", "BUFANDA", "ULLERES"],
 };
 
 // Length is orthogonal to subtype: a chino can be SHORT or LONG.
 // Only defined for categories where it changes seasonal fit.
 export const LENGTHS_BY_CATEGORY: Record<Category, string[]> = {
-  SWEATER: [],
-  SHIRT:   [],
-  PANTS:   ["SHORT", "LONG"],
-  SOCKS:   [],
-  SHOES:   [],
+  SWEATER:   [],
+  SHIRT:     [],
+  PANTS:     ["SHORT", "LONG"],
+  SOCKS:     [],
+  SHOES:     [],
+  ACCESSORI: [],
 };
 
 export const ALL_LENGTHS: string[] = [
   ...new Set(Object.values(LENGTHS_BY_CATEGORY).flat()),
 ];
 
+// Not applicable to ACCESSORI (a ring has no "fit"): empty list means the
+// field is hidden and must stay unset, same convention as subtype/length.
 export const FITS_BY_CATEGORY: Record<Category, string[]> = {
-  SWEATER: ["REGULAR", "OVERSIZED", "CROPPED"],
-  SHIRT:   ["REGULAR", "SLIM", "OVERSIZED", "CROPPED"],
-  PANTS:   ["STRAIGHT", "SLIM", "SKINNY", "BAGGY", "BARREL", "WIDE_LEG"],
-  SOCKS:   ["CURT", "TURMELL", "MITJA_CANYA", "GENOLLERA"],
-  SHOES:   ["LOW_TOP", "MID", "HIGH_TOP"],
+  SWEATER:   ["REGULAR", "OVERSIZED", "CROPPED"],
+  SHIRT:     ["REGULAR", "SLIM", "OVERSIZED", "CROPPED"],
+  PANTS:     ["STRAIGHT", "SLIM", "SKINNY", "BAGGY", "BARREL", "WIDE_LEG"],
+  SOCKS:     ["CURT", "TURMELL", "MITJA_CANYA", "GENOLLERA"],
+  SHOES:     ["LOW_TOP", "MID", "HIGH_TOP"],
+  ACCESSORI: [],
 };
 
+// Not applicable to ACCESSORI: sizing varies too much across rings, belts,
+// hats etc. to fit one dropdown, so the field is hidden for this category.
 export const SIZES_BY_CATEGORY: Record<Category, string[]> = {
-  SWEATER: ["XS", "S", "M", "L", "XL", "XXL"],
-  SHIRT:   ["XS", "S", "M", "L", "XL", "XXL"],
-  PANTS:   ["28", "29", "30", "31", "32", "33", "34", "36", "38"],
-  SOCKS:   ["36-40", "40-46"],
-  SHOES:   ["38", "39", "40", "41", "42", "43", "44", "45", "46"],
+  SWEATER:   ["XS", "S", "M", "L", "XL", "XXL"],
+  SHIRT:     ["XS", "S", "M", "L", "XL", "XXL"],
+  PANTS:     ["28", "29", "30", "31", "32", "33", "34", "36", "38"],
+  SOCKS:     ["36-40", "40-46"],
+  SHOES:     ["38", "39", "40", "41", "42", "43", "44", "45", "46"],
+  ACCESSORI: [],
 };
+
+// Texture/pattern don't apply to ACCESSORI either — same empty-list
+// convention as fit/size/subtype/length.
+export const TEXTURES_BY_CATEGORY: Record<Category, Texture[]> = {
+  SWEATER: TEXTURES,
+  SHIRT: TEXTURES,
+  PANTS: TEXTURES,
+  SOCKS: TEXTURES,
+  SHOES: TEXTURES,
+  ACCESSORI: [],
+};
+
+export const PATTERNS_BY_CATEGORY: Record<Category, Pattern[]> = {
+  SWEATER: PATTERNS,
+  SHIRT: PATTERNS,
+  PANTS: PATTERNS,
+  SOCKS: PATTERNS,
+  SHOES: PATTERNS,
+  ACCESSORI: [],
+};
+
+// Colours are required for every category except ACCESSORI — a ring or a
+// watch often doesn't have one worth recording.
+export const CATEGORIES_WITH_OPTIONAL_COLOR = new Set<Category>(["ACCESSORI"]);
+
+// Categories attached to a saved outfit as an "extra" (role: "extra") —
+// outside the colour-matching engine, added manually after the core is
+// built. Shared by the outfit builder (excludes them from the palette
+// grid) and the saved-outfits view (offers them in the extras picker).
+export const EXTRA_CATEGORIES = new Set<Category>(["SHOES", "SOCKS", "ACCESSORI"]);
 
 export const ALL_FITS: string[] = [
   ...new Set(Object.values(FITS_BY_CATEGORY).flat()),
@@ -55,12 +93,12 @@ export const ALL_SUBTYPES: string[] = [
 
 export interface GarmentInput {
   category: Category;
-  texture: Texture;
-  pattern: Pattern;
-  fit: string;
+  texture: Texture | null;
+  pattern: Pattern | null;
+  fit: string | null;
   subtype: string | null;
   length: string | null;
-  size: string;
+  size: string | null;
   seasons: Season[];
   hexColors: string[];
   notes?: string;
@@ -69,12 +107,12 @@ export interface GarmentInput {
 export interface GarmentWithColors {
   id: string;
   category: Category;
-  texture: Texture;
-  pattern: Pattern;
-  size: string;
+  texture: Texture | null;
+  pattern: Pattern | null;
+  size: string | null;
   subtype: string | null;
   length: string | null;
-  fit: string;
+  fit: string | null;
   notes: string | null;
   image: string | null;
   createdAt: Date;

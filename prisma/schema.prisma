@@ -12,12 +12,12 @@ model Garment {
   category  Category
   colors    Color[]
   seasons   GarmentSeason[]
-  texture   Texture
-  pattern   Pattern
-  size      String
+  texture   Texture?
+  pattern   Pattern?
+  size      String?
   subtype   String?
   length    String?
-  fit       String
+  fit       String?
   notes     String?
   image     String?
   outfits   OutfitGarment[]
@@ -91,6 +91,7 @@ enum Category {
   PANTS
   SOCKS
   SHOES
+  ACCESSORI
 }
 
 enum Texture {

@@ -5,14 +5,16 @@ import {
   findOutfitById,
   deleteOutfit,
   countOutfits,
-  addOutfitExtras,
+  createOutfitExtras,
   removeOutfitExtra,
+  removeOutfitExtrasByCategory,
   setOutfitFavorite,
   setWornDay,
   clearWornDay,
   findWornEventsInRange,
   findWornEventForDay,
 } from "./repository";
+import { findGarmentById } from "@/lib/prendas/service";
 import { palettes } from "@/lib/colors";
 import { dayKey, addDays, dayToISO } from "./week";
 import type { SavedOutfit, WeekDayPlan, OutfitGarmentRole } from "./types";
@@ -21,10 +23,38 @@ import type { GarmentWithColors } from "@/lib/prendas/types";
 export {
   findAllOutfits,
   deleteOutfit,
-  addOutfitExtras,
   removeOutfitExtra,
   setOutfitFavorite,
 };
+
+// Shoes are a unique slot on an outfit: adding a new pair replaces
+// whatever was there rather than stacking. Accessories (and everything
+// else added as "extra") have no such cap — an outfit can carry any
+// number of them.
+export async function addOutfitExtras(outfitId: string, garmentIds: string[]) {
+  if (garmentIds.length === 0) return;
+
+  const incoming = await Promise.all(garmentIds.map((id) => findGarmentById(id)));
+  const shoeIds = new Set(
+    incoming.filter((g) => g?.category === "SHOES").map((g) => g!.id),
+  );
+
+  if (shoeIds.size > 0) {
+    await removeOutfitExtrasByCategory(outfitId, "SHOES");
+  }
+
+  // If more than one pair was picked in the same batch, only the first
+  // survives — the slot stays singular.
+  let keptOneShoe = false;
+  const toInsert = garmentIds.filter((id) => {
+    if (!shoeIds.has(id)) return true;
+    if (keptOneShoe) return false;
+    keptOneShoe = true;
+    return true;
+  });
+
+  await createOutfitExtras(outfitId, toInsert);
+}
 
 interface OutfitWithGarments {
   id: string;
@@ -50,6 +80,36 @@ export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
       garment: og.garment,
     })),
   };
+}
+
+function outfitTop(outfit: SavedOutfit): GarmentWithColors | null {
+  const primaries = outfit.garments.filter((g) => g.role === "primary").map((g) => g.garment);
+  return (
+    primaries.find((g) => g.category === "SHIRT") ??
+    primaries.find((g) => g.category === "SWEATER") ??
+    null
+  );
+}
+
+// Groups saved outfits by the exact top (shirt/sweater) they're built
+// around, so every outfit wearing the same piece sits together — closer
+// to browsing a wardrobe rail than a chronological feed. Groups are
+// ordered by the top's label; outfits within a group keep their incoming
+// order (favourite first, then most recent — see `findAllOutfits`).
+// `Array.prototype.sort` is stable, so returning 0 for a shared top
+// preserves that incoming order.
+export function sortOutfitsByTop(outfits: SavedOutfit[]): SavedOutfit[] {
+  return [...outfits].sort((a, b) => {
+    const topA = outfitTop(a);
+    const topB = outfitTop(b);
+    if (!topA && !topB) return 0;
+    if (!topA) return 1;
+    if (!topB) return -1;
+    if (topA.id === topB.id) return 0;
+    const labelA = topA.subtype ?? topA.category;
+    const labelB = topB.subtype ?? topB.category;
+    return labelA !== labelB ? labelA.localeCompare(labelB) : topA.id.localeCompare(topB.id);
+  });
 }
 
 export async function assignOutfitToDay(outfitId: string, date: Date) {

@@ -10,11 +10,11 @@ A personal wardrobe manager. Catalogue your clothes with colours and photos, the
 
 ## Features
 
-- **Garment catalogue** (`/armari`) — grid with filters by category and season, tabs for pieces / combinations / saved outfits.
-- **Add & edit** (`/add`, `/edit/[id]`) — form with multi-colour picker, seasons multi-select, texture / pattern / fit / size, optional photo upload.
+- **Garment catalogue** (`/armari`) — grid with filters by category and season, tabs for pieces / combinations / saved outfits. Categories: sweater, shirt, pants, socks, shoes, accessory. Detail URLs are a slug (`/armari/bossa-zez4hi`), not the raw id — the "què hi combina" colour-matching action is hidden for shoes, socks and accessories since they don't take part in it.
+- **Add & edit** (`/add`, `/edit/[id]`) — form with multi-colour picker, seasons multi-select, texture / pattern / fit / size, optional photo upload. Fields adapt to the category: an accessory (ring, watch, belt, bag, hat, scarf, glasses…) skips texture, pattern, fit and size, and its colour is optional.
 - **Photo pipeline** — uploads re-encoded to WebP 800px @ q80 via `sharp`, EXIF stripped, thumbnails generated. Photos live on the filesystem, not in SQLite.
 - **Outfit builder** (`/armari` → `Combinar`) — pick a piece, get Sanzo Wada palettes that contain its colours, browse matching pieces per palette colour, save the outfit.
-- **Saved outfits** (`/armari` → `Desats`) — grouped by piece set, each entry linked to the palette it was saved with. Delete inline.
+- **Saved outfits** (`/armari` → `Desats`) — grouped by piece set, each entry linked to the palette it was saved with. Shoes, socks and accessories attach afterwards as "extras", outside the colour matching: shoes are a single slot (picking a new pair replaces the old one), accessories have no limit. The picker for extras is split into a section per kind, and an accessory shows its subtype (e.g. "bossa") instead of a generic label. Delete inline, or duplicate to try a different pair of shoes / set of accessories on the same core.
 - **Sanzo Wada palettes** (`/paleta`) — browse all 348 historical palettes; opening one shows the pieces you own that match it.
 - **Statistics** (`/stats`) — breakdown by category, season, fit and texture.
 - **Import / export** (`/settings`) — download all garments as JSON, upload a previously exported file to restore.
@@ -146,8 +146,9 @@ Two or more garments form a valid outfit when:
    _black shirt + black pants_ that would otherwise inherit any "Black + accent"
    palette without wearing the accent.
 3. Category constraints: exactly one bottom (`PANTS`) plus at least one top
-   (`SHIRT` or `SWEATER`), no repeated categories. Socks and shoes are excluded
-   from colour matching (see issue #57 for adding them as post-hoc extras).
+   (`SHIRT` or `SWEATER`), no repeated categories. Socks, shoes and accessories
+   are excluded from colour matching — they attach to a saved outfit
+   afterwards as post-hoc extras instead (see issue #57).
 
 There is **no coverage rule** requiring an outfit to wear every non-neutral accent
 a palette suggests. If Sanzo Wada's Combination 190 lists five colours and you're

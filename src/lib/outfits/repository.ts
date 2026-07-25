@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { dayKey } from "./week";
+import type { Category } from "@/lib/prendas/types";
 
 const OUTFIT_GARMENTS_INCLUDE = {
   garments: {
@@ -77,7 +78,7 @@ export async function createOutfit(data: {
   });
 }
 
-export async function addOutfitExtras(outfitId: string, garmentIds: string[]) {
+export async function createOutfitExtras(outfitId: string, garmentIds: string[]) {
   if (garmentIds.length === 0) return;
   await prisma.outfitGarment.createMany({
     data: garmentIds.map((garmentId) => ({ outfitId, garmentId, role: "extra" })),
@@ -87,6 +88,12 @@ export async function addOutfitExtras(outfitId: string, garmentIds: string[]) {
 export async function removeOutfitExtra(outfitId: string, garmentId: string) {
   await prisma.outfitGarment.deleteMany({
     where: { outfitId, garmentId, role: "extra" },
+  });
+}
+
+export async function removeOutfitExtrasByCategory(outfitId: string, category: Category) {
+  await prisma.outfitGarment.deleteMany({
+    where: { outfitId, role: "extra", garment: { category } },
   });
 }
 

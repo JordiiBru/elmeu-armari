@@ -1,17 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { addGarment, findAllGarments, deleteGarment } from "@/lib/prendas/service";
-import { CATEGORIES, TEXTURES, PATTERNS, SEASONS, FITS_BY_CATEGORY, SUBTYPES_BY_CATEGORY, LENGTHS_BY_CATEGORY } from "@/lib/prendas/types";
+import {
+  CATEGORIES,
+  SEASONS,
+  FITS_BY_CATEGORY,
+  SUBTYPES_BY_CATEGORY,
+  LENGTHS_BY_CATEGORY,
+  TEXTURES_BY_CATEGORY,
+  PATTERNS_BY_CATEGORY,
+  SIZES_BY_CATEGORY,
+  CATEGORIES_WITH_OPTIONAL_COLOR,
+} from "@/lib/prendas/types";
 import { isHex } from "@/lib/prendas/validation";
 import type { Category, Texture, Pattern, Season } from "@/lib/prendas/types";
 
 interface GarmentImport extends Record<string, unknown> {
   category: Category;
-  texture: Texture;
-  pattern: Pattern;
+  texture: Texture | null;
+  pattern: Pattern | null;
   seasons: Season[];
-  size: string;
-  fit: string;
+  size: string | null;
+  fit: string | null;
   subtype?: string | null;
   length?: string | null;
   notes?: string | null;
@@ -34,14 +44,34 @@ function validate(body: unknown): { ok: true; payload: ImportPayload } | { ok: f
     const gr = g as Record<string, unknown>;
     const category = gr.category as Category;
     if (!CATEGORIES.includes(category)) return { ok: false, error: `Peça ${i}: category invàlida` };
-    if (!TEXTURES.includes(gr.texture as Texture)) return { ok: false, error: `Peça ${i}: texture invàlida` };
-    if (!PATTERNS.includes(gr.pattern as Pattern)) return { ok: false, error: `Peça ${i}: pattern invàlid` };
-    if (!FITS_BY_CATEGORY[category]?.includes(gr.fit as string)) return { ok: false, error: `Peça ${i}: fit invàlid per categoria ${category}` };
+
+    const validTextures = TEXTURES_BY_CATEGORY[category];
+    const texture = gr.texture as string | null | undefined;
+    if (texture ? !validTextures.includes(texture as Texture) : validTextures.length > 0)
+      return { ok: false, error: `Peça ${i}: texture invàlida per categoria ${category}` };
+
+    const validPatterns = PATTERNS_BY_CATEGORY[category];
+    const pattern = gr.pattern as string | null | undefined;
+    if (pattern ? !validPatterns.includes(pattern as Pattern) : validPatterns.length > 0)
+      return { ok: false, error: `Peça ${i}: pattern invàlid per categoria ${category}` };
+
+    const validFits = FITS_BY_CATEGORY[category];
+    const fit = gr.fit as string | null | undefined;
+    if (fit ? !validFits.includes(fit) : validFits.length > 0)
+      return { ok: false, error: `Peça ${i}: fit invàlid per categoria ${category}` };
+
     if (!Array.isArray(gr.seasons) || gr.seasons.some((s) => !SEASONS.includes(s as Season)))
       return { ok: false, error: `Peça ${i}: seasons invàlides` };
-    if (typeof gr.size !== "string" || gr.size.trim() === "") return { ok: false, error: `Peça ${i}: size buit` };
-    if (!Array.isArray(gr.colors) || gr.colors.length === 0 || gr.colors.some((c) => !isHex(c)))
+
+    const validSizes = SIZES_BY_CATEGORY[category];
+    const size = gr.size as string | null | undefined;
+    if (size ? !validSizes.includes(size) : validSizes.length > 0)
+      return { ok: false, error: `Peça ${i}: size invàlid per categoria ${category}` };
+
+    const colorsRequired = !CATEGORIES_WITH_OPTIONAL_COLOR.has(category);
+    if (!Array.isArray(gr.colors) || (colorsRequired && gr.colors.length === 0) || gr.colors.some((c) => !isHex(c)))
       return { ok: false, error: `Peça ${i}: colors invàlids (cal array de hex #rrggbb)` };
+
     const validSubtypes = SUBTYPES_BY_CATEGORY[category];
     const subtype = gr.subtype as string | null | undefined;
     if (validSubtypes.length > 0 && subtype && !validSubtypes.includes(subtype))

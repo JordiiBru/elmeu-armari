@@ -15,6 +15,16 @@ export async function findGarmentById(id: string) {
   });
 }
 
+/** Resolves the short id suffix used in a garment's slug URL back to a
+ * garment. Collisions are astronomically unlikely at this catalog's scale
+ * (a personal wardrobe), so the first match is good enough. */
+export async function findGarmentByIdSuffix(suffix: string) {
+  return prisma.garment.findFirst({
+    where: { id: { endsWith: suffix } },
+    include: { colors: true, seasons: true },
+  });
+}
+
 export async function createGarment(data: GarmentInput) {
   return prisma.garment.create({
     data: {

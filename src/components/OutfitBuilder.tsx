@@ -2,19 +2,19 @@
 
 import { useState, useMemo } from "react";
 import type { GarmentWithColors, Season } from "@/lib/prendas/types";
+import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import type { SanzoPalette } from "@/lib/outfits/types";
 import { SEASON_LABELS } from "@/lib/prendas/labels";
 import { SelectableGarmentCard } from "./GarmentCard";
 import { OutfitBottomSheet } from "./OutfitBottomSheet";
 import { EmptyState } from "@/components/ui";
 
-const EXCLUDED_CATEGORIES = new Set(["SOCKS", "SHOES"]);
 const SEASONS: Season[] = ["SPRING", "SUMMER", "AUTUMN", "WINTER"];
 
 function filterBySeason(garments: GarmentWithColors[], season: Season): GarmentWithColors[] {
   return garments.filter(
     (g) =>
-      !EXCLUDED_CATEGORIES.has(g.category) &&
+      !EXTRA_CATEGORIES.has(g.category) &&
       g.seasons.some((s) => s.season === season || s.season === "ALL_YEAR"),
   );
 }
