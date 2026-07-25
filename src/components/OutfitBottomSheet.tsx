@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette, OutfitGroup } from "@/lib/outfits/types";
 import { generateOutfitGroupsForGarment } from "@/lib/outfits/engine";
@@ -46,6 +46,7 @@ export function OutfitBottomSheet({
   const [loading, setLoading] = useState(false);
   const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set());
   const [pieceFilter, setPieceFilter] = useState<number | null>(null);
+  const [pending, startTransition] = useTransition();
   const toast = useToast();
 
   const availablePieceCounts = useMemo(
@@ -77,12 +78,17 @@ export function OutfitBottomSheet({
     }, 0);
   };
 
-  const handleSave = async (group: OutfitGroup, paletteId: number) => {
+  // Calling the action outside a transition let its revalidatePath race
+  // the client-side promise, which never resolved — the save always
+  // succeeded server-side but the button never flipped to "desat".
+  const handleSave = (group: OutfitGroup, paletteId: number) => {
     const garmentIds = group.garments.map((g) => g.id);
     const key = [...garmentIds].sort().join(",") + "|" + paletteId;
-    await saveOutfitAction(paletteId, garmentIds);
-    setSavedKeys((prev) => new Set(prev).add(key));
-    toast.show("outfit desat", "success");
+    startTransition(async () => {
+      await saveOutfitAction(paletteId, garmentIds);
+      setSavedKeys((prev) => new Set(prev).add(key));
+      toast.show("outfit desat", "success");
+    });
   };
 
   const getSavedPaletteIds = (group: OutfitGroup): Set<number> => {
@@ -188,6 +194,7 @@ export function OutfitBottomSheet({
                 group={group}
                 onSave={(paletteId) => handleSave(group, paletteId)}
                 savedPaletteIds={getSavedPaletteIds(group)}
+                pending={pending}
               />
             ))}
           </div>

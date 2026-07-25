@@ -6,9 +6,22 @@ import type { SanzoPalette } from "@/lib/outfits/types";
 import { GarmentModal } from "./GarmentModal";
 
 /**
- * Thin route-driven wrapper around `GarmentModal`. Closing navigates back
- * in history instead of clearing local state, so the browser back button
- * closes the modal and the URL always reflects whether it's open.
+ * Thin route-driven wrapper around `GarmentModal`. Closing uses
+ * `router.back()` — the only navigation that reliably resets the
+ * `@modal` parallel slot back to `default.tsx`; `router.push`/`replace`
+ * to `/armari` land on the right URL but leave the closed Sheet mounted
+ * (confirmed empirically: 0 opacity, still `fixed inset-0 z-50`, still
+ * eating every click on the page).
+ *
+ * `back()` itself isn't fully reliable though: `ArmariGrid` writes its
+ * filter state via raw `window.history.replaceState` (to avoid a
+ * server round-trip per filter click), which can desync the browser's
+ * real history entries from Next's router-internal bookkeeping — and
+ * `back()` on that desynced state can overshoot past `/armari` (observed:
+ * straight to the home page). It always cleans up the modal correctly
+ * regardless of where it lands, so just correct the destination
+ * afterward if it went too far — by then the modal is already gone
+ * either way, so a follow-up `replace` is safe.
  */
 export function GarmentModalRoute({
   garment,
@@ -25,7 +38,14 @@ export function GarmentModalRoute({
       garment={garment}
       allGarments={allGarments}
       palettes={palettes}
-      onClose={() => router.back()}
+      onClose={() => {
+        router.back();
+        setTimeout(() => {
+          if (!window.location.pathname.startsWith("/armari")) {
+            router.replace("/armari");
+          }
+        }, 50);
+      }}
     />
   );
 }

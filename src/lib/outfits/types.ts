@@ -40,11 +40,19 @@ export interface SavedOutfit {
   name: string | null;
   paletteId: number;
   favorite: boolean;
-  lastWornAt: Date | null;
+  /** Most recent first, capped to a handful of entries. */
+  wornEvents: { id: string; date: Date }[];
   createdAt: Date;
   garments: {
     id: string;
     role: OutfitGarmentRole;
     garment: GarmentWithColors;
   }[];
+}
+
+/** One cell of the weekly planner: a calendar day and whatever outfit
+ * (if any) is assigned to it. */
+export interface WeekDayPlan {
+  date: string; // YYYY-MM-DD
+  outfit: SavedOutfit | null;
 }

@@ -19,11 +19,13 @@ export function ArmariTabs({
   garments,
   palettes,
   savedOutfits,
+  todayOutfitId,
   defaultSeason,
 }: {
   garments: GarmentWithColors[];
   palettes: SanzoPalette[];
   savedOutfits: SavedOutfit[];
+  todayOutfitId: string | null;
   defaultSeason?: Season;
 }) {
   const [tab, setTab] = useState<TabId>("peces");
@@ -102,6 +104,7 @@ export function ArmariTabs({
           outfits={savedOutfits}
           palettes={palettes}
           allGarments={garments}
+          todayOutfitId={todayOutfitId}
         />
       )}
     </div>

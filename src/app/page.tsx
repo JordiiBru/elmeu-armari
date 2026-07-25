@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 const PRIMARY = [
   { href: "/armari", label: "El meu armari" },
+  { href: "/calendari", label: "Calendari" },
   { href: "/paleta", label: "Paletes" },
 ];
 

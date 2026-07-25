@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { findAllGarments } from "@/lib/prendas/service";
-import { findAllOutfits } from "@/lib/outfits/service";
+import { findAllOutfits, findTodayOutfitId, toSavedOutfit } from "@/lib/outfits/service";
 import { getCurrentSeason } from "@/lib/prendas/season";
 import { palettes } from "@/lib/colors";
 import { ArmariTabs } from "@/components/ArmariTabs";
@@ -13,24 +13,13 @@ import { PageContainer, SectionHeader, GridSkeleton } from "@/components/ui";
  * modal layout as a client-side navigation into the intercepted route.
  */
 export async function ArmariPageBody() {
-  const [garments, outfits] = await Promise.all([
+  const [garments, outfits, todayOutfitId] = await Promise.all([
     findAllGarments(),
     findAllOutfits(),
+    findTodayOutfitId(),
   ]);
 
-  const savedOutfits = outfits.map((o) => ({
-    id: o.id,
-    name: o.name,
-    paletteId: o.paletteId,
-    favorite: o.favorite,
-    lastWornAt: o.wornEvents[0]?.date ?? null,
-    createdAt: o.createdAt,
-    garments: o.garments.map((og) => ({
-      id: og.id,
-      role: (og.role === "extra" ? "extra" : "primary") as "primary" | "extra",
-      garment: og.garment,
-    })),
-  }));
+  const savedOutfits = outfits.map(toSavedOutfit);
 
   return (
     <PageContainer width="wide">
@@ -48,6 +37,7 @@ export async function ArmariPageBody() {
           garments={garments}
           palettes={palettes}
           savedOutfits={savedOutfits}
+          todayOutfitId={todayOutfitId}
           defaultSeason={getCurrentSeason()}
         />
       </Suspense>
