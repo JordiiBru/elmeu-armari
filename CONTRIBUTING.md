@@ -29,6 +29,8 @@ The dev DB (`dev.db`) is git-ignored. Deleting it and re-running `npx prisma mig
 | `npm run lint` | Before commit. |
 | `npm run build` | To reproduce CI's build step. |
 | `npm run check` | Runs lint + typecheck + build. **Run before opening a PR.** |
+| `npm run test:unit` | Vitest unit tests. Runs in CI on every PR. |
+| `npm run test:e2e` | Playwright e2e tests. Local only — not run in CI. |
 
 ---
 
@@ -98,13 +100,13 @@ tight-match threshold.
 
 ### CI
 
-The CI workflow runs lint + typecheck, `npm audit`, Trivy filesystem scan, build and Lighthouse. All must be green before merge. **Do not merge on red.**
+The CI workflow (PRs only) runs lint + typecheck + `npm run test:unit` + build. All must be green before merge. **Do not merge on red.** Docker build/push happens separately on `release.yml` after merge to `main`; e2e (Playwright) and Lighthouse are not run in CI — run them locally.
 
 ---
 
-## 4. Testing manually
+## 4. Testing
 
-There is no automated test suite yet. Test manually against these paths after any UI change:
+Run `npm run test:unit` for the Vitest suite (colour-matching engine, etc.) and `npm run test:e2e` for the Playwright suite before a PR that touches their covered areas. Beyond that, test manually against these paths after any UI change:
 
 - `/` — home nav.
 - `/armari` — grid with several filter combinations (empty / one category / one season / crossed).

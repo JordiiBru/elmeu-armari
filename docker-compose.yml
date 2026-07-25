@@ -4,7 +4,7 @@ services:
       context: .
       args:
         DATABASE_URL: file:/data/prod.db
-    image: ghcr.io/jordiiibru/elmeu-armari:latest
+    image: ghcr.io/jordiibru/elmeu-armari:latest
     ports:
       - "3000:3000"
     environment:

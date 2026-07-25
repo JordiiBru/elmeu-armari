@@ -14,10 +14,11 @@ A personal wardrobe manager. Catalogue your clothes with colours and photos, the
 - **Add & edit** (`/add`, `/edit/[id]`) — form with multi-colour picker, seasons multi-select, texture / pattern / fit / size, optional photo upload. Fields adapt to the category: an accessory (ring, watch, belt, bag, hat, scarf, glasses…) skips texture, pattern, fit and size, and its colour is optional.
 - **Photo pipeline** — uploads re-encoded to WebP 800px @ q80 via `sharp`, EXIF stripped, thumbnails generated. Photos live on the filesystem, not in SQLite.
 - **Outfit builder** (`/armari` → `Combinar`) — pick a piece, get Sanzo Wada palettes that contain its colours, browse matching pieces per palette colour, save the outfit.
-- **Saved outfits** (`/armari` → `Desats`) — grouped by piece set, each entry linked to the palette it was saved with. Shoes, socks and accessories attach afterwards as "extras", outside the colour matching: shoes are a single slot (picking a new pair replaces the old one), accessories have no limit. The picker for extras is split into a section per kind, and an accessory shows its subtype (e.g. "bossa") instead of a generic label. Delete inline, or duplicate to try a different pair of shoes / set of accessories on the same core.
+- **Saved outfits** (`/armari` → `Desats`) — grouped by piece set, each entry linked to the palette it was saved with. Shoes, socks and accessories attach afterwards as "extras", outside the colour matching: shoes are a single slot (picking a new pair replaces the old one), accessories have no limit. The picker for extras is split into a section per kind, and an accessory shows its subtype (e.g. "bossa") instead of a generic label. Delete inline, duplicate to try a different pair of shoes / set of accessories on the same core, or mark it a favourite to pin it to the top.
+- **Weekly planner & worn-event log** (`/calendari`) — log which saved outfit you wore on a given day (at most one per calendar day); the outfit picker surfaces "least recently worn" suggestions from that history.
 - **Sanzo Wada palettes** (`/paleta`) — browse all 348 historical palettes; opening one shows the pieces you own that match it.
 - **Statistics** (`/stats`) — breakdown by category, season, fit and texture.
-- **Import / export** (`/settings`) — download all garments as JSON, upload a previously exported file to restore.
+- **Import / export** (`/settings`) — download all garments as JSON, or as a ZIP bundle including garment photos; upload a previously exported file to restore.
 - **PWA manifest** — installable on mobile, custom icon and theme.
 
 ---
@@ -203,6 +204,8 @@ ip route get 1 | awk '{print $7; exit}'
 | `npm run lint` | ESLint. |
 | `npm run typecheck` | `tsc --noEmit`. |
 | `npm run check` | Lint + typecheck + build. Run before opening a PR. |
+| `npm run test:unit` | Vitest unit tests (`tests/unit`). Runs in CI. |
+| `npm run test:e2e` | Playwright e2e tests (`tests/e2e`). Local only, not run in CI. |
 
 ---
 
@@ -279,8 +282,8 @@ Paste this into ChatGPT / Claude / Gemini with the raw photo to get a catalogue-
 
 ## CI/CD
 
-- **CI** (`.github/workflows/ci.yml`) — lint + typecheck, `npm audit`, Trivy filesystem scan, build, Lighthouse. Build requires `prisma migrate deploy` first because `/armari` reads the DB. Lighthouse runs against a local server with a migrated empty DB.
-- **Release** (`.github/workflows/release.yml`) — pushing a `v*.*.*` tag builds a Docker image and pushes to `ghcr.io/jordiibru/elmeu-armari` with semver tags.
+- **CI** (`.github/workflows/ci.yml`, PRs only) — lint + typecheck + `npm run test:unit` + build. Build requires `prisma migrate deploy` first because `/armari` reads the DB. No Docker build, no Trivy/Lighthouse/e2e in CI — those run locally to save Actions minutes on a private repo.
+- **Release** (`.github/workflows/release.yml`, on push to `main`) — auto-tags semver from conventional commits, creates a GitHub Release, then builds a Docker image and pushes to `ghcr.io/jordiibru/elmeu-armari` tagged with that version and `latest`.
 - **Renovate** — weekly updates on Mondays before 07:00, immediate automerge for security advisories, grouped for the Next.js / Prisma / Tailwind / GitHub Actions ecosystems, digest pinning for base Docker images.
 
 ---

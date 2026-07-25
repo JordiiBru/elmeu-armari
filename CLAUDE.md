@@ -71,9 +71,10 @@ Before opening a PR:
 
 ```bash
 npm run check              # lint + typecheck + build
+npm run test:unit          # Vitest — also runs in CI
 ```
 
-Individual gates: `npm run lint`, `npm run typecheck`, `npm run build`.
+Individual gates: `npm run lint`, `npm run typecheck`, `npm run build`. `npm run test:e2e` (Playwright) is local-only, not run in CI.
 
 ## Colour engine
 
@@ -93,4 +94,4 @@ Individual gates: `npm run lint`, `npm run typecheck`, `npm run build`.
 - Do not add `useEffect` to fetch data. Use Server Components + Server Actions.
 - Do not switch the Prisma client type. The driver adapter is a deliberate choice.
 - Do not commit `dev.db` changes. It is gitignored for a reason; if you accidentally staged it, unstage.
-- Do not write documentation files unless requested. This repo has three (`README.md`, `CLAUDE.md`, `CONTRIBUTING.md`, plus `AGENTS.md`); if a change belongs in one of them, edit it in place.
+- Do not write documentation files unless requested. This repo has four (`README.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `AGENTS.md`), plus `DESIGN-BIBLE.md` for the visual system; if a change belongs in one of them, edit it in place.
