@@ -49,7 +49,7 @@ function formatWornDate(date: Date): string {
 
 /** Deduped category labels of an outfit's extras — used to tell variants
  * of the same core+palette apart in the grid ("amb Sabates"). */
-function extraLabelsOf(outfit: SavedOutfit): string[] {
+export function extraLabelsOf(outfit: SavedOutfit): string[] {
   const labels = outfit.garments
     .filter((g) => g.role === "extra")
     .map((g) => CATEGORY_LABELS[g.garment.category]);

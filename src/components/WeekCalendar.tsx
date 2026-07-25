@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { assignOutfitToDayAction, unassignDayAction } from "@/app/outfits/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit, WeekDayPlan } from "@/lib/outfits/types";
-import { OutfitCollage, allGarmentsOf } from "./SavedOutfitsView";
+import { OutfitCollage, allGarmentsOf, extraLabelsOf } from "./SavedOutfitsView";
 import { Card, Icon, Sheet, Text, TextButton, useToast, EmptyState } from "@/components/ui";
 
 const WEEKDAY_LABELS = ["dl", "dt", "dc", "dj", "dv", "ds", "dg"];
@@ -15,6 +15,18 @@ function parseDay(iso: string): Date {
 
 function primaryGarmentsOf(outfit: SavedOutfit) {
   return outfit.garments.filter((g) => g.role === "primary").map((g) => g.garment);
+}
+
+function titleOf(outfit: SavedOutfit): string {
+  return primaryGarmentsOf(outfit)
+    .map((g) => CATEGORY_LABELS[g.category])
+    .join(" · ");
+}
+
+function subtitleOf(outfit: SavedOutfit, palette: SanzoPalette | null): string {
+  const base = palette?.nombre ?? outfit.name ?? "outfit";
+  const extraLabels = extraLabelsOf(outfit);
+  return extraLabels.length > 0 ? `${base} · ${extraLabels.join(", ")}` : base;
 }
 
 export function WeekCalendar({
@@ -82,10 +94,7 @@ function DayCell({
 }) {
   const d = parseDay(day.date);
   const weekday = WEEKDAY_LABELS[(d.getUTCDay() + 6) % 7];
-  const primaryGarments = day.outfit ? primaryGarmentsOf(day.outfit) : [];
-  const title = day.outfit
-    ? primaryGarments.map((g) => CATEGORY_LABELS[g.category]).join(" · ")
-    : null;
+  const title = day.outfit ? titleOf(day.outfit) : null;
 
   return (
     <Card
@@ -175,7 +184,7 @@ function DayPickerSheet({
       {day.outfit && (
         <div className="flex items-center justify-between border-b border-border pb-4">
           <Text variant="small" italic tone="secondary" className="font-serif">
-            ara portes {primaryGarmentsOf(day.outfit).map((g) => CATEGORY_LABELS[g.category]).join(" · ")}
+            outfit: {subtitleOf(day.outfit, paletteMap.get(day.outfit.paletteId) ?? null)}
           </Text>
           <TextButton type="button" tone="danger" onClick={handleClear} disabled={pending}>
             treure
@@ -183,7 +192,7 @@ function DayPickerSheet({
         </div>
       )}
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {savedOutfits.map((outfit) => {
           const isAssigned = day.outfit?.id === outfit.id;
           return (
@@ -200,8 +209,11 @@ function DayPickerSheet({
               }`}
             >
               <OutfitCollage garments={allGarmentsOf(outfit)} className="aspect-[3/4] w-full" />
-              <Text variant="small" tone="secondary" className="font-serif leading-tight truncate">
-                {paletteMap.get(outfit.paletteId)?.nombre ?? outfit.name ?? "outfit"}
+              <Text as="span" className="font-serif leading-tight truncate">
+                {titleOf(outfit)}
+              </Text>
+              <Text variant="small" italic tone="secondary" className="font-serif leading-tight truncate">
+                {subtitleOf(outfit, paletteMap.get(outfit.paletteId) ?? null)}
               </Text>
             </button>
           );
