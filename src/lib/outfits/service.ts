@@ -7,10 +7,14 @@ import {
   addOutfitExtras,
   removeOutfitExtra,
   setOutfitFavorite,
-  logWornEvent,
-  undoLastWornEvent,
+  setWornDay,
+  clearWornDay,
+  findWornEventsInRange,
 } from "./repository";
 import { palettes } from "@/lib/colors";
+import { dayKey, addDays, dayToISO } from "./week";
+import type { SavedOutfit, WeekDayPlan, OutfitGarmentRole } from "./types";
+import type { GarmentWithColors } from "@/lib/prendas/types";
 
 export {
   findAllOutfits,
@@ -18,9 +22,56 @@ export {
   addOutfitExtras,
   removeOutfitExtra,
   setOutfitFavorite,
-  logWornEvent,
-  undoLastWornEvent,
 };
+
+interface OutfitWithGarments {
+  id: string;
+  name: string | null;
+  paletteId: number;
+  favorite: boolean;
+  createdAt: Date;
+  garments: { id: string; role: string; garment: GarmentWithColors }[];
+  wornEvents?: { id: string; date: Date }[];
+}
+
+export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
+  return {
+    id: outfit.id,
+    name: outfit.name,
+    paletteId: outfit.paletteId,
+    favorite: outfit.favorite,
+    createdAt: outfit.createdAt,
+    wornEvents: (outfit.wornEvents ?? []).map((w) => ({ id: w.id, date: w.date })),
+    garments: outfit.garments.map((og) => ({
+      id: og.id,
+      role: (og.role === "extra" ? "extra" : "primary") as OutfitGarmentRole,
+      garment: og.garment,
+    })),
+  };
+}
+
+export async function assignOutfitToDay(outfitId: string, date: Date) {
+  return setWornDay(outfitId, dayKey(date));
+}
+
+export async function unassignDay(date: Date) {
+  return clearWornDay(dayKey(date));
+}
+
+/** Always returns exactly 7 entries, Monday first, one per day of the
+ * week that `weekStart` falls in — empty days included as `outfit: null`. */
+export async function findWeekPlan(weekStart: Date): Promise<WeekDayPlan[]> {
+  const start = dayKey(weekStart);
+  const end = addDays(start, 6);
+  const events = await findWornEventsInRange(start, end);
+  const byDay = new Map(events.map((e) => [dayToISO(e.date), e.outfit]));
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const date = dayToISO(addDays(start, i));
+    const outfit = byDay.get(date);
+    return { date, outfit: outfit ? toSavedOutfit(outfit) : null };
+  });
+}
 
 // Outfit.paletteId is an unchecked FK into sanzo-wada.json (no Palette
 // table), so writes must validate it here or orphan palettes slip in.

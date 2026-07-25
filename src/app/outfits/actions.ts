@@ -6,8 +6,8 @@ import {
   addOutfitExtras,
   removeOutfitExtra,
   setOutfitFavorite,
-  logWornEvent,
-  undoLastWornEvent,
+  assignOutfitToDay,
+  unassignDay,
 } from "@/lib/outfits/service";
 import { revalidatePath } from "next/cache";
 
@@ -20,6 +20,7 @@ export async function saveOutfitAction(paletteId: number, garmentIds: string[]) 
 export async function deleteOutfitAction(id: string) {
   await deleteOutfit(id);
   revalidatePath("/armari");
+  revalidatePath("/calendari");
 }
 
 export async function addOutfitExtrasAction(outfitId: string, garmentIds: string[]) {
@@ -37,12 +38,14 @@ export async function setOutfitFavoriteAction(outfitId: string, favorite: boolea
   revalidatePath("/armari");
 }
 
-export async function logWornEventAction(outfitId: string) {
-  await logWornEvent(outfitId);
+export async function assignOutfitToDayAction(outfitId: string, dayISO: string) {
+  await assignOutfitToDay(outfitId, new Date(dayISO));
+  revalidatePath("/calendari");
   revalidatePath("/armari");
 }
 
-export async function undoLastWornEventAction(outfitId: string) {
-  await undoLastWornEvent(outfitId);
+export async function unassignDayAction(dayISO: string) {
+  await unassignDay(new Date(dayISO));
+  revalidatePath("/calendari");
   revalidatePath("/armari");
 }

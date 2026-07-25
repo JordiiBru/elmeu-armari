@@ -1,11 +1,15 @@
 import { prisma } from "@/lib/prisma";
 
-const OUTFIT_INCLUDE = {
+const OUTFIT_GARMENTS_INCLUDE = {
   garments: {
     include: {
       garment: { include: { colors: true, seasons: true } },
     },
   },
+} as const;
+
+const OUTFIT_INCLUDE = {
+  ...OUTFIT_GARMENTS_INCLUDE,
   wornEvents: {
     orderBy: { date: "desc" },
     take: 3,
@@ -80,19 +84,27 @@ export async function setOutfitFavorite(id: string, favorite: boolean) {
   return prisma.outfit.update({ where: { id }, data: { favorite } });
 }
 
-export async function logWornEvent(outfitId: string) {
-  return prisma.wornEvent.create({ data: { outfitId } });
+// `day` must already be truncated to midnight — the unique constraint on
+// WornEvent.date is what enforces "one outfit per calendar day", so an
+// upsert here both assigns an empty day and reassigns an occupied one.
+export async function setWornDay(outfitId: string, day: Date) {
+  return prisma.wornEvent.upsert({
+    where: { date: day },
+    update: { outfitId },
+    create: { outfitId, date: day },
+  });
 }
 
-// Only the most recent entry is undoable — older log entries stay
-// permanent so the log can't be rewritten arbitrarily from the UI.
-export async function undoLastWornEvent(outfitId: string) {
-  const last = await prisma.wornEvent.findFirst({
-    where: { outfitId },
-    orderBy: { date: "desc" },
+export async function clearWornDay(day: Date) {
+  await prisma.wornEvent.deleteMany({ where: { date: day } });
+}
+
+export async function findWornEventsInRange(start: Date, end: Date) {
+  return prisma.wornEvent.findMany({
+    where: { date: { gte: start, lte: end } },
+    orderBy: { date: "asc" },
+    include: { outfit: { include: OUTFIT_GARMENTS_INCLUDE } },
   });
-  if (!last) return;
-  await prisma.wornEvent.delete({ where: { id: last.id } });
 }
 
 export async function deleteOutfit(id: string) {

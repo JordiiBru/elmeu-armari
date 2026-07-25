@@ -36,14 +36,17 @@ model Outfit {
   updatedAt  DateTime        @updatedAt
 }
 
+// One row per calendar day: `date` is a day (time truncated to midnight),
+// not a click timestamp — the unique constraint is what enforces
+// "at most one outfit per day" for the weekly planner.
 model WornEvent {
   id       String   @id @default(cuid())
   outfitId String
   date     DateTime @default(now())
   outfit   Outfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
 
+  @@unique([date])
   @@index([outfitId])
-  @@index([date])
 }
 
 model OutfitGarment {

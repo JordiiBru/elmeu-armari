@@ -49,3 +49,10 @@ export interface SavedOutfit {
     garment: GarmentWithColors;
   }[];
 }
+
+/** One cell of the weekly planner: a calendar day and whatever outfit
+ * (if any) is assigned to it. */
+export interface WeekDayPlan {
+  date: string; // YYYY-MM-DD
+  outfit: SavedOutfit | null;
+}

@@ -1,13 +1,12 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import {
   deleteOutfitAction,
   addOutfitExtrasAction,
   removeOutfitExtraAction,
   setOutfitFavoriteAction,
-  logWornEventAction,
-  undoLastWornEventAction,
 } from "@/app/outfits/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
@@ -56,7 +55,7 @@ function pickableExtras(
 }
 
 /** Tiled photo composite: the outfit's own garments, not swatches/icons. */
-function OutfitCollage({
+export function OutfitCollage({
   garments,
   className,
   thumb = true,
@@ -301,20 +300,6 @@ function SavedOutfitSheet({
     });
   };
 
-  const handleLogWorn = () => {
-    startTransition(async () => {
-      await logWornEventAction(outfit.id);
-      toast.show("marcat com portat avui", "success");
-    });
-  };
-
-  const handleUndoWorn = () => {
-    startTransition(async () => {
-      await undoLastWornEventAction(outfit.id);
-      toast.show("desfet");
-    });
-  };
-
   const handleRemoveExtra = (garmentId: string) => {
     startTransition(async () => {
       await removeOutfitExtraAction(outfit.id, garmentId);
@@ -438,28 +423,21 @@ function SavedOutfitSheet({
           </Text>
         ) : (
           <ul className="flex flex-col gap-1">
-            {outfit.wornEvents.map((ev, i) => (
-              <li key={ev.id} className="flex items-center justify-between gap-3">
+            {outfit.wornEvents.map((ev) => (
+              <li key={ev.id}>
                 <Text as="span" italic tone="secondary" className="font-serif text-sm">
                   {formatWornDate(ev.date)}
                 </Text>
-                {i === 0 && (
-                  <TextButton
-                    type="button"
-                    tone="secondary"
-                    onClick={handleUndoWorn}
-                    disabled={pending}
-                  >
-                    desfer
-                  </TextButton>
-                )}
               </li>
             ))}
           </ul>
         )}
-        <TextButton type="button" onClick={handleLogWorn} disabled={pending} className="self-start">
-          {pending ? "marcant…" : "marcar com portat avui"}
-        </TextButton>
+        <Link
+          href="/calendari"
+          className="self-start font-serif italic type-small text-text-primary hover:text-text-secondary transition-colors"
+        >
+          planificar a la setmana
+        </Link>
       </Stack>
 
       <div className="flex items-center justify-between pt-4 border-t border-border">

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { findAllGarments } from "@/lib/prendas/service";
-import { findAllOutfits } from "@/lib/outfits/service";
+import { findAllOutfits, toSavedOutfit } from "@/lib/outfits/service";
 import { getCurrentSeason } from "@/lib/prendas/season";
 import { palettes } from "@/lib/colors";
 import { ArmariTabs } from "@/components/ArmariTabs";
@@ -18,19 +18,7 @@ export async function ArmariPageBody() {
     findAllOutfits(),
   ]);
 
-  const savedOutfits = outfits.map((o) => ({
-    id: o.id,
-    name: o.name,
-    paletteId: o.paletteId,
-    favorite: o.favorite,
-    wornEvents: o.wornEvents.map((w) => ({ id: w.id, date: w.date })),
-    createdAt: o.createdAt,
-    garments: o.garments.map((og) => ({
-      id: og.id,
-      role: (og.role === "extra" ? "extra" : "primary") as "primary" | "extra",
-      garment: og.garment,
-    })),
-  }));
+  const savedOutfits = outfits.map(toSavedOutfit);
 
   return (
     <PageContainer width="wide">
