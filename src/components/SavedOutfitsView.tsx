@@ -513,12 +513,6 @@ function SavedOutfitSheet({
             {pending ? "assignant…" : "portar-lo avui"}
           </TextButton>
         )}
-        <Link
-          href="/calendari"
-          className="self-start font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors"
-        >
-          veure calendari
-        </Link>
       </Stack>
 
       <div className="flex items-center justify-between pt-4 border-t border-border">

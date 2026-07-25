@@ -5,7 +5,8 @@ import { assignOutfitToDayAction, unassignDayAction } from "@/app/outfits/action
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit, WeekDayPlan } from "@/lib/outfits/types";
 import { OutfitCollage, allGarmentsOf, extraLabelsOf } from "./SavedOutfitsView";
-import { Card, Icon, Sheet, Text, TextButton, useToast, EmptyState } from "@/components/ui";
+import { PieceThumb } from "./PieceThumb";
+import { Card, Icon, Sheet, Stack, Text, TextButton, useToast, EmptyState } from "@/components/ui";
 
 const WEEKDAY_LABELS = ["dl", "dt", "dc", "dj", "dv", "ds", "dg"];
 
@@ -144,6 +145,9 @@ function DayPickerSheet({
   onClose: () => void;
 }) {
   const [pending, startTransition] = useTransition();
+  // Empty days go straight to picking; a day that already has an outfit
+  // opens showing that outfit's pieces, with "canviar" to switch to picking.
+  const [picking, setPicking] = useState(day.outfit === null);
   const toast = useToast();
 
   const label = parseDay(day.date).toLocaleDateString("ca", {
@@ -175,50 +179,151 @@ function DayPickerSheet({
       size="md"
       label={`Planificar ${label}`}
       header={
-        <div className="flex flex-col gap-1">
-          <Text variant="caption">planificar</Text>
-          <h2 className="type-title capitalize">{label}</h2>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <Text variant="caption">planificar</Text>
+            <h2 className="type-title capitalize">{label}</h2>
+          </div>
+          {day.outfit && !picking && (
+            <TextButton type="button" tone="secondary" onClick={() => setPicking(true)}>
+              canviar
+            </TextButton>
+          )}
         </div>
       }
     >
-      {day.outfit && (
-        <div className="flex items-center justify-between border-b border-border pb-4">
-          <Text variant="small" italic tone="secondary" className="font-serif">
-            outfit: {subtitleOf(day.outfit, paletteMap.get(day.outfit.paletteId) ?? null)}
-          </Text>
-          <TextButton type="button" tone="danger" onClick={handleClear} disabled={pending}>
-            treure
-          </TextButton>
-        </div>
+      {day.outfit && !picking ? (
+        <DayOutfitDetails
+          outfit={day.outfit}
+          palette={paletteMap.get(day.outfit.paletteId) ?? null}
+          onClear={handleClear}
+          pending={pending}
+        />
+      ) : (
+        <>
+          {day.outfit && (
+            <TextButton
+              type="button"
+              tone="secondary"
+              onClick={() => setPicking(false)}
+              className="self-start"
+            >
+              ← tornar
+            </TextButton>
+          )}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {savedOutfits.map((outfit) => {
+              const isAssigned = day.outfit?.id === outfit.id;
+              return (
+                <button
+                  key={outfit.id}
+                  type="button"
+                  onClick={() => handleAssign(outfit.id)}
+                  disabled={pending}
+                  aria-pressed={isAssigned}
+                  className={`flex flex-col gap-1 p-1 border transition-colors text-left ${
+                    isAssigned
+                      ? "border-text-primary bg-elevated"
+                      : "border-border hover:border-text-secondary"
+                  }`}
+                >
+                  <OutfitCollage garments={allGarmentsOf(outfit)} className="aspect-[3/4] w-full" />
+                  <Text as="span" className="font-serif leading-tight truncate">
+                    {titleOf(outfit)}
+                  </Text>
+                  <Text
+                    variant="small"
+                    italic
+                    tone="secondary"
+                    className="font-serif leading-tight truncate"
+                  >
+                    {subtitleOf(outfit, paletteMap.get(outfit.paletteId) ?? null)}
+                  </Text>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </Sheet>
+  );
+}
+
+function DayOutfitDetails({
+  outfit,
+  palette,
+  onClear,
+  pending,
+}: {
+  outfit: SavedOutfit;
+  palette: SanzoPalette | null;
+  onClear: () => void;
+  pending: boolean;
+}) {
+  const primary = outfit.garments.filter((g) => g.role === "primary");
+  const extras = outfit.garments.filter((g) => g.role === "extra");
+
+  return (
+    <>
+      {palette && (
+        <Stack gap={2}>
+          <Text variant="caption">paleta</Text>
+          <div className="flex gap-1">
+            {palette.colores.map((color, i) => (
+              <span
+                key={i}
+                className="inline-block h-6 w-6"
+                style={{ backgroundColor: color }}
+                title={color}
+              />
+            ))}
+          </div>
+        </Stack>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {savedOutfits.map((outfit) => {
-          const isAssigned = day.outfit?.id === outfit.id;
-          return (
-            <button
-              key={outfit.id}
-              type="button"
-              onClick={() => handleAssign(outfit.id)}
-              disabled={pending}
-              aria-pressed={isAssigned}
-              className={`flex flex-col gap-1 p-1 border transition-colors text-left ${
-                isAssigned
-                  ? "border-text-primary bg-elevated"
-                  : "border-border hover:border-text-secondary"
-              }`}
-            >
-              <OutfitCollage garments={allGarmentsOf(outfit)} className="aspect-[3/4] w-full" />
-              <Text as="span" className="font-serif leading-tight truncate">
-                {titleOf(outfit)}
+      <Stack gap={2}>
+        <Text variant="caption">peces</Text>
+        <div className="flex flex-wrap gap-3">
+          {primary.map((og) => (
+            <div key={og.garment.id} className="flex w-16 flex-col items-center gap-1">
+              <PieceThumb garment={og.garment} className="h-16 w-16" />
+              <Text
+                variant="small"
+                tone="secondary"
+                className="font-serif text-center leading-tight"
+              >
+                {CATEGORY_LABELS[og.garment.category]}
               </Text>
-              <Text variant="small" italic tone="secondary" className="font-serif leading-tight truncate">
-                {subtitleOf(outfit, paletteMap.get(outfit.paletteId) ?? null)}
-              </Text>
-            </button>
-          );
-        })}
+            </div>
+          ))}
+        </div>
+      </Stack>
+
+      {extras.length > 0 && (
+        <Stack gap={2}>
+          <Text variant="caption">sabates i accessoris</Text>
+          <div className="flex flex-wrap gap-3">
+            {extras.map((og) => (
+              <div key={og.garment.id} className="flex w-16 flex-col items-center gap-1">
+                <PieceThumb garment={og.garment} className="h-16 w-16" />
+                <Text
+                  variant="small"
+                  tone="secondary"
+                  className="font-serif text-center leading-tight"
+                >
+                  {CATEGORY_LABELS[og.garment.category]}
+                </Text>
+              </div>
+            ))}
+          </div>
+        </Stack>
+      )}
+
+      <div className="flex items-center justify-end pt-4 border-t border-border">
+        <TextButton type="button" tone="danger" onClick={onClear} disabled={pending}>
+          treure
+        </TextButton>
       </div>
-    </Sheet>
+    </>
   );
 }
