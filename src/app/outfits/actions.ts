@@ -3,6 +3,7 @@
 import {
   saveOutfit,
   deleteOutfit,
+  duplicateOutfit,
   addOutfitExtras,
   removeOutfitExtra,
   setOutfitFavorite,
@@ -21,6 +22,12 @@ export async function deleteOutfitAction(id: string) {
   await deleteOutfit(id);
   revalidatePath("/armari");
   revalidatePath("/calendari");
+}
+
+export async function duplicateOutfitAction(outfitId: string) {
+  const outfit = await duplicateOutfit(outfitId);
+  revalidatePath("/armari");
+  return { id: outfit.id };
 }
 
 export async function addOutfitExtrasAction(outfitId: string, garmentIds: string[]) {

@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import {
   deleteOutfitAction,
+  duplicateOutfitAction,
   addOutfitExtrasAction,
   removeOutfitExtraAction,
   setOutfitFavoriteAction,
@@ -42,6 +43,15 @@ function formatWornDate(date: Date): string {
   if (days <= 0) return "avui";
   if (days === 1) return "ahir";
   return `fa ${days} dies`;
+}
+
+/** Deduped category labels of an outfit's extras — used to tell variants
+ * of the same core+palette apart in the grid ("amb Sabates"). */
+function extraLabelsOf(outfit: SavedOutfit): string[] {
+  const labels = outfit.garments
+    .filter((g) => g.role === "extra")
+    .map((g) => CATEGORY_LABELS[g.garment.category]);
+  return Array.from(new Set(labels));
 }
 
 function pickableExtras(
@@ -176,6 +186,10 @@ export function SavedOutfitsView({
             setExtrasPickerOpen(false);
           }}
           onOpenExtras={() => setExtrasPickerOpen(true)}
+          onDuplicated={(newOutfitId) => {
+            setOpenOutfitId(newOutfitId);
+            setExtrasPickerOpen(false);
+          }}
         />
       )}
 
@@ -248,7 +262,9 @@ function SavedOutfitCard({
     .filter((g) => g.role === "primary")
     .map((g) => CATEGORY_LABELS[g.garment.category])
     .join(" · ");
-  const subtitle = palette?.nombre ?? outfit.name ?? `outfit #${index + 1}`;
+  const base = palette?.nombre ?? outfit.name ?? `outfit #${index + 1}`;
+  const extraLabels = extraLabelsOf(outfit);
+  const subtitle = extraLabels.length > 0 ? `${base} · ${extraLabels.join(", ")}` : base;
 
   return (
     <Card
@@ -291,11 +307,13 @@ function SavedOutfitSheet({
   palette,
   onClose,
   onOpenExtras,
+  onDuplicated,
 }: {
   outfit: SavedOutfit;
   palette: SanzoPalette | null;
   onClose: () => void;
   onOpenExtras: () => void;
+  onDuplicated: (newOutfitId: string) => void;
 }) {
   const [pending, startTransition] = useTransition();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -324,6 +342,14 @@ function SavedOutfitSheet({
       await deleteOutfitAction(outfit.id);
       toast.show("outfit eliminat");
       onClose();
+    });
+  };
+
+  const handleDuplicate = () => {
+    startTransition(async () => {
+      const variant = await duplicateOutfitAction(outfit.id);
+      toast.show("variant creada — afegeix-hi altres sabates", "success");
+      onDuplicated(variant.id);
     });
   };
 
@@ -419,6 +445,15 @@ function SavedOutfitSheet({
             ))}
           </div>
         )}
+        <TextButton
+          type="button"
+          tone="secondary"
+          onClick={handleDuplicate}
+          disabled={pending}
+          className="self-start"
+        >
+          duplicar amb altres sabates
+        </TextButton>
       </Stack>
 
       <Stack gap={2}>

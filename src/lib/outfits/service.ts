@@ -2,6 +2,7 @@ import {
   createOutfit,
   findAllOutfits,
   findOutfitByGarmentsAndPalette,
+  findOutfitById,
   deleteOutfit,
   countOutfits,
   addOutfitExtras,
@@ -91,4 +92,23 @@ export async function saveOutfit(data: {
   const count = await countOutfits();
   const name = `Outfit #${count + 1}`;
   return createOutfit({ ...data, name });
+}
+
+// Same palette + primary garments as `saveOutfit` normally dedups into one
+// row (extras don't distinguish an outfit) — this deliberately bypasses
+// that dedup to let a saved outfit exist as several variants (e.g. same
+// core with different shoes), each independently plannable in /calendari.
+export async function duplicateOutfit(outfitId: string) {
+  const source = await findOutfitById(outfitId);
+  if (!source) throw new Error(`Outfit not found: ${outfitId}`);
+
+  const garmentIds = source.garments
+    .filter((g) => g.role === "primary")
+    .map((g) => g.garmentId);
+  const count = await countOutfits();
+  return createOutfit({
+    paletteId: source.paletteId,
+    garmentIds,
+    name: `Outfit #${count + 1}`,
+  });
 }

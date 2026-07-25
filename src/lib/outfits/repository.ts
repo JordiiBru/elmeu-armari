@@ -50,6 +50,10 @@ export async function findOutfitByGarmentsAndPalette(
   }) ?? null;
 }
 
+export async function findOutfitById(id: string) {
+  return prisma.outfit.findUnique({ where: { id }, include: OUTFIT_GARMENTS_INCLUDE });
+}
+
 export async function createOutfit(data: {
   name?: string;
   paletteId: number;
