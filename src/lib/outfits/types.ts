@@ -40,7 +40,8 @@ export interface SavedOutfit {
   name: string | null;
   paletteId: number;
   favorite: boolean;
-  lastWornAt: Date | null;
+  /** Most recent first, capped to a handful of entries. */
+  wornEvents: { id: string; date: Date }[];
   createdAt: Date;
   garments: {
     id: string;

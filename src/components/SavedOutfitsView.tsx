@@ -1,110 +1,80 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useMemo, useState, useTransition } from "react";
 import {
   deleteOutfitAction,
   addOutfitExtrasAction,
   removeOutfitExtraAction,
   setOutfitFavoriteAction,
   logWornEventAction,
+  undoLastWornEventAction,
 } from "@/app/outfits/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { PieceThumb } from "./PieceThumb";
-import { IconButton, Sheet, TextButton, Text, useToast, Icon, EmptyState } from "@/components/ui";
+import { Card, Icon, Sheet, Stack, Text, TextButton, useToast, EmptyState } from "@/components/ui";
 
 // Categories whose pieces are excluded from the colour engine but that
 // the user still wants to record on a saved outfit.
 const EXTRA_CATEGORIES = new Set(["SHOES", "SOCKS"]);
 
-type SavedGarment = SavedOutfit["garments"][number];
-
-interface SavedEntry {
-  outfitId: string;
-  name: string | null;
-  palette: SanzoPalette | null;
-  extras: SavedGarment[];
-  favorite: boolean;
-  lastWornAt: Date | null;
-}
+type WornEvent = SavedOutfit["wornEvents"][number];
 
 /**
  * Never-worn outfits rank before any dated one; among dated ones the
- * oldest date wins. Used both to pick the "menys portat" suggestion
- * and to render "fa X dies" / "mai portat".
+ * oldest last-worn date wins. Used both to pick the "menys portat"
+ * suggestion and to render "fa X dies" / "mai portat".
  */
-function wornRank(date: Date | null): number {
-  return date === null ? -Infinity : date.getTime();
+function wornRank(events: WornEvent[]): number {
+  return events.length === 0 ? -Infinity : events[0].date.getTime();
 }
 
-function formatLastWorn(date: Date | null): string {
-  if (date === null) return "mai portat";
-  const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+function formatLastWorn(events: WornEvent[]): string {
+  if (events.length === 0) return "mai portat";
+  const days = Math.floor((Date.now() - events[0].date.getTime()) / (1000 * 60 * 60 * 24));
   if (days <= 0) return "portat avui";
   if (days === 1) return "portat fa 1 dia";
   return `portat fa ${days} dies`;
 }
 
-interface SavedGroup {
-  garmentKey: string;
-  primaryGarments: SavedGarment[];
-  entries: SavedEntry[];
-  favorite: boolean;
+function formatWornDate(date: Date): string {
+  const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+  if (days <= 0) return "avui";
+  if (days === 1) return "ahir";
+  return `fa ${days} dies`;
 }
 
-function groupOutfits(outfits: SavedOutfit[], palettes: SanzoPalette[]): SavedGroup[] {
-  const paletteMap = new Map(palettes.map((p) => [p.id, p]));
-  const groups = new Map<string, SavedGroup>();
-
-  for (const outfit of outfits) {
-    const primary = outfit.garments.filter((g) => g.role === "primary");
-    const extras = outfit.garments.filter((g) => g.role === "extra");
-    const key = primary.map((g) => g.garment.id).sort().join(",");
-    const existing = groups.get(key);
-    const entry: SavedEntry = {
-      outfitId: outfit.id,
-      name: outfit.name,
-      palette: paletteMap.get(outfit.paletteId) ?? null,
-      extras,
-      favorite: outfit.favorite,
-      lastWornAt: outfit.lastWornAt,
-    };
-
-    if (existing) {
-      existing.entries.push(entry);
-      existing.favorite = existing.favorite || entry.favorite;
-    } else {
-      groups.set(key, {
-        garmentKey: key,
-        primaryGarments: primary,
-        entries: [entry],
-        favorite: entry.favorite,
-      });
-    }
-  }
-
-  for (const group of groups.values()) {
-    group.entries.sort((a, b) => Number(b.favorite) - Number(a.favorite));
-  }
-
-  return Array.from(groups.values()).sort(
-    (a, b) => Number(b.favorite) - Number(a.favorite),
-  );
-}
-
-function GarmentThumb({
-  garment,
-  muted = false,
+/** Tiled photo composite: the outfit's own garments, not swatches/icons. */
+function OutfitCollage({
+  garments,
+  className,
+  thumb = true,
 }: {
-  garment: GarmentWithColors;
-  muted?: boolean;
+  garments: GarmentWithColors[];
+  className?: string;
+  thumb?: boolean;
 }) {
+  if (garments.length === 0) {
+    return <div className={`bg-surface ${className ?? ""}`} />;
+  }
+  if (garments.length === 1) {
+    return <PieceThumb garment={garments[0]} thumb={thumb} className={className} />;
+  }
+  const shown = garments.slice(0, 4);
   return (
-    <PieceThumb
-      garment={garment}
-      className={`h-16 w-16 flex-shrink-0 ${muted ? "opacity-60" : ""}`}
-    />
+    <div
+      className={`grid grid-cols-2 gap-0.5 ${shown.length > 2 ? "grid-rows-2" : ""} ${className ?? ""}`}
+    >
+      {shown.map((g, i) => (
+        <PieceThumb
+          key={g.id}
+          garment={g}
+          thumb={thumb}
+          className={`h-full w-full ${shown.length === 3 && i === 0 ? "row-span-2" : ""}`}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -117,23 +87,25 @@ export function SavedOutfitsView({
   palettes: SanzoPalette[];
   allGarments: GarmentWithColors[];
 }) {
-  const groups = useMemo(() => groupOutfits(outfits, palettes), [outfits, palettes]);
+  const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
 
   const extraCandidates = useMemo(
     () => allGarments.filter((g) => EXTRA_CATEGORIES.has(g.category)),
     [allGarments],
   );
 
+  const [openOutfitId, setOpenOutfitId] = useState<string | null>(null);
+
   // "Menys portat": the outfit most overdue for a rewear, surfaced as a
-  // gentle daily-use nudge rather than a strict ranking of the whole list.
+  // gentle daily-use nudge. Only worth a banner once there's a choice.
   const suggestedOutfitId = useMemo(() => {
-    if (outfits.length === 0) return null;
+    if (outfits.length < 2) return null;
     return outfits.reduce((least, o) =>
-      wornRank(o.lastWornAt) < wornRank(least.lastWornAt) ? o : least,
+      wornRank(o.wornEvents) < wornRank(least.wornEvents) ? o : least,
     ).id;
   }, [outfits]);
 
-  if (groups.length === 0) {
+  if (outfits.length === 0) {
     return (
       <EmptyState
         title="encara no hi ha res desat."
@@ -147,240 +119,370 @@ export function SavedOutfitsView({
     );
   }
 
+  const openOutfit = outfits.find((o) => o.id === openOutfitId) ?? null;
+  const suggestedOutfit = outfits.find((o) => o.id === suggestedOutfitId) ?? null;
+
   return (
-    <div className="flex flex-col divide-y divide-border">
-      {groups.map((group, i) => (
-        <SavedGroupCard
-          key={group.garmentKey}
-          group={group}
-          index={i}
-          extraCandidates={extraCandidates}
-          suggestedOutfitId={suggestedOutfitId}
+    <div className="flex flex-col gap-10">
+      {suggestedOutfit && (
+        <SuggestionBanner
+          outfit={suggestedOutfit}
+          palette={paletteMap.get(suggestedOutfit.paletteId) ?? null}
+          onOpen={() => setOpenOutfitId(suggestedOutfit.id)}
         />
-      ))}
+      )}
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-16">
+        {outfits.map((outfit, i) => (
+          <SavedOutfitCard
+            key={outfit.id}
+            outfit={outfit}
+            palette={paletteMap.get(outfit.paletteId) ?? null}
+            index={i}
+            suggested={outfit.id === suggestedOutfitId}
+            onOpen={() => setOpenOutfitId(outfit.id)}
+          />
+        ))}
+      </div>
+
+      {openOutfit && (
+        <SavedOutfitSheet
+          outfit={openOutfit}
+          palette={paletteMap.get(openOutfit.paletteId) ?? null}
+          extraCandidates={extraCandidates}
+          onClose={() => setOpenOutfitId(null)}
+        />
+      )}
     </div>
   );
 }
 
-function SavedGroupCard({
-  group,
-  index,
-  extraCandidates,
-  suggestedOutfitId,
+function SuggestionBanner({
+  outfit,
+  palette,
+  onOpen,
 }: {
-  group: SavedGroup;
-  index: number;
-  extraCandidates: GarmentWithColors[];
-  suggestedOutfitId: string | null;
+  outfit: SavedOutfit;
+  palette: SanzoPalette | null;
+  onOpen: () => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const primaryGarments = outfit.garments
+    .filter((g) => g.role === "primary")
+    .map((g) => g.garment);
+  const title = primaryGarments.map((g) => CATEGORY_LABELS[g.category]).join(" · ");
 
   return (
-    <div className="py-8">
-      <button
-        type="button"
-        onClick={() => setExpanded((v) => !v)}
-        className="group w-full flex items-center gap-4 text-left outline-none"
-        aria-expanded={expanded}
-      >
-        <div className="flex gap-2 flex-shrink-0">
-          {group.primaryGarments.map((og) => (
-            <GarmentThumb key={og.garment.id} garment={og.garment} />
-          ))}
-        </div>
-
-        <div className="flex-1 min-w-0 flex items-baseline justify-between gap-4">
-          <div className="flex flex-col gap-0.5">
-            <span className="font-serif text-base leading-tight text-text-primary">
-              {group.primaryGarments
-                .map((og) => CATEGORY_LABELS[og.garment.category])
-                .join(" · ")}
-            </span>
-            <span className="font-serif italic text-xs text-text-secondary">
-              {group.entries.length}{" "}
-              {group.entries.length === 1 ? "paleta desada" : "paletes desades"}
-            </span>
-          </div>
-          <span className="inline-flex items-center gap-3 shrink-0">
-            <span className="type-caption tabular-nums">
-              n{String(index + 1).padStart(3, "0")}
-            </span>
-            <span
-              className={`inline-flex text-text-secondary transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] ${
-                expanded ? "rotate-180" : ""
-              }`}
-            >
-              <Icon name="chevron-down" size={12} />
-            </span>
-          </span>
-        </div>
-      </button>
-
-      <div
-        className={`collapse-panel ${expanded ? "mt-6" : ""}`}
-        data-open={expanded}
-      >
-        <div className="flex flex-col gap-4">
-          {group.entries.map((entry) => (
-            <SavedPaletteRow
-              key={entry.outfitId}
-              entry={entry}
-              extraCandidates={extraCandidates}
-              suggested={entry.outfitId === suggestedOutfitId}
-            />
-          ))}
-        </div>
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group flex items-center gap-4 border border-border p-4 text-left outline-none transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:border-text-primary focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
+      <OutfitCollage garments={primaryGarments} className="h-16 w-16 flex-shrink-0" />
+      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+        <Text variant="caption">suggerit — el que fa més temps que no portes</Text>
+        <Text as="span" className="font-serif truncate">
+          {title || (palette?.nombre ?? "outfit")}
+        </Text>
+        <Text variant="small" italic tone="secondary" className="font-serif">
+          {formatLastWorn(outfit.wornEvents)}
+        </Text>
       </div>
-    </div>
+      <span className="flex-shrink-0 text-text-secondary transition-colors group-hover:text-text-primary">
+        <Icon name="arrow-right" size={14} />
+      </span>
+    </button>
   );
 }
 
-function SavedPaletteRow({
-  entry,
-  extraCandidates,
+function SavedOutfitCard({
+  outfit,
+  palette,
+  index,
   suggested,
+  onOpen,
 }: {
-  entry: SavedEntry;
-  extraCandidates: GarmentWithColors[];
+  outfit: SavedOutfit;
+  palette: SanzoPalette | null;
+  index: number;
   suggested: boolean;
+  onOpen: () => void;
+}) {
+  const primaryGarments = outfit.garments
+    .filter((g) => g.role === "primary")
+    .map((g) => g.garment);
+  const title = primaryGarments.map((g) => CATEGORY_LABELS[g.category]).join(" · ");
+  const subtitle = palette?.nombre ?? outfit.name ?? `outfit #${index + 1}`;
+
+  return (
+    <Card
+      as="button"
+      type="button"
+      interactive="clickable"
+      onClick={onOpen}
+      data-testid="saved-outfit-card"
+    >
+      <div className="relative aspect-[3/4] w-full overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0">
+        <OutfitCollage garments={primaryGarments} className="h-full w-full" />
+        {outfit.favorite && (
+          <span className="absolute top-2 right-2 inline-flex bg-elevated p-1">
+            <Icon name="star" size={12} className="fill-current text-text-primary" />
+          </span>
+        )}
+        {suggested && (
+          <span className="absolute bottom-2 left-2 type-caption bg-elevated px-1.5 py-0.5">
+            suggerit
+          </span>
+        )}
+      </div>
+      <div className="flex items-baseline justify-between pt-3">
+        <Text as="span" className="font-serif leading-tight">
+          {title}
+        </Text>
+        <Text variant="caption" tabular>
+          n{String(index + 1).padStart(3, "0")}
+        </Text>
+      </div>
+      <Text variant="small" italic tone="secondary" className="font-serif mt-0.5 truncate">
+        {subtitle}
+      </Text>
+    </Card>
+  );
+}
+
+function SavedOutfitSheet({
+  outfit,
+  palette,
+  extraCandidates,
+  onClose,
+}: {
+  outfit: SavedOutfit;
+  palette: SanzoPalette | null;
+  extraCandidates: GarmentWithColors[];
+  onClose: () => void;
 }) {
   const [pending, startTransition] = useTransition();
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const toast = useToast();
 
-  const handleDelete = () => {
-    startTransition(async () => {
-      await deleteOutfitAction(entry.outfitId);
-      toast.show("outfit eliminat");
-    });
-  };
+  const primary = outfit.garments.filter((g) => g.role === "primary");
+  const extras = outfit.garments.filter((g) => g.role === "extra");
+  const title = primary.map((og) => CATEGORY_LABELS[og.garment.category]).join(" · ");
+
+  const existingExtraIds = new Set(extras.map((e) => e.garment.id));
+  const pickableCandidates = extraCandidates.filter((g) => !existingExtraIds.has(g.id));
 
   const handleToggleFavorite = () => {
     startTransition(async () => {
-      await setOutfitFavoriteAction(entry.outfitId, !entry.favorite);
-      toast.show(entry.favorite ? "tret de preferits" : "afegit a preferits");
+      await setOutfitFavoriteAction(outfit.id, !outfit.favorite);
+      toast.show(outfit.favorite ? "tret de preferits" : "afegit a preferits");
     });
   };
 
   const handleLogWorn = () => {
     startTransition(async () => {
-      await logWornEventAction(entry.outfitId);
+      await logWornEventAction(outfit.id);
       toast.show("marcat com portat avui", "success");
+    });
+  };
+
+  const handleUndoWorn = () => {
+    startTransition(async () => {
+      await undoLastWornEventAction(outfit.id);
+      toast.show("desfet");
     });
   };
 
   const handleRemoveExtra = (garmentId: string) => {
     startTransition(async () => {
-      await removeOutfitExtraAction(entry.outfitId, garmentId);
+      await removeOutfitExtraAction(outfit.id, garmentId);
       toast.show("extra tret");
     });
   };
 
-  const existingExtraIds = new Set(entry.extras.map((e) => e.garment.id));
-  const pickableCandidates = extraCandidates.filter(
-    (g) => !existingExtraIds.has(g.id),
-  );
+  const handleDelete = () => {
+    startTransition(async () => {
+      await deleteOutfitAction(outfit.id);
+      toast.show("outfit eliminat");
+      onClose();
+    });
+  };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="grid grid-cols-[auto_1fr_auto] gap-3 items-center">
-        {entry.palette ? (
-          <div className="flex gap-0 shrink-0">
-            {entry.palette.colores.map((color, i) => (
+    <Sheet
+      onClose={onClose}
+      size="md"
+      label={`Outfit ${title}`}
+      media={
+        <OutfitCollage
+          garments={primary.map((og) => og.garment)}
+          thumb={false}
+          className="h-full w-full"
+        />
+      }
+      mediaHeight="h-40"
+      header={
+        <Stack gap={1}>
+          <Text variant="caption">outfit desat</Text>
+          <h2 className="type-title">{title}</h2>
+          {palette && (
+            <Text variant="small" italic tone="secondary" className="font-serif">
+              {palette.nombre}
+            </Text>
+          )}
+        </Stack>
+      }
+    >
+      {palette && (
+        <Stack gap={2}>
+          <Text variant="caption">paleta</Text>
+          <div className="flex gap-1">
+            {palette.colores.map((color, i) => (
               <span
                 key={i}
-                className="inline-block h-5 w-5"
+                className="inline-block h-6 w-6"
                 style={{ backgroundColor: color }}
                 title={color}
               />
             ))}
           </div>
-        ) : (
-          <div />
-        )}
-        <span className="font-serif italic text-sm text-text-secondary min-w-0 truncate">
-          {entry.palette?.nombre ?? `paleta #${entry.outfitId}`}
-        </span>
-        <span className="flex items-center gap-1 shrink-0">
-          <IconButton
-            onClick={handleLogWorn}
-            disabled={pending}
-            label="Marcar com portat avui"
-            size="sm"
-          >
-            <Icon name="check" size={14} />
-          </IconButton>
-          <IconButton
-            onClick={handleToggleFavorite}
-            disabled={pending}
-            label={entry.favorite ? "Treure de preferits" : "Afegir a preferits"}
-            aria-pressed={entry.favorite}
-            size="sm"
-            className={entry.favorite ? "text-text-primary" : ""}
-          >
-            <Icon
-              name="star"
-              size={14}
-              className={entry.favorite ? "fill-current" : "fill-none"}
-            />
-          </IconButton>
-          <IconButton
-            onClick={handleDelete}
-            disabled={pending}
-            label="Eliminar outfit"
-            size="sm"
-          >
-            <Icon name="close" size={14} />
-          </IconButton>
-        </span>
-      </div>
+        </Stack>
+      )}
 
-      <div className="flex items-center gap-3 pl-1">
-        <span className="font-serif italic text-xs text-text-secondary">
-          {formatLastWorn(entry.lastWornAt)}
-        </span>
-        {suggested && (
-          <span className="type-caption text-text-primary">
-            suggerit — el que fa més temps que no portes
-          </span>
-        )}
-      </div>
-
-      <div className="flex items-end justify-between gap-3 pl-1">
-        <div className="flex flex-wrap gap-2">
-          {entry.extras.map((og) => (
-            <div key={og.garment.id} className="relative group/extra">
-              <GarmentThumb garment={og.garment} muted />
-              <button
-                type="button"
-                onClick={() => handleRemoveExtra(og.garment.id)}
-                disabled={pending}
-                aria-label={`Treure ${CATEGORY_LABELS[og.garment.category]}`}
-                className="absolute -top-1 -right-1 bg-background border border-border rounded-full p-0.5 opacity-0 group-hover/extra:opacity-100 focus:opacity-100 transition-opacity"
+      <Stack gap={2}>
+        <Text variant="caption">peces</Text>
+        <div className="flex flex-wrap gap-3">
+          {primary.map((og) => (
+            <div key={og.garment.id} className="flex w-16 flex-col items-center gap-1">
+              <PieceThumb garment={og.garment} className="h-16 w-16" />
+              <Text
+                variant="small"
+                tone="secondary"
+                className="font-serif text-center leading-tight"
               >
-                <Icon name="close" size={10} />
-              </button>
+                {CATEGORY_LABELS[og.garment.category]}
+              </Text>
             </div>
           ))}
         </div>
+      </Stack>
+
+      <Stack gap={2}>
+        <div className="flex items-baseline justify-between">
+          <Text variant="caption">sabates i accessoris</Text>
+          <TextButton
+            type="button"
+            tone="secondary"
+            onClick={() => setPickerOpen(true)}
+            disabled={pending || pickableCandidates.length === 0}
+          >
+            + afegir
+          </TextButton>
+        </div>
+        {extras.length === 0 ? (
+          <Text variant="small" italic tone="secondary" className="font-serif">
+            cap.
+          </Text>
+        ) : (
+          <div className="flex flex-wrap gap-3">
+            {extras.map((og) => (
+              <div
+                key={og.garment.id}
+                className="group/extra relative flex w-16 flex-col items-center gap-1"
+              >
+                <PieceThumb garment={og.garment} className="h-16 w-16" />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveExtra(og.garment.id)}
+                  disabled={pending}
+                  aria-label={`Treure ${CATEGORY_LABELS[og.garment.category]}`}
+                  className="absolute -top-1 -right-1 rounded-full border border-border bg-background p-0.5 opacity-0 transition-opacity focus:opacity-100 group-hover/extra:opacity-100"
+                >
+                  <Icon name="close" size={10} />
+                </button>
+                <Text
+                  variant="small"
+                  tone="secondary"
+                  className="font-serif text-center leading-tight"
+                >
+                  {CATEGORY_LABELS[og.garment.category]}
+                </Text>
+              </div>
+            ))}
+          </div>
+        )}
+      </Stack>
+
+      <Stack gap={2}>
+        <Text variant="caption">portat</Text>
+        {outfit.wornEvents.length === 0 ? (
+          <Text variant="small" italic tone="secondary" className="font-serif">
+            mai portat.
+          </Text>
+        ) : (
+          <ul className="flex flex-col gap-1">
+            {outfit.wornEvents.map((ev, i) => (
+              <li key={ev.id} className="flex items-center justify-between gap-3">
+                <Text as="span" italic tone="secondary" className="font-serif text-sm">
+                  {formatWornDate(ev.date)}
+                </Text>
+                {i === 0 && (
+                  <TextButton
+                    type="button"
+                    tone="secondary"
+                    onClick={handleUndoWorn}
+                    disabled={pending}
+                  >
+                    desfer
+                  </TextButton>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        <TextButton type="button" onClick={handleLogWorn} disabled={pending} className="self-start">
+          {pending ? "marcant…" : "marcar com portat avui"}
+        </TextButton>
+      </Stack>
+
+      <div className="flex items-center justify-between pt-4 border-t border-border">
         <TextButton
           type="button"
           tone="secondary"
-          onClick={() => setPickerOpen(true)}
-          disabled={pending || pickableCandidates.length === 0}
+          onClick={handleToggleFavorite}
+          disabled={pending}
         >
-          + sabates / accessoris
+          {outfit.favorite ? "treure de preferits" : "afegir a preferits"}
         </TextButton>
+        {confirmingDelete ? (
+          <div className="flex items-center gap-4">
+            <TextButton
+              type="button"
+              tone="secondary"
+              onClick={() => setConfirmingDelete(false)}
+              disabled={pending}
+            >
+              cancel·lar
+            </TextButton>
+            <TextButton type="button" tone="danger" onClick={handleDelete} disabled={pending}>
+              {pending ? "eliminant…" : "sí, eliminar"}
+            </TextButton>
+          </div>
+        ) : (
+          <TextButton type="button" tone="danger" onClick={() => setConfirmingDelete(true)}>
+            eliminar
+          </TextButton>
+        )}
       </div>
 
       {pickerOpen && (
         <ExtrasPicker
-          outfitId={entry.outfitId}
+          outfitId={outfit.id}
           candidates={pickableCandidates}
           onClose={() => setPickerOpen(false)}
         />
       )}
-    </div>
+    </Sheet>
   );
 }
 

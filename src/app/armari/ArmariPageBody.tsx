@@ -23,7 +23,7 @@ export async function ArmariPageBody() {
     name: o.name,
     paletteId: o.paletteId,
     favorite: o.favorite,
-    lastWornAt: o.wornEvents[0]?.date ?? null,
+    wornEvents: o.wornEvents.map((w) => ({ id: w.id, date: w.date })),
     createdAt: o.createdAt,
     garments: o.garments.map((og) => ({
       id: og.id,

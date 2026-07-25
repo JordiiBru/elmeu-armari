@@ -8,7 +8,7 @@ const OUTFIT_INCLUDE = {
   },
   wornEvents: {
     orderBy: { date: "desc" },
-    take: 1,
+    take: 3,
   },
 } as const;
 
@@ -82,6 +82,17 @@ export async function setOutfitFavorite(id: string, favorite: boolean) {
 
 export async function logWornEvent(outfitId: string) {
   return prisma.wornEvent.create({ data: { outfitId } });
+}
+
+// Only the most recent entry is undoable — older log entries stay
+// permanent so the log can't be rewritten arbitrarily from the UI.
+export async function undoLastWornEvent(outfitId: string) {
+  const last = await prisma.wornEvent.findFirst({
+    where: { outfitId },
+    orderBy: { date: "desc" },
+  });
+  if (!last) return;
+  await prisma.wornEvent.delete({ where: { id: last.id } });
 }
 
 export async function deleteOutfit(id: string) {
