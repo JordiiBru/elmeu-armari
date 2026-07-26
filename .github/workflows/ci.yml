@@ -9,11 +9,16 @@ name: CI
 #
 # A push to main must never trigger more than that one image build, so this
 # workflow deliberately has no `push` trigger. E2E (Playwright) and
-# Lighthouse run locally, not here — private repo, Actions minutes are the
-# scarce resource.
+# Lighthouse run locally, not here — Actions minutes are cheap on a public
+# repo, but this stays lean because it's all this PR gate actually needs.
 on:
   pull_request:
     branches: [main]
+
+# Least privilege: this job only reads the checkout and posts no comments,
+# statuses, or packages. Matters more once fork PRs run this workflow too.
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.ref }}

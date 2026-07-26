@@ -27,7 +27,7 @@ A personal wardrobe manager. Catalogue your clothes with colours and photos, the
 
 | Layer | Choice | Notes |
 |---|---|---|
-| Framework | **Next.js 16.2** | App Router, React Server Components, Turbopack. Read `AGENTS.md` — this is not the Next.js from your training data. |
+| Framework | **Next.js 16.2** | App Router, React Server Components, Turbopack. |
 | Runtime | **React 19** | Server Actions, `useActionState`. **No `useEffect` for data fetching.** |
 | Styling | **Tailwind CSS v4** | No config file; theming via CSS custom properties and `@theme`. |
 | DB | **SQLite** | Single file, mounted volume in prod. |
@@ -282,7 +282,7 @@ Paste this into ChatGPT / Claude / Gemini with the raw photo to get a catalogue-
 
 ## CI/CD
 
-- **CI** (`.github/workflows/ci.yml`, PRs only) — lint + typecheck + `npm run test:unit` + build. Build requires `prisma migrate deploy` first because `/armari` reads the DB. No Docker build, no Trivy/Lighthouse/e2e in CI — those run locally to save Actions minutes on a private repo.
+- **CI** (`.github/workflows/ci.yml`, PRs only) — lint + typecheck + `npm run test:unit` + build. Build requires `prisma migrate deploy` first because `/armari` reads the DB. No Docker build, no Trivy/Lighthouse/e2e in CI — those run locally for now.
 - **Release** (`.github/workflows/release.yml`, on push to `main`) — auto-tags semver from conventional commits, creates a GitHub Release, then builds a Docker image and pushes to `ghcr.io/jordiibru/elmeu-armari` tagged with that version and `latest`.
 - **Renovate** — weekly updates on Mondays before 07:00, immediate automerge for security advisories, grouped for the Next.js / Prisma / Tailwind / GitHub Actions ecosystems, digest pinning for base Docker images.
 
@@ -292,7 +292,9 @@ Paste this into ChatGPT / Claude / Gemini with the raw photo to get a catalogue-
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for local setup, branch naming, PR flow and code conventions.
 
-If you are (or run) an AI agent, read [`CLAUDE.md`](./CLAUDE.md) and [`AGENTS.md`](./AGENTS.md) first — they explain non-obvious constraints of this codebase.
+If you are (or run) an AI agent, read [`AGENTS.md`](./AGENTS.md) first — it explains non-obvious constraints of this codebase.
+
+Found a security issue? See [`SECURITY.md`](./SECURITY.md) — please don't open a public issue.
 
 ---
 
