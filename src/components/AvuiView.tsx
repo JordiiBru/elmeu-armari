@@ -40,47 +40,59 @@ export function AvuiView({
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [almostOpen, setAlmostOpen] = useState(false);
-  const [wearingId, setWearingId] = useState<string | null>(null);
   // The server round-trip (revalidatePath) eventually refreshes
   // `todayOutfitId`, but that's not instant enough to feel like a
-  // response to the tap — this flips the card the moment the action
+  // response to the tap — this flips the button the moment the action
   // resolves, without waiting for the route to re-render.
   const [justWornId, setJustWornId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const toast = useToast();
   const effectiveTodayId = justWornId ?? todayOutfitId;
+  const activeOutfit = readyOutfits[activeIndex] ?? null;
+  const activeIsToday = activeOutfit?.id === effectiveTodayId;
 
-  // Tracks which card is centred in the viewport so the dots and the
-  // arrows agree on "current" without re-deriving it from scroll math.
+  // Which card is centred, tracked from actual scroll position rather
+  // than IntersectionObserver threshold crossings — with peeking
+  // neighbours several cards can be simultaneously "intersecting" at
+  // low ratios, which made the threshold-based version stick on the
+  // first card. Comparing each card's centre to the viewport's centre
+  // has no such ambiguity.
   useEffect(() => {
-    const root = scrollerRef.current;
-    if (!root || readyOutfits.length < 2) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.find((e) => e.isIntersecting);
-        if (visible) setActiveIndex(Number((visible.target as HTMLElement).dataset.index));
-      },
-      { root, threshold: 0.6 },
-    );
-    cardRefs.current.forEach((card) => card && observer.observe(card));
-    return () => observer.disconnect();
+    const el = scrollerRef.current;
+    if (!el) return;
+    let raf = 0;
+    const updateActive = () => {
+      const viewportCenter = el.scrollLeft + el.clientWidth / 2;
+      let closest = 0;
+      let closestDistance = Infinity;
+      cardRefs.current.forEach((card, i) => {
+        if (!card) return;
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const distance = Math.abs(cardCenter - viewportCenter);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closest = i;
+        }
+      });
+      setActiveIndex(closest);
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(updateActive);
+    };
+    updateActive();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
   }, [readyOutfits.length]);
 
-  const scrollByCard = (direction: 1 | -1) => {
-    cardRefs.current[activeIndex + direction]?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-  };
-
   const handleWear = (outfit: SavedOutfit) => {
-    setWearingId(outfit.id);
     startTransition(async () => {
       const { dirtied } = await wearOutfitTodayAction(outfit.id);
       setJustWornId(outfit.id);
       toast.show(UI.bugaderia.avui.dirtiedToast(dirtied), "success");
-      setWearingId(null);
     });
   };
 
@@ -101,7 +113,7 @@ export function AvuiView({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       {effectiveTodayId && (
         <Text variant="small" italic tone="secondary" className="font-serif">
           {UI.bugaderia.avui.alreadyToday}
@@ -115,7 +127,6 @@ export function AvuiView({
           tabIndex={0}
         >
           {readyOutfits.map((outfit, i) => {
-            const isToday = outfit.id === effectiveTodayId;
             const palette = paletteMap.get(outfit.paletteId) ?? null;
             return (
               <div
@@ -124,35 +135,13 @@ export function AvuiView({
                   cardRefs.current[i] = el;
                 }}
                 data-index={i}
-                className="w-[88%] shrink-0 snap-center flex flex-col gap-4"
+                className="w-[88%] shrink-0 snap-center flex flex-col gap-3"
               >
-                <div className="relative">
-                  <OutfitCollage
-                    garments={allGarmentsOf(outfit)}
-                    thumb={false}
-                    className="aspect-[3/4] w-full"
-                  />
-                  {readyOutfits.length > 1 && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => scrollByCard(-1)}
-                        aria-label="Outfit anterior"
-                        className="absolute left-2 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center bg-elevated/90 text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:bg-elevated focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                      >
-                        <Icon name="chevron-left" size={18} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => scrollByCard(1)}
-                        aria-label="Outfit següent"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center bg-elevated/90 text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:bg-elevated focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                      >
-                        <Icon name="chevron-right" size={18} />
-                      </button>
-                    </>
-                  )}
-                </div>
+                <OutfitCollage
+                  garments={allGarmentsOf(outfit)}
+                  thumb={false}
+                  className="aspect-[3/4] w-full"
+                />
                 <div className="flex flex-col gap-1">
                   <Text as="span" className="font-serif type-title leading-tight">
                     {titleOf(outfit) || palette?.nombre || "outfit"}
@@ -169,23 +158,6 @@ export function AvuiView({
                     </div>
                   )}
                 </div>
-                {isToday ? (
-                  <Button type="button" size="lg" variant="secondary" disabled className="gap-2">
-                    <Icon name="check" size={16} />
-                    {UI.bugaderia.avui.wornToday}
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    size="lg"
-                    onClick={() => handleWear(outfit)}
-                    disabled={isPending}
-                    loading={wearingId === outfit.id}
-                    loadingText="assignant…"
-                  >
-                    {UI.bugaderia.avui.wearIt}
-                  </Button>
-                )}
               </div>
             );
           })}
@@ -205,6 +177,30 @@ export function AvuiView({
           </div>
         )}
       </div>
+
+      {/* One action for the centred card, not one per card: with cards
+          peeking at 88% width a button matching each card's width read
+          as off-centre except on the middle ones. A single, full-width
+          button that follows the active card stays centred always. */}
+      {activeOutfit &&
+        (activeIsToday ? (
+          <Button type="button" size="lg" variant="secondary" disabled className="w-full gap-2">
+            <Icon name="check" size={16} />
+            {UI.bugaderia.avui.wornToday}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            size="lg"
+            className="w-full"
+            onClick={() => handleWear(activeOutfit)}
+            disabled={isPending}
+            loading={isPending}
+            loadingText="assignant…"
+          >
+            {UI.bugaderia.avui.wearIt}
+          </Button>
+        ))}
 
       {almostOutfits.length > 0 && (
         <div className="flex flex-col gap-3 pt-4 border-t border-border">
