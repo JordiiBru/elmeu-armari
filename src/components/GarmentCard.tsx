@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
 import { garmentSlug } from "@/lib/prendas/slug";
+import { isDirty } from "@/lib/bugaderia/laundry";
+import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
 import { Card, Text, Icon } from "@/components/ui";
 
@@ -9,12 +11,19 @@ import { Card, Text, Icon } from "@/components/ui";
 function GarmentCardContent({ garment, index }: { garment: GarmentWithColors; index: number }) {
   return (
     <>
-      <PieceThumb
-        garment={garment}
-        thumb
-        loading={index < 4 ? "eager" : "lazy"}
-        className="aspect-[3/4] w-full transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0"
-      />
+      <div className="relative">
+        <PieceThumb
+          garment={garment}
+          thumb
+          loading={index < 4 ? "eager" : "lazy"}
+          className="aspect-[3/4] w-full transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0"
+        />
+        {isDirty(garment) && (
+          <span className="absolute top-2 left-2 type-caption bg-elevated px-1.5 py-0.5">
+            {UI.bugaderia.grid.badge}
+          </span>
+        )}
+      </div>
       <div className="flex items-baseline justify-between pt-3">
         <Text as="span" className="font-serif leading-tight">
           {CATEGORY_LABELS[garment.category]}

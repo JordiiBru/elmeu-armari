@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GarmentCard, AddGarmentCard } from "@/components/GarmentCard";
 import { filterGarments } from "@/lib/prendas/filtering";
+import type { GarmentState } from "@/lib/prendas/filtering";
 import type { GarmentWithColors, Category, Texture, Season } from "@/lib/prendas/types";
 import { CATEGORIES, SEASONS, ALL_FITS, TEXTURES, ALL_LENGTHS } from "@/lib/prendas/types";
 import {
@@ -93,6 +94,9 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
     () => initialParams.getAll("len")
   );
   const [colors, setColors] = useState<string[]>(() => initialParams.getAll("color"));
+  const [states, setStates] = useState<GarmentState[]>(
+    () => initialParams.getAll("state") as GarmentState[]
+  );
   const [query, setQuery] = useState<string>(() => initialParams.get("q") ?? "");
   const [isAutoSeason, setIsAutoSeason] = useState(
     () => !initialParams.has("season") && !!defaultSeason
@@ -105,6 +109,7 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
     textures.length > 0 ||
     lengths.length > 0 ||
     colors.length > 0 ||
+    states.length > 0 ||
     query !== "";
 
   useEffect(() => {
@@ -115,11 +120,12 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
     textures.forEach((t) => params.append("tex", t));
     lengths.forEach((l) => params.append("len", l));
     colors.forEach((c) => params.append("color", c));
+    states.forEach((s) => params.append("state", s));
     if (query) params.set("q", query);
     const qs = params.toString();
     const next = qs ? `?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", next);
-  }, [categories, seasons, fits, textures, lengths, colors, query]);
+  }, [categories, seasons, fits, textures, lengths, colors, states, query]);
 
   const toggleIn = useCallback(
     <T extends string>(setter: React.Dispatch<React.SetStateAction<T[]>>, value: T) => {
@@ -142,6 +148,7 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
     setTextures([]);
     setLengths([]);
     setColors([]);
+    setStates([]);
     setQuery("");
     setIsAutoSeason(false);
   }, []);
@@ -161,8 +168,18 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
   }, [garments]);
 
   const filtered = useMemo(
-    () => filterGarments(garments, { categories, seasons, fits, textures, lengths, colors, query }),
-    [garments, categories, seasons, fits, textures, lengths, colors, query]
+    () =>
+      filterGarments(garments, {
+        categories,
+        seasons,
+        fits,
+        textures,
+        lengths,
+        colors,
+        states,
+        query,
+      }),
+    [garments, categories, seasons, fits, textures, lengths, colors, states, query]
   );
 
   const activeCount =
@@ -172,6 +189,7 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
     textures.length +
     lengths.length +
     colors.length +
+    states.length +
     (query ? 1 : 0);
 
   return (
@@ -278,6 +296,18 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
                     onClick={() => toggleIn(setLengths, l)}
                   >
                     {LENGTH_LABELS[l]}
+                  </FilterTag>
+                ))}
+              </FilterRow>
+
+              <FilterRow label={UI.bugaderia.grid.state.toLowerCase()}>
+                {(["clean", "dirty"] as const).map((s) => (
+                  <FilterTag
+                    key={s}
+                    active={states.includes(s)}
+                    onClick={() => toggleIn(setStates, s)}
+                  >
+                    {s === "clean" ? UI.bugaderia.grid.clean : UI.bugaderia.grid.dirty}
                   </FilterTag>
                 ))}
               </FilterRow>
