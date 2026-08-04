@@ -25,7 +25,7 @@ export default function HomePage() {
   const palette = pickPalette();
 
   return (
-    <div className="flex-1 grid grid-rows-[1fr_auto_1fr] px-6 py-12 md:py-20">
+    <div className="flex-1 grid grid-rows-[1fr_auto_1fr] px-6 py-8 md:py-12">
       <Stack as="section" gap={5} align="center" className="self-end text-center">
         <Heading level="display-xl">el meu armari</Heading>
         <Text variant="subtitle" tone="secondary" italic as="p">
@@ -33,7 +33,7 @@ export default function HomePage() {
         </Text>
       </Stack>
 
-      <div className="flex justify-center py-16 md:py-24">
+      <div className="flex justify-center py-8 md:py-12">
         <Link
           href="/paleta"
           aria-label={`Paleta ${palette.nombre}`}
@@ -51,7 +51,7 @@ export default function HomePage() {
         </Link>
       </div>
 
-      <Stack as="section" gap={7} align="center" className="self-start">
+      <Stack as="section" gap={6} align="center" className="self-start">
         <nav className="flex flex-col items-center gap-4">
           {PRIMARY.map((entry) => (
             <Link
