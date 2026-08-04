@@ -31,6 +31,7 @@ export async function wearOutfitTodayAction(outfitId: string): Promise<{ dirtied
   const dirtied = await markGarmentsDirty(washableGarmentsOf(outfit).map((g) => g.id));
 
   revalidatePath("/bugaderia");
+  revalidatePath("/bugaderia/avui");
   revalidatePath("/armari");
   revalidatePath("/calendari");
   return { dirtied };
