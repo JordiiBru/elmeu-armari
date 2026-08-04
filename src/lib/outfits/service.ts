@@ -13,8 +13,11 @@ import {
   clearWornDay,
   findWornEventsInRange,
   findWornEventForDay,
+  findUnsettledPastWornEvents,
+  markWornEventSettled,
 } from "./repository";
-import { findGarmentById } from "@/lib/prendas/service";
+import { findGarmentById, markGarmentsDirty } from "@/lib/prendas/service";
+import { WASHABLE_CATEGORIES } from "@/lib/prendas/types";
 import { palettes } from "@/lib/colors";
 import { dayKey, addDays, dayToISO } from "./week";
 import type { SavedOutfit, WeekDayPlan, OutfitGarmentRole } from "./types";
@@ -123,6 +126,28 @@ export async function assignOutfitToDay(outfitId: string, date: Date) {
 
 export async function unassignDay(date: Date) {
   return clearWornDay(dayKey(date));
+}
+
+/**
+ * Wearing an outfit only assigns the day — dirtying is deferred to
+ * whenever the app next notices that day has fully passed. Reconsidering
+ * same-day (pick outfit A, change your mind, pick outfit B before you've
+ * actually left the house) never soils A's pieces, since a day is only
+ * ever settled once, strictly after it ends.
+ */
+export async function settlePastWornEvents(): Promise<number> {
+  const events = await findUnsettledPastWornEvents(dayKey(new Date()));
+  for (const event of events) {
+    const washableIds = event.outfit.garments
+      .map((og) => og.garment)
+      .filter((g) => WASHABLE_CATEGORIES.has(g.category))
+      .map((g) => g.id);
+    if (washableIds.length > 0) {
+      await markGarmentsDirty(washableIds);
+    }
+    await markWornEventSettled(event.id);
+  }
+  return events.length;
 }
 
 /** The outfit assigned to today, if any — used to hide the "menys portat"

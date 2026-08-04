@@ -77,13 +77,9 @@ export const UI = {
       wearIt: "Me'l poso",
       almost: "gairebé",
       almostMissing: (label: string) => `et falta: ${label}`,
-      neverWorn: "mai portat",
       wornToday: "portat avui",
       alreadyToday: "ja portes un altre outfit avui. tornar-lo a triar el substituirà.",
-      dirtiedToast: (n: number) =>
-        n === 1
-          ? "outfit assignat a avui, 1 peça al cistell"
-          : `outfit assignat a avui, ${n} peces al cistell`,
+      assignedToast: "assignat per avui — es marcarà brut demà",
       emptyNoOutfits: "encara no tens outfits desats",
       emptyNoneReady: "toca fer bugada",
       goToArmari: "anar a l'armari",

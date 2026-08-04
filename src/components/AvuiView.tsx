@@ -88,11 +88,19 @@ export function AvuiView({
     };
   }, [readyOutfits.length]);
 
+  const goToCard = (direction: 1 | -1) => {
+    cardRefs.current[activeIndex + direction]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  };
+
   const handleWear = (outfit: SavedOutfit) => {
     startTransition(async () => {
-      const { dirtied } = await wearOutfitTodayAction(outfit.id);
+      await wearOutfitTodayAction(outfit.id);
       setJustWornId(outfit.id);
-      toast.show(UI.bugaderia.avui.dirtiedToast(dirtied), "success");
+      toast.show(UI.bugaderia.avui.assignedToast, "success");
     });
   };
 
@@ -137,11 +145,37 @@ export function AvuiView({
                 data-index={i}
                 className="w-[88%] shrink-0 snap-center flex flex-col gap-3"
               >
-                <OutfitCollage
-                  garments={allGarmentsOf(outfit)}
-                  thumb={false}
-                  className="aspect-[3/4] w-full"
-                />
+                <div className="relative">
+                  <OutfitCollage
+                    garments={allGarmentsOf(outfit)}
+                    thumb={false}
+                    className="aspect-[3/4] w-full"
+                  />
+                  {/* Swiping covers touch; a mouse can't drag this
+                      scroller, so pointer-capable screens get click
+                      targets too. Hidden below `sm` — on a phone
+                      they'd just sit on top of the swipe gesture. */}
+                  {readyOutfits.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => goToCard(-1)}
+                        aria-label="Outfit anterior"
+                        className="hidden sm:inline-flex absolute left-2 top-1/2 -translate-y-1/2 h-11 w-11 items-center justify-center bg-elevated/90 text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:bg-elevated focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      >
+                        <Icon name="chevron-left" size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => goToCard(1)}
+                        aria-label="Outfit següent"
+                        className="hidden sm:inline-flex absolute right-2 top-1/2 -translate-y-1/2 h-11 w-11 items-center justify-center bg-elevated/90 text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:bg-elevated focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      >
+                        <Icon name="chevron-right" size={18} />
+                      </button>
+                    </>
+                  )}
+                </div>
                 <div className="flex flex-col gap-1">
                   <Text as="span" className="font-serif type-title leading-tight">
                     {titleOf(outfit) || palette?.nombre || "outfit"}
