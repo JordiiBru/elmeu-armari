@@ -35,10 +35,6 @@ export function dirtyGarmentsOf(outfit: SavedOutfit): GarmentWithColors[] {
   return garmentsOf(outfit).filter(isDirty);
 }
 
-export function washableGarmentsOf(outfit: SavedOutfit): GarmentWithColors[] {
-  return garmentsOf(outfit).filter(isWashable);
-}
-
 export type OutfitAvailability = "ready" | "almost" | "blocked";
 
 /**

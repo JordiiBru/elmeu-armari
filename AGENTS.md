@@ -38,6 +38,7 @@ Rules:
 - `Outfit.paletteId` is a **foreign key into the Sanzo Wada JSON**, not into a DB table. There is no `Palette` model; palettes live in `src/lib/colors/sanzo-wada.json`.
 - Garment photos: the DB stores only the filename in `Garment.image`; the actual file sits under `UPLOAD_DIR` on the filesystem.
 - `Garment.dirtySince` is nullable: `null` means clean, a timestamp means dirty since that moment. Only `WASHABLE_CATEGORIES` (`src/lib/prendas/types.ts`: `SWEATER`, `SHIRT`, `PANTS`) can carry a dirty state — shoes, socks and accessories are always available and must never end up with a `dirtySince`, however the request got there. The washable filter lives server-side in `src/lib/prendas/service.ts` (`markGarmentsDirty` / `markGarmentsClean`), not only in the `/bugaderia` views. `dirtySince` is not part of the export/import JSON payload — it is ephemeral state, and an imported garment always starts clean.
+- **Wearing an outfit does not dirty it.** `wearOutfitTodayAction` only assigns the day; a day holds one outfit, so reconsidering before you leave the house must not soil clothes you never wore. `WornEvent.settledAt` (`null` = pending) tracks this, and `settlePastWornEvents` dirties the pieces of days that have fully passed. It runs lazily from `src/app/bugaderia/layout.tsx` — there is no cron, so nothing settles until someone opens a `/bugaderia` route. Keep it idempotent: `setGarmentsDirtyState` only writes to already-clean garments, so re-settling never resets a `dirtySince`.
 
 ## Prisma
 
