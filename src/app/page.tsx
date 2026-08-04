@@ -8,6 +8,7 @@ const PRIMARY = [
   { href: "/armari", label: "El meu armari" },
   { href: "/calendari", label: "Calendari" },
   { href: "/paleta", label: "Paletes" },
+  { href: "/bugaderia", label: "Bugaderia" },
 ];
 
 const SECONDARY = [

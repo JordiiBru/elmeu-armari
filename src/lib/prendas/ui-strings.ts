@@ -42,4 +42,15 @@ export const UI = {
     noResults: "Cap peça trobada",
     results: (count: number) => `${count} peça${count !== 1 ? "s" : ""}`,
   },
+  bugaderia: {
+    title: "bugaderia",
+    subtitle: "què tens net, què tens al cistell, i què et pots posar avui.",
+    soil: "Embrutar",
+    wash: "Rentar",
+    today: "Què em poso?",
+    cleanCount: (n: number) => (n === 1 ? "1 peça neta" : `${n} peces netes`),
+    basketCount: (n: number) =>
+      n === 1 ? "1 peça al cistell" : `${n} peces al cistell`,
+    readyCount: (n: number) => (n === 1 ? "1 outfit a punt" : `${n} outfits a punt`),
+  },
 } as const;
