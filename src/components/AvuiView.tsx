@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { wearOutfitTodayAction } from "@/app/bugaderia/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
@@ -37,31 +37,37 @@ export function AvuiView({
 }) {
   const paletteMap = new Map(palettes.map((p) => [p.id, p]));
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [almostOpen, setAlmostOpen] = useState(false);
   const [wearingId, setWearingId] = useState<string | null>(null);
+  // The server round-trip (revalidatePath) eventually refreshes
+  // `todayOutfitId`, but that's not instant enough to feel like a
+  // response to the tap — this flips the card the moment the action
+  // resolves, without waiting for the route to re-render.
+  const [justWornId, setJustWornId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const toast = useToast();
+  const effectiveTodayId = justWornId ?? todayOutfitId;
 
-  // `scrollBy(clientWidth)` used to undershoot the next snap point by
-  // exactly the flex gap, and `snap-mandatory` would immediately snap
-  // back to the card we started on — the click looked like it did
-  // nothing. Reading the actual card elements' offsets instead of
-  // guessing a fixed step is what makes this land correctly regardless
-  // of gap or card width.
-  const scrollByCard = (direction: 1 | -1) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const cards = Array.from(el.children) as HTMLElement[];
-    if (cards.length === 0) return;
-    const currentIndex = cards.reduce(
-      (closest, card, i) =>
-        Math.abs(card.offsetLeft - el.scrollLeft) <
-        Math.abs(cards[closest].offsetLeft - el.scrollLeft)
-          ? i
-          : closest,
-      0,
+  // Tracks which card is centred in the viewport so the dots and the
+  // arrows agree on "current" without re-deriving it from scroll math.
+  useEffect(() => {
+    const root = scrollerRef.current;
+    if (!root || readyOutfits.length < 2) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.find((e) => e.isIntersecting);
+        if (visible) setActiveIndex(Number((visible.target as HTMLElement).dataset.index));
+      },
+      { root, threshold: 0.6 },
     );
-    cards[currentIndex + direction]?.scrollIntoView({
+    cardRefs.current.forEach((card) => card && observer.observe(card));
+    return () => observer.disconnect();
+  }, [readyOutfits.length]);
+
+  const scrollByCard = (direction: 1 | -1) => {
+    cardRefs.current[activeIndex + direction]?.scrollIntoView({
       behavior: "smooth",
       inline: "center",
       block: "nearest",
@@ -72,6 +78,7 @@ export function AvuiView({
     setWearingId(outfit.id);
     startTransition(async () => {
       const { dirtied } = await wearOutfitTodayAction(outfit.id);
+      setJustWornId(outfit.id);
       toast.show(UI.bugaderia.avui.dirtiedToast(dirtied), "success");
       setWearingId(null);
     });
@@ -95,80 +102,108 @@ export function AvuiView({
 
   return (
     <div className="flex flex-col gap-8">
-      {todayOutfitId && (
+      {effectiveTodayId && (
         <Text variant="small" italic tone="secondary" className="font-serif">
           {UI.bugaderia.avui.alreadyToday}
         </Text>
       )}
 
-      <div
-        ref={scrollerRef}
-        className="flex snap-x snap-mandatory overflow-x-auto gap-6 scroll-smooth"
-        tabIndex={0}
-      >
-        {readyOutfits.map((outfit) => {
-          const isToday = outfit.id === todayOutfitId;
-          const palette = paletteMap.get(outfit.paletteId) ?? null;
-          return (
-            <div key={outfit.id} className="w-full shrink-0 snap-center flex flex-col gap-4">
-              <div className="relative">
-                <OutfitCollage
-                  garments={allGarmentsOf(outfit)}
-                  thumb={false}
-                  className="aspect-[3/4] w-full"
-                />
-                {readyOutfits.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => scrollByCard(-1)}
-                      aria-label="Outfit anterior"
-                      className="absolute left-2 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center bg-elevated/90 text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:bg-elevated focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                    >
-                      <Icon name="chevron-left" size={18} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => scrollByCard(1)}
-                      aria-label="Outfit següent"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center bg-elevated/90 text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:bg-elevated focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                    >
-                      <Icon name="chevron-right" size={18} />
-                    </button>
-                  </>
+      <div className="flex flex-col gap-3">
+        <div
+          ref={scrollerRef}
+          className="flex snap-x snap-mandatory overflow-x-auto gap-4 scroll-smooth"
+          tabIndex={0}
+        >
+          {readyOutfits.map((outfit, i) => {
+            const isToday = outfit.id === effectiveTodayId;
+            const palette = paletteMap.get(outfit.paletteId) ?? null;
+            return (
+              <div
+                key={outfit.id}
+                ref={(el) => {
+                  cardRefs.current[i] = el;
+                }}
+                data-index={i}
+                className="w-[88%] shrink-0 snap-center flex flex-col gap-4"
+              >
+                <div className="relative">
+                  <OutfitCollage
+                    garments={allGarmentsOf(outfit)}
+                    thumb={false}
+                    className="aspect-[3/4] w-full"
+                  />
+                  {readyOutfits.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => scrollByCard(-1)}
+                        aria-label="Outfit anterior"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center bg-elevated/90 text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:bg-elevated focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      >
+                        <Icon name="chevron-left" size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => scrollByCard(1)}
+                        aria-label="Outfit següent"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center bg-elevated/90 text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:bg-elevated focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      >
+                        <Icon name="chevron-right" size={18} />
+                      </button>
+                    </>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Text as="span" className="font-serif type-title leading-tight">
+                    {titleOf(outfit) || palette?.nombre || "outfit"}
+                  </Text>
+                  {palette && (
+                    <div className="flex gap-1">
+                      {palette.colores.map((color, colorIndex) => (
+                        <span
+                          key={colorIndex}
+                          className="inline-block h-3 w-6"
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {isToday ? (
+                  <Button type="button" size="lg" variant="secondary" disabled className="gap-2">
+                    <Icon name="check" size={16} />
+                    {UI.bugaderia.avui.wornToday}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    size="lg"
+                    onClick={() => handleWear(outfit)}
+                    disabled={isPending}
+                    loading={wearingId === outfit.id}
+                    loadingText="assignant…"
+                  >
+                    {UI.bugaderia.avui.wearIt}
+                  </Button>
                 )}
               </div>
-              <div className="flex flex-col gap-1">
-                <Text as="span" className="font-serif type-title leading-tight">
-                  {titleOf(outfit) || palette?.nombre || "outfit"}
-                </Text>
-                {palette && (
-                  <div className="flex gap-1">
-                    {palette.colores.map((color, i) => (
-                      <span key={i} className="inline-block h-3 w-6" style={{ backgroundColor: color }} />
-                    ))}
-                  </div>
-                )}
-              </div>
-              {isToday ? (
-                <Text variant="small" italic tone="secondary" className="font-serif">
-                  {UI.bugaderia.avui.wornToday}
-                </Text>
-              ) : (
-                <Button
-                  type="button"
-                  size="lg"
-                  onClick={() => handleWear(outfit)}
-                  disabled={isPending}
-                  loading={wearingId === outfit.id}
-                  loadingText="assignant…"
-                >
-                  {UI.bugaderia.avui.wearIt}
-                </Button>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
+        {readyOutfits.length > 1 && (
+          <div className="flex items-center justify-center gap-2" role="tablist" aria-label="Outfits">
+            {readyOutfits.map((_, i) => (
+              <span
+                key={i}
+                aria-hidden
+                className={`h-1.5 w-1.5 rounded-full transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] ${
+                  i === activeIndex ? "bg-text-primary" : "bg-border"
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {almostOutfits.length > 0 && (
