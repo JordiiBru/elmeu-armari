@@ -112,6 +112,11 @@ export function sortOutfitsByTop(outfits: SavedOutfit[]): SavedOutfit[] {
   });
 }
 
+export async function findSavedOutfitById(id: string): Promise<SavedOutfit | null> {
+  const outfit = await findOutfitById(id);
+  return outfit ? toSavedOutfit(outfit) : null;
+}
+
 export async function assignOutfitToDay(outfitId: string, date: Date) {
   return setWornDay(outfitId, dayKey(date));
 }

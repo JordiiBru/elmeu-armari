@@ -74,6 +74,26 @@ export async function updateGarment(id: string, data: GarmentInput) {
   });
 }
 
+export async function findGarmentCategories(ids: string[]) {
+  return prisma.garment.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, category: true },
+  });
+}
+
+/**
+ * Marking as dirty only touches garments that are currently clean: a piece
+ * already in the basket keeps its original `dirtySince`, so "how long has
+ * this been waiting" stays truthful. The returned count is therefore the
+ * number of garments that actually changed state.
+ */
+export async function setGarmentsDirtyState(ids: string[], dirty: boolean) {
+  return prisma.garment.updateMany({
+    where: dirty ? { id: { in: ids }, dirtySince: null } : { id: { in: ids } },
+    data: { dirtySince: dirty ? new Date() : null },
+  });
+}
+
 export async function setGarmentImage(id: string, filename: string | null) {
   return prisma.garment.update({ where: { id }, data: { image: filename } });
 }
