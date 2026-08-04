@@ -61,19 +61,24 @@ export function AvuiView({
   // than IntersectionObserver threshold crossings — with peeking
   // neighbours several cards can be simultaneously "intersecting" at
   // low ratios, which made the threshold-based version stick on the
-  // first card. Comparing each card's centre to the viewport's centre
-  // has no such ambiguity.
+  // first card. `getBoundingClientRect` for both the container and each
+  // card, not `offsetLeft` vs `scrollLeft`: those two are only
+  // comparable when the container happens to be a CSS positioning
+  // context, which this one isn't — mixing them silently measured
+  // against the wrong origin and the index barely ever moved.
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
     let raf = 0;
     const updateActive = () => {
-      const viewportCenter = el.scrollLeft + el.clientWidth / 2;
+      const containerRect = el.getBoundingClientRect();
+      const viewportCenter = containerRect.left + containerRect.width / 2;
       let closest = 0;
       let closestDistance = Infinity;
       cardRefs.current.forEach((card, i) => {
         if (!card) return;
-        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const cardRect = card.getBoundingClientRect();
+        const cardCenter = cardRect.left + cardRect.width / 2;
         const distance = Math.abs(cardCenter - viewportCenter);
         if (distance < closestDistance) {
           closestDistance = distance;
@@ -148,7 +153,7 @@ export function AvuiView({
                   cardRefs.current[i] = el;
                 }}
                 data-index={i}
-                className="w-[88%] shrink-0 snap-center flex flex-col gap-3"
+                className="w-[70%] shrink-0 snap-center flex flex-col gap-3"
               >
                 <OutfitCollage
                   garments={allGarmentsOf(outfit)}
