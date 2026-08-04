@@ -7,7 +7,6 @@ import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
-import { formatLastWorn } from "@/lib/outfits/worn";
 import { OutfitCollage, allGarmentsOf } from "./SavedOutfitsView";
 import { Button, Icon, Text, EmptyState, useToast } from "@/components/ui";
 
@@ -82,78 +81,74 @@ export function AvuiView({
         </Text>
       )}
 
-      <div className="relative">
-        <div
-          ref={scrollerRef}
-          className="flex snap-x snap-mandatory overflow-x-auto gap-6 scroll-smooth"
-          tabIndex={0}
-        >
-          {readyOutfits.map((outfit) => {
-            const isToday = outfit.id === todayOutfitId;
-            const palette = paletteMap.get(outfit.paletteId) ?? null;
-            return (
-              <div key={outfit.id} className="w-full shrink-0 snap-center flex flex-col gap-4">
+      <div
+        ref={scrollerRef}
+        className="flex snap-x snap-mandatory overflow-x-auto gap-6 scroll-smooth"
+        tabIndex={0}
+      >
+        {readyOutfits.map((outfit) => {
+          const isToday = outfit.id === todayOutfitId;
+          const palette = paletteMap.get(outfit.paletteId) ?? null;
+          return (
+            <div key={outfit.id} className="w-full shrink-0 snap-center flex flex-col gap-4">
+              <div className="relative">
                 <OutfitCollage
                   garments={allGarmentsOf(outfit)}
                   thumb={false}
                   className="aspect-[3/4] w-full"
                 />
-                <div className="flex flex-col gap-1">
-                  <Text as="span" className="font-serif type-title leading-tight">
-                    {titleOf(outfit) || palette?.nombre || "outfit"}
-                  </Text>
-                  {palette && (
-                    <div className="flex gap-1">
-                      {palette.colores.map((color, i) => (
-                        <span key={i} className="inline-block h-3 w-6" style={{ backgroundColor: color }} />
-                      ))}
-                    </div>
-                  )}
-                  <Text variant="small" italic tone="secondary" className="font-serif">
-                    {formatLastWorn(outfit.wornEvents)}
-                  </Text>
-                </div>
-                {isToday ? (
-                  <Text variant="small" italic tone="secondary" className="font-serif">
-                    {UI.bugaderia.avui.wornToday}
-                  </Text>
-                ) : (
-                  <Button
-                    type="button"
-                    size="lg"
-                    onClick={() => handleWear(outfit)}
-                    disabled={isPending}
-                    loading={wearingId === outfit.id}
-                    loadingText="assignant…"
-                  >
-                    {UI.bugaderia.avui.wearIt}
-                  </Button>
+                {readyOutfits.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => scrollByCard(-1)}
+                      aria-label="Outfit anterior"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center bg-elevated/90 text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:bg-elevated focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    >
+                      <Icon name="chevron-left" size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scrollByCard(1)}
+                      aria-label="Outfit següent"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center bg-elevated/90 text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:bg-elevated focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    >
+                      <Icon name="chevron-right" size={18} />
+                    </button>
+                  </>
                 )}
               </div>
-            );
-          })}
-        </div>
-
-        {readyOutfits.length > 1 && (
-          <div className="flex items-center justify-center gap-6 pt-4">
-            <button
-              type="button"
-              onClick={() => scrollByCard(-1)}
-              aria-label="Outfit anterior"
-              className="text-text-secondary hover:text-text-primary transition-colors"
-            >
-              <Icon name="chevron-left" size={18} />
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollByCard(1)}
-              aria-label="Outfit següent"
-              className="text-text-secondary hover:text-text-primary transition-colors"
-            >
-              <Icon name="chevron-right" size={18} />
-            </button>
-          </div>
-        )}
+              <div className="flex flex-col gap-1">
+                <Text as="span" className="font-serif type-title leading-tight">
+                  {titleOf(outfit) || palette?.nombre || "outfit"}
+                </Text>
+                {palette && (
+                  <div className="flex gap-1">
+                    {palette.colores.map((color, i) => (
+                      <span key={i} className="inline-block h-3 w-6" style={{ backgroundColor: color }} />
+                    ))}
+                  </div>
+                )}
+              </div>
+              {isToday ? (
+                <Text variant="small" italic tone="secondary" className="font-serif">
+                  {UI.bugaderia.avui.wornToday}
+                </Text>
+              ) : (
+                <Button
+                  type="button"
+                  size="lg"
+                  onClick={() => handleWear(outfit)}
+                  disabled={isPending}
+                  loading={wearingId === outfit.id}
+                  loadingText="assignant…"
+                >
+                  {UI.bugaderia.avui.wearIt}
+                </Button>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {almostOutfits.length > 0 && (
