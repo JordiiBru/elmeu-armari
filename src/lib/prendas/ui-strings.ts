@@ -52,5 +52,48 @@ export const UI = {
     basketCount: (n: number) =>
       n === 1 ? "1 peça al cistell" : `${n} peces al cistell`,
     readyCount: (n: number) => (n === 1 ? "1 outfit a punt" : `${n} outfits a punt`),
+    picker: {
+      soil: {
+        title: "Embrutar",
+        subtitle: "tria les peces que van al cistell.",
+        submit: "Marcar com a brut",
+        submitting: "marcant…",
+        toast: (n: number) => (n === 1 ? "1 peça al cistell" : `${n} peces al cistell`),
+        empty: "totes les peces ja són al cistell.",
+      },
+      wash: {
+        title: "Rentar",
+        subtitle: "tria les peces que has rentat.",
+        submit: "Marcar com a net",
+        submitting: "marcant…",
+        toast: (n: number) => (n === 1 ? "1 peça neta" : `${n} peces netes`),
+        empty: "cap peça al cistell. tot net.",
+        didLaundry: "he fet la bugada",
+      },
+      selectedCount: (n: number) => (n === 1 ? "1 seleccionada" : `${n} seleccionades`),
+      clearSelection: "desmarcar-ho tot",
+    },
+    avui: {
+      wearIt: "Me'l poso",
+      almost: "gairebé",
+      almostMissing: (label: string) => `et falta: ${label}`,
+      neverWorn: "mai portat",
+      wornToday: "portat avui",
+      alreadyToday: "ja portes un altre outfit avui. tornar-lo a triar el substituirà.",
+      dirtiedToast: (n: number) =>
+        n === 1
+          ? "outfit assignat a avui, 1 peça al cistell"
+          : `outfit assignat a avui, ${n} peces al cistell`,
+      emptyNoOutfits: "encara no tens outfits desats",
+      emptyNoneReady: "toca fer bugada",
+      goToArmari: "anar a l'armari",
+      goToRentar: "anar a rentar",
+    },
+    grid: {
+      state: "Estat",
+      clean: "Netes",
+      dirty: "Brutes",
+      badge: "al cistell",
+    },
   },
 } as const;
