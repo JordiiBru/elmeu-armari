@@ -42,10 +42,30 @@ export function AvuiView({
   const [isPending, startTransition] = useTransition();
   const toast = useToast();
 
+  // `scrollBy(clientWidth)` used to undershoot the next snap point by
+  // exactly the flex gap, and `snap-mandatory` would immediately snap
+  // back to the card we started on — the click looked like it did
+  // nothing. Reading the actual card elements' offsets instead of
+  // guessing a fixed step is what makes this land correctly regardless
+  // of gap or card width.
   const scrollByCard = (direction: 1 | -1) => {
     const el = scrollerRef.current;
     if (!el) return;
-    el.scrollBy({ left: direction * el.clientWidth, behavior: "smooth" });
+    const cards = Array.from(el.children) as HTMLElement[];
+    if (cards.length === 0) return;
+    const currentIndex = cards.reduce(
+      (closest, card, i) =>
+        Math.abs(card.offsetLeft - el.scrollLeft) <
+        Math.abs(cards[closest].offsetLeft - el.scrollLeft)
+          ? i
+          : closest,
+      0,
+    );
+    cards[currentIndex + direction]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
   };
 
   const handleWear = (outfit: SavedOutfit) => {
