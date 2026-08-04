@@ -37,6 +37,7 @@ Rules:
 - Seasons are a **1:N relation** to `GarmentSeason` (enum: `SPRING | SUMMER | AUTUMN | WINTER | ALL_YEAR`).
 - `Outfit.paletteId` is a **foreign key into the Sanzo Wada JSON**, not into a DB table. There is no `Palette` model; palettes live in `src/lib/colors/sanzo-wada.json`.
 - Garment photos: the DB stores only the filename in `Garment.image`; the actual file sits under `UPLOAD_DIR` on the filesystem.
+- `Garment.dirtySince` is nullable: `null` means clean, a timestamp means dirty since that moment. Only `WASHABLE_CATEGORIES` (`src/lib/prendas/types.ts`: `SWEATER`, `SHIRT`, `PANTS`) can carry a dirty state — shoes, socks and accessories are always available and must never end up with a `dirtySince`, however the request got there. The washable filter lives server-side in `src/lib/prendas/service.ts` (`markGarmentsDirty` / `markGarmentsClean`), not only in the `/bugaderia` views. `dirtySince` is not part of the export/import JSON payload — it is ephemeral state, and an imported garment always starts clean.
 
 ## Prisma
 
