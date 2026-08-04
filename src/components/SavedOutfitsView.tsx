@@ -15,27 +15,9 @@ import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { dayToISO } from "@/lib/outfits/week";
+import { wornRank, formatLastWorn } from "@/lib/outfits/worn";
 import { PieceThumb } from "./PieceThumb";
 import { Card, Icon, Sheet, Stack, Text, TextButton, useToast, EmptyState } from "@/components/ui";
-
-type WornEvent = SavedOutfit["wornEvents"][number];
-
-/**
- * Never-worn outfits rank before any dated one; among dated ones the
- * oldest last-worn date wins. Used both to pick the "menys portat"
- * suggestion and to render "fa X dies" / "mai portat".
- */
-function wornRank(events: WornEvent[]): number {
-  return events.length === 0 ? -Infinity : events[0].date.getTime();
-}
-
-function formatLastWorn(events: WornEvent[]): string {
-  if (events.length === 0) return "mai portat";
-  const days = Math.floor((Date.now() - events[0].date.getTime()) / (1000 * 60 * 60 * 24));
-  if (days <= 0) return "portat avui";
-  if (days === 1) return "portat fa 1 dia";
-  return `portat fa ${days} dies`;
-}
 
 function formatWornDate(date: Date): string {
   const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));

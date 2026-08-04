@@ -83,6 +83,10 @@ export const CATEGORIES_WITH_OPTIONAL_COLOR = new Set<Category>(["ACCESSORI"]);
 // grid) and the saved-outfits view (offers them in the extras picker).
 export const EXTRA_CATEGORIES = new Set<Category>(["SHOES", "SOCKS", "ACCESSORI"]);
 
+// Categories that can be dirty. Shoes, socks and accessories are always
+// available: they never block an outfit and never appear in the laundry lists.
+export const WASHABLE_CATEGORIES = new Set<Category>(["SWEATER", "SHIRT", "PANTS"]);
+
 export const ALL_FITS: string[] = [
   ...new Set(Object.values(FITS_BY_CATEGORY).flat()),
 ];
@@ -115,6 +119,8 @@ export interface GarmentWithColors {
   fit: string | null;
   notes: string | null;
   image: string | null;
+  /** null = clean. Set to the moment the garment was marked dirty. */
+  dirtySince: Date | null;
   createdAt: Date;
   updatedAt: Date;
   colors: { id: string; hex: string }[];

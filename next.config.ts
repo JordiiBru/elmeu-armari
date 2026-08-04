@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  allowedDevOrigins: ["192.168.1.47"],
+  allowedDevOrigins: ["192.168.1.47", "172.20.10.12"],
   images: {
     // Every <Image> in the app already passes `unoptimized` — sharp
     // pre-processes uploads to final WebP, so Next's own optimizer would

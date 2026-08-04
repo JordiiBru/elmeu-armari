@@ -123,6 +123,17 @@ export async function clearWornDay(day: Date) {
   await prisma.wornEvent.deleteMany({ where: { date: day } });
 }
 
+export async function findUnsettledPastWornEvents(beforeDay: Date) {
+  return prisma.wornEvent.findMany({
+    where: { date: { lt: beforeDay }, settledAt: null },
+    include: { outfit: { include: OUTFIT_GARMENTS_INCLUDE } },
+  });
+}
+
+export async function markWornEventSettled(id: string) {
+  return prisma.wornEvent.update({ where: { id }, data: { settledAt: new Date() } });
+}
+
 export async function findWornEventForDay(day: Date) {
   return prisma.wornEvent.findUnique({
     where: { date: day },

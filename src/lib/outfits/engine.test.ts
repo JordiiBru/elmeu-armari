@@ -41,6 +41,7 @@ function createTestGarment(
     length: null,
     notes: null,
     image: null,
+    dirtySince: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     colors: hexColors.map((hex, idx) => ({

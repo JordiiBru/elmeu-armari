@@ -11,6 +11,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 function fallbackFor(pathname: string): string {
   if (pathname === "/add") return "/armari";
   if (pathname.startsWith("/edit/")) return "/armari";
+  if (pathname.startsWith("/bugaderia/")) return "/bugaderia";
   return "/";
 }
 

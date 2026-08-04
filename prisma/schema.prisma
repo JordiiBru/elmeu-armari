@@ -20,6 +20,8 @@ model Garment {
   fit       String?
   notes     String?
   image     String?
+  /// null = clean. Set to the moment the garment was marked dirty.
+  dirtySince DateTime?
   outfits   OutfitGarment[]
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
@@ -43,6 +45,11 @@ model WornEvent {
   id       String   @id @default(cuid())
   outfitId String
   date     DateTime @default(now())
+  /// null = not settled yet. Wearing an outfit only assigns the day;
+  /// its washable pieces are dirtied once this day has fully passed
+  /// (see settlePastWornEvents), so reconsidering same-day never soils
+  /// clothes you didn't actually wear.
+  settledAt DateTime?
   outfit   Outfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
 
   @@unique([date])

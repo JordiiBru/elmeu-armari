@@ -1,5 +1,8 @@
 import type { GarmentWithColors, Category, Texture, Season } from "./types";
 import { perceptualDistance, OKLCH_DISTANCE_THRESHOLD } from "@/lib/outfits/color-matching";
+import { isDirty } from "@/lib/bugaderia/laundry";
+
+export type GarmentState = "clean" | "dirty";
 
 export interface GarmentFilters {
   categories: Category[];
@@ -8,6 +11,7 @@ export interface GarmentFilters {
   textures: Texture[];
   lengths: string[];
   colors: string[];
+  states: GarmentState[];
   query: string;
 }
 
@@ -15,7 +19,7 @@ export function filterGarments(
   garments: GarmentWithColors[],
   filters: GarmentFilters
 ): GarmentWithColors[] {
-  const { categories, seasons, fits, textures, lengths, colors, query } = filters;
+  const { categories, seasons, fits, textures, lengths, colors, states, query } = filters;
   const q = query.toLowerCase().trim();
 
   return garments.filter((g) => {
@@ -23,6 +27,7 @@ export function filterGarments(
     if (fits.length > 0 && (!g.fit || !fits.includes(g.fit))) return false;
     if (textures.length > 0 && (!g.texture || !textures.includes(g.texture))) return false;
     if (lengths.length > 0 && (!g.length || !lengths.includes(g.length))) return false;
+    if (states.length > 0 && !states.includes(isDirty(g) ? "dirty" : "clean")) return false;
 
     if (seasons.length > 0) {
       const garmentSeasons = g.seasons.map((s) => s.season);
