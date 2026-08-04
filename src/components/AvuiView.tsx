@@ -8,7 +8,7 @@ import { UI } from "@/lib/prendas/ui-strings";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { OutfitCollage, allGarmentsOf } from "./SavedOutfitsView";
-import { Button, Icon, Text, EmptyState, useToast } from "@/components/ui";
+import { Button, Icon, Text, EmptyState } from "@/components/ui";
 
 function titleOf(outfit: SavedOutfit): string {
   return outfit.garments
@@ -53,7 +53,6 @@ export function AvuiView({
   // resolves, without waiting for the route to re-render.
   const [justWornId, setJustWornId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const toast = useToast();
   const effectiveTodayId = justWornId ?? todayOutfitId;
   const activeOutfit = orderedOutfits[activeIndex] ?? null;
   const activeIsToday = activeOutfit?.id === effectiveTodayId;
@@ -107,7 +106,6 @@ export function AvuiView({
     startTransition(async () => {
       await wearOutfitTodayAction(outfit.id);
       setJustWornId(outfit.id);
-      toast.show(UI.bugaderia.avui.assignedToast, "success");
     });
   };
 

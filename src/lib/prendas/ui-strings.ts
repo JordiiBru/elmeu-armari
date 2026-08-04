@@ -79,7 +79,6 @@ export const UI = {
       almostMissing: (label: string) => `et falta: ${label}`,
       wornToday: "portat avui",
       alreadyToday: "ja portes un altre outfit avui. tornar-lo a triar el substituirà.",
-      assignedToast: "assignat per avui — es marcarà brut demà",
       emptyNoOutfits: "encara no tens outfits desats",
       emptyNoneReady: "toca fer bugada",
       goToArmari: "anar a l'armari",
