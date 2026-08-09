@@ -29,8 +29,12 @@ model Garment {
 
 model Outfit {
   id         String          @id @default(cuid())
-  /// null = improvised (assembled on the spot, never explicitly saved/named).
   name       String?
+  /// true = assembled on the spot in the "què em poso?" builder rather
+  /// than deliberately saved. An explicit flag, not `name == null`:
+  /// existing databases already hold nameless saved outfits, so reading
+  /// the absence of a name as "improvised" hid them from /armari.
+  improvised Boolean         @default(false)
   /// null when the garments have no shared Sanzo Wada palette — only
   /// possible for improvised outfits; a saved outfit always resolves one.
   paletteId  Int?

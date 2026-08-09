@@ -21,16 +21,25 @@ const SETTLE_DELAY_MS = 150;
 
 export function useCenteredIndex(itemCount: number) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const itemRefs = useRef<(HTMLElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   // Mirrors activeIndex, but only once scrolling has actually stopped for
   // a beat — consumers that react to the pick (the builder's cross-row
   // reordering) must never fire mid-gesture, only once it settles.
   const [settledIndex, setSettledIndex] = useState(0);
+  // Whether a scroll is in flight. Gating "may I reorder this row now?"
+  // on this rather than on pointer events avoids a stuck state: a pointer
+  // released outside the scroller never fires pointerup on it, which left
+  // the row permanently believing it was still being touched.
+  const [isScrolling, setIsScrolling] = useState(false);
 
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
+    // Truncated to the current length so a shrinking list (unticking the
+    // sweater row, a reorder to fewer cards) leaves no detached nodes
+    // behind for the centring pass to measure.
+    itemRefs.current.length = itemCount;
     let raf = 0;
     let settleTimer = 0;
     const updateActive = () => {
@@ -52,11 +61,15 @@ export function useCenteredIndex(itemCount: number) {
       return closest;
     };
     const onScroll = () => {
+      setIsScrolling(true);
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         const closest = updateActive();
         window.clearTimeout(settleTimer);
-        settleTimer = window.setTimeout(() => setSettledIndex(closest), SETTLE_DELAY_MS);
+        settleTimer = window.setTimeout(() => {
+          setSettledIndex(closest);
+          setIsScrolling(false);
+        }, SETTLE_DELAY_MS);
       });
     };
     setSettledIndex(updateActive());
@@ -68,7 +81,7 @@ export function useCenteredIndex(itemCount: number) {
     };
   }, [itemCount]);
 
-  const setItemRef = (index: number) => (el: HTMLDivElement | null) => {
+  const setItemRef = (index: number) => (el: HTMLElement | null) => {
     itemRefs.current[index] = el;
   };
 
@@ -80,5 +93,5 @@ export function useCenteredIndex(itemCount: number) {
     });
   };
 
-  return { scrollerRef, activeIndex, settledIndex, setItemRef, scrollToIndex };
+  return { scrollerRef, activeIndex, settledIndex, isScrolling, setItemRef, scrollToIndex };
 }

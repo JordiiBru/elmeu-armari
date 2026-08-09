@@ -6,10 +6,19 @@ import { garmentPaletteIds, resolvePaletteForOutfit } from "@/lib/outfits/engine
 import { GarmentRow } from "./GarmentRow";
 import { AvuiView } from "./AvuiView";
 import { UI } from "@/lib/prendas/ui-strings";
+import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { RowCategory } from "@/lib/bugaderia/rows";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
-import { Button, Checkbox, Heading, SegmentedControl, Text, useToast } from "@/components/ui";
+import {
+  Button,
+  Checkbox,
+  Heading,
+  Icon,
+  SegmentedControl,
+  Text,
+  TextButton,
+} from "@/components/ui";
 
 interface AlmostEntry {
   outfit: SavedOutfit;
@@ -76,6 +85,7 @@ function sortByCompatibility(
  */
 export function AvuiBuilder({
   rows,
+  hasDirtyByRow,
   defaultSweater,
   readyOutfits,
   almostOutfits,
@@ -84,6 +94,7 @@ export function AvuiBuilder({
   hasAnyOutfits,
 }: {
   rows: Record<RowCategory, GarmentWithColors[]>;
+  hasDirtyByRow: Record<RowCategory, boolean>;
   defaultSweater: boolean;
   readyOutfits: SavedOutfit[];
   almostOutfits: AlmostEntry[];
@@ -93,9 +104,26 @@ export function AvuiBuilder({
 }) {
   const [tab, setTab] = useState<Tab>("munta");
   const [withSweater, setWithSweater] = useState(defaultSweater);
-  const [selection, setSelection] = useState<Selection>({});
+  // Seeded with each row's first card so the very first paint already
+  // shows the real, enabled state. Left empty, the server rendered a
+  // disabled button under "et falta triar: …" that flashed on every load
+  // until hydration let the rows report what was centred all along. The
+  // rows correct this on mount if a re-sort moved their first card.
+  const [selection, setSelection] = useState<Selection>(() => {
+    const initial: Selection = {};
+    for (const category of ALL_ROWS) {
+      const first = rows[category][0];
+      if (first) initial[category] = first;
+    }
+    return initial;
+  });
   const [isPending, startTransition] = useTransition();
-  const toast = useToast();
+  // The revalidatePath round-trip eventually refreshes the page, but not
+  // fast enough to read as a response to the tap — this confirms the wear
+  // immediately, the same trick AvuiView uses for saved outfits. Keyed by
+  // the worn combination rather than a bare flag, so changing any row
+  // drops back to "Me'l poso" instead of claiming you already wear it.
+  const [wornKey, setWornKey] = useState<string | null>(null);
 
   const activeRows = useMemo<RowCategory[]>(
     () => (withSweater ? [...FIXED_ROWS, "SWEATER"] : FIXED_ROWS),
@@ -152,26 +180,49 @@ export function AvuiBuilder({
   const selectedGarments = activeRows
     .map((category) => selection[category])
     .filter((g): g is GarmentWithColors => !!g);
-  const canWear = selectedGarments.length === activeRows.length;
+  const missingRows = activeRows.filter((category) => !selection[category]);
+  const canWear = missingRows.length === 0;
+  const selectionKey = selectedGarments.map((g) => g.id).join(",");
+  const isWorn = canWear && wornKey === selectionKey;
 
-  const resolvedPaletteId = canWear ? resolvePaletteForOutfit(selectedGarments, palettes) : null;
-  const resolvedPalette = resolvedPaletteId !== null
-    ? (palettes.find((p) => p.id === resolvedPaletteId) ?? null)
-    : null;
+  // The engine walks every garment colour against 157 canonicals, so this
+  // stays out of the render path unless the actual picks change.
+  const resolvedPalette = useMemo(() => {
+    if (!canWear) return null;
+    const id = resolvePaletteForOutfit(selectedGarments, palettes);
+    return id === null ? null : (palettes.find((p) => p.id === id) ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canWear, palettes, selectionKey]);
 
   const handleWear = () => {
     if (!canWear) return;
     const garmentIds = selectedGarments.map((g) => g.id);
     startTransition(async () => {
       await wearImprovisedTodayAction(garmentIds);
-      toast.show(UI.bugaderia.avui.wornToday, "success");
+      setWornKey(garmentIds.join(","));
     });
   };
 
+  /* Two layout modes, because the tabs want opposite things. The builder
+     must fit the viewport exactly (`flex-1 min-h-0` — never `h-[100dvh]`,
+     which would stack under the site header and reintroduce the very
+     scroll this screen must not have). The saved-outfit list is a list:
+     it scrolls the page like every other route. Forcing it into the
+     builder's fixed box left the page scrolling *and* an inner scroller
+     inside it, which on a phone reads as the screen fighting your thumb. */
+  const isBuilder = tab === "munta";
+
   return (
-    <div className="flex h-[100dvh] flex-col gap-4 px-6 md:px-10 pt-2 pb-6 sm:mx-auto sm:w-full sm:max-w-lg sm:max-h-[820px]">
-      <header className="flex flex-col gap-3 shrink-0">
-        <Heading level="title-xl">{UI.bugaderia.today}</Heading>
+    <div
+      className={`flex flex-col gap-3 px-6 md:px-10 pt-2 sm:mx-auto sm:w-full sm:max-w-lg ${
+        isBuilder ? "flex-1 min-h-0 pb-4 sm:max-h-[820px]" : "pb-24"
+      }`}
+    >
+      {/* `title`, not `title-xl`: on a 375px screen the larger serif ate
+          roughly a card's worth of height off every row, and this screen
+          is one where the clothes matter more than the masthead. */}
+      <header className="flex flex-col gap-2 shrink-0">
+        <Heading level="title">{UI.bugaderia.today}</Heading>
         <SegmentedControl<Tab>
           value={tab}
           onChange={setTab}
@@ -183,7 +234,7 @@ export function AvuiBuilder({
         />
       </header>
 
-      {tab === "munta" ? (
+      {isBuilder ? (
         <>
           <div className="flex flex-1 min-h-0 flex-col gap-2">
             {activeRows.map((category) => (
@@ -192,6 +243,7 @@ export function AvuiBuilder({
                 category={category}
                 garments={sortedRows[category]}
                 compatibleIds={compatibleIdsByRow[category]}
+                hasDirty={hasDirtyByRow[category]}
                 onSelectionChange={(garment) =>
                   setSelection((prev) => ({ ...prev, [category]: garment ?? undefined }))
                 }
@@ -199,38 +251,79 @@ export function AvuiBuilder({
               />
             ))}
           </div>
-          <Checkbox
-            className="shrink-0"
-            label={UI.bugaderia.avui.withSweater}
-            checked={withSweater}
-            onChange={(e) => setWithSweater(e.target.checked)}
-          />
-          {resolvedPalette && (
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="flex gap-1">
-                {resolvedPalette.colores.map((color, i) => (
-                  <span key={i} className="inline-block h-3 w-6" style={{ backgroundColor: color }} />
-                ))}
+          <div className="flex shrink-0 items-center justify-between gap-3">
+            <Checkbox
+              label={UI.bugaderia.avui.withSweater}
+              checked={withSweater}
+              onChange={(e) => setWithSweater(e.target.checked)}
+            />
+            {/* Silent when the combination lands in no palette: that is
+                not an error, just one the catalogue doesn't cover. */}
+            {resolvedPalette && (
+              <div className="flex min-w-0 items-center gap-2">
+                <div className="flex shrink-0 gap-0.5">
+                  {resolvedPalette.colores.map((color, i) => (
+                    <span
+                      key={i}
+                      className="inline-block h-3 w-4"
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+                <Text
+                  variant="small"
+                  italic
+                  tone="secondary"
+                  className="font-serif truncate"
+                >
+                  {resolvedPalette.nombre}
+                </Text>
               </div>
-              <Text variant="small" italic tone="secondary" className="font-serif">
-                {resolvedPalette.nombre}
-              </Text>
-            </div>
+            )}
+          </div>
+
+          {/* A disabled button with no reason reads as broken — name the
+              rows still waiting for a pick (an empty row can never fill
+              itself, so this is the only way out of a dead button). */}
+          {!canWear && (
+            <Text
+              variant="small"
+              italic
+              tone="secondary"
+              className="font-serif shrink-0 text-center"
+            >
+              {UI.bugaderia.avui.missingRows(
+                missingRows.map((c) => CATEGORY_LABELS[c].toLowerCase()).join(", "),
+              )}
+            </Text>
           )}
-          <Button
-            type="button"
-            size="lg"
-            className="w-full shrink-0"
-            onClick={handleWear}
-            disabled={!canWear || isPending}
-            loading={isPending}
-            loadingText="assignant…"
-          >
-            {UI.bugaderia.avui.wearIt}
-          </Button>
+
+          {isWorn ? (
+            <div className="flex shrink-0 flex-col items-center gap-1">
+              <Button type="button" size="lg" variant="secondary" disabled className="w-full gap-2">
+                <Icon name="check" size={16} />
+                {UI.bugaderia.avui.wornImprovised}
+              </Button>
+              <TextButton type="button" tone="secondary" onClick={() => setWornKey(null)}>
+                {UI.bugaderia.avui.changeIt}
+              </TextButton>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              size="lg"
+              className="w-full shrink-0"
+              onClick={handleWear}
+              disabled={!canWear || isPending}
+              loading={isPending}
+              loadingText="assignant…"
+            >
+              {UI.bugaderia.avui.wearIt}
+            </Button>
+          )}
         </>
       ) : (
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div>
           <AvuiView
             readyOutfits={readyOutfits}
             almostOutfits={almostOutfits}

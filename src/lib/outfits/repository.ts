@@ -78,9 +78,9 @@ export async function findOutfitByExactGarments(garmentIds: string[]) {
   }) ?? null;
 }
 
-// `name: null` is the improvised marker (see AGENTS.md data model): no
-// saveOutfit/duplicateOutfit path ever creates a nameless outfit, so the
-// null is free as a signal without a dedicated column.
+// Marked by the explicit `improvised` column rather than by the absence
+// of a name — see the schema comment: nameless *saved* outfits already
+// exist in the wild, so the name can't carry that signal.
 export async function createImprovisedOutfit(data: {
   garmentIds: string[];
   paletteId: number | null;
@@ -93,6 +93,7 @@ export async function createImprovisedOutfit(data: {
   return prisma.outfit.create({
     data: {
       name: null,
+      improvised: true,
       paletteId: data.paletteId,
       garments: {
         create: data.garmentIds.map((garmentId) => ({

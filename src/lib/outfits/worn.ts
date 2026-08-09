@@ -13,10 +13,15 @@ export function paletteOf(
   return outfit.paletteId === null ? null : paletteMap.get(outfit.paletteId) ?? null;
 }
 
-/** Improvised marker: no `saveOutfit`/`duplicateOutfit` path ever creates
- * a nameless outfit, so `name === null` is free as a signal. */
+/**
+ * Whether the outfit was assembled on the spot in the builder rather than
+ * deliberately saved. Reads an explicit column: `name === null` looked
+ * free as a marker (no code path creates a nameless outfit) but existing
+ * databases already held nameless *saved* outfits, and treating those as
+ * improvised hid every one of them from /armari.
+ */
 export function isImprovised(outfit: SavedOutfit): boolean {
-  return outfit.name === null;
+  return outfit.improvised;
 }
 
 /**

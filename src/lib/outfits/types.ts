@@ -38,6 +38,8 @@ export type OutfitGarmentRole = "primary" | "extra";
 export interface SavedOutfit {
   id: string;
   name: string | null;
+  /** Assembled on the spot in the builder rather than deliberately saved. */
+  improvised: boolean;
   /** null for an improvised outfit whose garments share no Sanzo palette. */
   paletteId: number | null;
   favorite: boolean;

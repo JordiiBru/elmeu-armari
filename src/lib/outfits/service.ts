@@ -72,6 +72,7 @@ export async function addOutfitExtras(outfitId: string, garmentIds: string[]) {
 interface OutfitWithGarments {
   id: string;
   name: string | null;
+  improvised: boolean;
   paletteId: number | null;
   favorite: boolean;
   createdAt: Date;
@@ -83,6 +84,7 @@ export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
   return {
     id: outfit.id,
     name: outfit.name,
+    improvised: outfit.improvised,
     paletteId: outfit.paletteId,
     favorite: outfit.favorite,
     createdAt: outfit.createdAt,

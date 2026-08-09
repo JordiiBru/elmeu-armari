@@ -88,7 +88,11 @@ export const UI = {
         desats: "Desats",
       },
       withSweater: "amb jersei",
-      emptyRow: "res net per aquí",
+      emptyRowDirty: "tot al cistell — anar a rentar",
+      emptyRowSeason: "res d'aquesta temporada",
+      missingRows: (labels: string) => `et falta triar: ${labels}`,
+      wornImprovised: "te'l poses avui",
+      changeIt: "canviar-lo",
     },
     grid: {
       state: "Estat",

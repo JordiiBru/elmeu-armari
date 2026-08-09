@@ -53,6 +53,14 @@ describe("buildRows", () => {
     );
   });
 
+  it("keeps garments with no season recorded, whatever the season", () => {
+    // Shoes and accessories often carry no season. Treating that as
+    // "fits no season" emptied the shoes row and disabled the builder.
+    const seasonless = garment({ id: "shoes", category: "SHOES", seasons: [] });
+    expect(buildRows([seasonless], "SUMMER", new Map()).SHOES.map((g) => g.id)).toEqual(["shoes"]);
+    expect(buildRows([seasonless], "WINTER", new Map()).SHOES.map((g) => g.id)).toEqual(["shoes"]);
+  });
+
   it("orders least-recently-worn first, never-worn winning over any date", () => {
     const old = garment({ id: "old", category: "PANTS" });
     const recent = garment({ id: "recent", category: "PANTS" });
