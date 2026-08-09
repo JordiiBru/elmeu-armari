@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { markGarmentsDirty, markGarmentsClean } from "@/lib/prendas/service";
-import { assignOutfitToDay, findSavedOutfitById } from "@/lib/outfits/service";
+import { assignOutfitToDay, findSavedOutfitById, wearImprovisedOutfit } from "@/lib/outfits/service";
 
 export async function markDirtyAction(garmentIds: string[]): Promise<{ affected: number }> {
   const affected = await markGarmentsDirty(garmentIds);
@@ -30,6 +30,18 @@ export async function wearOutfitTodayAction(outfitId: string): Promise<void> {
   if (!outfit) throw new Error(`Outfit not found: ${outfitId}`);
 
   await assignOutfitToDay(outfitId, new Date());
+
+  revalidatePath("/bugaderia");
+  revalidatePath("/bugaderia/avui");
+  revalidatePath("/armari");
+  revalidatePath("/calendari");
+}
+
+/** Same deferred-dirtying contract as `wearOutfitTodayAction`, for a
+ * combination assembled on the spot in the row builder rather than picked
+ * from a saved outfit. */
+export async function wearImprovisedTodayAction(garmentIds: string[]): Promise<void> {
+  await wearImprovisedOutfit(garmentIds);
 
   revalidatePath("/bugaderia");
   revalidatePath("/bugaderia/avui");

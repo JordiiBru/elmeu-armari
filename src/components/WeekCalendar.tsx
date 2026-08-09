@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { assignOutfitToDayAction, unassignDayAction } from "@/app/outfits/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { SanzoPalette, SavedOutfit, WeekDayPlan } from "@/lib/outfits/types";
+import { paletteOf } from "@/lib/outfits/worn";
 import { OutfitCollage, allGarmentsOf, extraLabelsOf } from "./SavedOutfitsView";
 import { PieceThumb } from "./PieceThumb";
 import { Card, Icon, Sheet, Stack, Text, TextButton, useToast, EmptyState } from "@/components/ui";
@@ -195,7 +196,7 @@ function DayPickerSheet({
       {day.outfit && !picking ? (
         <DayOutfitDetails
           outfit={day.outfit}
-          palette={paletteMap.get(day.outfit.paletteId) ?? null}
+          palette={paletteOf(day.outfit, paletteMap)}
           onClear={handleClear}
           pending={pending}
         />
@@ -237,7 +238,7 @@ function DayPickerSheet({
                     tone="secondary"
                     className="font-serif leading-tight truncate"
                   >
-                    {subtitleOf(outfit, paletteMap.get(outfit.paletteId) ?? null)}
+                    {subtitleOf(outfit, paletteOf(outfit, paletteMap))}
                   </Text>
                 </button>
               );

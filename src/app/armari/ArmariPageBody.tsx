@@ -1,6 +1,12 @@
 import { Suspense } from "react";
 import { findAllGarments } from "@/lib/prendas/service";
-import { findAllOutfits, findTodayOutfitId, toSavedOutfit, sortOutfitsByTop } from "@/lib/outfits/service";
+import {
+  findAllOutfits,
+  findTodayOutfitId,
+  toSavedOutfit,
+  sortOutfitsByTop,
+  isImprovised,
+} from "@/lib/outfits/service";
 import { getCurrentSeason } from "@/lib/prendas/season";
 import { palettes } from "@/lib/colors";
 import { ArmariTabs } from "@/components/ArmariTabs";
@@ -19,7 +25,12 @@ export async function ArmariPageBody() {
     findTodayOutfitId(),
   ]);
 
-  const savedOutfits = sortOutfitsByTop(outfits.map(toSavedOutfit));
+  // One-off combinations worn from the builder shouldn't clutter the
+  // wardrobe list — they still show in /calendari and stats, which is
+  // where they belong. Favouriting one opts it back in.
+  const savedOutfits = sortOutfitsByTop(
+    outfits.map(toSavedOutfit).filter((o) => !isImprovised(o) || o.favorite),
+  );
 
   return (
     <PageContainer width="wide">

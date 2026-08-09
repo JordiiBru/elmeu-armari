@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { wearOutfitTodayAction } from "@/app/bugaderia/actions";
 import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
+import { paletteOf } from "@/lib/outfits/worn";
 import type { GarmentWithColors } from "@/lib/prendas/types";
+import { useCenteredIndex } from "@/lib/useCenteredIndex";
 import { OutfitCollage, allGarmentsOf } from "./SavedOutfitsView";
 import { Button, Icon, Text, EmptyState } from "@/components/ui";
 
@@ -36,8 +38,6 @@ export function AvuiView({
   hasAnyOutfits: boolean;
 }) {
   const paletteMap = new Map(palettes.map((p) => [p.id, p]));
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   // Wearing an outfit re-ranks it to "just worn" (least-recently-worn
   // sorts it last), and the server round-trip would deliver that new
   // order mid-session — the card the user is looking at would jump to
@@ -45,7 +45,7 @@ export function AvuiView({
   // ever reflecting state changes (via `justWornId` below) keeps
   // browsing stable; a fresh visit still picks up the real order.
   const [orderedOutfits] = useState(readyOutfits);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const { scrollerRef, activeIndex, setItemRef } = useCenteredIndex(orderedOutfits.length);
   const [almostOpen, setAlmostOpen] = useState(false);
   // The server round-trip (revalidatePath) eventually refreshes
   // `todayOutfitId`, but that's not instant enough to feel like a
@@ -56,56 +56,6 @@ export function AvuiView({
   const effectiveTodayId = justWornId ?? todayOutfitId;
   const activeOutfit = orderedOutfits[activeIndex] ?? null;
   const activeIsToday = activeOutfit?.id === effectiveTodayId;
-
-  // Which card is centred, tracked from actual scroll position rather
-  // than IntersectionObserver threshold crossings — with peeking
-  // neighbours several cards can be simultaneously "intersecting" at
-  // low ratios, which made the threshold-based version stick on the
-  // first card. `getBoundingClientRect` for both the container and each
-  // card, not `offsetLeft` vs `scrollLeft`: those two are only
-  // comparable when the container happens to be a CSS positioning
-  // context, which this one isn't — mixing them silently measured
-  // against the wrong origin and the index barely ever moved.
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    let raf = 0;
-    const updateActive = () => {
-      const containerRect = el.getBoundingClientRect();
-      const viewportCenter = containerRect.left + containerRect.width / 2;
-      let closest = 0;
-      let closestDistance = Infinity;
-      cardRefs.current.forEach((card, i) => {
-        if (!card) return;
-        const cardRect = card.getBoundingClientRect();
-        const cardCenter = cardRect.left + cardRect.width / 2;
-        const distance = Math.abs(cardCenter - viewportCenter);
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closest = i;
-        }
-      });
-      setActiveIndex(closest);
-    };
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(updateActive);
-    };
-    updateActive();
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      el.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, [orderedOutfits.length]);
-
-  const goToCard = (direction: 1 | -1) => {
-    cardRefs.current[activeIndex + direction]?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-  };
 
   const handleWear = (outfit: SavedOutfit) => {
     startTransition(async () => {
@@ -145,13 +95,11 @@ export function AvuiView({
           tabIndex={0}
         >
           {orderedOutfits.map((outfit, i) => {
-            const palette = paletteMap.get(outfit.paletteId) ?? null;
+            const palette = paletteOf(outfit, paletteMap);
             return (
               <div
                 key={outfit.id}
-                ref={(el) => {
-                  cardRefs.current[i] = el;
-                }}
+                ref={setItemRef(i)}
                 data-index={i}
                 className="w-[70%] shrink-0 snap-center flex flex-col gap-3"
               >
@@ -195,32 +143,6 @@ export function AvuiView({
           </div>
         )}
       </div>
-
-      {/* Touch swipes; a mouse can't drag this scroller, so pointer-
-          capable, wide-enough screens get click targets too — sitting
-          in the page margins outside the outfit itself, not overlaid
-          on the photo, since `lg` leaves plenty of room either side of
-          the narrow content column. */}
-      {orderedOutfits.length > 1 && (
-        <>
-          <button
-            type="button"
-            onClick={() => goToCard(-1)}
-            aria-label="Outfit anterior"
-            className="hidden lg:inline-flex fixed left-6 xl:left-16 top-1/2 -translate-y-1/2 h-11 w-11 items-center justify-center bg-elevated/90 text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:bg-elevated focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          >
-            <Icon name="chevron-left" size={18} />
-          </button>
-          <button
-            type="button"
-            onClick={() => goToCard(1)}
-            aria-label="Outfit següent"
-            className="hidden lg:inline-flex fixed right-6 xl:right-16 top-1/2 -translate-y-1/2 h-11 w-11 items-center justify-center bg-elevated/90 text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:bg-elevated focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          >
-            <Icon name="chevron-right" size={18} />
-          </button>
-        </>
-      )}
 
       {/* One action for the centred card, not one per card: with cards
           peeking at 88% width a button matching each card's width read

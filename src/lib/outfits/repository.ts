@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { dayKey } from "./week";
 import type { Category } from "@/lib/prendas/types";
+import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 
 const OUTFIT_GARMENTS_INCLUDE = {
   garments: {
@@ -59,6 +60,66 @@ export async function findOutfitByGarmentsAndPalette(
 
 export async function findOutfitById(id: string) {
   return prisma.outfit.findUnique({ where: { id }, include: OUTFIT_GARMENTS_INCLUDE });
+}
+
+// Dedup by exact garment set, ignoring role and palette. Unlike
+// findOutfitByGarmentsAndPalette, this matches on the whole outfit
+// (primary + extra) — an improvised combination always carries shoes,
+// so restricting the comparison to "bare" primaries would never match.
+export async function findOutfitByExactGarments(garmentIds: string[]) {
+  const sorted = [...garmentIds].sort();
+  const outfits = await prisma.outfit.findMany({
+    where: { garments: { some: { garmentId: { in: sorted } } } },
+    include: outfitInclude(),
+  });
+  return outfits.find((o) => {
+    const ids = o.garments.map((g) => g.garmentId).sort();
+    return ids.length === sorted.length && ids.every((id, i) => id === sorted[i]);
+  }) ?? null;
+}
+
+// `name: null` is the improvised marker (see AGENTS.md data model): no
+// saveOutfit/duplicateOutfit path ever creates a nameless outfit, so the
+// null is free as a signal without a dedicated column.
+export async function createImprovisedOutfit(data: {
+  garmentIds: string[];
+  paletteId: number | null;
+}) {
+  const categories = await prisma.garment.findMany({
+    where: { id: { in: data.garmentIds } },
+    select: { id: true, category: true },
+  });
+  const categoryById = new Map(categories.map((g) => [g.id, g.category]));
+  return prisma.outfit.create({
+    data: {
+      name: null,
+      paletteId: data.paletteId,
+      garments: {
+        create: data.garmentIds.map((garmentId) => ({
+          garmentId,
+          role: EXTRA_CATEGORIES.has(categoryById.get(garmentId) as Category) ? "extra" : "primary",
+        })),
+      },
+    },
+    include: outfitInclude(),
+  });
+}
+
+// Last time each garment was worn, most recent first per garment — used
+// to order the builder rows (never worn wins, see buildRows).
+export async function findLastWornByGarment(): Promise<Map<string, Date>> {
+  const events = await prisma.wornEvent.findMany({
+    where: { date: { lte: dayKey(new Date()) } },
+    orderBy: { date: "desc" },
+    include: { outfit: { include: { garments: { select: { garmentId: true } } } } },
+  });
+  const lastWorn = new Map<string, Date>();
+  for (const event of events) {
+    for (const og of event.outfit.garments) {
+      if (!lastWorn.has(og.garmentId)) lastWorn.set(og.garmentId, event.date);
+    }
+  }
+  return lastWorn;
 }
 
 export async function createOutfit(data: {

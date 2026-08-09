@@ -29,8 +29,11 @@ model Garment {
 
 model Outfit {
   id         String          @id @default(cuid())
+  /// null = improvised (assembled on the spot, never explicitly saved/named).
   name       String?
-  paletteId  Int
+  /// null when the garments have no shared Sanzo Wada palette — only
+  /// possible for improvised outfits; a saved outfit always resolves one.
+  paletteId  Int?
   favorite   Boolean         @default(false)
   garments   OutfitGarment[]
   wornEvents WornEvent[]

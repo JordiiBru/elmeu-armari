@@ -83,6 +83,12 @@ export const UI = {
       emptyNoneReady: "toca fer bugada",
       goToArmari: "anar a l'armari",
       goToRentar: "anar a rentar",
+      tabs: {
+        munta: "Munta'l",
+        desats: "Desats",
+      },
+      withSweater: "amb jersei",
+      emptyRow: "res net per aquí",
     },
     grid: {
       state: "Estat",

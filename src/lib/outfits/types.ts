@@ -38,7 +38,8 @@ export type OutfitGarmentRole = "primary" | "extra";
 export interface SavedOutfit {
   id: string;
   name: string | null;
-  paletteId: number;
+  /** null for an improvised outfit whose garments share no Sanzo palette. */
+  paletteId: number | null;
   favorite: boolean;
   /** Most recent first, capped to a handful of entries. */
   wornEvents: { id: string; date: Date }[];

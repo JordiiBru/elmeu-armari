@@ -179,8 +179,15 @@ function intersectSets(sets: Set<number>[]): Set<number> {
   return out;
 }
 
-function buildContext(g: GarmentWithColors): Ctx | null {
-  if (EXCLUDED_CATEGORIES.has(g.category)) return null;
+/**
+ * Snaps every colour of a garment to its canonical readings and
+ * intersects the palette sets they belong to — the core of both
+ * `buildContext` (outfit generation) and `garmentPaletteIds` (colour
+ * hints for categories generation excludes, e.g. shoes). `null` when
+ * any colour falls outside the Sanzo Wada vocabulary, or the garment
+ * has no colours at all.
+ */
+function snapGarmentColours(g: GarmentWithColors): { snaps: Snap[]; paletteIds: Set<number> } | null {
   if (g.colors.length === 0) return null;
 
   const snaps: Snap[] = [];
@@ -202,8 +209,27 @@ function buildContext(g: GarmentWithColors): Ctx | null {
   const paletteIds = intersectSets(perColour);
   if (paletteIds.size === 0) return null;
 
-  const totalDistance = snaps.reduce((sum, s) => sum + s.best.distance, 0);
-  return { garment: g, snaps, paletteIds, totalDistance };
+  return { snaps, paletteIds };
+}
+
+/**
+ * Palette ids a single garment's colours belong to, ignoring the
+ * category exclusion `buildContext` applies (SOCKS/SHOES). Used by the
+ * "Què em poso?" builder to hint compatibility on cards `buildContext`
+ * itself would refuse to score, e.g. shoes — never affects outfit
+ * generation, which keeps going through `buildContext`.
+ */
+export function garmentPaletteIds(g: GarmentWithColors): Set<number> | null {
+  return snapGarmentColours(g)?.paletteIds ?? null;
+}
+
+function buildContext(g: GarmentWithColors): Ctx | null {
+  if (EXCLUDED_CATEGORIES.has(g.category)) return null;
+  const snapped = snapGarmentColours(g);
+  if (!snapped) return null;
+
+  const totalDistance = snapped.snaps.reduce((sum, s) => sum + s.best.distance, 0);
+  return { garment: g, snaps: snapped.snaps, paletteIds: snapped.paletteIds, totalDistance };
 }
 
 function hasTop(cats: Set<string>): boolean {
@@ -328,6 +354,31 @@ function refinePalettes(
     )
     .slice(0, MAX_EXTRA_PALETTES);
   return [primary, ...tightExtras];
+}
+
+/**
+ * The best shared palette id for a fixed set of garments (as opposed to
+ * `generateOutfitGroups*`, which enumerates every subset of a catalogue).
+ * Used to resolve the palette of an improvised outfit at wear time: `null`
+ * when a garment falls outside the Sanzo vocabulary or the set shares no
+ * palette — an improvised combination is free to not land in the catalogue.
+ */
+export function resolvePaletteForOutfit(
+  garments: GarmentWithColors[],
+  palettes: SanzoPalette[],
+): number | null {
+  const ctxs: Ctx[] = [];
+  for (const g of garments) {
+    const ctx = buildContext(g);
+    if (ctx) ctxs.push(ctx);
+  }
+  if (ctxs.length === 0) return null;
+
+  const shared = intersectSets(ctxs.map((c) => c.paletteIds));
+  if (shared.size === 0) return null;
+
+  const matches = refinePalettes([...shared], ctxs, palettes);
+  return matches[0]?.palette.id ?? null;
 }
 
 export function generateOutfitGroupsForGarment(

@@ -1,18 +1,29 @@
-import { findAllOutfits, findTodayOutfitId, toSavedOutfit } from "@/lib/outfits/service";
+import {
+  findAllOutfits,
+  findTodayOutfitId,
+  toSavedOutfit,
+  findLastWornByGarment,
+} from "@/lib/outfits/service";
+import { findAllGarments } from "@/lib/prendas/service";
 import { rankOutfitsForToday, outfitAvailability } from "@/lib/bugaderia/laundry";
+import { buildRows } from "@/lib/bugaderia/rows";
 import { getCurrentSeason } from "@/lib/prendas/season";
 import { palettes } from "@/lib/colors";
-import { AvuiView } from "@/components/AvuiView";
-import { UI } from "@/lib/prendas/ui-strings";
-import { PageContainer, SectionHeader } from "@/components/ui";
+import { AvuiBuilder } from "@/components/AvuiBuilder";
 
 export const dynamic = "force-dynamic";
 
 export default async function AvuiPage() {
-  const [outfits, todayOutfitId] = await Promise.all([findAllOutfits(), findTodayOutfitId()]);
+  const [outfits, todayOutfitId, garments, lastWorn] = await Promise.all([
+    findAllOutfits(),
+    findTodayOutfitId(),
+    findAllGarments(),
+    findLastWornByGarment(),
+  ]);
 
+  const season = getCurrentSeason();
   const savedOutfits = outfits.map(toSavedOutfit);
-  const ranked = rankOutfitsForToday(savedOutfits, getCurrentSeason());
+  const ranked = rankOutfitsForToday(savedOutfits, season);
 
   const readyOutfits = ranked.filter((o) => outfitAvailability(o).status === "ready");
   const almostOutfits = ranked
@@ -20,16 +31,21 @@ export default async function AvuiPage() {
     .filter(({ availability }) => availability.status === "almost")
     .map(({ outfit, availability }) => ({ outfit, blockedBy: availability.blockedBy }));
 
+  const rows = buildRows(garments, season, lastWorn);
+  // Computed server-side and passed as a prop so the initial client render
+  // matches — flipping this from a client-only `useEffect` would hydrate
+  // unchecked and then jump, or mismatch entirely.
+  const defaultSweater = season === "AUTUMN" || season === "WINTER";
+
   return (
-    <PageContainer width="narrow">
-      <SectionHeader title={UI.bugaderia.today} level="title-xl" />
-      <AvuiView
-        readyOutfits={readyOutfits}
-        almostOutfits={almostOutfits}
-        palettes={palettes}
-        todayOutfitId={todayOutfitId}
-        hasAnyOutfits={savedOutfits.length > 0}
-      />
-    </PageContainer>
+    <AvuiBuilder
+      rows={rows}
+      defaultSweater={defaultSweater}
+      readyOutfits={readyOutfits}
+      almostOutfits={almostOutfits}
+      palettes={palettes}
+      todayOutfitId={todayOutfitId}
+      hasAnyOutfits={savedOutfits.length > 0}
+    />
   );
 }

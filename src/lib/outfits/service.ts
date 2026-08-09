@@ -2,6 +2,9 @@ import {
   createOutfit,
   findAllOutfits,
   findOutfitByGarmentsAndPalette,
+  findOutfitByExactGarments,
+  createImprovisedOutfit,
+  findLastWornByGarment,
   findOutfitById,
   deleteOutfit,
   countOutfits,
@@ -20,8 +23,15 @@ import { findGarmentById, markGarmentsDirty } from "@/lib/prendas/service";
 import { WASHABLE_CATEGORIES } from "@/lib/prendas/types";
 import { palettes } from "@/lib/colors";
 import { dayKey, addDays, dayToISO } from "./week";
+import { resolvePaletteForOutfit } from "./engine";
+import { paletteOf, isImprovised } from "./worn";
 import type { SavedOutfit, WeekDayPlan, OutfitGarmentRole } from "./types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
+
+// Re-exported from the pure `worn.ts` module so server call sites can keep
+// pulling everything from `service.ts`; client components should import
+// them from `worn.ts` directly to avoid dragging Prisma into the bundle.
+export { findLastWornByGarment, paletteOf, isImprovised };
 
 export {
   findAllOutfits,
@@ -62,7 +72,7 @@ export async function addOutfitExtras(outfitId: string, garmentIds: string[]) {
 interface OutfitWithGarments {
   id: string;
   name: string | null;
-  paletteId: number;
+  paletteId: number | null;
   favorite: boolean;
   createdAt: Date;
   garments: { id: string; role: string; garment: GarmentWithColors }[];
@@ -126,6 +136,27 @@ export async function assignOutfitToDay(outfitId: string, date: Date) {
 
 export async function unassignDay(date: Date) {
   return clearWornDay(dayKey(date));
+}
+
+/**
+ * Wears a combination assembled on the spot in the builder. Reuses the
+ * exact-set match if it already exists (e.g. re-wearing the same rows
+ * without changing a category), otherwise materialises a fresh
+ * improvised `Outfit` row so `WornEvent`, `settlePastWornEvents`,
+ * `/calendari` and stats keep working untouched. Never touches
+ * `settlePastWornEvents` itself — the garments hang off the `Outfit`
+ * like any other, so deferred soiling stays idempotent.
+ */
+export async function wearImprovisedOutfit(garmentIds: string[]): Promise<string> {
+  const found = await Promise.all(garmentIds.map((id) => findGarmentById(id)));
+  const garments = found.filter((g): g is NonNullable<typeof g> => g !== null);
+  const paletteId = resolvePaletteForOutfit(garments, palettes);
+
+  const existing = await findOutfitByExactGarments(garmentIds);
+  const outfit = existing ?? (await createImprovisedOutfit({ garmentIds, paletteId }));
+
+  await assignOutfitToDay(outfit.id, new Date());
+  return outfit.id;
 }
 
 /**
@@ -200,6 +231,12 @@ export async function saveOutfit(data: {
 export async function duplicateOutfit(outfitId: string) {
   const source = await findOutfitById(outfitId);
   if (!source) throw new Error(`Outfit not found: ${outfitId}`);
+  // Duplicating always produces a new saved (named) variant, which needs a
+  // concrete palette — an improvised outfit whose garments share none has
+  // nothing to carry over.
+  if (source.paletteId === null) {
+    throw new Error(`Cannot duplicate an improvised outfit with no shared palette: ${outfitId}`);
+  }
 
   const garmentIds = source.garments
     .filter((g) => g.role === "primary")

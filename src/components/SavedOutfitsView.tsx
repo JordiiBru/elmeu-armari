@@ -15,7 +15,7 @@ import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { dayToISO } from "@/lib/outfits/week";
-import { wornRank, formatLastWorn } from "@/lib/outfits/worn";
+import { wornRank, formatLastWorn, paletteOf } from "@/lib/outfits/worn";
 import { PieceThumb } from "./PieceThumb";
 import { Card, Icon, Sheet, Stack, Text, TextButton, useToast, EmptyState } from "@/components/ui";
 
@@ -153,7 +153,7 @@ export function SavedOutfitsView({
       {suggestedOutfit && !todayOutfitId && (
         <SuggestionBanner
           outfit={suggestedOutfit}
-          palette={paletteMap.get(suggestedOutfit.paletteId) ?? null}
+          palette={paletteOf(suggestedOutfit, paletteMap)}
           onOpen={() => setOpenOutfitId(suggestedOutfit.id)}
         />
       )}
@@ -163,7 +163,7 @@ export function SavedOutfitsView({
           <SavedOutfitCard
             key={outfit.id}
             outfit={outfit}
-            palette={paletteMap.get(outfit.paletteId) ?? null}
+            palette={paletteOf(outfit, paletteMap)}
             index={i}
             suggested={outfit.id === suggestedOutfitId}
             onOpen={() => setOpenOutfitId(outfit.id)}
@@ -174,7 +174,7 @@ export function SavedOutfitsView({
       {openOutfit && (
         <SavedOutfitSheet
           outfit={openOutfit}
-          palette={paletteMap.get(openOutfit.paletteId) ?? null}
+          palette={paletteOf(openOutfit, paletteMap)}
           isToday={openOutfit.id === todayOutfitId}
           onClose={() => {
             setOpenOutfitId(null);

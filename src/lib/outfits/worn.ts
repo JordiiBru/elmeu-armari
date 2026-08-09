@@ -1,6 +1,23 @@
-import type { SavedOutfit } from "./types";
+import type { SanzoPalette, SavedOutfit } from "./types";
 
 type WornEvent = SavedOutfit["wornEvents"][number];
+
+/** Resolves an outfit's palette through its (possibly null) paletteId —
+ * route every lookup through here instead of `paletteMap.get(outfit.paletteId)`
+ * directly, since that no longer typechecks once paletteId is nullable.
+ * Pure (no Prisma), so client components can import it directly. */
+export function paletteOf(
+  outfit: SavedOutfit,
+  paletteMap: Map<number, SanzoPalette>,
+): SanzoPalette | null {
+  return outfit.paletteId === null ? null : paletteMap.get(outfit.paletteId) ?? null;
+}
+
+/** Improvised marker: no `saveOutfit`/`duplicateOutfit` path ever creates
+ * a nameless outfit, so `name === null` is free as a signal. */
+export function isImprovised(outfit: SavedOutfit): boolean {
+  return outfit.name === null;
+}
 
 /**
  * Never-worn outfits rank before any dated one; among dated ones the
