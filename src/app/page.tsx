@@ -4,7 +4,10 @@ import { Stack, Text, Heading } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
+// "Què em poso?" is the question the app exists to answer, so it leads —
+// two taps deep under Bugaderia it read as a laundry chore.
 const PRIMARY = [
+  { href: "/avui", label: "Què em poso?" },
   { href: "/armari", label: "El meu armari" },
   { href: "/calendari", label: "Calendari" },
   { href: "/paleta", label: "Paletes" },

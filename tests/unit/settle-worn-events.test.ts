@@ -13,9 +13,9 @@ const events = [
     settledAt: null,
     outfit: {
       garments: [
-        { role: "primary", garment: garment("shirt", "SHIRT") },
-        { role: "primary", garment: garment("pants", "PANTS") },
-        { role: "extra", garment: garment("shoes", "SHOES") },
+        { garment: garment("shirt", "SHIRT") },
+        { garment: garment("sweater", "SWEATER") },
+        { garment: garment("pants", "PANTS") },
       ],
     },
   },
@@ -25,10 +25,9 @@ const events = [
     date: new Date("2026-08-02T00:00:00.000Z"),
     settledAt: null,
     outfit: {
-      garments: [
-        { role: "extra", garment: garment("shoes2", "SHOES") },
-        { role: "extra", garment: garment("ring", "ACCESSORI") },
-      ],
+      // An outfit is clothes only — this one has none, e.g. a bare
+      // top-only saved outfit whose other slot was never filled.
+      garments: [],
     },
   },
 ];
@@ -44,9 +43,6 @@ vi.mock("@/lib/outfits/repository", () => ({
   findOutfitById: vi.fn(),
   deleteOutfit: vi.fn(),
   countOutfits: vi.fn(),
-  createOutfitExtras: vi.fn(),
-  removeOutfitExtra: vi.fn(),
-  removeOutfitExtrasByCategory: vi.fn(),
   setOutfitFavorite: vi.fn(),
   setWornDay: vi.fn(),
   clearWornDay: vi.fn(),
@@ -70,14 +66,16 @@ beforeEach(() => {
 });
 
 describe("settlePastWornEvents", () => {
-  it("dirties only the washable pieces of each unsettled past outfit", async () => {
+  it("dirties what one wear soils, and leaves the trousers alone", async () => {
     const count = await settlePastWornEvents();
     expect(count).toBe(2);
     expect(markGarmentsDirty).toHaveBeenCalledTimes(1);
-    expect(markGarmentsDirty).toHaveBeenCalledWith(["shirt", "pants"]);
+    // Trousers are washable, but wearing them once is not what puts them
+    // in the basket — that is a decision you make in Embrutar.
+    expect(markGarmentsDirty).toHaveBeenCalledWith(["shirt", "sweater"]);
   });
 
-  it("skips the dirty call for an outfit with no washable pieces, but still settles it", async () => {
+  it("skips the dirty call for an outfit with nothing to soil, but still settles it", async () => {
     await settlePastWornEvents();
     expect(markGarmentsDirty).not.toHaveBeenCalledWith([]);
     expect(markWornEventSettled).toHaveBeenCalledWith("w2");

@@ -21,48 +21,35 @@ export function isClean(garment: GarmentWithColors): boolean {
   return !isDirty(garment);
 }
 
-/** Every garment of the outfit, primary and extra alike. */
+/** An outfit is clothes only, so this is all of it. */
 export function garmentsOf(outfit: SavedOutfit): GarmentWithColors[] {
-  return outfit.garments.map((og) => og.garment);
+  return outfit.garments;
 }
 
-/**
- * Dirtiness is evaluated over every garment of the outfit, not only the
- * primary ones: extras happen to be non-washable today, but that is a
- * property of `WASHABLE_CATEGORIES`, not something to assume here.
- */
+/** An outfit is blocked only by its own clothes — the shoes and
+ * accessories you wear it with belong to the day, not to the outfit. */
 export function dirtyGarmentsOf(outfit: SavedOutfit): GarmentWithColors[] {
   return garmentsOf(outfit).filter(isDirty);
 }
 
-export type OutfitAvailability = "ready" | "almost" | "blocked";
-
 /**
- * Strict: an outfit is wearable only when all of its washable pieces are
- * clean. Missing exactly one is "almost" — worth surfacing, since one
- * wash away. An outfit with no washable piece at all is trivially ready.
+ * Available or not, nothing in between. There used to be a middle state
+ * for "one wash away", but a state that is neither wearable nor
+ * unwearable only ever raised the question of what it meant.
  */
-export function outfitAvailability(outfit: SavedOutfit): {
-  status: OutfitAvailability;
-  blockedBy: GarmentWithColors[];
-} {
-  const blockedBy = dirtyGarmentsOf(outfit);
-  const status: OutfitAvailability =
-    blockedBy.length === 0 ? "ready" : blockedBy.length === 1 ? "almost" : "blocked";
-  return { status, blockedBy };
+export function isWearable(outfit: SavedOutfit): boolean {
+  return dirtyGarmentsOf(outfit).length === 0;
 }
 
 /**
- * In season means *every* primary piece fits the current season. Asking
- * for just one match would let a wool jumper through in August because
- * the trousers are all-year.
+ * In season means *every* piece fits the current season. Asking for just
+ * one match would let a wool jumper through in August because the
+ * trousers are all-year.
  */
 export function isInSeason(outfit: SavedOutfit, season: Season): boolean {
-  return outfit.garments
-    .filter((og) => og.role === "primary")
-    .every((og) =>
-      og.garment.seasons.some((s) => s.season === season || s.season === "ALL_YEAR"),
-    );
+  return outfit.garments.every((g) =>
+    g.seasons.some((s) => s.season === season || s.season === "ALL_YEAR"),
+  );
 }
 
 /**

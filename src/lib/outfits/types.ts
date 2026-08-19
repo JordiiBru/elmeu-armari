@@ -33,26 +33,31 @@ export interface OutfitResult {
   unmatchedColors: number[];
 }
 
-export type OutfitGarmentRole = "primary" | "extra";
-
 export interface SavedOutfit {
   id: string;
   name: string | null;
   paletteId: number;
   favorite: boolean;
-  /** Most recent first, capped to a handful of entries. */
-  wornEvents: { id: string; date: Date }[];
   createdAt: Date;
-  garments: {
-    id: string;
-    role: OutfitGarmentRole;
-    garment: GarmentWithColors;
-  }[];
+  /** Clothes only, no role wrapper — an outfit has nothing else in it. */
+  garments: GarmentWithColors[];
+  /** Most recent first, past days only, capped at 3. */
+  wornEvents: WornDay[];
 }
 
-/** One cell of the weekly planner: a calendar day and whatever outfit
- * (if any) is assigned to it. */
+/** A day that has been committed: the outfit is in `SavedOutfit`, this is
+ * everything else you put on that morning. */
+export interface WornDay {
+  id: string;
+  date: Date;
+  /** Shoes / socks / accessories worn that day. */
+  extras: GarmentWithColors[];
+}
+
+/** One cell of the weekly planner: a calendar day, whatever outfit
+ * (if any) is assigned to it, and what it is worn with. */
 export interface WeekDayPlan {
   date: string; // YYYY-MM-DD
   outfit: SavedOutfit | null;
+  extras: GarmentWithColors[];
 }

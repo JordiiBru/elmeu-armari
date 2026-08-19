@@ -5,14 +5,24 @@ import BackLink from "@/components/BackLink";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 /**
- * Fallback per rutes que teoricament sempre vindran d'un lloc concret.
- * Aixo evita que un "enrere" acabi a la home per accident.
+ * Jerarquia de pantalles. "Enrere" puja un nivell, i cada pantalla te un
+ * unic pare: es el que fa que el boto sigui previsible vinguis d'on
+ * vinguis. Les pantalles de primer nivell pengen de la portada, encara
+ * que una altra pantalla hi enllaci de costat (la bugaderia enllaca a
+ * "Què em poso?", que es germana seva, no filla).
  */
-function fallbackFor(pathname: string): string {
-  if (pathname === "/add") return "/armari";
-  if (pathname.startsWith("/edit/")) return "/armari";
-  if (pathname.startsWith("/bugaderia/")) return "/bugaderia";
-  return "/";
+const PARENT: { prefix: string; parent: string }[] = [
+  { prefix: "/add", parent: "/armari" },
+  { prefix: "/edit/", parent: "/armari" },
+  { prefix: "/armari/", parent: "/armari" },
+  { prefix: "/bugaderia/", parent: "/bugaderia" },
+];
+
+function parentOf(pathname: string): string {
+  const match = PARENT.find(
+    (e) => pathname === e.prefix || pathname.startsWith(e.prefix),
+  );
+  return match ? match.parent : "/";
 }
 
 export default function SiteHeader() {
@@ -21,7 +31,7 @@ export default function SiteHeader() {
 
   return (
     <header className="w-full px-6 md:px-10 pt-6 pb-4 flex items-center justify-between">
-      {isHome ? <span /> : <BackLink fallbackHref={fallbackFor(pathname)} />}
+      {isHome ? <span /> : <BackLink href={parentOf(pathname)} />}
       <ThemeToggle />
     </header>
   );

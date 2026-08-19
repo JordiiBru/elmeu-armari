@@ -1,4 +1,5 @@
 import type { GarmentWithColors, Category, Texture, Season } from "./types";
+import { CATEGORIES, SUBTYPES_BY_CATEGORY } from "./types";
 import { perceptualDistance, OKLCH_DISTANCE_THRESHOLD } from "@/lib/outfits/color-matching";
 import { isDirty } from "@/lib/bugaderia/laundry";
 
@@ -51,5 +52,32 @@ export function filterGarments(
     }
 
     return true;
+  });
+}
+
+/**
+ * Wardrobe order: by category first, then by subtype, both in the order
+ * the domain declares them rather than alphabetically — a rail goes
+ * jerseis, samarretes, pantalons, not a dictionary. Creation date breaks
+ * ties so the sequence never shuffles between renders.
+ *
+ * The laundry screens live off this: a grid of thirty pieces in
+ * insertion order is a pile, and a pile is what you are trying to sort
+ * out when you open Embrutar.
+ */
+export function sortByWardrobeOrder(garments: GarmentWithColors[]): GarmentWithColors[] {
+  const categoryRank = new Map(CATEGORIES.map((c, i) => [c, i]));
+  const subtypeRank = (g: GarmentWithColors): number => {
+    if (!g.subtype) return -1;
+    const i = SUBTYPES_BY_CATEGORY[g.category].indexOf(g.subtype);
+    return i === -1 ? Number.MAX_SAFE_INTEGER : i;
+  };
+
+  return [...garments].sort((a, b) => {
+    const byCategory = (categoryRank.get(a.category) ?? 0) - (categoryRank.get(b.category) ?? 0);
+    if (byCategory !== 0) return byCategory;
+    const bySubtype = subtypeRank(a) - subtypeRank(b);
+    if (bySubtype !== 0) return bySubtype;
+    return a.createdAt.getTime() - b.createdAt.getTime();
   });
 }

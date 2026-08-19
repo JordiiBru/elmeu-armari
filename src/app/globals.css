@@ -367,6 +367,18 @@ button, a, input, textarea, select {
   height: auto;
 }
 
+/* Un panell que substitueix un altre al mateix lloc (les pestanyes del
+   selector de sabates/accessoris): sense entrada, el canvi es un salt sec.
+   Fade + 4px, prou per llegir-se com un moviment i no com un efecte.
+   `prefers-reduced-motion` ja el neutralitza a dalt. */
+@keyframes panel-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+.panel-enter {
+  animation: panel-enter var(--duration-base) var(--ease-standard) both;
+}
+
 .cv-auto {
   content-visibility: auto;
   contain-intrinsic-size: auto 320px;

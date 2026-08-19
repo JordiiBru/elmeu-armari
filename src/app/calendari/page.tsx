@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { findAllOutfits, findWeekPlan, toSavedOutfit } from "@/lib/outfits/service";
+import { findAllGarments } from "@/lib/prendas/service";
+import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { palettes } from "@/lib/colors";
 import { startOfWeek, addDays, dayToISO, isoToDay } from "@/lib/outfits/week";
 import { WeekCalendar } from "@/components/WeekCalendar";
@@ -23,7 +25,11 @@ export default async function CalendariPage({
   const weekStart = startOfWeek(startParam ? isoToDay(startParam) : today);
   const weekEnd = addDays(weekStart, 6);
 
-  const [outfits, days] = await Promise.all([findAllOutfits(), findWeekPlan(weekStart)]);
+  const [outfits, garments, days] = await Promise.all([
+    findAllOutfits(),
+    findAllGarments(),
+    findWeekPlan(weekStart),
+  ]);
   const savedOutfits = outfits.map(toSavedOutfit);
 
   return (
@@ -63,6 +69,7 @@ export default async function CalendariPage({
         days={days}
         savedOutfits={savedOutfits}
         palettes={palettes}
+        extraCandidates={garments.filter((g) => EXTRA_CATEGORIES.has(g.category))}
         todayISO={dayToISO(today)}
       />
     </PageContainer>

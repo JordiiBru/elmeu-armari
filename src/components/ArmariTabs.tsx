@@ -1,11 +1,12 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { GarmentWithColors, Season } from "@/lib/prendas/types";
+import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import { ArmariGrid } from "./ArmariGrid";
 import { OutfitBuilder } from "./OutfitBuilder";
-import { SavedOutfitsView } from "./SavedOutfitsView";
+import { OutfitLibrary } from "./OutfitLibrary";
 
 const TABS = [
   { id: "peces", label: "Peces" },
@@ -19,16 +20,22 @@ export function ArmariTabs({
   garments,
   palettes,
   savedOutfits,
+  todayISO,
   todayOutfitId,
-  defaultSeason,
+  season,
 }: {
   garments: GarmentWithColors[];
   palettes: SanzoPalette[];
   savedOutfits: SavedOutfit[];
+  todayISO: string;
   todayOutfitId: string | null;
-  defaultSeason?: Season;
+  season: Season;
 }) {
   const [tab, setTab] = useState<TabId>("peces");
+  const extraCandidates = useMemo(
+    () => garments.filter((g) => EXTRA_CATEGORIES.has(g.category)),
+    [garments],
+  );
   const listRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState<{ x: number; w: number }>({
     x: 0,
@@ -97,13 +104,16 @@ export function ArmariTabs({
         />
       </div>
 
-      {tab === "peces" && <ArmariGrid garments={garments} defaultSeason={defaultSeason} />}
+      {tab === "peces" && <ArmariGrid garments={garments} defaultSeason={season} />}
       {tab === "combinar" && <OutfitBuilder garments={garments} palettes={palettes} />}
       {tab === "desats" && (
-        <SavedOutfitsView
+        <OutfitLibrary
+          mode="browse"
           outfits={savedOutfits}
           palettes={palettes}
-          allGarments={garments}
+          extraCandidates={extraCandidates}
+          season={season}
+          todayISO={todayISO}
           todayOutfitId={todayOutfitId}
         />
       )}

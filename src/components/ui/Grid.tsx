@@ -30,7 +30,7 @@ const GAP_Y_CLASS: Record<Gap, string> = {
  * `cols` for one-off layouts.
  */
 interface Props extends ComponentPropsWithoutRef<"div"> {
-  cols?: "editorial" | "stats" | "palette";
+  cols?: "editorial" | "stats" | "palette" | "library";
   gapX?: Gap;
   gapY?: Gap;
   className?: string;
@@ -43,6 +43,10 @@ const COLS_CLASS = {
   editorial: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4",
   stats: "grid grid-cols-4 sm:grid-cols-8",
   palette: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5",
+  // An outfit collage is two or three photographs in one frame, so it
+  // needs more width than a single piece, not less: at five columns the
+  // captions wrapped onto two lines and the row went ragged.
+  library: "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
 } as const;
 
 export function Grid({

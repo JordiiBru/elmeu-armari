@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useEffect, useRef } from "react";
 import { useSheetState } from "@/lib/useSheetState";
 import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { IconButton } from "./IconButton";
@@ -41,6 +42,11 @@ interface Props {
    * stays visible.
    */
   headerBelow?: ReactNode;
+  /**
+   * Pinned under the scrolling body: the sheet's primary action stays
+   * reachable however long the content is.
+   */
+  footer?: ReactNode;
 }
 
 /**
@@ -57,10 +63,53 @@ export function Sheet({
   label,
   header,
   headerBelow,
+  footer,
   children,
 }: Props) {
   const { open, close } = useSheetState(onClose, 420);
   const swipe = useSwipeToClose(close);
+  const panel = useRef<HTMLDivElement>(null);
+
+  /**
+   * A dialog has to own the keyboard while it is open: focus moves into
+   * the panel, Tab cycles inside it, and it returns to whatever opened
+   * the sheet on close. Without this, tabbing walks the page behind the
+   * overlay, which for a screen reader means the sheet barely exists.
+   */
+  useEffect(() => {
+    const el = panel.current;
+    if (!el) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const focusable = () =>
+      Array.from(
+        el.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((n) => n.offsetParent !== null);
+
+    focusable()[0]?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const items = focusable();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    el.addEventListener("keydown", onKeyDown);
+    return () => {
+      el.removeEventListener("keydown", onKeyDown);
+      previous?.focus?.();
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -75,6 +124,7 @@ export function Sheet({
       />
 
       <div
+        ref={panel}
         role="dialog"
         aria-modal
         aria-label={label}
@@ -114,8 +164,7 @@ export function Sheet({
               type="button"
               onClick={close}
               label="Tancar"
-              size="sm"
-              className="flex-shrink-0 -mr-1 -mt-1"
+              className="flex-shrink-0 -mr-2 -mt-2"
             >
               <Icon name="close" size={18} />
             </IconButton>
@@ -131,6 +180,12 @@ export function Sheet({
         <div className="overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6">
           {children}
         </div>
+
+        {footer && (
+          <div className="flex-shrink-0 border-t border-border px-6 py-4">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

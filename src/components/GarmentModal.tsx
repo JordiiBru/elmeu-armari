@@ -18,7 +18,7 @@ import {
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
-import { Sheet, Text, TextButton, Stack, useToast } from "@/components/ui";
+import { Sheet, Text, TextButton, Stack } from "@/components/ui";
 
 interface Props {
   garment: GarmentWithColors;
@@ -31,7 +31,6 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
   const [confirming, setConfirming] = useState(false);
   const [combineOpen, setCombineOpen] = useState(false);
   const [pending, startTransition] = useTransition();
-  const toast = useToast();
 
   const handleDelete = () => {
     if (pending) return;
@@ -39,7 +38,6 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
       const fd = new FormData();
       fd.append("id", garment.id);
       await deleteGarmentAction(fd);
-      toast.show("peça eliminada");
       onClose();
     });
   };
