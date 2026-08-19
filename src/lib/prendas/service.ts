@@ -12,7 +12,14 @@ import {
 import type { GarmentInput } from "./types";
 import { WASHABLE_CATEGORIES } from "./types";
 
-export { findAllGarments, findGarmentById, findGarmentByIdSuffix, deleteGarment, setGarmentImage };
+export {
+  findAllGarments,
+  findGarmentById,
+  findGarmentByIdSuffix,
+  findGarmentCategories,
+  deleteGarment,
+  setGarmentImage,
+};
 
 export async function addGarment(data: GarmentInput) {
   return createGarment(data);

@@ -3,7 +3,7 @@ import {
   isWashable,
   isDirty,
   dirtyGarmentsOf,
-  outfitAvailability,
+  isWearable,
   isInSeason,
   rankOutfitsForToday,
 } from "@/lib/bugaderia/laundry";
@@ -39,8 +39,8 @@ function garment(
 
 function outfit(
   id: string,
-  primary: GarmentWithColors[],
-  opts: { extras?: GarmentWithColors[]; wornDates?: string[] } = {},
+  clothes: GarmentWithColors[],
+  opts: { wornDates?: string[] } = {},
 ): SavedOutfit {
   return {
     id,
@@ -51,15 +51,9 @@ function outfit(
     wornEvents: (opts.wornDates ?? []).map((date, i) => ({
       id: `worn-${id}-${i}`,
       date: new Date(date),
+      extras: [],
     })),
-    garments: [
-      ...primary.map((g) => ({ id: `og-${id}-${g.id}`, role: "primary" as const, garment: g })),
-      ...(opts.extras ?? []).map((g) => ({
-        id: `og-${id}-${g.id}`,
-        role: "extra" as const,
-        garment: g,
-      })),
-    ],
+    garments: clothes,
   };
 }
 
@@ -94,46 +88,43 @@ describe("isDirty", () => {
   });
 });
 
-// ── dirtyGarmentsOf / outfitAvailability ──────────────────────────────────────
+// ── dirtyGarmentsOf / isWearable ─────────────────────────────────────────────
 
-describe("outfitAvailability", () => {
-  it("an outfit with no washable piece is ready", () => {
-    const o = outfit("o1", [], {
-      extras: [garment("s", "SHOES", { dirty: true }), garment("a", "ACCESSORI")],
+describe("isWearable", () => {
+  it("an outfit is blocked only by its own clothes, not by what it's worn with", () => {
+    // No clothes at all is trivially wearable — there's nothing to dirty.
+    expect(isWearable(outfit("bare", []))).toBe(true);
+
+    // Extras live on the worn day now, not on the outfit — a dirty pair
+    // of shoes worn with it must not block the outfit itself.
+    const withDirtyExtras = outfit("o1", [garment("sh", "SHIRT")], {
+      wornDates: ["2026-08-01T00:00:00Z"],
     });
-    expect(dirtyGarmentsOf(o)).toEqual([]);
-    expect(outfitAvailability(o).status).toBe("ready");
+    withDirtyExtras.wornEvents[0].extras = [garment("s", "SHOES", { dirty: true })];
+    expect(dirtyGarmentsOf(withDirtyExtras)).toEqual([]);
+    expect(isWearable(withDirtyExtras)).toBe(true);
   });
 
-  it("all washable pieces clean is ready", () => {
+  it("every piece clean is wearable", () => {
     const o = outfit("o2", [garment("sh", "SHIRT"), garment("pa", "PANTS")]);
-    expect(outfitAvailability(o)).toEqual({ status: "ready", blockedBy: [] });
+    expect(isWearable(o)).toBe(true);
+    expect(dirtyGarmentsOf(o)).toEqual([]);
   });
 
-  it("exactly one dirty piece is almost, and names it", () => {
-    const dirtyShirt = garment("sh", "SHIRT", { dirty: true });
-    const o = outfit("o3", [dirtyShirt, garment("pa", "PANTS")]);
-    const { status, blockedBy } = outfitAvailability(o);
-    expect(status).toBe("almost");
-    expect(blockedBy.map((g) => g.id)).toEqual(["sh"]);
+  it("one dirty piece is enough to block it, and it is named", () => {
+    const o = outfit("o3", [garment("sh", "SHIRT", { dirty: true }), garment("pa", "PANTS")]);
+    expect(isWearable(o)).toBe(false);
+    expect(dirtyGarmentsOf(o).map((g) => g.id)).toEqual(["sh"]);
   });
 
-  it("two dirty pieces is blocked", () => {
+  it("names every dirty piece, not just the first", () => {
     const o = outfit("o4", [
       garment("sh", "SHIRT", { dirty: true }),
       garment("pa", "PANTS", { dirty: true }),
       garment("sw", "SWEATER"),
     ]);
-    const { status, blockedBy } = outfitAvailability(o);
-    expect(status).toBe("blocked");
-    expect(blockedBy).toHaveLength(2);
-  });
-
-  it("a dirty extra does not block, because extras are never washable", () => {
-    const o = outfit("o5", [garment("sh", "SHIRT")], {
-      extras: [garment("so", "SOCKS", { dirty: true })],
-    });
-    expect(outfitAvailability(o).status).toBe("ready");
+    expect(isWearable(o)).toBe(false);
+    expect(dirtyGarmentsOf(o)).toHaveLength(2);
   });
 });
 
@@ -157,10 +148,11 @@ describe("isInSeason", () => {
     expect(isInSeason(o, "WINTER")).toBe(true);
   });
 
-  it("extras do not decide seasonality", () => {
+  it("extras do not decide seasonality — they live on the day, not the outfit", () => {
     const o = outfit("o8", [garment("sh", "SHIRT", { seasons: ["SUMMER"] })], {
-      extras: [garment("bo", "SHOES", { seasons: ["WINTER"] })],
+      wornDates: ["2026-08-01T00:00:00Z"],
     });
+    o.wornEvents[0].extras = [garment("bo", "SHOES", { seasons: ["WINTER"] })];
     expect(isInSeason(o, "SUMMER")).toBe(true);
   });
 });

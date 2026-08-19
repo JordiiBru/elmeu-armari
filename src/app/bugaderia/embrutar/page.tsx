@@ -1,5 +1,6 @@
 import { findAllGarments } from "@/lib/prendas/service";
 import { isWashable, isClean } from "@/lib/bugaderia/laundry";
+import { sortByWardrobeOrder } from "@/lib/prendas/filtering";
 import { LaundryPicker } from "@/components/LaundryPicker";
 import { UI } from "@/lib/prendas/ui-strings";
 import { PageContainer, SectionHeader } from "@/components/ui";
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function EmbrutarPage() {
   const garments = await findAllGarments();
-  const clean = garments.filter((g) => isWashable(g) && isClean(g));
+  const clean = sortByWardrobeOrder(garments.filter((g) => isWashable(g) && isClean(g)));
 
   return (
     <PageContainer width="narrow">

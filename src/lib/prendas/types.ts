@@ -77,15 +77,25 @@ export const PATTERNS_BY_CATEGORY: Record<Category, Pattern[]> = {
 // watch often doesn't have one worth recording.
 export const CATEGORIES_WITH_OPTIONAL_COLOR = new Set<Category>(["ACCESSORI"]);
 
-// Categories attached to a saved outfit as an "extra" (role: "extra") —
-// outside the colour-matching engine, added manually after the core is
-// built. Shared by the outfit builder (excludes them from the palette
-// grid) and the saved-outfits view (offers them in the extras picker).
+// Categories that are never part of a saved outfit: they sit outside the
+// colour-matching engine and are picked when you commit a day, so they
+// belong to the WornEvent and not to the Outfit.
 export const EXTRA_CATEGORIES = new Set<Category>(["SHOES", "SOCKS", "ACCESSORI"]);
 
-// Categories that can be dirty. Shoes, socks and accessories are always
-// available: they never block an outfit and never appear in the laundry lists.
+// The complement: what a saved outfit is made of. Used by the outfit
+// builder and by the server-side validation of a worn day.
+export const OUTFIT_CATEGORIES = CATEGORIES.filter((c) => !EXTRA_CATEGORIES.has(c));
+
+// Categories that can be dirty at all. Shoes, socks and accessories are
+// always available: they never block an outfit and never appear in the
+// laundry lists.
 export const WASHABLE_CATEGORIES = new Set<Category>(["SWEATER", "SHIRT", "PANTS"]);
+
+// Categories a single wear is enough to soil, so a past day dirties them
+// on its own. Trousers are washable but not here on purpose: nobody
+// washes their jeans after one day, and having the app insist made the
+// basket lie. They go to the basket when you say so, from Embrutar.
+export const AUTO_SOIL_CATEGORIES = new Set<Category>(["SWEATER", "SHIRT"]);
 
 export const ALL_FITS: string[] = [
   ...new Set(Object.values(FITS_BY_CATEGORY).flat()),

@@ -30,7 +30,10 @@ export function useToast(): ToastAPI {
   return ctx;
 }
 
-const DURATION_MS = 3400;
+// Long enough to read one line, short enough not to loiter. The only
+// toasts left are the import result on /settings: everywhere else the
+// action changes something on screen, which says it better.
+const DURATION_MS = 2600;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);

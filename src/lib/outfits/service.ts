@@ -5,9 +5,6 @@ import {
   findOutfitById,
   deleteOutfit,
   countOutfits,
-  createOutfitExtras,
-  removeOutfitExtra,
-  removeOutfitExtrasByCategory,
   setOutfitFavorite,
   setWornDay,
   clearWornDay,
@@ -16,47 +13,24 @@ import {
   findUnsettledPastWornEvents,
   markWornEventSettled,
 } from "./repository";
-import { findGarmentById, markGarmentsDirty } from "@/lib/prendas/service";
-import { WASHABLE_CATEGORIES } from "@/lib/prendas/types";
+import { findGarmentCategories, markGarmentsDirty } from "@/lib/prendas/service";
+import { AUTO_SOIL_CATEGORIES, EXTRA_CATEGORIES } from "@/lib/prendas/types";
+import { dirtyGarmentsOf } from "@/lib/bugaderia/laundry";
 import { palettes } from "@/lib/colors";
 import { dayKey, addDays, dayToISO } from "./week";
-import type { SavedOutfit, WeekDayPlan, OutfitGarmentRole } from "./types";
+import type { SavedOutfit, WeekDayPlan } from "./types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 
 export {
   findAllOutfits,
   deleteOutfit,
-  removeOutfitExtra,
   setOutfitFavorite,
 };
 
-// Shoes are a unique slot on an outfit: adding a new pair replaces
-// whatever was there rather than stacking. Accessories (and everything
-// else added as "extra") have no such cap — an outfit can carry any
-// number of them.
-export async function addOutfitExtras(outfitId: string, garmentIds: string[]) {
-  if (garmentIds.length === 0) return;
-
-  const incoming = await Promise.all(garmentIds.map((id) => findGarmentById(id)));
-  const shoeIds = new Set(
-    incoming.filter((g) => g?.category === "SHOES").map((g) => g!.id),
-  );
-
-  if (shoeIds.size > 0) {
-    await removeOutfitExtrasByCategory(outfitId, "SHOES");
-  }
-
-  // If more than one pair was picked in the same batch, only the first
-  // survives — the slot stays singular.
-  let keptOneShoe = false;
-  const toInsert = garmentIds.filter((id) => {
-    if (!shoeIds.has(id)) return true;
-    if (keptOneShoe) return false;
-    keptOneShoe = true;
-    return true;
-  });
-
-  await createOutfitExtras(outfitId, toInsert);
+interface WornEventWithGarments {
+  id: string;
+  date: Date;
+  garments: { garment: GarmentWithColors }[];
 }
 
 interface OutfitWithGarments {
@@ -65,8 +39,8 @@ interface OutfitWithGarments {
   paletteId: number;
   favorite: boolean;
   createdAt: Date;
-  garments: { id: string; role: string; garment: GarmentWithColors }[];
-  wornEvents?: { id: string; date: Date }[];
+  garments: { garment: GarmentWithColors }[];
+  wornEvents?: WornEventWithGarments[];
 }
 
 export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
@@ -76,20 +50,19 @@ export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
     paletteId: outfit.paletteId,
     favorite: outfit.favorite,
     createdAt: outfit.createdAt,
-    wornEvents: (outfit.wornEvents ?? []).map((w) => ({ id: w.id, date: w.date })),
-    garments: outfit.garments.map((og) => ({
-      id: og.id,
-      role: (og.role === "extra" ? "extra" : "primary") as OutfitGarmentRole,
-      garment: og.garment,
+    garments: outfit.garments.map((og) => og.garment),
+    wornEvents: (outfit.wornEvents ?? []).map((w) => ({
+      id: w.id,
+      date: w.date,
+      extras: w.garments.map((wg) => wg.garment),
     })),
   };
 }
 
 function outfitTop(outfit: SavedOutfit): GarmentWithColors | null {
-  const primaries = outfit.garments.filter((g) => g.role === "primary").map((g) => g.garment);
   return (
-    primaries.find((g) => g.category === "SHIRT") ??
-    primaries.find((g) => g.category === "SWEATER") ??
+    outfit.garments.find((g) => g.category === "SHIRT") ??
+    outfit.garments.find((g) => g.category === "SWEATER") ??
     null
   );
 }
@@ -120,8 +93,54 @@ export async function findSavedOutfitById(id: string): Promise<SavedOutfit | nul
   return outfit ? toSavedOutfit(outfit) : null;
 }
 
-export async function assignOutfitToDay(outfitId: string, date: Date) {
-  return setWornDay(outfitId, dayKey(date));
+/**
+ * A day is an outfit plus what you wore it with. The clean gate only
+ * applies to today or a past day: a shirt in the basket on Monday can
+ * perfectly well be clean by Thursday, so planning ahead is allowed.
+ *
+ * The extras are filtered here and not only in the picker, same spirit as
+ * the washable filter in `markGarmentsDirty` — ids reach this from the
+ * client, so the rules have to hold whatever the caller sends.
+ */
+export async function wearOutfit(
+  outfitId: string,
+  date: Date,
+  extraIds: string[],
+): Promise<void> {
+  const outfit = await findSavedOutfitById(outfitId);
+  if (!outfit) throw new Error(`Outfit not found: ${outfitId}`);
+
+  const day = dayKey(date);
+  if (day.getTime() <= dayKey(new Date()).getTime()) {
+    const dirty = dirtyGarmentsOf(outfit);
+    if (dirty.length > 0) {
+      throw new Error(
+        `Outfit ${outfitId} has dirty garments: ${dirty.map((g) => g.id).join(", ")}`,
+      );
+    }
+  }
+
+  const categories = new Map(
+    (await findGarmentCategories(extraIds)).map((g) => [g.id, g.category]),
+  );
+  // Shoes are a single slot: you wear one pair a day. Everything else
+  // accumulates. Walking `extraIds` rather than the query result keeps the
+  // caller's order, which is what decides the surviving pair.
+  let shoesTaken = false;
+  const garmentIds: string[] = [];
+  const seen = new Set<string>();
+  for (const id of extraIds) {
+    const category = categories.get(id);
+    if (!category || !EXTRA_CATEGORIES.has(category) || seen.has(id)) continue;
+    if (category === "SHOES") {
+      if (shoesTaken) continue;
+      shoesTaken = true;
+    }
+    seen.add(id);
+    garmentIds.push(id);
+  }
+
+  await setWornDay(outfitId, day, garmentIds);
 }
 
 export async function unassignDay(date: Date) {
@@ -138,9 +157,11 @@ export async function unassignDay(date: Date) {
 export async function settlePastWornEvents(): Promise<number> {
   const events = await findUnsettledPastWornEvents(dayKey(new Date()));
   for (const event of events) {
+    // Only what one wear actually soils. Trousers are washable but are
+    // not dirtied by having been worn — that stays a manual decision.
     const washableIds = event.outfit.garments
       .map((og) => og.garment)
-      .filter((g) => WASHABLE_CATEGORIES.has(g.category))
+      .filter((g) => AUTO_SOIL_CATEGORIES.has(g.category))
       .map((g) => g.id);
     if (washableIds.length > 0) {
       await markGarmentsDirty(washableIds);
@@ -164,12 +185,16 @@ export async function findWeekPlan(weekStart: Date): Promise<WeekDayPlan[]> {
   const start = dayKey(weekStart);
   const end = addDays(start, 6);
   const events = await findWornEventsInRange(start, end);
-  const byDay = new Map(events.map((e) => [dayToISO(e.date), e.outfit]));
+  const byDay = new Map(events.map((e) => [dayToISO(e.date), e]));
 
   return Array.from({ length: 7 }, (_, i) => {
     const date = dayToISO(addDays(start, i));
-    const outfit = byDay.get(date);
-    return { date, outfit: outfit ? toSavedOutfit(outfit) : null };
+    const event = byDay.get(date);
+    return {
+      date,
+      outfit: event ? toSavedOutfit(event.outfit) : null,
+      extras: event ? event.garments.map((wg) => wg.garment) : [],
+    };
   });
 }
 
@@ -191,23 +216,4 @@ export async function saveOutfit(data: {
   const count = await countOutfits();
   const name = `Outfit #${count + 1}`;
   return createOutfit({ ...data, name });
-}
-
-// Same palette + primary garments as `saveOutfit` normally dedups into one
-// row (extras don't distinguish an outfit) — this deliberately bypasses
-// that dedup to let a saved outfit exist as several variants (e.g. same
-// core with different shoes), each independently plannable in /calendari.
-export async function duplicateOutfit(outfitId: string) {
-  const source = await findOutfitById(outfitId);
-  if (!source) throw new Error(`Outfit not found: ${outfitId}`);
-
-  const garmentIds = source.garments
-    .filter((g) => g.role === "primary")
-    .map((g) => g.garmentId);
-  const count = await countOutfits();
-  return createOutfit({
-    paletteId: source.paletteId,
-    garmentIds,
-    name: `Outfit #${count + 1}`,
-  });
 }

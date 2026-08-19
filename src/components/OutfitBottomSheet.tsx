@@ -7,7 +7,7 @@ import { generateOutfitGroupsForGarment } from "@/lib/outfits/engine";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
 import { saveOutfitAction } from "@/app/outfits/actions";
 import { OutfitGroupCard } from "./OutfitCard";
-import { Sheet, TextButton, Text, Stack, useToast, Icon } from "@/components/ui";
+import { Sheet, TextButton, Text, Stack, Icon } from "@/components/ui";
 
 const PAGE_SIZE = 6;
 
@@ -47,7 +47,6 @@ export function OutfitBottomSheet({
   const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set());
   const [pieceFilter, setPieceFilter] = useState<number | null>(null);
   const [pending, startTransition] = useTransition();
-  const toast = useToast();
 
   const availablePieceCounts = useMemo(
     () =>
@@ -87,7 +86,6 @@ export function OutfitBottomSheet({
     startTransition(async () => {
       await saveOutfitAction(paletteId, garmentIds);
       setSavedKeys((prev) => new Set(prev).add(key));
-      toast.show("outfit desat", "success");
     });
   };
 

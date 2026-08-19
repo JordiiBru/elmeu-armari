@@ -6,7 +6,7 @@ import type { GarmentWithColors } from "@/lib/prendas/types";
 import { UI } from "@/lib/prendas/ui-strings";
 import { markDirtyAction, markCleanAction } from "@/app/bugaderia/actions";
 import { PieceThumb } from "./PieceThumb";
-import { Button, TextButton, Icon, EmptyState, useToast } from "@/components/ui";
+import { Button, TextButton, IconButton, Icon, EmptyState } from "@/components/ui";
 
 type Mode = "soil" | "wash";
 
@@ -58,7 +58,6 @@ export function LaundryPicker({
 }) {
   const copy = COPY[mode];
   const router = useRouter();
-  const toast = useToast();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
 
@@ -80,8 +79,7 @@ export function LaundryPicker({
     const ids = Array.from(selected);
     startTransition(async () => {
       const action = mode === "soil" ? markDirtyAction : markCleanAction;
-      const { affected } = await action(ids);
-      toast.show(copy.toast(affected), "success");
+      await action(ids);
       router.push("/bugaderia");
     });
   };
@@ -109,16 +107,19 @@ export function LaundryPicker({
         </TextButton>
       )}
 
+      {/* Two controls, no sentences: at 375px a counter, a "clear all" and
+          a five-word verb do not share a row, and the count means more
+          inside the action than beside it. */}
       {selected.size > 0 && (
         <div className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-between gap-4 border-t border-border bg-background px-6 py-4">
-          <div className="flex items-center gap-4">
-            <span className="type-caption tabular-nums">
-              {UI.bugaderia.picker.selectedCount(selected.size)}
-            </span>
-            <TextButton type="button" tone="secondary" onClick={clearSelection} disabled={pending}>
-              {UI.bugaderia.picker.clearSelection}
-            </TextButton>
-          </div>
+          <IconButton
+            type="button"
+            onClick={clearSelection}
+            disabled={pending}
+            label={UI.bugaderia.picker.clearSelection}
+          >
+            <Icon name="close" size={18} />
+          </IconButton>
           <Button
             type="button"
             size="lg"
@@ -126,7 +127,11 @@ export function LaundryPicker({
             loading={pending}
             loadingText={copy.submitting}
           >
-            {copy.submit}
+            {/* One text run: as separate flex children the browser trims
+                the space around the separator. */}
+            <span className="tabular-nums">
+              {copy.submit} · {selected.size}
+            </span>
           </Button>
         </div>
       )}

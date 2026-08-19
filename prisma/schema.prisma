@@ -23,6 +23,7 @@ model Garment {
   /// null = clean. Set to the moment the garment was marked dirty.
   dirtySince DateTime?
   outfits   OutfitGarment[]
+  wornWith  WornEventGarment[]
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
 }
@@ -51,19 +52,33 @@ model WornEvent {
   /// clothes you didn't actually wear.
   settledAt DateTime?
   outfit   Outfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  /// Shoes / socks / accessories worn that day. The outfit itself is
+  /// clothes only — what you put on your feet is a property of the day,
+  /// not of the look.
+  garments WornEventGarment[]
 
   @@unique([date])
   @@index([outfitId])
 }
 
+model WornEventGarment {
+  id          String    @id @default(cuid())
+  wornEventId String
+  garmentId   String
+  wornEvent   WornEvent @relation(fields: [wornEventId], references: [id], onDelete: Cascade)
+  garment     Garment   @relation(fields: [garmentId], references: [id], onDelete: Cascade)
+
+  @@unique([wornEventId, garmentId])
+  @@index([wornEventId])
+  @@index([garmentId])
+}
+
+// Every row is part of the palette-matched core: shoes, socks and
+// accessories live on the day (WornEventGarment), never on the outfit.
 model OutfitGarment {
   id        String  @id @default(cuid())
   outfitId  String
   garmentId String
-  // "primary": part of the palette-matched core.
-  // "extra":   added manually (shoes / socks / accessories),
-  //            outside the colour engine.
-  role      String  @default("primary")
   outfit    Outfit  @relation(fields: [outfitId], references: [id], onDelete: Cascade)
   garment   Garment @relation(fields: [garmentId], references: [id], onDelete: Cascade)
 
