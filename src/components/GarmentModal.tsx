@@ -5,8 +5,10 @@ import Link from "next/link";
 import { deleteGarmentAction } from "@/app/armari/actions";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
-import type { SanzoPalette } from "@/lib/outfits/types";
+import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import { OutfitBottomSheet } from "./OutfitBottomSheet";
+import { OutfitSheet } from "./OutfitSheet";
+import { OutfitTile } from "./OutfitTile";
 import {
   CATEGORY_LABELS,
   TEXTURE_LABELS,
@@ -18,13 +20,19 @@ import {
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
-import { Button, Sheet, Text, TextButton, Stack } from "@/components/ui";
+import { Button, Grid, Sheet, Text, TextButton, Stack } from "@/components/ui";
 
 interface Props {
   garment: GarmentWithColors;
   allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
   savedOutfitKeys: string[];
+  /** The saved looks this piece is part of, ranked for today. */
+  outfitsWith: SavedOutfit[];
+  /** Everything an outfit can be worn with, for the sheet below. */
+  extraCandidates: GarmentWithColors[];
+  todayISO: string;
+  todayOutfitId: string | null;
   onClose: () => void;
 }
 
@@ -33,10 +41,15 @@ export function GarmentModal({
   allGarments,
   palettes,
   savedOutfitKeys,
+  outfitsWith,
+  extraCandidates,
+  todayISO,
+  todayOutfitId,
   onClose,
 }: Props) {
   const [confirming, setConfirming] = useState(false);
   const [combineOpen, setCombineOpen] = useState(false);
+  const [openOutfitId, setOpenOutfitId] = useState<string | null>(null);
   // What you saved during this visit. It lives here rather than in the
   // combinations sheet because that sheet unmounts every time you close
   // it, and reopening it on the same piece would otherwise offer to save
@@ -58,6 +71,25 @@ export function GarmentModal({
       onClose();
     });
   };
+
+  // Opening one of this piece's looks. Same swap as the combiner, and
+  // the same shared `OutfitSheet` every other surface commits a day
+  // through — this is a shortcut into it, not a second way of doing it.
+  const openOutfit = outfitsWith.find((o) => o.id === openOutfitId) ?? null;
+  if (openOutfit) {
+    return (
+      <OutfitSheet
+        outfit={openOutfit}
+        palette={palettes.find((p) => p.id === openOutfit.paletteId) ?? null}
+        extraCandidates={extraCandidates}
+        dayISO={todayISO}
+        todayISO={todayISO}
+        isCommitted={openOutfit.id === todayOutfitId}
+        onBack={() => setOpenOutfitId(null)}
+        onClose={onClose}
+      />
+    );
+  }
 
   // One sheet at a time, never one inside the other. Two mounted `Sheet`s
   // means two Escape listeners (Escape closed both) and the inner one
@@ -126,6 +158,40 @@ export function GarmentModal({
         </Stack>
       }
     >
+      {/* First thing in the body, before the reference data. Standing in
+          front of the wardrobe holding this piece, the looks you have
+          already built with it are the answer; texture and pattern are
+          the footnotes. */}
+      {outfitsWith.length > 0 && (
+        <Stack gap={3}>
+          <div className="flex items-baseline justify-between gap-3">
+            <Text variant="caption" as="h3">
+              {UI.outfits.withThisPiece}
+            </Text>
+            <Text variant="caption" tabular>
+              {outfitsWith.length}
+            </Text>
+          </div>
+          {/* Two across, not three. Inside a `md` sheet three columns
+              leave about 110px a tile, which truncates every caption —
+              and the caption is what names the *other* pieces, the only
+              thing you do not already know when you arrive here holding
+              this one. */}
+          <Grid cols="library" gapX={4} gapY={5} className="!grid-cols-2">
+            {outfitsWith.map((outfit, i) => (
+              <OutfitTile
+                key={outfit.id}
+                outfit={outfit}
+                palette={palettes.find((p) => p.id === outfit.paletteId) ?? null}
+                index={i}
+                mark={outfit.id === todayOutfitId ? UI.outfits.today : null}
+                onOpen={() => setOpenOutfitId(outfit.id)}
+              />
+            ))}
+          </Grid>
+        </Stack>
+      )}
+
       {(garment.texture || garment.pattern) && (
         <dl className="grid grid-cols-2 gap-y-4 gap-x-6">
           {garment.texture && <Meta label={UI.modal.texture} value={TEXTURE_LABELS[garment.texture]} />}

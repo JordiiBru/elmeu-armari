@@ -155,6 +155,8 @@ export const UI = {
     goToRentar: "anar a rentar",
     /** Header of the group that holds outfits built around no top. */
     noTop: "sense samarreta",
+    /** The looks a piece already lives in, shown on the piece itself. */
+    withThisPiece: "Amb aquesta peça",
     plan: "planificar",
     back: "tornar",
     planned: "planificat",

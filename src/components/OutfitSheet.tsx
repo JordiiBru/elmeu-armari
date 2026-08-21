@@ -44,6 +44,9 @@ interface Props {
    * only the library offers it. */
   allowDelete?: boolean;
   onClose: () => void;
+  /** Up one level, back to whatever opened this. When set, dismissing
+   * means leaving entirely — the same split as the combiner's. */
+  onBack?: () => void;
   onCommitted?: () => void;
   /** Calendar only: go back to the outfit grid for this day. */
   onChangeOutfit?: () => void;
@@ -67,6 +70,7 @@ export function OutfitSheet({
   dayExtras,
   allowDelete = false,
   onClose,
+  onBack,
   onCommitted,
   onChangeOutfit,
   onClear,
@@ -160,19 +164,26 @@ export function OutfitSheet({
       // which outfit you opened, and no more.
       mediaHeight="h-36 sm:h-56"
       header={
-        <Stack gap={1}>
-          <h2 className="type-title lowercase">{title}</h2>
-          <Text variant="small" italic tone="secondary" className="font-serif">
-            {subtitle}
-          </Text>
-          {palette && (
-            <div aria-hidden className="mt-1 flex h-1 w-full max-w-40 overflow-hidden">
-              {palette.colores.map((hex, i) => (
-                <span key={i} className="flex-1" style={{ backgroundColor: hex }} />
-              ))}
-            </div>
+        <div className="flex items-start justify-between gap-3">
+          <Stack gap={1} className="min-w-0">
+            <h2 className="type-title lowercase">{title}</h2>
+            <Text variant="small" italic tone="secondary" className="font-serif">
+              {subtitle}
+            </Text>
+            {palette && (
+              <div aria-hidden className="mt-1 flex h-1 w-full max-w-40 overflow-hidden">
+                {palette.colores.map((hex, i) => (
+                  <span key={i} className="flex-1" style={{ backgroundColor: hex }} />
+                ))}
+              </div>
+            )}
+          </Stack>
+          {onBack && (
+            <TextButton type="button" tone="secondary" onClick={onBack}>
+              {UI.outfits.back}
+            </TextButton>
           )}
-        </Stack>
+        </div>
       }
       headerBelow={
         <div className="px-6 py-2">
