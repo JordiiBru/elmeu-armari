@@ -55,7 +55,19 @@ export function GarmentModal({
       const fd = new FormData();
       fd.append("id", garment.id);
       await deleteGarmentAction(fd);
-      onClose();
+      /**
+       * A full navigation, not `router.back()` and not a redirect from
+       * the action. Deleting happens from `/armari/[slug]`, and the
+       * moment the piece is gone that route renders a 404 — which the
+       * client router then caches for the segment, so every softer way
+       * out lands on that 404 even once the URL says `/armari`
+       * (reproduced: grid empty, "This page could not be found", no way
+       * back without a reload).
+       *
+       * Deleting a garment is rare and irreversible, so paying for one
+       * clean page load is the right trade for never stranding anyone.
+       */
+      window.location.assign("/armari");
     });
   };
 

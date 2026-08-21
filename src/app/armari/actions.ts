@@ -13,4 +13,5 @@ export async function deleteGarmentAction(formData: FormData) {
   revalidatePath("/stats");
   revalidatePath("/settings");
   revalidatePath("/");
+  revalidatePath("/avui");
 }
