@@ -9,7 +9,7 @@ import { formatLastWorn } from "@/lib/outfits/worn";
 import { UI } from "@/lib/prendas/ui-strings";
 import { OutfitCollage, outfitSubtitle, paletteName } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
-import { Card, EmptyState, Stack, Text, TextButton } from "@/components/ui";
+import { Card, EmptyState, Icon, Stack, Text, TextButton } from "@/components/ui";
 
 /**
  * The day's answer, as one plate. Top stratum of "què em poso?".
@@ -91,12 +91,13 @@ export function TodayPlate({
     <Stack gap={4}>
       <div className="flex items-baseline justify-between gap-4">
         <Text variant="caption">
-          {isCommitted ? UI.outfits.today : UI.outfits.todayUndecided}
+          {isCommitted ? UI.outfits.todayWearing : UI.outfits.todayProposal}
         </Text>
         {/* Shuffling only makes sense while the day is still open, and
             only when there is something else it could land on. */}
         {!isCommitted && candidates.length > 1 && (
-          <TextButton type="button" onClick={shuffle}>
+          <TextButton type="button" onClick={shuffle} className="inline-flex items-center gap-1.5">
+            <Icon name="sparkle" size={13} className="fill-current" />
             {UI.outfits.pickForMe}
           </TextButton>
         )}
@@ -142,6 +143,18 @@ export function TodayPlate({
           </div>
         </div>
       </Card>
+
+      {/* Without this the plate read as the only thing on offer: the
+          collection is three screens down and its heading was never seen.
+          An anchor, so it works before hydration and leaves the URL at
+          the section you jumped to. */}
+      <a
+        href="#tots-els-outfits"
+        className="inline-flex items-center gap-1.5 self-start font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
+      >
+        {UI.outfits.seeAll}
+        <Icon name="arrow-right" size={12} />
+      </a>
 
       {open && (
         <OutfitSheet

@@ -12,7 +12,9 @@ import { EmptyState, Grid, SegmentedControl, Stack } from "@/components/ui";
 
 type Filter = "all" | "ready";
 
-const FILTERS: Filter[] = ["all", "ready"];
+// "a punt" first and selected: the screen asks what you can wear now, and
+// an outfit whose shirt is in the basket is not an answer to that.
+const FILTERS: Filter[] = ["ready", "all"];
 
 const FILTER_LABELS: Record<Filter, string> = {
   all: UI.outfits.filters.all,

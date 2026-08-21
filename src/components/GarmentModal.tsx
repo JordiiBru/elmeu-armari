@@ -18,7 +18,7 @@ import {
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
-import { Sheet, Text, TextButton, Stack } from "@/components/ui";
+import { Button, Sheet, Text, TextButton, Stack } from "@/components/ui";
 
 interface Props {
   garment: GarmentWithColors;
@@ -31,6 +31,11 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
   const [confirming, setConfirming] = useState(false);
   const [combineOpen, setCombineOpen] = useState(false);
   const [pending, startTransition] = useTransition();
+
+  // Shoes, socks and accessories do not take part in the colour matching,
+  // and a piece with no colour has nothing to match on.
+  const canCombine =
+    garment.colors.length > 0 && !EXTRA_CATEGORIES.has(garment.category);
 
   const handleDelete = () => {
     if (pending) return;
@@ -65,6 +70,21 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
       label={`Peça ${CATEGORY_LABELS[garment.category]}`}
       media={<PieceThumb garment={garment} priority className="h-full w-full" />}
       mediaHeight="h-40"
+      // The reason this modal replaced a whole screen: matching a piece
+      // against Sanzo Wada is the app's centre of gravity, not a footnote
+      // to its swatches. Pinned, primary, and the widest thing here.
+      footer={
+        canCombine ? (
+          <Button
+            type="button"
+            size="lg"
+            onClick={() => setCombineOpen(true)}
+            className="w-full justify-center"
+          >
+            {UI.modal.combine}
+          </Button>
+        ) : undefined
+      }
       header={
         <Stack gap={1}>
           <Text variant="caption">peça</Text>
@@ -113,16 +133,6 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
             </div>
           ))}
         </div>
-        {garment.colors.length > 0 && !EXTRA_CATEGORIES.has(garment.category) && (
-          <TextButton
-            type="button"
-            tone="secondary"
-            onClick={() => setCombineOpen(true)}
-            className="self-start"
-          >
-            què hi combina
-          </TextButton>
-        )}
       </Stack>
 
       {garment.seasons.length > 0 && (

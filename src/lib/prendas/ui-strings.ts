@@ -27,6 +27,7 @@ export const UI = {
     invalidColor: "Color no valid",
   },
   modal: {
+    combine: "Què hi combina",
     texture: "Textura",
     pattern: "Dibuix",
     colors: "Colors",
@@ -89,13 +90,20 @@ export const UI = {
       week: "la setmana",
       all: "tots els outfits",
     },
-    todayUndecided: "encara per decidir",
-    changeToday: "canviar",
+    // The plate is a proposal until you accept it, and it has to say so:
+    // read as a bare state ("encara per decidir") nobody could tell the
+    // photograph was a suggestion rather than the only option.
+    todayProposal: "et proposo",
+    todayWearing: "avui portes",
+    seeAll: "veure tots els outfits",
     filtersLabel: "Filtrar outfits",
     filters: {
       ready: "a punt",
       all: "tots",
     },
+    // "a punt" leads: the question is what you can wear now, and an outfit
+    // whose shirt is in the basket is not an answer to it.
+    filterOrder: ["ready", "all"] as const,
     pickForMe: "tria per mi",
     today: "avui",
     // "al cistell" describes where the piece is; on an outfit what you

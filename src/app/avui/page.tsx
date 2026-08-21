@@ -30,16 +30,18 @@ function formatWeekRange(start: Date, end: Date): string {
  * turns a long scroll into three named places.
  */
 function Stratum({
+  id,
   title,
   aside,
   children,
 }: {
+  id?: string;
   title: string;
   aside?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <Stack as="section" gap={5}>
+    <Stack as="section" id={id} gap={5} className="scroll-mt-6">
       <div className="flex items-baseline justify-between gap-4 border-b border-border pb-3">
         <Text variant="caption" as="h2">
           {title}
@@ -138,7 +140,7 @@ export default async function AvuiPage({
           />
         </Stratum>
 
-        <Stratum title={UI.outfits.sections.all}>
+        <Stratum id="tots-els-outfits" title={UI.outfits.sections.all}>
           <OutfitLibrary
             outfits={ranked}
             palettes={palettes}
