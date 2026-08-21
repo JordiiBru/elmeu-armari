@@ -3,7 +3,7 @@ import { groupOutfitsBy } from "@/lib/outfits/grouping";
 import type { SavedOutfit } from "@/lib/outfits/types";
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 
-function garment(id: string, category: Category): GarmentWithColors {
+function garment(id: string, category: Category, createdAt = new Date(0)): GarmentWithColors {
   return {
     id,
     category,
@@ -16,7 +16,7 @@ function garment(id: string, category: Category): GarmentWithColors {
     notes: null,
     image: null,
     dirtySince: null,
-    createdAt: new Date(),
+    createdAt,
     updatedAt: new Date(),
     colors: [],
     seasons: [],
@@ -27,8 +27,8 @@ function outfit(id: string, garments: GarmentWithColors[]): SavedOutfit {
   return { id, name: id, paletteId: 1, createdAt: new Date(), garments, wornEvents: [] };
 }
 
-const shirtA = garment("shirt-a", "SHIRT");
-const shirtB = garment("shirt-b", "SHIRT");
+const shirtA = garment("shirt-a", "SHIRT", new Date(1));
+const shirtB = garment("shirt-b", "SHIRT", new Date(2));
 const sweater = garment("sweater", "SWEATER");
 const pants = garment("pants", "PANTS");
 
@@ -53,12 +53,22 @@ describe("groupOutfitsBy", () => {
     expect(byPants[0].outfits.map((o) => o.id)).toEqual(["1", "2"]);
   });
 
-  it("keeps the order each piece first appears in", () => {
+  it("orders the rail by the wardrobe, not by the incoming order", () => {
+    // Saving a new look ranks it first, which used to drag its shirt to
+    // the top of the rail and move the group out from under you.
     const groups = groupOutfitsBy(
       [outfit("1", [shirtB, pants]), outfit("2", [shirtA, pants])],
       "SHIRT",
     );
-    expect(groups.map((g) => g.piece.id)).toEqual(["shirt-b", "shirt-a"]);
+    expect(groups.map((g) => g.piece.id)).toEqual(["shirt-a", "shirt-b"]);
+  });
+
+  it("keeps a group's own outfits in the order they arrived", () => {
+    const groups = groupOutfitsBy(
+      [outfit("new", [shirtA, pants]), outfit("old", [shirtA, pants])],
+      "SHIRT",
+    );
+    expect(groups[0].outfits.map((o) => o.id)).toEqual(["new", "old"]);
   });
 
   it("leaves out outfits with no piece of that category", () => {

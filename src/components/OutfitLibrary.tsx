@@ -191,9 +191,16 @@ export function OutfitLibrary({
                   </span>
                 </button>
 
-                <div className="collapse-panel" data-open={isOpen}>
+                {/* `inert` while closed. The panel stays in the DOM so it
+                    can animate open, but `height: 0` alone does not take
+                    its contents out of the tab order — you could tab into
+                    buttons nobody can see. */}
+                <div className="collapse-panel" data-open={isOpen} inert={!isOpen}>
                   <div>
-                    <Stack gap={5} className="pb-6 pt-1">
+                    {/* Generous foot: on a phone this action ended up a
+                        hair above the next group's rule, and the two read
+                        as one block. */}
+                    <Stack gap={5} className="pb-9 pt-1">
                       <Grid cols="library" gapX={5} gapY={6}>
                         {group.outfits.map((outfit) => (
                           <OutfitTile

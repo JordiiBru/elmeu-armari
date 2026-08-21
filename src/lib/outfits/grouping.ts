@@ -1,4 +1,5 @@
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
+import { sortByWardrobeOrder } from "@/lib/prendas/filtering";
 import type { SavedOutfit } from "./types";
 
 export interface OutfitsByPiece {
@@ -18,8 +19,17 @@ export interface OutfitsByPiece {
  *
  * An outfit with no piece of that category simply is not in that index —
  * a look with no sweater has nothing to say to someone browsing
- * sweaters. Groups keep the order their piece first appears in, and
- * outfits keep their incoming order inside a group.
+ * sweaters.
+ *
+ * The rail is ordered by the wardrobe, not by the day. It used to follow
+ * whatever order the outfits arrived in, which is ranked for today and
+ * therefore puts never-worn outfits first — so saving a new look made
+ * its shirt leap to the top of the rail and you lost the group you were
+ * standing in. Wardrobe order is stable, and it means a piece sits in
+ * the same relative place here as it does in /armari.
+ *
+ * Outfits keep their incoming order inside a group, so a look you have
+ * just saved is the first thing in the group you saved it from.
  */
 export function groupOutfitsBy(
   outfits: SavedOutfit[],
@@ -35,5 +45,8 @@ export function groupOutfitsBy(
     else groups.set(piece.id, { piece, outfits: [outfit] });
   }
 
-  return [...groups.values()];
+  const byPiece = new Map([...groups.values()].map((g) => [g.piece.id, g]));
+  return sortByWardrobeOrder([...byPiece.values()].map((g) => g.piece)).map(
+    (piece) => byPiece.get(piece.id)!,
+  );
 }

@@ -167,8 +167,10 @@ export const UI = {
     },
     axisEmpty: "cap outfit amb aquesta peça encara.",
     /** The way from your short list into everything the matcher can
-     * build with the same piece. */
-    seeMore: "veure'n més amb aquesta peça",
+     * build with the same piece. Two words: it sits inside that piece's
+     * own group, so naming the piece again was saying it twice — and
+     * "combinacions" is what keeps it from reading as more saved ones. */
+    seeMore: "més combinacions",
     plan: "planificar",
     back: "tornar",
     planned: "planificat",
