@@ -33,7 +33,7 @@ export default async function CalendariPage({
   const savedOutfits = outfits.map(toSavedOutfit);
 
   return (
-    <PageContainer width="wide">
+    <PageContainer width="full">
       <SectionHeader
         title="calendari"
         subtitle={
