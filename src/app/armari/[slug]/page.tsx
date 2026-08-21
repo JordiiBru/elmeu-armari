@@ -1,13 +1,6 @@
 import { notFound } from "next/navigation";
 import { findGarmentByIdSuffix, findAllGarments } from "@/lib/prendas/service";
-import {
-  findSavedOutfitKeys,
-  findOutfitsWithGarment,
-  findTodayWorn,
-} from "@/lib/outfits/service";
-import { getCurrentSeason } from "@/lib/prendas/season";
-import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
-import { dayToISO } from "@/lib/outfits/week";
+import { findSavedOutfitKeys } from "@/lib/outfits/service";
 import { idSuffixFromSlug } from "@/lib/prendas/slug";
 import { palettes } from "@/lib/colors";
 import { GarmentModalRoute } from "@/components/GarmentModalRoute";
@@ -27,15 +20,12 @@ export default async function GarmentDirectPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [garment, allGarments, savedOutfitKeys, todayWorn] = await Promise.all([
+  const [garment, allGarments, savedOutfitKeys] = await Promise.all([
     findGarmentByIdSuffix(idSuffixFromSlug(slug)),
     findAllGarments(),
     findSavedOutfitKeys(),
-    findTodayWorn(),
   ]);
   if (!garment) notFound();
-
-  const outfitsWith = await findOutfitsWithGarment(garment.id, getCurrentSeason());
 
   return (
     <>
@@ -45,10 +35,6 @@ export default async function GarmentDirectPage({
       allGarments={allGarments}
       palettes={palettes}
       savedOutfitKeys={savedOutfitKeys}
-      outfitsWith={outfitsWith}
-      extraCandidates={allGarments.filter((g) => EXTRA_CATEGORIES.has(g.category))}
-      todayISO={dayToISO(new Date())}
-      todayOutfitId={todayWorn?.outfitId ?? null}
     />
     </>
   );

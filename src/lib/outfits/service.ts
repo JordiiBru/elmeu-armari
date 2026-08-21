@@ -15,12 +15,12 @@ import {
 import { findGarmentCategories, markGarmentsDirty } from "@/lib/prendas/service";
 import { sortByWardrobeOrder } from "@/lib/prendas/filtering";
 import { AUTO_SOIL_CATEGORIES, EXTRA_CATEGORIES } from "@/lib/prendas/types";
-import { dirtyGarmentsOf, rankOutfitsForToday } from "@/lib/bugaderia/laundry";
+import { dirtyGarmentsOf } from "@/lib/bugaderia/laundry";
 import { palettes } from "@/lib/colors";
 import { dayKey, addDays, dayToISO } from "./week";
 import { outfitKey } from "./key";
 import type { SavedOutfit, WeekDayPlan } from "./types";
-import type { GarmentWithColors, Season } from "@/lib/prendas/types";
+import type { GarmentWithColors } from "@/lib/prendas/types";
 
 export { findAllOutfits, deleteOutfit };
 
@@ -60,25 +60,6 @@ export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
       extras: sortByWardrobeOrder(w.garments.map((wg) => wg.garment)),
     })),
   };
-}
-
-/**
- * The saved looks a given piece is part of. This is the morning question
- * asked from the other end: you have the shirt in your hand, so you go
- * to the shirt, not to a collection you have to scroll.
- *
- * Ranked for the day like everywhere else, so what is in season and long
- * unworn comes first.
- */
-export async function findOutfitsWithGarment(
-  garmentId: string,
-  season: Season,
-): Promise<SavedOutfit[]> {
-  const outfits = (await findAllOutfits()).map(toSavedOutfit);
-  return rankOutfitsForToday(
-    outfits.filter((o) => o.garments.some((g) => g.id === garmentId)),
-    season,
-  );
 }
 
 /** Every combination already in the wardrobe, for the combiner to grey

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { GarmentWithColors } from "@/lib/prendas/types";
-import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
+import type { SanzoPalette } from "@/lib/outfits/types";
 import { GarmentModal } from "./GarmentModal";
 
 /**
@@ -28,19 +28,11 @@ export function GarmentModalRoute({
   allGarments,
   palettes,
   savedOutfitKeys,
-  outfitsWith,
-  extraCandidates,
-  todayISO,
-  todayOutfitId,
 }: {
   garment: GarmentWithColors;
   allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
   savedOutfitKeys: string[];
-  outfitsWith: SavedOutfit[];
-  extraCandidates: GarmentWithColors[];
-  todayISO: string;
-  todayOutfitId: string | null;
 }) {
   const router = useRouter();
   return (
@@ -49,10 +41,6 @@ export function GarmentModalRoute({
       allGarments={allGarments}
       palettes={palettes}
       savedOutfitKeys={savedOutfitKeys}
-      outfitsWith={outfitsWith}
-      extraCandidates={extraCandidates}
-      todayISO={todayISO}
-      todayOutfitId={todayOutfitId}
       onClose={() => {
         router.back();
         setTimeout(() => {

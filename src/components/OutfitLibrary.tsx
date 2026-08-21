@@ -5,46 +5,45 @@ import Link from "next/link";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { isWearable } from "@/lib/bugaderia/laundry";
+import { groupOutfitsBy } from "@/lib/outfits/grouping";
 import { UI } from "@/lib/prendas/ui-strings";
-import { groupOutfitsByTop } from "@/lib/outfits/grouping";
-import { OutfitTile, pieceLabel, pieceTint } from "./OutfitTile";
-import { PieceThumb } from "./PieceThumb";
+import { OutfitTile, pieceTint } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
-import { EmptyState, Grid, SegmentedControl, Stack, Text } from "@/components/ui";
+import { PieceThumb } from "./PieceThumb";
+import {
+  EmptyState,
+  Grid,
+  Icon,
+  SegmentedControl,
+  Stack,
+  Text,
+} from "@/components/ui";
 
-type Filter = "all" | "ready";
+/** The three ways to index the collection. Shirts lead: that is the one
+ * you have in your hand most mornings. Narrowed to these three because
+ * they are the only categories an outfit is made of — shoes, socks and
+ * accessories belong to the day, not to the look. */
+type Axis = "SHIRT" | "PANTS" | "SWEATER";
 
-// "a punt" first and selected: the screen asks what you can wear now, and
-// an outfit whose shirt is in the basket is not an answer to that.
-const FILTERS: Filter[] = ["ready", "all"];
-
-const FILTER_LABELS: Record<Filter, string> = {
-  all: UI.outfits.filters.all,
-  ready: UI.outfits.filters.ready,
-};
-
-const EMPTY_FILTER: Record<Filter, string> = {
-  all: UI.outfits.emptyNoOutfitsBrowse,
-  ready: UI.outfits.emptyReady,
-};
-
-function matchesFilter(outfit: SavedOutfit, filter: Filter): boolean {
-  return filter === "all" || isWearable(outfit);
-}
+const AXES: Axis[] = ["SHIRT", "PANTS", "SWEATER"];
 
 /**
- * The whole collection of saved outfits, the bottom stratum of "què em
- * poso?". It only browses: the day's answer lives above it in
- * `TodayPlate`, and the week between the two.
+ * The whole collection, indexed by whichever piece you have decided on.
+ * Every look built on one shirt sits under that shirt, and the tabs
+ * re-index the same collection by trousers or by sweater — because some
+ * mornings the decision starts at the other end.
  *
- * Filed under the piece each look is built around, so it reads like a
- * wardrobe rail: pull a shirt off the pile in the morning, find it here,
- * and everything you have ever built with it is underneath.
+ * Collapsed by default, all of it. Open, this is a photograph of every
+ * outfit you own, which is a lot of page to scroll past to reach one
+ * shirt; closed it is a rail of pieces you take in at a glance. Hold as
+ * many open as you like — it is a wardrobe, not an accordion that
+ * resents you.
  *
- * That also makes the catalogue numbers mean something. They used to
- * follow the day's ranking, which is partly "least recently worn" — so
- * the same outfit was n004 today and n007 tomorrow. Filed by top they
- * only move when the wardrobe does.
+ * The clean/dirty filter is gone. It was a third selector on a screen
+ * that now has two, and a tile already says "per rentar" on its own
+ * face. Instead the wearable ones come first inside each group, and a
+ * piece with nothing wearable left reads dimmer in the rail — the same
+ * information, no control.
  */
 export function OutfitLibrary({
   outfits,
@@ -61,31 +60,38 @@ export function OutfitLibrary({
   todayOutfitId: string | null;
 }) {
   const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
-  const [filter, setFilter] = useState<Filter>(FILTERS[0]);
+  const [axis, setAxis] = useState<Axis>(AXES[0]);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [openOutfitId, setOpenOutfitId] = useState<string | null>(null);
 
-  const counts = useMemo(() => {
-    const entries = FILTERS.map(
-      (f) => [f, outfits.filter((o) => matchesFilter(o, f)).length] as const,
-    );
-    return new Map<Filter, number>(entries);
-  }, [outfits]);
-
-  const visible = useMemo(
-    () => outfits.filter((o) => matchesFilter(o, filter)),
-    [outfits, filter],
+  const groups = useMemo(
+    () =>
+      groupOutfitsBy(outfits, axis).map((group) => ({
+        ...group,
+        outfits: [...group.outfits].sort(
+          (a, b) => Number(isWearable(b)) - Number(isWearable(a)),
+        ),
+      })),
+    [outfits, axis],
   );
 
-  const groups = useMemo(() => groupOutfitsByTop(visible), [visible]);
-
-  // The catalogue number belongs to the outfit's place in the whole
-  // collection, not to its place in the current filter — renumbering the
-  // same card as you narrow the list would make it read as a different
-  // outfit. So it is numbered off the unfiltered rail.
+  // Numbered off one fixed index — the shirt rail — rather than whichever
+  // tab you are on, so an outfit keeps the same catalogue number however
+  // you arrived at it.
   const numbers = useMemo(() => {
-    const all = groupOutfitsByTop(outfits).flatMap((g) => g.outfits);
-    return new Map(all.map((o, i) => [o.id, i]));
+    const byShirt = groupOutfitsBy(outfits, "SHIRT").flatMap((g) => g.outfits);
+    const seen = new Set(byShirt.map((o) => o.id));
+    const rest = outfits.filter((o) => !seen.has(o.id));
+    return new Map([...byShirt, ...rest].map((o, i) => [o.id, i]));
   }, [outfits]);
+
+  const toggle = (id: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   const openOutfit = outfits.find((o) => o.id === openOutfitId) ?? null;
 
@@ -108,71 +114,79 @@ export function OutfitLibrary({
 
   return (
     <Stack gap={6}>
-      <SegmentedControl<Filter>
-        value={filter}
-        onChange={setFilter}
-        ariaLabel={UI.outfits.filtersLabel}
-        options={FILTERS.map((f) => ({
-          value: f,
-          label: (
-            <>
-              {FILTER_LABELS[f]}
-              <span className="tabular-nums"> {counts.get(f) ?? 0}</span>
-            </>
-          ),
-        }))}
+      <SegmentedControl<Axis>
+        value={axis}
+        onChange={setAxis}
+        ariaLabel={UI.outfits.axisLabel}
+        options={AXES.map((c) => ({ value: c, label: UI.outfits.axes[c] }))}
       />
 
-      {visible.length === 0 ? (
-        <EmptyState title={EMPTY_FILTER[filter]} />
+      {groups.length === 0 ? (
+        <EmptyState title={UI.outfits.axisEmpty} />
       ) : (
-        <Stack gap={8} className="md:gap-14">
-          {groups.map((group) => (
-            <Stack as="section" key={group.top?.id ?? "sense-top"} gap={5}>
-              {/* The piece itself is the heading. A photograph of the
-                  shirt is what you match against the one in your hand;
-                  its name is only there to confirm it. */}
-              <div className="flex items-center gap-3 border-b border-border-subtle pb-3">
-                {group.top ? (
+        // Keyed on the axis so switching tab re-enters instead of
+        // swapping dry, the same way the shoe picker does.
+        <div key={axis} className="panel-enter flex flex-col">
+          {groups.map((group) => {
+            const isOpen = expanded.has(group.piece.id);
+            const anyWearable = group.outfits.some(isWearable);
+            return (
+              <div key={group.piece.id} className="border-b border-border-subtle">
+                <button
+                  type="button"
+                  onClick={() => toggle(group.piece.id)}
+                  aria-expanded={isOpen}
+                  className={`group flex w-full items-center gap-4 py-3 text-left outline-none transition-opacity duration-[var(--duration-base)] focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                    anyWearable ? "" : "opacity-50"
+                  }`}
+                >
                   <PieceThumb
-                    garment={group.top}
+                    garment={group.piece}
                     thumb
                     sizes="48px"
                     className="h-12 w-12 flex-shrink-0"
                   />
-                ) : null}
-                <h3 className="min-w-0 font-serif lowercase leading-tight">
-                  {group.top ? pieceLabel(group.top) : UI.outfits.noTop}
-                  {/* Every shirt is a "samarreta", so the kind alone
-                      names eight headers the same. The colour is what
-                      tells them apart on the page, next to the
-                      photograph that tells them apart in your hand. */}
-                  {group.top && pieceTint(group.top) && (
-                    <Text as="span" variant="small" italic tone="secondary">
-                      {" "}· {pieceTint(group.top)}
-                    </Text>
-                  )}
-                </h3>
-                <Text variant="caption" tabular className="ml-auto flex-shrink-0">
-                  {group.outfits.length}
-                </Text>
-              </div>
+                  {/* The tab already said "samarretes", so the row does not
+                      repeat it. What is left is the only thing that tells
+                      one from another in words. */}
+                  <Text as="span" className="min-w-0 truncate font-serif lowercase">
+                    {pieceTint(group.piece)}
+                  </Text>
+                  <Text variant="caption" tabular className="ml-auto flex-shrink-0">
+                    {group.outfits.length}
+                  </Text>
+                  {/* The whole affordance, and the same one the wardrobe
+                      filters use: a chevron that turns over when it opens. */}
+                  <span
+                    aria-hidden
+                    className={`flex-shrink-0 text-text-secondary transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:text-text-primary ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                  >
+                    <Icon name="chevron-down" size={14} />
+                  </span>
+                </button>
 
-              <Grid cols="library" gapX={5} gapY={7} className="md:gap-y-12">
-                {group.outfits.map((outfit) => (
-                  <OutfitTile
-                    key={outfit.id}
-                    outfit={outfit}
-                    palette={paletteMap.get(outfit.paletteId) ?? null}
-                    index={numbers.get(outfit.id) ?? 0}
-                    mark={outfit.id === todayOutfitId ? UI.outfits.today : null}
-                    onOpen={() => setOpenOutfitId(outfit.id)}
-                  />
-                ))}
-              </Grid>
-            </Stack>
-          ))}
-        </Stack>
+                <div className="collapse-panel" data-open={isOpen}>
+                  <div>
+                    <Grid cols="library" gapX={5} gapY={6} className="pb-6 pt-1">
+                      {group.outfits.map((outfit) => (
+                        <OutfitTile
+                          key={outfit.id}
+                          outfit={outfit}
+                          palette={paletteMap.get(outfit.paletteId) ?? null}
+                          index={numbers.get(outfit.id) ?? 0}
+                          mark={outfit.id === todayOutfitId ? UI.outfits.today : null}
+                          onOpen={() => setOpenOutfitId(outfit.id)}
+                        />
+                      ))}
+                    </Grid>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
 
       {openOutfit && (
