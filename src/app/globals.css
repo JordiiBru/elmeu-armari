@@ -112,6 +112,15 @@
   interpolate-size: allow-keywords;
 }
 
+/* La portada es l'unic lloc on viu `display-xl`, i a 96px "el meu armari"
+   ocupa dues linies i mig telefon. Un escalo avall (el mateix `display`)
+   deixa el titol gran sense que es mengi la pantalla. */
+@media (max-width: 40rem) {
+  :root {
+    --font-size-display-xl: var(--font-size-display);
+  }
+}
+
 /* ==========================================================================
    Mode obscur — grafit calid, no gris fred.
    Es la mateixa temperatura del cream, pero baixada.
