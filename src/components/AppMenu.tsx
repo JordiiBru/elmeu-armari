@@ -31,6 +31,15 @@ const LINKS = [
  * `resolvedTheme` is undefined on the first paint, and by the time
  * anything here mounts it is not.
  */
+function ThemeOption({ name, label }: { name: "sun" | "moon"; label: string }) {
+  return (
+    <>
+      <Icon name={name} size={16} />
+      <span className="sr-only">{label}</span>
+    </>
+  );
+}
+
 export function AppMenu() {
   const [open, setOpen] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
@@ -93,13 +102,17 @@ export function AppMenu() {
                 <Text variant="caption" as="span">
                   {UI.menu.theme}
                 </Text>
+                {/* A sun and a moon say it faster than two words, and the
+                    control already marks the active one twice: full-ink
+                    label plus the hairline this app uses for "selected"
+                    everywhere else. The names stay for screen readers. */}
                 <SegmentedControl<Theme>
                   value={resolvedTheme === "dark" ? "dark" : "light"}
                   onChange={setTheme}
                   ariaLabel={UI.menu.theme}
                   options={[
-                    { value: "light", label: UI.menu.themeLight },
-                    { value: "dark", label: UI.menu.themeDark },
+                    { value: "light", label: <ThemeOption name="sun" label={UI.menu.themeLight} /> },
+                    { value: "dark", label: <ThemeOption name="moon" label={UI.menu.themeDark} /> },
                   ]}
                   className="gap-x-4"
                 />

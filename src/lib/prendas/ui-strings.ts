@@ -83,6 +83,8 @@ export const UI = {
     stats: "estadístiques",
     settings: "configuració",
     theme: "tema",
+    // The icons carry the meaning; these name them for screen readers
+    // and for the tooltip, since a sun and a moon have no text.
     themeLight: "clar",
     themeDark: "fosc",
   },
