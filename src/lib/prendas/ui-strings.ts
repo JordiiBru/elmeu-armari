@@ -153,11 +153,6 @@ export const UI = {
     emptyReady: "cap outfit a punt ara mateix.",
     goToArmari: "anar a l'armari",
     goToRentar: "anar a rentar",
-    // What the outfit is worn with today. The clothes are the outfit;
-    // these belong to the day, so they read as a companion line rather
-    // than as part of the photograph.
-    wornWith: "amb",
-    saved: "Outfit desat",
     plan: "planificar",
     back: "tornar",
     planned: "planificat",

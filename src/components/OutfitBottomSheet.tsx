@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
+import { useCallback, useState, useMemo, useTransition } from "react";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette, OutfitGroup } from "@/lib/outfits/types";
 import { generateOutfitGroupsForGarment } from "@/lib/outfits/engine";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
 import { saveOutfitAction } from "@/app/outfits/actions";
-import { UI } from "@/lib/prendas/ui-strings";
+import { outfitKey } from "@/lib/outfits/key";
 import { OutfitGroupCard } from "./OutfitCard";
-import { Sheet, TextButton, Text, Stack, Icon, useToast } from "@/components/ui";
+import { Sheet, TextButton, Text, Stack, Icon } from "@/components/ui";
 
 const PAGE_SIZE = 6;
 
@@ -16,10 +16,15 @@ interface Props {
   garment: GarmentWithColors;
   allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
+  /** Every combination already in the wardrobe, as `outfitKey`s. Without
+   * it the sheet kept offering to save outfits you already own: the save
+   * deduped server-side and nothing happened, which read as a dead
+   * button. */
+  savedOutfitKeys: string[];
+  /** Reported upward so the mark survives this sheet being closed and
+   * reopened on the same piece — the state below unmounts with it. */
+  onOutfitSaved: (key: string) => void;
   onClose: () => void;
-  /** Saving is the end of the errand: it leaves the wardrobe with
-   * nothing open rather than dropping you back on the piece. */
-  onSaved?: () => void;
 }
 
 function computeInitial(
@@ -40,32 +45,54 @@ export function OutfitBottomSheet({
   garment,
   allGarments,
   palettes,
+  savedOutfitKeys,
+  onOutfitSaved,
   onClose,
-  onSaved,
 }: Props) {
-  const toast = useToast();
   const [initial] = useState(() =>
     computeInitial(garment, allGarments, palettes),
   );
   const [groups, setGroups] = useState<OutfitGroup[]>(initial.groups);
   const [hasMore, setHasMore] = useState(initial.hasMore);
   const [loading, setLoading] = useState(false);
+  // What was already saved when this opened, and what you saved while it
+  // was open. Both grey the button out; only the first decides the order,
+  // so the list never reshuffles under your thumb as you save.
+  const [savedAtOpen] = useState(() => new Set(savedOutfitKeys));
   const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set());
   const [pieceFilter, setPieceFilter] = useState<number | null>(null);
   const [pending, startTransition] = useTransition();
 
+  const isSaved = useCallback(
+    (garmentIds: string[], paletteId: number) => {
+      const key = outfitKey(garmentIds, paletteId);
+      return savedAtOpen.has(key) || savedKeys.has(key);
+    },
+    [savedAtOpen, savedKeys],
+  );
+
+  // Combinations you already own sink to the bottom: the point of this
+  // list is what you have not thought of yet.
+  const ordered = useMemo(() => {
+    const already = (g: OutfitGroup) =>
+      savedAtOpen.has(
+        outfitKey(g.garments.map((x) => x.id), g.palettes[0].palette.id),
+      );
+    return [...groups].sort((a, b) => Number(already(a)) - Number(already(b)));
+  }, [groups, savedAtOpen]);
+
   const availablePieceCounts = useMemo(
     () =>
-      Array.from(new Set(groups.map((g) => g.garments.length))).sort(
+      Array.from(new Set(ordered.map((g) => g.garments.length))).sort(
         (a, b) => a - b,
       ),
-    [groups],
+    [ordered],
   );
 
   const visibleGroups =
     pieceFilter == null
-      ? groups
-      : groups.filter((g) => g.garments.length === pieceFilter);
+      ? ordered
+      : ordered.filter((g) => g.garments.length === pieceFilter);
 
   const loadMore = (offset: number) => {
     setLoading(true);
@@ -88,24 +115,19 @@ export function OutfitBottomSheet({
   // succeeded server-side but the button never flipped to "desat".
   const handleSave = (group: OutfitGroup, paletteId: number) => {
     const garmentIds = group.garments.map((g) => g.id);
-    const key = [...garmentIds].sort().join(",") + "|" + paletteId;
+    const key = outfitKey(garmentIds, paletteId);
     startTransition(async () => {
       await saveOutfitAction(paletteId, garmentIds);
       setSavedKeys((prev) => new Set(prev).add(key));
-      // The sheet is about to go, so the receipt cannot be the button
-      // flipping to "desat" — nobody would see it.
-      toast.show(UI.outfits.saved, "success");
-      onSaved?.();
+      onOutfitSaved(key);
     });
   };
 
   const getSavedPaletteIds = (group: OutfitGroup): Set<number> => {
-    const garmentKey = group.garments.map((g) => g.id).sort().join(",");
+    const garmentIds = group.garments.map((g) => g.id);
     const ids = new Set<number>();
     for (const pm of group.palettes) {
-      if (savedKeys.has(garmentKey + "|" + pm.palette.id)) {
-        ids.add(pm.palette.id);
-      }
+      if (isSaved(garmentIds, pm.palette.id)) ids.add(pm.palette.id);
     }
     return ids;
   };
@@ -182,7 +204,7 @@ export function OutfitBottomSheet({
             </TextButton>
           )}
         </div>
-      ) : groups.length === 0 ? (
+      ) : ordered.length === 0 ? (
         <Text italic tone="secondary" className="font-serif text-center py-8">
           cap combinació trobada per a aquesta peça.
         </Text>

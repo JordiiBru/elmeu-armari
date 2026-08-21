@@ -8,9 +8,18 @@ import {
 } from "@/lib/outfits/service";
 import { revalidatePath } from "next/cache";
 
+/**
+ * Deliberately revalidates nothing. It used to revalidate /avui, which
+ * re-rendered whatever route the user was actually on — and they are on
+ * /armari/[slug], where that reset `combineOpen` and threw them out of
+ * the combinations list back onto the piece they had already left.
+ *
+ * Nothing is lost: /avui is `force-dynamic`, so it renders fresh on
+ * arrival (verified: the collection goes 11 → 12 after saving, over a
+ * client-side navigation).
+ */
 export async function saveOutfitAction(paletteId: number, garmentIds: string[]) {
   const outfit = await saveOutfit({ paletteId, garmentIds });
-  revalidatePath("/avui");
   return { id: outfit.id, name: outfit.name };
 }
 

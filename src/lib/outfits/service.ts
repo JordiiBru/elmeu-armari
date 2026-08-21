@@ -18,6 +18,7 @@ import { AUTO_SOIL_CATEGORIES, EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { dirtyGarmentsOf } from "@/lib/bugaderia/laundry";
 import { palettes } from "@/lib/colors";
 import { dayKey, addDays, dayToISO } from "./week";
+import { outfitKey } from "./key";
 import type { SavedOutfit, WeekDayPlan } from "./types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 
@@ -59,6 +60,15 @@ export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
       extras: sortByWardrobeOrder(w.garments.map((wg) => wg.garment)),
     })),
   };
+}
+
+/** Every combination already in the wardrobe, for the combiner to grey
+ * out and sink to the bottom of its list. */
+export async function findSavedOutfitKeys(): Promise<string[]> {
+  const outfits = await findAllOutfits();
+  return outfits.map((o) =>
+    outfitKey(o.garments.map((og) => og.garment.id), o.paletteId),
+  );
 }
 
 export async function findSavedOutfitById(id: string): Promise<SavedOutfit | null> {

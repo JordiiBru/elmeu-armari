@@ -187,15 +187,14 @@ export function TodayPlate({
             {/* Beside the photograph, not inside it. Folding shoes and
                 accessories into the collage turns one clean plate into a
                 wall of six thumbnails; as a companion strip they are
-                legible at a glance and the photograph stays the subject. */}
+                legible at a glance and the photograph stays the subject.
+                No label: a row of shoes under an outfit needs no word to
+                explain that you are wearing them with it. */}
             {todayExtras.length > 0 && (
-              <div className="mt-5 flex items-center gap-2">
-                <Text variant="caption" as="span" className="mr-1">
-                  {UI.outfits.wornWith}
-                </Text>
+              <div className="mt-5 flex flex-wrap items-center gap-2">
                 {todayExtras.map((g) => (
                   <span key={g.id} title={pieceLabel(g)} className="flex-shrink-0">
-                    <PieceThumb garment={g} thumb sizes="40px" className="h-10 w-10" />
+                    <PieceThumb garment={g} thumb sizes="64px" className="h-16 w-16" />
                   </span>
                 ))}
               </div>

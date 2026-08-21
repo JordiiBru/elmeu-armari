@@ -24,12 +24,24 @@ interface Props {
   garment: GarmentWithColors;
   allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
+  savedOutfitKeys: string[];
   onClose: () => void;
 }
 
-export function GarmentModal({ garment, allGarments, palettes, onClose }: Props) {
+export function GarmentModal({
+  garment,
+  allGarments,
+  palettes,
+  savedOutfitKeys,
+  onClose,
+}: Props) {
   const [confirming, setConfirming] = useState(false);
   const [combineOpen, setCombineOpen] = useState(false);
+  // What you saved during this visit. It lives here rather than in the
+  // combinations sheet because that sheet unmounts every time you close
+  // it, and reopening it on the same piece would otherwise offer to save
+  // outfits you had just saved.
+  const [savedHere, setSavedHere] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
 
   // Shoes, socks and accessories do not take part in the colour matching,
@@ -58,8 +70,9 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
         garment={garment}
         allGarments={allGarments}
         palettes={palettes}
+        savedOutfitKeys={[...savedOutfitKeys, ...savedHere]}
+        onOutfitSaved={(key) => setSavedHere((prev) => [...prev, key])}
         onClose={() => setCombineOpen(false)}
-        onSaved={onClose}
       />
     );
   }
