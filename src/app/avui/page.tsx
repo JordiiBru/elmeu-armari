@@ -58,9 +58,14 @@ function WeekNav({ weekStart, weekEnd }: { weekStart: Date; weekEnd: Date }) {
     "inline-flex items-center gap-1 font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]";
   return (
     <div className="flex items-baseline gap-4">
+      {/* scroll={false}: App Router resets the scroll on navigation, and
+          these two only change the seven cells beside them. Being thrown
+          back to the top of the page to look at the next week is not what
+          pressing an arrow asks for. */}
       <Link
         href={`/avui?start=${dayToISO(addDays(weekStart, -7))}`}
         aria-label="Setmana anterior"
+        scroll={false}
         className={link}
       >
         <Icon name="chevron-left" size={12} />
@@ -71,6 +76,7 @@ function WeekNav({ weekStart, weekEnd }: { weekStart: Date; weekEnd: Date }) {
       <Link
         href={`/avui?start=${dayToISO(addDays(weekStart, 7))}`}
         aria-label="Setmana següent"
+        scroll={false}
         className={link}
       >
         <Icon name="chevron-right" size={12} />

@@ -8,6 +8,7 @@ import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
 import { saveOutfitAction } from "@/app/outfits/actions";
 import { outfitKey } from "@/lib/outfits/key";
 import { OutfitGroupCard } from "./OutfitCard";
+import { UI } from "@/lib/prendas/ui-strings";
 import { Sheet, TextButton, Text, Stack, Icon } from "@/components/ui";
 
 const PAGE_SIZE = 6;
@@ -24,6 +25,9 @@ interface Props {
   /** Reported upward so the mark survives this sheet being closed and
    * reopened on the same piece — the state below unmounts with it. */
   onOutfitSaved: (key: string) => void;
+  /** Up one level, back to the piece. */
+  onBack: () => void;
+  /** Out of the whole thing, back to the wardrobe. */
   onClose: () => void;
 }
 
@@ -47,6 +51,7 @@ export function OutfitBottomSheet({
   palettes,
   savedOutfitKeys,
   onOutfitSaved,
+  onBack,
   onClose,
 }: Props) {
   const [initial] = useState(() =>
@@ -151,21 +156,30 @@ export function OutfitBottomSheet({
       }
       mediaHeight="h-24 sm:h-32"
       header={
-        <Stack gap={1}>
-          <Text variant="caption">combinar</Text>
-          <h2 className="type-title leading-tight">
-            {CATEGORY_LABELS[garment.category]}
-          </h2>
-          <Text variant="small" italic tone="secondary" className="font-serif">
-            {[
-              garment.fit ? FIT_LABELS[garment.fit] : null,
-              garment.size ? `talla ${garment.size}` : null,
-              garment.notes,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </Text>
-        </Stack>
+        // Dismissing means leaving; going back to the piece is its own
+        // control. Without it the close button did both jobs badly: you
+        // pressed it to get out and landed on the piece you had already
+        // left, which reads as the popup reopening on you.
+        <div className="flex items-start justify-between gap-3">
+          <Stack gap={1}>
+            <Text variant="caption">combinar</Text>
+            <h2 className="type-title leading-tight">
+              {CATEGORY_LABELS[garment.category]}
+            </h2>
+            <Text variant="small" italic tone="secondary" className="font-serif">
+              {[
+                garment.fit ? FIT_LABELS[garment.fit] : null,
+                garment.size ? `talla ${garment.size}` : null,
+                garment.notes,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </Text>
+          </Stack>
+          <TextButton type="button" tone="secondary" onClick={onBack}>
+            {UI.outfits.back}
+          </TextButton>
+        </div>
       }
       headerBelow={
         availablePieceCounts.length > 1 && (

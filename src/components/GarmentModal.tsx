@@ -72,7 +72,8 @@ export function GarmentModal({
         palettes={palettes}
         savedOutfitKeys={[...savedOutfitKeys, ...savedHere]}
         onOutfitSaved={(key) => setSavedHere((prev) => [...prev, key])}
-        onClose={() => setCombineOpen(false)}
+        onBack={() => setCombineOpen(false)}
+        onClose={onClose}
       />
     );
   }
