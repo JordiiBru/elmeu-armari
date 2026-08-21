@@ -76,8 +76,8 @@ export function LaundryPicker({
    * Stays on the screen. The action revalidates this route, so the
    * pieces you just marked leave the grid on their own — which is both
    * the receipt and the reason to stay: sorting laundry is a handful of
-   * passes over the same pile, and bouncing back to the hub after each
-   * one meant navigating in again.
+   * passes over the same pile, and leaving the screen after each one
+   * meant navigating back in.
    */
   const handleSubmit = () => {
     if (selected.size === 0) return;
@@ -95,7 +95,10 @@ export function LaundryPicker({
 
   return (
     <div className="flex flex-col gap-6 pb-28">
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+      {/* Three up on a phone is the right thumb-sized target; past that
+          the columns keep coming rather than the pieces getting bigger,
+          so a full basket stays one screenful. */}
+      <div className="panel-enter grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-3">
         {garments.map((garment) => (
           <GarmentPickCard
             key={garment.id}
@@ -116,28 +119,37 @@ export function LaundryPicker({
           a five-word verb do not share a row, and the count means more
           inside the action than beside it. */}
       {selected.size > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-between gap-4 border-t border-border bg-background px-6 py-4">
-          <IconButton
-            type="button"
-            onClick={clearSelection}
-            disabled={pending}
-            label={UI.bugaderia.picker.clearSelection}
-          >
-            <Icon name="close" size={18} />
-          </IconButton>
-          <Button
-            type="button"
-            size="lg"
-            onClick={handleSubmit}
-            loading={pending}
-            loadingText={copy.submitting}
-          >
-            {/* One text run: as separate flex children the browser trims
-                the space around the separator. */}
-            <span className="tabular-nums">
-              {copy.submit} · {selected.size}
-            </span>
-          </Button>
+        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background">
+          {/* Same measure and gutters as PageContainer, so the two
+              controls sit on the same edges as the grid above them. */}
+          <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-4 md:px-10">
+            {/* Next to a filled primary button a bare 18px hairline cross
+                read as decoration. Bordered so it is legibly a control,
+                and in the danger ink because what it does is throw the
+                selection away. */}
+            <IconButton
+              type="button"
+              onClick={clearSelection}
+              disabled={pending}
+              label={UI.bugaderia.picker.clearSelection}
+              className="border border-border text-danger hover:border-danger hover:text-danger"
+            >
+              <Icon name="close" size={18} />
+            </IconButton>
+            <Button
+              type="button"
+              size="lg"
+              onClick={handleSubmit}
+              loading={pending}
+              loadingText={copy.submitting}
+            >
+              {/* One text run: as separate flex children the browser trims
+                  the space around the separator. */}
+              <span className="tabular-nums">
+                {copy.submit} · {selected.size}
+              </span>
+            </Button>
+          </div>
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import BackLink from "@/components/BackLink";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { AppMenu } from "@/components/AppMenu";
 
 /**
  * Jerarquia de pantalles. "Enrere" puja un nivell, i cada pantalla te un
@@ -15,7 +15,6 @@ const PARENT: { prefix: string; parent: string }[] = [
   { prefix: "/add", parent: "/armari" },
   { prefix: "/edit/", parent: "/armari" },
   { prefix: "/armari/", parent: "/armari" },
-  { prefix: "/bugaderia/", parent: "/bugaderia" },
 ];
 
 function parentOf(pathname: string): string {
@@ -32,7 +31,7 @@ export default function SiteHeader() {
   return (
     <header className="w-full px-6 md:px-10 pt-6 pb-4 flex items-center justify-between">
       {isHome ? <span /> : <BackLink href={parentOf(pathname)} />}
-      <ThemeToggle />
+      <AppMenu />
     </header>
   );
 }

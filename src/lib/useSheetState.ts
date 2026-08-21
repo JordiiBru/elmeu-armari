@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Estat compartit per bottom sheets i dialegs modals:
@@ -25,6 +25,15 @@ import { useCallback, useEffect, useState } from "react";
 export function useSheetState(onClose: () => void, exitMs = 420) {
   const [shown, setShown] = useState(false);
   const [closing, setClosing] = useState(false);
+  // The guard has to be a ref, not the `closing` state. It used to live
+  // inside the `setClosing` updater, which made scheduling `onClose` a
+  // side effect of a state updater — and React double-invokes updaters
+  // under StrictMode to check they are pure. So every close fired
+  // `onClose` twice in development. On a sheet that closes with
+  // `router.back()` that is two history steps: closing a garment landed
+  // on the home page before the fallback pulled it back to /armari,
+  // which is the flash you could see.
+  const closingRef = useRef(false);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setShown(true));
@@ -36,15 +45,14 @@ export function useSheetState(onClose: () => void, exitMs = 420) {
   }, []);
 
   const close = useCallback(() => {
-    setClosing((wasClosing) => {
-      if (wasClosing) return true;
-      setShown(false);
-      const reduceMotion =
-        typeof window !== "undefined" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      setTimeout(onClose, reduceMotion ? 0 : exitMs);
-      return true;
-    });
+    if (closingRef.current) return;
+    closingRef.current = true;
+    setClosing(true);
+    setShown(false);
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setTimeout(onClose, reduceMotion ? 0 : exitMs);
   }, [onClose, exitMs]);
 
   useEffect(() => {

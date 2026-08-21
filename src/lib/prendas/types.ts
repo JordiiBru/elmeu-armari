@@ -94,7 +94,8 @@ export const WASHABLE_CATEGORIES = new Set<Category>(["SWEATER", "SHIRT", "PANTS
 // Categories a single wear is enough to soil, so a past day dirties them
 // on its own. Trousers are washable but not here on purpose: nobody
 // washes their jeans after one day, and having the app insist made the
-// basket lie. They go to the basket when you say so, from Embrutar.
+// basket lie. They go to the basket when you say so, from the clean pile
+// of /bugaderia.
 export const AUTO_SOIL_CATEGORIES = new Set<Category>(["SWEATER", "SHIRT"]);
 
 export const ALL_FITS: string[] = [

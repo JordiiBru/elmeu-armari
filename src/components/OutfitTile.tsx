@@ -4,10 +4,11 @@ import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { CATEGORY_LABELS, SUBTYPE_LABELS } from "@/lib/prendas/labels";
 import { isWearable } from "@/lib/bugaderia/laundry";
-import { nameOf } from "@/lib/colors";
+import { nameOf, namedColors } from "@/lib/colors";
+import { oklchDistance } from "@/lib/outfits/color-matching";
 import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
-import { Card, Icon, Text } from "@/components/ui";
+import { Card, Text } from "@/components/ui";
 
 /** A piece reads better by its subtype ("polo", "vaquers", "anell") than
  * by its category — every accessory shares the same category label. */
@@ -16,6 +17,52 @@ export function pieceLabel(garment: GarmentWithColors): string {
     (garment.subtype ? SUBTYPE_LABELS[garment.subtype] : null) ??
     CATEGORY_LABELS[garment.category]
   );
+}
+
+/**
+ * The historic name of the Sanzo Wada colour a hex is closest to.
+ *
+ * `nameOf` is an exact lookup, and clothes are almost never an exact
+ * Sanzo hex — so naming a garment's colour that way printed raw hexes
+ * into the interface most of the time. The nearest name is both honest
+ * and the vocabulary this app already speaks everywhere else.
+ *
+ * Cached: 348 comparisons per colour, and the same handful of colours
+ * are asked for on every render.
+ */
+const nearestNameCache = new Map<string, string>();
+
+function nearestSanzoName(hex: string): string {
+  const key = hex.toLowerCase();
+  const cached = nearestNameCache.get(key);
+  if (cached) return cached;
+
+  const exact = nameOf(key);
+  if (exact) {
+    nearestNameCache.set(key, exact);
+    return exact;
+  }
+
+  let best = namedColors[0];
+  let bestDistance = Infinity;
+  for (const candidate of namedColors) {
+    const distance = oklchDistance(key, candidate.hex);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      best = candidate;
+    }
+  }
+  nearestNameCache.set(key, best.name);
+  return best.name;
+}
+
+/**
+ * What tells two pieces of the same kind apart at a glance. Every shirt
+ * you own is a "samarreta"; only one of them is Salvia Blue.
+ */
+export function pieceTint(garment: GarmentWithColors): string | null {
+  const hex = garment.colors[0]?.hex;
+  return hex ? nearestSanzoName(hex) : null;
 }
 
 /** The pieces an outfit is made of: "polo · vaquers". No extras — they
@@ -128,20 +175,17 @@ export function OutfitTile({
   outfit,
   palette,
   index,
-  suggested = false,
   mark,
   onOpen,
 }: {
   outfit: SavedOutfit;
   palette: SanzoPalette | null;
   index: number;
-  suggested?: boolean;
   /** Caption over the top-left corner: whose day this outfit already is
-   * ("avui" in the library, "planificat" in the calendar). */
+   * ("avui" in the collection, "planificat" in the week). */
   mark?: string | null;
   onOpen: () => void;
 }) {
-  const wearable = isWearable(outfit);
   // The clothes name the outfit: they are what tells two looks apart at a
   // glance, and with subtypes they read as a garment rail ("polo · vaquers")
   // rather than as a taxonomy.
@@ -149,11 +193,7 @@ export function OutfitTile({
 
   // Which piece is missing is a detail for the sheet: spelled out here it
   // wrapped the caption onto two lines over the photograph.
-  const stateMark = !wearable
-    ? UI.outfits.inBasket
-    : suggested
-      ? UI.outfits.suggested
-      : null;
+  const stateMark = isWearable(outfit) ? null : UI.outfits.inBasket;
 
   return (
     <Card
@@ -169,11 +209,6 @@ export function OutfitTile({
           sizes={TILE_SIZES}
           className="h-full w-full"
         />
-        {outfit.favorite && (
-          <span className="absolute top-2 right-2 inline-flex bg-elevated p-1">
-            <Icon name="star" size={12} className="fill-current text-text-primary" />
-          </span>
-        )}
         {mark && <Mark position="top-left">{mark}</Mark>}
         {stateMark && <Mark position="bottom-left">{stateMark}</Mark>}
       </div>

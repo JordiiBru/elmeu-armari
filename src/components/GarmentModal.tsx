@@ -18,19 +18,36 @@ import {
 } from "@/lib/prendas/labels";
 import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
-import { Sheet, Text, TextButton, Stack } from "@/components/ui";
+import { Button, Sheet, Text, TextButton, Stack } from "@/components/ui";
 
 interface Props {
   garment: GarmentWithColors;
   allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
+  savedOutfitKeys: string[];
   onClose: () => void;
 }
 
-export function GarmentModal({ garment, allGarments, palettes, onClose }: Props) {
+export function GarmentModal({
+  garment,
+  allGarments,
+  palettes,
+  savedOutfitKeys,
+  onClose,
+}: Props) {
   const [confirming, setConfirming] = useState(false);
   const [combineOpen, setCombineOpen] = useState(false);
+  // What you saved during this visit. It lives here rather than in the
+  // combinations sheet because that sheet unmounts every time you close
+  // it, and reopening it on the same piece would otherwise offer to save
+  // outfits you had just saved.
+  const [savedHere, setSavedHere] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
+
+  // Shoes, socks and accessories do not take part in the colour matching,
+  // and a piece with no colour has nothing to match on.
+  const canCombine =
+    garment.colors.length > 0 && !EXTRA_CATEGORIES.has(garment.category);
 
   const handleDelete = () => {
     if (pending) return;
@@ -38,9 +55,40 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
       const fd = new FormData();
       fd.append("id", garment.id);
       await deleteGarmentAction(fd);
-      onClose();
+      /**
+       * A full navigation, not `router.back()` and not a redirect from
+       * the action. Deleting happens from `/armari/[slug]`, and the
+       * moment the piece is gone that route renders a 404 — which the
+       * client router then caches for the segment, so every softer way
+       * out lands on that 404 even once the URL says `/armari`
+       * (reproduced: grid empty, "This page could not be found", no way
+       * back without a reload).
+       *
+       * Deleting a garment is rare and irreversible, so paying for one
+       * clean page load is the right trade for never stranding anyone.
+       */
+      window.location.assign("/armari");
     });
   };
+
+  // One sheet at a time, never one inside the other. Two mounted `Sheet`s
+  // means two Escape listeners (Escape closed both) and the inner one
+  // released the body scroll lock on unmount while the outer was still
+  // open. Swapping instead of nesting also reads right: "què hi combina"
+  // is a level deeper, and closing it comes back to the piece.
+  if (combineOpen) {
+    return (
+      <OutfitBottomSheet
+        garment={garment}
+        allGarments={allGarments}
+        palettes={palettes}
+        savedOutfitKeys={[...savedOutfitKeys, ...savedHere]}
+        onOutfitSaved={(key) => setSavedHere((prev) => [...prev, key])}
+        onBack={() => setCombineOpen(false)}
+        onClose={onClose}
+      />
+    );
+  }
 
   return (
     <Sheet
@@ -49,6 +97,21 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
       label={`Peça ${CATEGORY_LABELS[garment.category]}`}
       media={<PieceThumb garment={garment} priority className="h-full w-full" />}
       mediaHeight="h-40"
+      // The reason this modal replaced a whole screen: matching a piece
+      // against Sanzo Wada is the app's centre of gravity, not a footnote
+      // to its swatches. Pinned, primary, and the widest thing here.
+      footer={
+        canCombine ? (
+          <Button
+            type="button"
+            size="lg"
+            onClick={() => setCombineOpen(true)}
+            className="w-full justify-center"
+          >
+            {UI.modal.combine}
+          </Button>
+        ) : undefined
+      }
       header={
         <Stack gap={1}>
           <Text variant="caption">peça</Text>
@@ -97,16 +160,6 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
             </div>
           ))}
         </div>
-        {garment.colors.length > 0 && !EXTRA_CATEGORIES.has(garment.category) && (
-          <TextButton
-            type="button"
-            tone="secondary"
-            onClick={() => setCombineOpen(true)}
-            className="self-start"
-          >
-            què hi combina
-          </TextButton>
-        )}
       </Stack>
 
       {garment.seasons.length > 0 && (
@@ -174,14 +227,6 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
         )}
       </div>
 
-      {combineOpen && (
-        <OutfitBottomSheet
-          garment={garment}
-          allGarments={allGarments}
-          palettes={palettes}
-          onClose={() => setCombineOpen(false)}
-        />
-      )}
     </Sheet>
   );
 }

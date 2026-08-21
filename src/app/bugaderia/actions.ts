@@ -4,10 +4,10 @@ import { revalidatePath } from "next/cache";
 import { markGarmentsDirty, markGarmentsClean } from "@/lib/prendas/service";
 
 /**
- * "layout", not the default page scope: the pickers live at
- * /bugaderia/rentar and /bugaderia/embrutar and stay open after marking,
- * so what has to be refreshed is the subtree, not just the hub. Without
- * it the grid you are looking at keeps the pieces you just marked.
+ * "layout", not the default page scope: the picker stays open after
+ * marking, so both piles and the layout that settles worn events have to
+ * be refreshed, not just the current render. Without it the grid you are
+ * looking at keeps the pieces you just marked.
  * /avui reads the same clean/dirty state to decide what you can wear.
  */
 function revalidateLaundry() {

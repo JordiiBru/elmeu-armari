@@ -1,10 +1,7 @@
 import { Suspense } from "react";
 import { findAllGarments } from "@/lib/prendas/service";
-import { findAllOutfits, findTodayOutfitId, toSavedOutfit, sortOutfitsByTop } from "@/lib/outfits/service";
 import { getCurrentSeason } from "@/lib/prendas/season";
-import { dayToISO } from "@/lib/outfits/week";
-import { palettes } from "@/lib/colors";
-import { ArmariTabs } from "@/components/ArmariTabs";
+import { ArmariGrid } from "@/components/ArmariGrid";
 import { PageContainer, SectionHeader, GridSkeleton } from "@/components/ui";
 
 /**
@@ -12,15 +9,13 @@ import { PageContainer, SectionHeader, GridSkeleton } from "@/components/ui";
  * `/armari/[slug]` (the non-intercepted fallback for direct/deep links to a
  * garment) so a hard refresh on a garment URL shows the same list-behind-
  * modal layout as a client-side navigation into the intercepted route.
+ *
+ * One grid, no tabs. Combining used to be a tab here and is now an action
+ * on a piece, inside its modal, which is the only place a piece lives;
+ * saved outfits used to be another tab and now live in "què em poso?".
  */
 export async function ArmariPageBody() {
-  const [garments, outfits, todayOutfitId] = await Promise.all([
-    findAllGarments(),
-    findAllOutfits(),
-    findTodayOutfitId(),
-  ]);
-
-  const savedOutfits = sortOutfitsByTop(outfits.map(toSavedOutfit));
+  const garments = await findAllGarments();
 
   return (
     <PageContainer width="wide">
@@ -34,14 +29,7 @@ export async function ArmariPageBody() {
       />
 
       <Suspense fallback={<GridSkeleton />}>
-        <ArmariTabs
-          garments={garments}
-          palettes={palettes}
-          savedOutfits={savedOutfits}
-          todayISO={dayToISO(new Date())}
-          todayOutfitId={todayOutfitId}
-          season={getCurrentSeason()}
-        />
+        <ArmariGrid garments={garments} defaultSeason={getCurrentSeason()} />
       </Suspense>
     </PageContainer>
   );

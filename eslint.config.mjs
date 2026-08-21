@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Harness state, and the nested git worktrees agents run in — each
+    // carries its own node_modules, which is not this project's code.
+    ".claude/**",
   ]),
   {
     // Layering rule from CLAUDE.md: repository.ts is the only place the

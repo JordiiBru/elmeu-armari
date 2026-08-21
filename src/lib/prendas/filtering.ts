@@ -61,9 +61,9 @@ export function filterGarments(
  * jerseis, samarretes, pantalons, not a dictionary. Creation date breaks
  * ties so the sequence never shuffles between renders.
  *
- * The laundry screens live off this: a grid of thirty pieces in
+ * The laundry screen lives off this: a grid of thirty pieces in
  * insertion order is a pile, and a pile is what you are trying to sort
- * out when you open Embrutar.
+ * out when you open /bugaderia.
  */
 export function sortByWardrobeOrder(garments: GarmentWithColors[]): GarmentWithColors[] {
   const categoryRank = new Map(CATEGORIES.map((c, i) => [c, i]));

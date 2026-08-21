@@ -2,11 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import {
-  deleteOutfitAction,
-  setOutfitFavoriteAction,
-  wearOutfitAction,
-} from "@/app/outfits/actions";
+import { deleteOutfitAction, wearOutfitAction } from "@/app/outfits/actions";
 import { UI } from "@/lib/prendas/ui-strings";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
@@ -128,12 +124,6 @@ export function OutfitSheet({
     });
   };
 
-  const handleToggleFavorite = () => {
-    startTransition(async () => {
-      await setOutfitFavoriteAction(outfit.id, !outfit.favorite);
-    });
-  };
-
   const handleDelete = () => {
     startTransition(async () => {
       await deleteOutfitAction(outfit.id);
@@ -210,7 +200,7 @@ export function OutfitSheet({
                 {UI.outfits.blockedReason(blockedBy.map(pieceLabel))}
               </Text>
               <Link
-                href="/bugaderia/rentar"
+                href="/bugaderia?vista=cistell"
                 className="font-serif italic type-small text-text-secondary underline underline-offset-4 hover:text-text-primary transition-colors duration-[var(--duration-base)]"
               >
                 {UI.outfits.goToRentar}
@@ -282,14 +272,6 @@ export function OutfitSheet({
         ) : (
           <>
             <div className="flex flex-wrap items-center gap-4">
-              <TextButton
-                type="button"
-                tone="secondary"
-                onClick={handleToggleFavorite}
-                disabled={pending}
-              >
-                {outfit.favorite ? UI.outfits.removeFavorite : UI.outfits.addFavorite}
-              </TextButton>
               {onChangeOutfit && (
                 <TextButton
                   type="button"

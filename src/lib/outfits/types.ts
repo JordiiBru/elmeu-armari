@@ -37,7 +37,6 @@ export interface SavedOutfit {
   id: string;
   name: string | null;
   paletteId: number;
-  favorite: boolean;
   createdAt: Date;
   /** Clothes only, no role wrapper — an outfit has nothing else in it. */
   garments: GarmentWithColors[];

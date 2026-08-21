@@ -133,11 +133,17 @@ test.describe("wardrobe — delete garment", () => {
     await page.getByRole("button", { name: "eliminar" }).click();
     await page.getByRole("button", { name: /sí, eliminar/i }).click();
 
-    // handleDelete awaits the server action then calls onClose() (router.back()).
+    // handleDelete awaits the server action then calls onClose(), which is
+    // router.back() — so this lands on the wardrobe *with its filters*,
+    // e.g. /armari?season=SUMMER, since ArmariGrid keeps them in the URL.
+    // Matching the bare path was only ever green by accident: closing used
+    // to fire onClose twice under StrictMode, overshoot to the home page,
+    // and get pulled back by a router.replace("/armari") with no query.
+    //
     // waitForURL resolves as soon as the URL changes, which can race the RSC
     // revalidation fetch that actually updates the grid — wait for the modal
     // dialog to fully close (confirms the transition settled) before counting.
-    await page.waitForURL("/armari");
+    await page.waitForURL(/\/armari(\?|$)/);
     await expect(page.getByRole("dialog")).toBeHidden();
     await expect(async () => {
       const after = await page.locator('[data-testid="garment-card"]').count();

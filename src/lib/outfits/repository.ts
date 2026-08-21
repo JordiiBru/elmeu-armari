@@ -69,12 +69,10 @@ export async function createOutfit(data: {
 export async function findAllOutfits() {
   return prisma.outfit.findMany({
     include: outfitInclude(),
-    orderBy: [{ favorite: "desc" }, { createdAt: "desc" }],
+    // Newest first. Every surface re-ranks for the day on top of this,
+    // so this only decides ties.
+    orderBy: { createdAt: "desc" },
   });
-}
-
-export async function setOutfitFavorite(id: string, favorite: boolean) {
-  return prisma.outfit.update({ where: { id }, data: { favorite } });
 }
 
 // `day` must already be truncated to midnight — the unique constraint on

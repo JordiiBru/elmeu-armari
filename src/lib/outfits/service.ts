@@ -5,7 +5,6 @@ import {
   findOutfitById,
   deleteOutfit,
   countOutfits,
-  setOutfitFavorite,
   setWornDay,
   clearWornDay,
   findWornEventsInRange,
@@ -19,14 +18,11 @@ import { AUTO_SOIL_CATEGORIES, EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { dirtyGarmentsOf } from "@/lib/bugaderia/laundry";
 import { palettes } from "@/lib/colors";
 import { dayKey, addDays, dayToISO } from "./week";
+import { outfitKey } from "./key";
 import type { SavedOutfit, WeekDayPlan } from "./types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 
-export {
-  findAllOutfits,
-  deleteOutfit,
-  setOutfitFavorite,
-};
+export { findAllOutfits, deleteOutfit };
 
 interface WornEventWithGarments {
   id: string;
@@ -38,7 +34,6 @@ interface OutfitWithGarments {
   id: string;
   name: string | null;
   paletteId: number;
-  favorite: boolean;
   createdAt: Date;
   garments: { garment: GarmentWithColors }[];
   wornEvents?: WornEventWithGarments[];
@@ -57,7 +52,6 @@ export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
     id: outfit.id,
     name: outfit.name,
     paletteId: outfit.paletteId,
-    favorite: outfit.favorite,
     createdAt: outfit.createdAt,
     garments: sortByWardrobeOrder(outfit.garments.map((og) => og.garment)),
     wornEvents: (outfit.wornEvents ?? []).map((w) => ({
@@ -68,33 +62,13 @@ export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
   };
 }
 
-function outfitTop(outfit: SavedOutfit): GarmentWithColors | null {
-  return (
-    outfit.garments.find((g) => g.category === "SHIRT") ??
-    outfit.garments.find((g) => g.category === "SWEATER") ??
-    null
+/** Every combination already in the wardrobe, for the combiner to grey
+ * out and sink to the bottom of its list. */
+export async function findSavedOutfitKeys(): Promise<string[]> {
+  const outfits = await findAllOutfits();
+  return outfits.map((o) =>
+    outfitKey(o.garments.map((og) => og.garment.id), o.paletteId),
   );
-}
-
-// Groups saved outfits by the exact top (shirt/sweater) they're built
-// around, so every outfit wearing the same piece sits together — closer
-// to browsing a wardrobe rail than a chronological feed. Groups are
-// ordered by the top's label; outfits within a group keep their incoming
-// order (favourite first, then most recent — see `findAllOutfits`).
-// `Array.prototype.sort` is stable, so returning 0 for a shared top
-// preserves that incoming order.
-export function sortOutfitsByTop(outfits: SavedOutfit[]): SavedOutfit[] {
-  return [...outfits].sort((a, b) => {
-    const topA = outfitTop(a);
-    const topB = outfitTop(b);
-    if (!topA && !topB) return 0;
-    if (!topA) return 1;
-    if (!topB) return -1;
-    if (topA.id === topB.id) return 0;
-    const labelA = topA.subtype ?? topA.category;
-    const labelB = topB.subtype ?? topB.category;
-    return labelA !== labelB ? labelA.localeCompare(labelB) : topA.id.localeCompare(topB.id);
-  });
 }
 
 export async function findSavedOutfitById(id: string): Promise<SavedOutfit | null> {
@@ -180,12 +154,25 @@ export async function settlePastWornEvents(): Promise<number> {
   return events.length;
 }
 
-/** The outfit assigned to today, if any — used to hide the "menys portat"
- * suggestion once today is already decided, and to let a saved outfit's
- * own sheet offer a one-click "portar-lo avui". */
-export async function findTodayOutfitId(): Promise<string | null> {
+/**
+ * Today's committed day: the outfit, and the shoes and accessories it is
+ * being worn with.
+ *
+ * Read straight from today rather than off the week plan. The plate used
+ * to pick its extras out of the seven days the planner had loaded, which
+ * works right up until you page back a week — then the plan no longer
+ * contains today and the plate silently lost everything it was worn with.
+ */
+export async function findTodayWorn(): Promise<{
+  outfitId: string;
+  extras: GarmentWithColors[];
+} | null> {
   const event = await findWornEventForDay(dayKey(new Date()));
-  return event?.outfitId ?? null;
+  if (!event) return null;
+  return {
+    outfitId: event.outfitId,
+    extras: sortByWardrobeOrder(event.garments.map((wg) => wg.garment)),
+  };
 }
 
 /** Always returns exactly 7 entries, Monday first, one per day of the

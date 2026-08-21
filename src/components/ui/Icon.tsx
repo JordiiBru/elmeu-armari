@@ -9,6 +9,8 @@ export type IconName =
   | "close"
   | "check"
   | "star"
+  | "sparkle"
+  | "ellipsis"
   | "sun"
   | "moon";
 
@@ -73,6 +75,25 @@ const PATHS: Record<IconName, ReactElement> = {
   check: <polyline points="4 12 10 18 20 6" />,
   star: (
     <polygon points="12 3 14.7 9.2 21.5 9.9 16.4 14.5 17.8 21.2 12 17.8 6.2 21.2 7.6 14.5 2.5 9.9 9.3 9.2" />
+  ),
+  // Two four-pointed stars: the shape that has come to mean "the machine
+  // chose this". Here it is honest about being a weighted shuffle, not a
+  // model — but the gesture is the one people already read.
+  sparkle: (
+    <>
+      <polygon points="10 4 11.3 11.2 18.5 12.5 11.3 13.8 10 21 8.7 13.8 1.5 12.5 8.7 11.2" />
+      <polygon points="18.5 3 19 5.2 21.2 5.7 19 6.2 18.5 8.4 18 6.2 15.8 5.7 18 5.2" />
+    </>
+  ),
+  // The way into everything that is about the app rather than in it.
+  // Deliberately not a gear and not a hamburger: one reads as SaaS
+  // settings, the other as primary navigation, and this is neither.
+  ellipsis: (
+    <>
+      <circle cx="5" cy="12" r="1.1" />
+      <circle cx="12" cy="12" r="1.1" />
+      <circle cx="19" cy="12" r="1.1" />
+    </>
   ),
   sun: (
     <>

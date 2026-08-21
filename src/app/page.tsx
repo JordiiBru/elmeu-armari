@@ -4,20 +4,22 @@ import { Stack, Text, Heading } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
-// "Què em poso?" is the question the app exists to answer, so it leads —
-// two taps deep under Bugaderia it read as a laundry chore.
+/**
+ * The whole app, one entry per room. The week and the saved outfits live
+ * under "què em poso?" and combining lives on a piece, so listing those
+ * here would be listing the same rooms twice.
+ *
+ * The split that matters is not how often you open something, it is
+ * whether it is *the app* or *about the app*. Paletes is the app, so it
+ * belongs in this column; estadístiques and configuració are about it,
+ * and live in the header menu instead. That is also what makes this page
+ * hold together: four items on one axis, and nothing else to centre.
+ */
 const PRIMARY = [
   { href: "/avui", label: "Què em poso?" },
   { href: "/armari", label: "Armari" },
-  { href: "/calendari", label: "Calendari" },
   { href: "/bugaderia", label: "Bugaderia" },
-  // Last: it is the one entry you open to look rather than to decide.
   { href: "/paleta", label: "Paletes" },
-];
-
-const SECONDARY = [
-  { href: "/stats", label: "estadístiques" },
-  { href: "/settings", label: "configuració" },
 ];
 
 function pickPalette() {
@@ -29,37 +31,34 @@ export default function HomePage() {
   const palette = pickPalette();
 
   return (
-    // Masthead at the top, index at the foot, one pause between them.
-    // Centred as a block it left a third of the screen empty above the
-    // title — air a cover has to earn, and up there it read as a page
-    // that had not finished loading.
-    <div className="flex-1 grid grid-rows-[auto_1fr] px-6 pt-2 pb-8 md:pt-6 md:pb-12">
-      <Stack as="section" gap={5} align="center" className="text-center">
-        <Heading level="display-xl">el meu armari</Heading>
-        <Text variant="subtitle" tone="secondary" italic as="p">
-          un estudi d&apos;harmonia visual
-        </Text>
+    // One centred block, one quiet footer. The masthead used to sit at the
+    // top with the index centred in what was left, which put the title high
+    // and opened a hole between the palette rule and the links. Title,
+    // rule and index are one composition, so they are centred as one.
+    <div className="flex-1 flex flex-col justify-center px-6 pb-8 md:pb-10">
+      <Stack as="section" gap={6} align="center" className="text-center">
+        <Stack gap={3} align="center">
+          <Heading level="display-xl">el meu armari</Heading>
+          <Text variant="subtitle" tone="secondary" italic as="p">
+            un estudi d&apos;harmonia visual
+          </Text>
+        </Stack>
 
-        {/* The masthead's rule, in colour: today's palette as a line
-            under the title rather than a swatch adrift mid-page, which
-            turned one pause into two. */}
+        {/* The masthead's rule, in colour. Close enough to the index to
+            read as the line between a title and its contents. */}
         <Link
           href="/paleta"
           aria-label={`Paleta ${palette.nombre}`}
-          className="group mt-2 block w-40 md:w-56 outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+          className="group block w-32 md:w-40 outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
         >
-          <div className="flex h-4 md:h-6 overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-spring)] group-hover:-translate-y-0.5">
+          <div className="flex h-3 md:h-4 overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-spring)] group-hover:-translate-y-0.5">
             {palette.colores.map((hex, i) => (
               <div key={i} className="flex-1" style={{ backgroundColor: hex }} />
             ))}
           </div>
         </Link>
-      </Stack>
 
-      {/* Centred in what the masthead leaves, so the pause reads as one
-          measured gap above and below the index instead of a hole. */}
-      <Stack as="section" gap={6} align="center" className="self-center">
-        <nav className="flex flex-col items-center gap-4">
+        <nav className="flex flex-col items-center gap-4 pt-1">
           {PRIMARY.map((entry) => (
             <Link
               key={entry.href}
@@ -76,26 +75,8 @@ export default function HomePage() {
             </Link>
           ))}
         </nav>
-
-        <nav className="flex items-center gap-6 font-serif italic type-small text-text-secondary">
-          {SECONDARY.map((entry, i) => (
-            <span key={entry.href} className="inline-flex items-center gap-6">
-              {i > 0 && (
-                <span
-                  aria-hidden
-                  className="inline-block h-1 w-1 rounded-full bg-border"
-                />
-              )}
-              <Link
-                href={entry.href}
-                className="hover:text-text-primary transition-colors duration-[var(--duration-base)]"
-              >
-                {entry.label}
-              </Link>
-            </span>
-          ))}
-        </nav>
       </Stack>
+
     </div>
   );
 }

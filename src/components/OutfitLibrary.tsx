@@ -2,188 +2,251 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
-import type { GarmentWithColors, Season } from "@/lib/prendas/types";
-import { isWearable, rankOutfitsForToday } from "@/lib/bugaderia/laundry";
+import type { GarmentWithColors } from "@/lib/prendas/types";
+import { isWearable } from "@/lib/bugaderia/laundry";
+import { groupOutfitsBy } from "@/lib/outfits/grouping";
 import { UI } from "@/lib/prendas/ui-strings";
-import { OutfitTile } from "./OutfitTile";
+import { OutfitTile, pieceTint } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
-import { EmptyState, Grid, Icon, SegmentedControl, Stack, TextButton } from "@/components/ui";
+import { OutfitBottomSheet } from "./OutfitBottomSheet";
+import { PieceThumb } from "./PieceThumb";
+import {
+  EmptyState,
+  Grid,
+  Icon,
+  SegmentedControl,
+  Stack,
+  Text,
+  TextButton,
+} from "@/components/ui";
 
-type Mode = "browse" | "today";
-type Filter = "all" | "ready" | "favorites";
+/** The three ways to index the collection. Shirts lead: that is the one
+ * you have in your hand most mornings. Narrowed to these three because
+ * they are the only categories an outfit is made of — shoes, socks and
+ * accessories belong to the day, not to the look. */
+type Axis = "SHIRT" | "PANTS" | "SWEATER";
 
-/** Desats browses what you own, so it filters. Què em poso answers one
- * question and shows one answer: the outfits you can actually wear. */
-const FILTERS: Filter[] = ["all", "favorites", "ready"];
+const AXES: Axis[] = ["SHIRT", "PANTS", "SWEATER"];
 
-const FILTER_LABELS: Record<Filter, string> = {
-  all: UI.outfits.filters.all,
-  ready: UI.outfits.filters.ready,
-  favorites: UI.outfits.filters.favorites,
-};
-
-const EMPTY_FILTER: Record<Filter, string> = {
-  all: UI.outfits.emptyNoOutfitsBrowse,
-  ready: UI.outfits.emptyReady,
-  favorites: UI.outfits.emptyFavorites,
-};
-
-function matchesFilter(outfit: SavedOutfit, filter: Filter): boolean {
-  if (filter === "all") return true;
-  if (filter === "favorites") return outfit.favorite;
-  return isWearable(outfit);
-}
-
-function QuietLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center gap-1 font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
-    >
-      {children}
-    </Link>
-  );
-}
-
+/**
+ * The whole collection, indexed by whichever piece you have decided on.
+ * Every look built on one shirt sits under that shirt, and the tabs
+ * re-index the same collection by trousers or by sweater — because some
+ * mornings the decision starts at the other end.
+ *
+ * Collapsed by default, all of it. Open, this is a photograph of every
+ * outfit you own, which is a lot of page to scroll past to reach one
+ * shirt; closed it is a rail of pieces you take in at a glance. Hold as
+ * many open as you like — it is a wardrobe, not an accordion that
+ * resents you.
+ *
+ * A group ends in the way out of it: "veure'n més amb aquesta peça"
+ * runs the matcher on the same piece. Your looks and every look the
+ * engine can build with that piece used to live in different rooms —
+ * these here, the other two hundred behind the piece over in the
+ * wardrobe — which is the same question asked twice in two places. Now
+ * the short list is on top and the long one is one tap under it, and
+ * saving means exactly one thing: promoting something out of the long
+ * list into the short one.
+ *
+ * The clean/dirty filter is gone. It was a third selector on a screen
+ * that now has two, and a tile already says "per rentar" on its own
+ * face. Instead the wearable ones come first inside each group, and a
+ * piece with nothing wearable left reads dimmer in the rail — the same
+ * information, no control.
+ */
 export function OutfitLibrary({
   outfits,
+  allGarments,
   palettes,
   extraCandidates,
-  season,
+  savedOutfitKeys,
   todayISO,
   todayOutfitId,
-  mode,
 }: {
-  /** Already ordered by the server for `browse`; `today` re-ranks. */
+  /** Already ranked by the server. */
   outfits: SavedOutfit[];
+  /** The whole wardrobe, for the matcher behind "veure'n més". */
+  allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
   extraCandidates: GarmentWithColors[];
-  season: Season;
+  /** Combinations already owned, so the matcher greys them out. */
+  savedOutfitKeys: string[];
   todayISO: string;
   todayOutfitId: string | null;
-  mode: Mode;
 }) {
   const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
-  const [filter, setFilter] = useState<Filter>(FILTERS[0]);
+  const [axis, setAxis] = useState<Axis>(AXES[0]);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [openOutfitId, setOpenOutfitId] = useState<string | null>(null);
+  const [combineFor, setCombineFor] = useState<GarmentWithColors | null>(null);
+  // Held here rather than in the combiner, which unmounts every time you
+  // close it — reopening it on the same piece would otherwise offer to
+  // save what you had just saved.
+  const [savedHere, setSavedHere] = useState<string[]>([]);
+  const router = useRouter();
 
-  // In season first, least recently worn first — the order the question
-  // "què em poso avui?" actually wants.
-  const ordered = useMemo(
-    () => (mode === "today" ? rankOutfitsForToday(outfits, season) : outfits),
-    [mode, outfits, season],
-  );
-
-  const counts = useMemo(() => {
-    const entries = FILTERS.map(
-      (f) => [f, ordered.filter((o) => matchesFilter(o, f)).length] as const,
-    );
-    return new Map<Filter, number>(entries);
-  }, [ordered]);
-
-  const visible = useMemo(
+  const groups = useMemo(
     () =>
-      mode === "today"
-        ? ordered.filter(isWearable)
-        : ordered.filter((o) => matchesFilter(o, filter)),
-    [mode, ordered, filter],
+      groupOutfitsBy(outfits, axis).map((group) => ({
+        ...group,
+        outfits: [...group.outfits].sort(
+          (a, b) => Number(isWearable(b)) - Number(isWearable(a)),
+        ),
+      })),
+    [outfits, axis],
   );
 
-  // The catalogue number belongs to the outfit's place in the collection,
-  // not to its place in the current filter — renumbering the same card as
-  // you switch tabs would make it read as a different outfit.
-  const numbers = useMemo(
-    () => new Map(ordered.map((o, i) => [o.id, i])),
-    [ordered],
-  );
+  // Numbered off one fixed index — the shirt rail — rather than whichever
+  // tab you are on, so an outfit keeps the same catalogue number however
+  // you arrived at it.
+  const numbers = useMemo(() => {
+    const byShirt = groupOutfitsBy(outfits, "SHIRT").flatMap((g) => g.outfits);
+    const seen = new Set(byShirt.map((o) => o.id));
+    const rest = outfits.filter((o) => !seen.has(o.id));
+    return new Map([...byShirt, ...rest].map((o, i) => [o.id, i]));
+  }, [outfits]);
 
-  // Only the first wearable outfit of the day view carries the mark, and
-  // only while today is still undecided.
-  const suggestedId =
-    mode === "today" && !todayOutfitId ? (visible[0]?.id ?? null) : null;
+  const toggle = (id: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   const openOutfit = outfits.find((o) => o.id === openOutfitId) ?? null;
 
-  // The screen is called "what do I wear?", so it should be able to just
-  // answer. Anything but the one you wore last, weighted towards what you
-  // have not worn in a while — the ranking already put those first.
-  const pickForMe = () => {
-    const pool = visible.slice(0, Math.max(3, Math.ceil(visible.length / 2)));
-    const pick = pool[Math.floor(Math.random() * pool.length)];
-    if (pick) setOpenOutfitId(pick.id);
-  };
-
   if (outfits.length === 0) {
-    return mode === "today" ? (
-      <EmptyState
-        title={UI.outfits.emptyNoOutfits}
-        action={<QuietLink href="/armari">{UI.outfits.goToArmari}</QuietLink>}
-      />
-    ) : (
+    return (
       <EmptyState
         title={UI.outfits.emptyNoOutfitsBrowse}
         hint={UI.outfits.emptyNoOutfitsHint}
+        action={
+          <Link
+            href="/armari"
+            className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
+          >
+            {UI.outfits.goToArmari}
+          </Link>
+        }
       />
     );
   }
 
   return (
     <Stack gap={6}>
-      <div className="flex flex-wrap items-baseline justify-between gap-4">
-        {mode === "browse" ? (
-          <>
-            <SegmentedControl<Filter>
-              value={filter}
-              onChange={setFilter}
-              ariaLabel={UI.outfits.filtersLabel}
-              options={FILTERS.map((f) => ({
-                value: f,
-                label: (
-                  <>
-                    {FILTER_LABELS[f]}
-                    <span className="tabular-nums"> {counts.get(f) ?? 0}</span>
-                  </>
-                ),
-              }))}
-            />
-            <QuietLink href="/calendari">
-              {UI.outfits.seeCalendar}
-              <Icon name="arrow-right" size={12} />
-            </QuietLink>
-          </>
-        ) : (
-          visible.length > 1 && (
-            <TextButton type="button" onClick={pickForMe} className="ml-auto">
-              {UI.outfits.pickForMe}
-            </TextButton>
-          )
-        )}
-      </div>
+      <SegmentedControl<Axis>
+        value={axis}
+        onChange={setAxis}
+        ariaLabel={UI.outfits.axisLabel}
+        options={AXES.map((c) => ({ value: c, label: UI.outfits.axes[c] }))}
+      />
 
-      {visible.length === 0 ? (
-        <EmptyState
-          title={mode === "today" ? UI.outfits.emptyNoneReady : EMPTY_FILTER[filter]}
-          action={
-            mode === "today" ? (
-              <QuietLink href="/bugaderia/rentar">{UI.outfits.goToRentar}</QuietLink>
-            ) : undefined
-          }
-        />
+      {groups.length === 0 ? (
+        <EmptyState title={UI.outfits.axisEmpty} />
       ) : (
-        <Grid cols="library" gapX={5} gapY={7} className="md:gap-y-16">
-          {visible.map((outfit) => (
-            <OutfitTile
-              key={outfit.id}
-              outfit={outfit}
-              palette={paletteMap.get(outfit.paletteId) ?? null}
-              index={numbers.get(outfit.id) ?? 0}
-              suggested={outfit.id === suggestedId}
-              mark={outfit.id === todayOutfitId ? UI.outfits.today : null}
-              onOpen={() => setOpenOutfitId(outfit.id)}
-            />
-          ))}
-        </Grid>
+        // Keyed on the axis so switching tab re-enters instead of
+        // swapping dry, the same way the shoe picker does.
+        <div key={axis} className="panel-enter flex flex-col">
+          {groups.map((group) => {
+            const isOpen = expanded.has(group.piece.id);
+            const anyWearable = group.outfits.some(isWearable);
+            return (
+              <div key={group.piece.id} className="border-b border-border-subtle">
+                <button
+                  type="button"
+                  onClick={() => toggle(group.piece.id)}
+                  aria-expanded={isOpen}
+                  className={`group flex w-full items-center gap-4 py-3 text-left outline-none transition-opacity duration-[var(--duration-base)] focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                    anyWearable ? "" : "opacity-50"
+                  }`}
+                >
+                  <PieceThumb
+                    garment={group.piece}
+                    thumb
+                    sizes="48px"
+                    className="h-12 w-12 flex-shrink-0"
+                  />
+                  {/* The tab already said "samarretes", so the row does not
+                      repeat it. What is left is the only thing that tells
+                      one from another in words. */}
+                  <Text as="span" className="min-w-0 truncate font-serif lowercase">
+                    {pieceTint(group.piece)}
+                  </Text>
+                  <Text variant="caption" tabular className="ml-auto flex-shrink-0">
+                    {group.outfits.length}
+                  </Text>
+                  {/* The whole affordance, and the same one the wardrobe
+                      filters use: a chevron that turns over when it opens. */}
+                  <span
+                    aria-hidden
+                    className={`flex-shrink-0 text-text-secondary transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:text-text-primary ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                  >
+                    <Icon name="chevron-down" size={14} />
+                  </span>
+                </button>
+
+                {/* `inert` while closed. The panel stays in the DOM so it
+                    can animate open, but `height: 0` alone does not take
+                    its contents out of the tab order — you could tab into
+                    buttons nobody can see. */}
+                <div className="collapse-panel" data-open={isOpen} inert={!isOpen}>
+                  <div>
+                    {/* Generous foot: on a phone this action ended up a
+                        hair above the next group's rule, and the two read
+                        as one block. */}
+                    <Stack gap={5} className="pb-9 pt-1">
+                      <Grid cols="library" gapX={5} gapY={6}>
+                        {group.outfits.map((outfit) => (
+                          <OutfitTile
+                            key={outfit.id}
+                            outfit={outfit}
+                            palette={paletteMap.get(outfit.paletteId) ?? null}
+                            index={numbers.get(outfit.id) ?? 0}
+                            mark={outfit.id === todayOutfitId ? UI.outfits.today : null}
+                            onOpen={() => setOpenOutfitId(outfit.id)}
+                          />
+                        ))}
+                      </Grid>
+                      {group.piece.colors.length > 0 && (
+                        <TextButton
+                          type="button"
+                          tone="secondary"
+                          onClick={() => setCombineFor(group.piece)}
+                          className="self-start"
+                        >
+                          {UI.outfits.seeMore}
+                          <Icon name="arrow-right" size={12} />
+                        </TextButton>
+                      )}
+                    </Stack>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {combineFor && (
+        <OutfitBottomSheet
+          garment={combineFor}
+          allGarments={allGarments}
+          palettes={palettes}
+          savedOutfitKeys={[...savedOutfitKeys, ...savedHere]}
+          onOutfitSaved={(key) => {
+            setSavedHere((prev) => [...prev, key]);
+            // A soft refresh, so the new look joins the rail underneath
+            // without tearing down which groups you have open.
+            router.refresh();
+          }}
+          onClose={() => setCombineFor(null)}
+        />
       )}
 
       {openOutfit && (

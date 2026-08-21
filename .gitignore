@@ -47,3 +47,6 @@ dev.db
 
 # uploads (self-hosted data, not tracked in git)
 /data/
+
+# local agent/harness state, including nested git worktrees
+/.claude/

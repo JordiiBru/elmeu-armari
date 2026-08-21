@@ -3,34 +3,36 @@
 import {
   saveOutfit,
   deleteOutfit,
-  setOutfitFavorite,
   wearOutfit,
   unassignDay,
 } from "@/lib/outfits/service";
 import { revalidatePath } from "next/cache";
 
+/**
+ * Deliberately revalidates nothing. It used to revalidate /avui, which
+ * re-rendered whatever route the user was actually on — and they are on
+ * /armari/[slug], where that reset `combineOpen` and threw them out of
+ * the combinations list back onto the piece they had already left.
+ *
+ * Nothing is lost: /avui is `force-dynamic`, so it renders fresh on
+ * arrival (verified: the collection goes 11 → 12 after saving, over a
+ * client-side navigation).
+ */
 export async function saveOutfitAction(paletteId: number, garmentIds: string[]) {
   const outfit = await saveOutfit({ paletteId, garmentIds });
-  revalidatePath("/armari");
   return { id: outfit.id, name: outfit.name };
 }
 
 export async function deleteOutfitAction(id: string) {
   await deleteOutfit(id);
-  revalidatePath("/armari");
-  revalidatePath("/calendari");
-}
-
-export async function setOutfitFavoriteAction(outfitId: string, favorite: boolean) {
-  await setOutfitFavorite(outfitId, favorite);
-  revalidatePath("/armari");
+  revalidatePath("/avui");
 }
 
 /**
  * Committing a day: the outfit plus the shoes and accessories you wear it
- * with. Lives here rather than next to a route because all three surfaces
- * that can decide a day (Desats, Què em poso, the calendar) call it, so
- * the revalidation list is the union of theirs.
+ * with. Lives here rather than next to a route because the three strata
+ * of "què em poso?" (the day's plate, the week, the collection) all call
+ * it, and so does the piece grid's laundry badge.
  *
  * It does not dirty anything yet: reconsidering same-day, before you've
  * actually left the house, shouldn't soil clothes you never wore.
@@ -47,11 +49,9 @@ export async function wearOutfitAction(
   revalidatePath("/bugaderia");
   revalidatePath("/avui");
   revalidatePath("/armari");
-  revalidatePath("/calendari");
 }
 
 export async function unassignDayAction(dayISO: string) {
   await unassignDay(new Date(dayISO));
-  revalidatePath("/calendari");
-  revalidatePath("/armari");
+  revalidatePath("/avui");
 }

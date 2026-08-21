@@ -27,6 +27,7 @@ export const UI = {
     invalidColor: "Color no valid",
   },
   modal: {
+    combine: "Què hi combina",
     texture: "Textura",
     pattern: "Dibuix",
     colors: "Colors",
@@ -45,22 +46,20 @@ export const UI = {
   bugaderia: {
     title: "bugaderia",
     subtitle: "què tens net i què tens al cistell.",
-    soil: "Embrutar",
-    wash: "Rentar",
     today: "Què em poso?",
-    cleanCount: (n: number) => (n === 1 ? "1 peça neta" : `${n} peces netes`),
-    basketCount: (n: number) =>
-      n === 1 ? "1 peça al cistell" : `${n} peces al cistell`,
+    viewsLabel: "Quina pila mires",
+    views: {
+      clean: "netes",
+      basket: "cistell",
+    },
     picker: {
       soil: {
-        title: "Embrutar",
         subtitle: "tria les peces que van al cistell.",
         submit: "Al cistell",
         submitting: "marcant…",
         empty: "totes les peces ja són al cistell.",
       },
       wash: {
-        title: "Rentar",
         subtitle: "tria les peces que has rentat.",
         submit: "Rentat",
         submitting: "marcant…",
@@ -76,14 +75,51 @@ export const UI = {
       badge: "al cistell",
     },
   },
+  menu: {
+    // Everything that is *about* the app rather than in it. When there
+    // are accounts the profile, the session and the language switch are
+    // rows in this same list.
+    label: "Menú",
+    stats: "estadístiques",
+    settings: "configuració",
+    theme: "tema",
+    // The icons carry the meaning; these name them for screen readers
+    // and for the tooltip, since a sun and a moon have no text.
+    themeLight: "clar",
+    themeDark: "fosc",
+  },
   outfits: {
+    // The screen is one question, so it is titled with the question.
+    screenTitle: "Què em poso?",
+    /**
+     * The three strata of that screen, top to bottom: the answer, the
+     * week the answer sits in, and the collection it came from. Same
+     * noun at three distances in time, which is why they are one screen.
+     */
+    sections: {
+      today: "avui",
+      week: "la setmana",
+      // Not "tots els outfits": these are the ones you chose, and the
+      // engine can generate a couple of hundred per piece. "Teus" says
+      // what makes them different without the filing-cabinet ring of
+      // "desats".
+      all: "els teus outfits",
+    },
+    // The plate is reserved for what you are actually wearing. It used to
+    // show a ranked "proposal" when the day was open, but with a handful
+    // of outfits that ranking rarely lands, and showing an arbitrary pick
+    // large and first overstates how sure the app is.
+    todayUndecided: "encara no ho has decidit",
+    chooseToday: "Triar l'outfit d'avui",
+    changeToday: "canviar d'outfit",
     filtersLabel: "Filtrar outfits",
     filters: {
       ready: "a punt",
       all: "tots",
-      favorites: "preferits",
     },
-    suggested: "suggerit",
+    // "a punt" leads: the question is what you can wear now, and an outfit
+    // whose shirt is in the basket is not an answer to it.
+    filterOrder: ["ready", "all"] as const,
     pickForMe: "tria per mi",
     today: "avui",
     // "al cistell" describes where the piece is; on an outfit what you
@@ -100,8 +136,6 @@ export const UI = {
     wearToday: "Me'l poso",
     wearOnDay: (day: string) => `Desar per ${day}`,
     saving: "desant…",
-    addFavorite: "afegir a preferits",
-    removeFavorite: "treure de preferits",
     delete: "eliminar",
     deleteConfirm: "sí, eliminar",
     deleting: "eliminant…",
@@ -115,15 +149,28 @@ export const UI = {
     deleteCostMany: "s'esborraran també els dies del calendari on el portaves.",
     changeOutfit: "canviar d'outfit",
     removeFromDay: "treure del dia",
-    seeCalendar: "veure calendari",
     emptyNoOutfits: "encara no tens outfits desats",
     emptyNoOutfitsBrowse: "encara no hi ha res desat.",
-    emptyNoOutfitsHint: "passa per combinar i guarda les paletes que t'agradin.",
+    emptyNoOutfitsHint:
+      "obre una peça de l'armari i mira què hi combina per desar el primer.",
     emptyNoneReady: "toca fer bugada",
-    emptyFavorites: "cap outfit preferit encara.",
     emptyReady: "cap outfit a punt ara mateix.",
     goToArmari: "anar a l'armari",
     goToRentar: "anar a rentar",
+    /** The three ways to index the collection. Plurals, because each one
+     * heads a list of pieces rather than naming one. */
+    axisLabel: "Ordenar per",
+    axes: {
+      SHIRT: "samarretes",
+      PANTS: "pantalons",
+      SWEATER: "jerseis",
+    },
+    axisEmpty: "cap outfit amb aquesta peça encara.",
+    /** The way from your short list into everything the matcher can
+     * build with the same piece. Two words: it sits inside that piece's
+     * own group, so naming the piece again was saying it twice — and
+     * "combinacions" is what keeps it from reading as more saved ones. */
+    seeMore: "més combinacions",
     plan: "planificar",
     back: "tornar",
     planned: "planificat",

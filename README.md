@@ -10,14 +10,15 @@ A personal wardrobe manager. Catalogue your clothes with colours and photos, the
 
 ## Features
 
-- **Garment catalogue** (`/armari`) — grid with filters by category and season, tabs for pieces / combinations / saved outfits. Categories: sweater, shirt, pants, socks, shoes, accessory. Detail URLs are a slug (`/armari/bossa-zez4hi`), not the raw id — the "què hi combina" colour-matching action is hidden for shoes, socks and accessories since they don't take part in it.
+- **Garment catalogue** (`/armari`) — one grid, no tabs, with filters by category and season. Categories: sweater, shirt, pants, socks, shoes, accessory. Detail URLs are a slug (`/armari/bossa-zez4hi`), not the raw id. Opening a piece is the only place a piece lives: its data, "què hi combina", edit and delete. That colour-matching action is hidden for shoes, socks and accessories since they don't take part in it.
 - **Add & edit** (`/add`, `/edit/[id]`) — form with multi-colour picker, seasons multi-select, texture / pattern / fit / size, optional photo upload. Fields adapt to the category: an accessory (ring, watch, belt, bag, hat, scarf, glasses…) skips texture, pattern, fit and size, and its colour is optional.
 - **Photo pipeline** — uploads re-encoded to WebP 800px @ q80 via `sharp`, EXIF stripped, thumbnails generated. Photos live on the filesystem, not in SQLite.
-- **Outfit builder** (`/armari` → `Combinar`) — pick a piece, get Sanzo Wada palettes that contain its colours, browse matching pieces per palette colour, save the outfit.
-- **Saved outfits** (`/armari` → `Desats`) — grouped by piece set, each entry linked to the palette it was saved with. Shoes, socks and accessories attach afterwards as "extras", outside the colour matching: shoes are a single slot (picking a new pair replaces the old one), accessories have no limit. The picker for extras is split into a section per kind, and an accessory shows its subtype (e.g. "bossa") instead of a generic label. Delete inline, duplicate to try a different pair of shoes / set of accessories on the same core, or mark it a favourite to pin it to the top.
-- **Weekly planner & worn-event log** (`/calendari`) — log which saved outfit you wore on a given day (at most one per calendar day); the outfit picker surfaces "least recently worn" suggestions from that history.
-- **Laundry** (`/bugaderia`, plus `/bugaderia/embrutar`, `/bugaderia/rentar`, `/bugaderia/avui`) — clean/dirty state per garment for the washable categories (sweater, shirt, pants); shoes, socks and accessories are always available. Mark pieces dirty or clean in bulk from a one-tap grid, then "què em poso?" surfaces only the saved outfits every washable piece of which is clean, ranked by season and least recently worn — picking one assigns it to today, and its pieces move to the basket once that day has passed, so changing your mind mid-day never soils clothes you didn't wear.
-- **Sanzo Wada palettes** (`/paleta`) — browse all 348 historical palettes; opening one shows the pieces you own that match it.
+- **Outfit builder** (`/armari` → a piece → `què hi combina`) — get the Sanzo Wada palettes that contain that piece's colours, browse matching pieces per palette colour, save the outfit. It is an action on a piece, not a place: the two sheets swap rather than nest, so closing the combinations returns to the piece.
+- **Què em poso?** (`/avui`) — the one place outfits live, in three strata. **Today**: the look you have committed to, as one plate with what you are wearing it with beside it; an undecided day gets no plate, just the question, a primary action and `✦ tria per mi`, which is a dice roll over what is clean rather than a recommendation. **The week**: seven cells, `?start=` navigates weeks without moving the page. **Els teus outfits**: the collection filed under the piece each look is built on, re-indexed by shirt, trousers or sweater from the tabs, every group collapsed until you open it, and each open group ending in `més combinacions` — the matcher run on that same piece, since it generates around 190 per piece and this list holds the handful you chose. All three strata open the same sheet and commit a day through the same action.
+- **Worn-event log** — a day holds at most one outfit. Shoes, socks and accessories attach to the *day*, not to the outfit: shoes are a single slot (picking a new pair replaces the old one), accessories have no limit, and the picker preselects whatever you last wore that outfit with. History drives the "least recently worn" ranking.
+- **Laundry** (`/bugaderia`, one screen toggling between the clean pile and the basket via `?vista=cistell`) — clean/dirty state per garment for the washable categories (sweater, shirt, pants); shoes, socks and accessories are always available. Mark pieces dirty or clean in bulk from a one-tap grid. In "què em poso?" an outfit with a piece in the basket cannot be committed, sorts below the wearable ones in its group, and says so on its own face — picking a wearable one assigns it to today, and its pieces move to the basket once that day has passed, so changing your mind mid-day never soils clothes you didn't wear.
+- **Sanzo Wada palettes** (`/paleta`) — browse all 348 historical palettes by colour name. Garment colours are named by their nearest Sanzo colour wherever the interface needs to tell two pieces of the same kind apart.
+- **Home and menu** — the home is four doors on one axis (`Què em poso?`, `Armari`, `Bugaderia`, `Paletes`); everything *about* the app rather than in it lives behind the header's ellipsis: statistics, settings and the light/dark switch. That menu is where the profile, the session and the language switch land once there are accounts.
 - **Statistics** (`/stats`) — breakdown by category, season, fit and texture.
 - **Import / export** (`/settings`) — download all garments as JSON, or as a ZIP bundle including garment photos; upload a previously exported file to restore.
 - **PWA manifest** — installable on mobile, custom icon and theme.
@@ -45,7 +46,8 @@ src/
   app/                       App Router routes
     page.tsx                 Home
     add/                     New garment
-    armari/                  Wardrobe grid + tabs (pieces / combine / saved)
+    armari/                  Wardrobe grid (one grid, no tabs)
+    avui/                    "Què em poso?" — today, the week, the collection
     edit/[id]/               Edit garment
     outfits/actions.ts       Server actions: save / delete outfit
     paleta/                  Sanzo Wada browser
@@ -102,7 +104,7 @@ Photos are stored on disk under `UPLOAD_DIR`, referenced by the `Garment.image` 
 
 ## How the colour engine picks outfits
 
-The **Combinar** tab suggests outfits by matching a garment against the Sanzo Wada
+The **què hi combina** action suggests outfits by matching a garment against the Sanzo Wada
 _Dictionary of Color Combinations_ (348 curated palettes, 157 canonical colours). The
 algorithm lives in [`src/lib/outfits/engine.ts`](src/lib/outfits/engine.ts) and is
 _canonical-first_: it never invents a combination, it always cites a page of the book.
