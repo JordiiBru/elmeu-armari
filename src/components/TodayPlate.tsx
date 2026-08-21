@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { formatLastWorn } from "@/lib/outfits/worn";
 import { UI } from "@/lib/prendas/ui-strings";
-import { OutfitCollage, outfitSubtitle, paletteName } from "./OutfitTile";
+import { OutfitCollage, outfitSubtitle, paletteName, pieceLabel } from "./OutfitTile";
+import { PieceThumb } from "./PieceThumb";
 import { OutfitSheet } from "./OutfitSheet";
 import { Button, Card, EmptyState, Icon, Stack, Text, TextButton } from "@/components/ui";
 
@@ -33,6 +34,7 @@ function scrollToCollection() {
 export function TodayPlate({
   committed,
   candidates,
+  todayExtras,
   palettes,
   extraCandidates,
   todayISO,
@@ -41,11 +43,37 @@ export function TodayPlate({
   committed: SavedOutfit | null;
   /** Wearable outfits, already ranked. Only feeds the shuffle now. */
   candidates: SavedOutfit[];
+  /** Shoes, socks and accessories recorded for today. They belong to the
+   * day, not to the outfit, which is why they arrive separately. */
+  todayExtras: GarmentWithColors[];
   palettes: SanzoPalette[];
   extraCandidates: GarmentWithColors[];
   todayISO: string;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
+
+  /**
+   * Deciding the day changes this plate, and you are usually deep in the
+   * week or the collection when you do it — so the thing that just
+   * changed would be off-screen.
+   *
+   * It has to be owned here rather than by the sheet that commits: the
+   * sheet unmounts on close, and the server action's revalidation lands
+   * afterwards, at which point Next restores the scroll position and
+   * undoes anything scrolled before it (measured: 0, then straight back
+   * to where you were). This component survives that round trip, so an
+   * effect on the committed id runs after it, not against it.
+   */
+  const committedId = committed?.id ?? null;
+  const lastCommittedId = useRef(committedId);
+  const settled = useRef(false);
+  useEffect(() => {
+    if (settled.current && committedId !== null && committedId !== lastCommittedId.current) {
+      window.scrollTo({ top: 0 });
+    }
+    lastCommittedId.current = committedId;
+    settled.current = true;
+  }, [committedId]);
 
   const open = useMemo(
     () =>
@@ -152,6 +180,23 @@ export function TodayPlate({
               <div aria-hidden className="mt-4 flex h-1 w-full max-w-64 overflow-hidden">
                 {palette.colores.map((hex, i) => (
                   <span key={i} className="flex-1" style={{ backgroundColor: hex }} />
+                ))}
+              </div>
+            )}
+
+            {/* Beside the photograph, not inside it. Folding shoes and
+                accessories into the collage turns one clean plate into a
+                wall of six thumbnails; as a companion strip they are
+                legible at a glance and the photograph stays the subject. */}
+            {todayExtras.length > 0 && (
+              <div className="mt-5 flex items-center gap-2">
+                <Text variant="caption" as="span" className="mr-1">
+                  {UI.outfits.wornWith}
+                </Text>
+                {todayExtras.map((g) => (
+                  <span key={g.id} title={pieceLabel(g)} className="flex-shrink-0">
+                    <PieceThumb garment={g} thumb sizes="40px" className="h-10 w-10" />
+                  </span>
                 ))}
               </div>
             )}

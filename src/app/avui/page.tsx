@@ -144,6 +144,7 @@ export default async function AvuiPage({
           <TodayPlate
             committed={committed}
             candidates={ranked.filter(isWearable)}
+            todayExtras={days.find((d) => d.date === todayISO)?.extras ?? []}
             palettes={palettes}
             extraCandidates={extraCandidates}
             todayISO={todayISO}

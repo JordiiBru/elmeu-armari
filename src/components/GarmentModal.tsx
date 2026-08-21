@@ -59,6 +59,7 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
         allGarments={allGarments}
         palettes={palettes}
         onClose={() => setCombineOpen(false)}
+        onSaved={onClose}
       />
     );
   }

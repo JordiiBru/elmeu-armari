@@ -6,8 +6,9 @@ import type { SanzoPalette, OutfitGroup } from "@/lib/outfits/types";
 import { generateOutfitGroupsForGarment } from "@/lib/outfits/engine";
 import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
 import { saveOutfitAction } from "@/app/outfits/actions";
+import { UI } from "@/lib/prendas/ui-strings";
 import { OutfitGroupCard } from "./OutfitCard";
-import { Sheet, TextButton, Text, Stack, Icon } from "@/components/ui";
+import { Sheet, TextButton, Text, Stack, Icon, useToast } from "@/components/ui";
 
 const PAGE_SIZE = 6;
 
@@ -16,6 +17,9 @@ interface Props {
   allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
   onClose: () => void;
+  /** Saving is the end of the errand: it leaves the wardrobe with
+   * nothing open rather than dropping you back on the piece. */
+  onSaved?: () => void;
 }
 
 function computeInitial(
@@ -37,7 +41,9 @@ export function OutfitBottomSheet({
   allGarments,
   palettes,
   onClose,
+  onSaved,
 }: Props) {
+  const toast = useToast();
   const [initial] = useState(() =>
     computeInitial(garment, allGarments, palettes),
   );
@@ -86,6 +92,10 @@ export function OutfitBottomSheet({
     startTransition(async () => {
       await saveOutfitAction(paletteId, garmentIds);
       setSavedKeys((prev) => new Set(prev).add(key));
+      // The sheet is about to go, so the receipt cannot be the button
+      // flipping to "desat" — nobody would see it.
+      toast.show(UI.outfits.saved, "success");
+      onSaved?.();
     });
   };
 
