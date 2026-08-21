@@ -14,6 +14,7 @@ import {
   markWornEventSettled,
 } from "./repository";
 import { findGarmentCategories, markGarmentsDirty } from "@/lib/prendas/service";
+import { sortByWardrobeOrder } from "@/lib/prendas/filtering";
 import { AUTO_SOIL_CATEGORIES, EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { dirtyGarmentsOf } from "@/lib/bugaderia/laundry";
 import { palettes } from "@/lib/colors";
@@ -43,6 +44,14 @@ interface OutfitWithGarments {
   wornEvents?: WornEventWithGarments[];
 }
 
+/**
+ * The join rows come back in insertion order, which is the order the
+ * builder happened to pick the pieces in — so the same wardrobe read
+ * differently on every card. Sorting here, at the single point every
+ * surface goes through, makes a collage, a subtitle and a day cell all
+ * read top-down: jersei, samarreta, pantalons, and then what you wore
+ * them with.
+ */
 export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
   return {
     id: outfit.id,
@@ -50,11 +59,11 @@ export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
     paletteId: outfit.paletteId,
     favorite: outfit.favorite,
     createdAt: outfit.createdAt,
-    garments: outfit.garments.map((og) => og.garment),
+    garments: sortByWardrobeOrder(outfit.garments.map((og) => og.garment)),
     wornEvents: (outfit.wornEvents ?? []).map((w) => ({
       id: w.id,
       date: w.date,
-      extras: w.garments.map((wg) => wg.garment),
+      extras: sortByWardrobeOrder(w.garments.map((wg) => wg.garment)),
     })),
   };
 }
@@ -193,7 +202,7 @@ export async function findWeekPlan(weekStart: Date): Promise<WeekDayPlan[]> {
     return {
       date,
       outfit: event ? toSavedOutfit(event.outfit) : null,
-      extras: event ? event.garments.map((wg) => wg.garment) : [],
+      extras: event ? sortByWardrobeOrder(event.garments.map((wg) => wg.garment)) : [],
     };
   });
 }
