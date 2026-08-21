@@ -79,15 +79,15 @@ export function WeekCalendar({
 
   return (
     <>
-      {/* Seven across only once there is room for seven photographs.
-          Below that the week wraps rather than shrinking to thumbnails:
-          two up on a phone, four on a tablet. The desktop row is a
-          single line of seven, so its cells can be portrait — vertical
-          space is the one thing that screen has to spare, and squares
-          left the week reading as a strip of stamps. On a phone the
-          days stack, so there the square is what keeps the week from
-          turning into a long scroll. */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 lg:gap-3">
+      {/* Always seven across. The week used to wrap two-up on a phone,
+          which was right when it was a screen of its own; as the middle
+          stratum of "què em poso?" that same layout became four rows of
+          large squares sitting between the day's answer and the
+          collection, and the secondary thing outweighed both. Seven
+          small stamps read as one line of time, which is all this
+          stratum has to say. Desktop keeps portrait cells — there the
+          row has width to spend. */}
+      <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
         {days.map((day) => (
           <DayCell
             key={day.date}
@@ -152,7 +152,9 @@ function DayCell({
       onClick={onOpen}
       data-testid="calendar-day-cell"
     >
-      <div className="flex items-baseline justify-between pb-2">
+      {/* Stacked and centred at seven-across, back to a baseline row
+          once a cell is wide enough to hold both on one line. */}
+      <div className="flex flex-col items-center gap-0 pb-1 sm:flex-row sm:items-baseline sm:justify-between sm:pb-2">
         <Text variant="caption" tone={isToday ? "primary" : "secondary"}>
           {weekday}
         </Text>
@@ -181,11 +183,13 @@ function DayCell({
           </div>
         )}
       </div>
+      {/* A caption under a 42px stamp is an ellipsis, so the phone goes
+          without one: the photograph already says which outfit it is. */}
       <Text
         variant="small"
         italic
         tone="secondary"
-        className="font-serif lowercase mt-1.5 truncate"
+        className="font-serif lowercase mt-1.5 truncate hidden sm:block"
       >
         {title ?? UI.outfits.plan}
       </Text>

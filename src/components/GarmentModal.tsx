@@ -42,6 +42,22 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
     });
   };
 
+  // One sheet at a time, never one inside the other. Two mounted `Sheet`s
+  // means two Escape listeners (Escape closed both) and the inner one
+  // released the body scroll lock on unmount while the outer was still
+  // open. Swapping instead of nesting also reads right: "què hi combina"
+  // is a level deeper, and closing it comes back to the piece.
+  if (combineOpen) {
+    return (
+      <OutfitBottomSheet
+        garment={garment}
+        allGarments={allGarments}
+        palettes={palettes}
+        onClose={() => setCombineOpen(false)}
+      />
+    );
+  }
+
   return (
     <Sheet
       onClose={onClose}
@@ -174,14 +190,6 @@ export function GarmentModal({ garment, allGarments, palettes, onClose }: Props)
         )}
       </div>
 
-      {combineOpen && (
-        <OutfitBottomSheet
-          garment={garment}
-          allGarments={allGarments}
-          palettes={palettes}
-          onClose={() => setCombineOpen(false)}
-        />
-      )}
     </Sheet>
   );
 }

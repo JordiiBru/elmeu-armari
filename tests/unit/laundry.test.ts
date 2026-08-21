@@ -46,7 +46,6 @@ function outfit(
     id,
     name: id,
     paletteId: 1,
-    favorite: false,
     createdAt: new Date("2026-01-01T00:00:00Z"),
     wornEvents: (opts.wornDates ?? []).map((date, i) => ({
       id: `worn-${id}-${i}`,

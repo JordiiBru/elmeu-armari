@@ -77,13 +77,25 @@ export const UI = {
     },
   },
   outfits: {
+    // The screen is one question, so it is titled with the question.
+    screenTitle: "Què em poso?",
+    /**
+     * The three strata of that screen, top to bottom: the answer, the
+     * week the answer sits in, and the collection it came from. Same
+     * noun at three distances in time, which is why they are one screen.
+     */
+    sections: {
+      today: "avui",
+      week: "la setmana",
+      all: "tots els outfits",
+    },
+    todayUndecided: "encara per decidir",
+    changeToday: "canviar",
     filtersLabel: "Filtrar outfits",
     filters: {
       ready: "a punt",
       all: "tots",
-      favorites: "preferits",
     },
-    suggested: "suggerit",
     pickForMe: "tria per mi",
     today: "avui",
     // "al cistell" describes where the piece is; on an outfit what you
@@ -100,8 +112,6 @@ export const UI = {
     wearToday: "Me'l poso",
     wearOnDay: (day: string) => `Desar per ${day}`,
     saving: "desant…",
-    addFavorite: "afegir a preferits",
-    removeFavorite: "treure de preferits",
     delete: "eliminar",
     deleteConfirm: "sí, eliminar",
     deleting: "eliminant…",
@@ -115,12 +125,11 @@ export const UI = {
     deleteCostMany: "s'esborraran també els dies del calendari on el portaves.",
     changeOutfit: "canviar d'outfit",
     removeFromDay: "treure del dia",
-    seeCalendar: "veure calendari",
     emptyNoOutfits: "encara no tens outfits desats",
     emptyNoOutfitsBrowse: "encara no hi ha res desat.",
-    emptyNoOutfitsHint: "passa per combinar i guarda les paletes que t'agradin.",
+    emptyNoOutfitsHint:
+      "obre una peça de l'armari i mira què hi combina per desar el primer.",
     emptyNoneReady: "toca fer bugada",
-    emptyFavorites: "cap outfit preferit encara.",
     emptyReady: "cap outfit a punt ara mateix.",
     goToArmari: "anar a l'armari",
     goToRentar: "anar a rentar",

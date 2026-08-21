@@ -4,18 +4,22 @@ import { Stack, Text, Heading } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
-// "Què em poso?" is the question the app exists to answer, so it leads —
-// two taps deep under Bugaderia it read as a laundry chore.
+/**
+ * Three doors, one per thing you actually do: decide a look, keep the
+ * catalogue, know what is clean. Everything else is reachable from
+ * inside one of them — the week and the saved outfits live under "què em
+ * poso?", combining lives on a piece — so listing them here would be
+ * listing the same rooms twice.
+ */
 const PRIMARY = [
   { href: "/avui", label: "Què em poso?" },
   { href: "/armari", label: "Armari" },
-  { href: "/calendari", label: "Calendari" },
   { href: "/bugaderia", label: "Bugaderia" },
-  // Last: it is the one entry you open to look rather than to decide.
-  { href: "/paleta", label: "Paletes" },
 ];
 
+// The ones you open to look rather than to decide.
 const SECONDARY = [
+  { href: "/paleta", label: "paletes" },
   { href: "/stats", label: "estadístiques" },
   { href: "/settings", label: "configuració" },
 ];

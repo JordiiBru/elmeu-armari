@@ -7,7 +7,7 @@ import { isWearable } from "@/lib/bugaderia/laundry";
 import { nameOf } from "@/lib/colors";
 import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
-import { Card, Icon, Text } from "@/components/ui";
+import { Card, Text } from "@/components/ui";
 
 /** A piece reads better by its subtype ("polo", "vaquers", "anell") than
  * by its category — every accessory shares the same category label. */
@@ -128,20 +128,17 @@ export function OutfitTile({
   outfit,
   palette,
   index,
-  suggested = false,
   mark,
   onOpen,
 }: {
   outfit: SavedOutfit;
   palette: SanzoPalette | null;
   index: number;
-  suggested?: boolean;
   /** Caption over the top-left corner: whose day this outfit already is
-   * ("avui" in the library, "planificat" in the calendar). */
+   * ("avui" in the collection, "planificat" in the week). */
   mark?: string | null;
   onOpen: () => void;
 }) {
-  const wearable = isWearable(outfit);
   // The clothes name the outfit: they are what tells two looks apart at a
   // glance, and with subtypes they read as a garment rail ("polo · vaquers")
   // rather than as a taxonomy.
@@ -149,11 +146,7 @@ export function OutfitTile({
 
   // Which piece is missing is a detail for the sheet: spelled out here it
   // wrapped the caption onto two lines over the photograph.
-  const stateMark = !wearable
-    ? UI.outfits.inBasket
-    : suggested
-      ? UI.outfits.suggested
-      : null;
+  const stateMark = isWearable(outfit) ? null : UI.outfits.inBasket;
 
   return (
     <Card
@@ -169,11 +162,6 @@ export function OutfitTile({
           sizes={TILE_SIZES}
           className="h-full w-full"
         />
-        {outfit.favorite && (
-          <span className="absolute top-2 right-2 inline-flex bg-elevated p-1">
-            <Icon name="star" size={12} className="fill-current text-text-primary" />
-          </span>
-        )}
         {mark && <Mark position="top-left">{mark}</Mark>}
         {stateMark && <Mark position="bottom-left">{stateMark}</Mark>}
       </div>

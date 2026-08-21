@@ -2,11 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import {
-  deleteOutfitAction,
-  setOutfitFavoriteAction,
-  wearOutfitAction,
-} from "@/app/outfits/actions";
+import { deleteOutfitAction, wearOutfitAction } from "@/app/outfits/actions";
 import { UI } from "@/lib/prendas/ui-strings";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
@@ -125,12 +121,6 @@ export function OutfitSheet({
       await wearOutfitAction(outfit.id, dayISO, picked.map((g) => g.id));
       onCommitted?.();
       onClose();
-    });
-  };
-
-  const handleToggleFavorite = () => {
-    startTransition(async () => {
-      await setOutfitFavoriteAction(outfit.id, !outfit.favorite);
     });
   };
 
@@ -282,14 +272,6 @@ export function OutfitSheet({
         ) : (
           <>
             <div className="flex flex-wrap items-center gap-4">
-              <TextButton
-                type="button"
-                tone="secondary"
-                onClick={handleToggleFavorite}
-                disabled={pending}
-              >
-                {outfit.favorite ? UI.outfits.removeFavorite : UI.outfits.addFavorite}
-              </TextButton>
               {onChangeOutfit && (
                 <TextButton
                   type="button"
