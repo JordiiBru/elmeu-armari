@@ -17,7 +17,10 @@ export default async function BugaderiaPage() {
   const washable = (await findAllGarments()).filter(isWashable);
 
   return (
-    <PageContainer width="narrow">
+    // Wide, not narrow. This is a wall of photographs you scan standing in
+    // front of the wardrobe; at max-w-lg a desktop showed a phone-sized
+    // column stranded in the middle of the screen.
+    <PageContainer width="wide">
       <SectionHeader title={UI.bugaderia.title} subtitle={UI.bugaderia.subtitle} />
 
       <Suspense fallback={null}>

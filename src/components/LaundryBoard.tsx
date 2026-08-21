@@ -78,9 +78,14 @@ export function LaundryBoard({
         </Text>
       </Stack>
 
-      {/* Keyed on the view so the picker re-enters and, more to the point,
-          drops a selection that belongs to the other pile. */}
-      <div key={view} className="panel-enter">
+      {/* Keyed on the view so the picker remounts and drops a selection
+          belonging to the other pile. The entrance animation lives on the
+          grid inside `LaundryPicker`, not here: `panel-enter` animates a
+          transform, and an element with a filling transform animation is
+          a containing block for `position: fixed` descendants — with it
+          up here the picker's action bar stopped being pinned to the
+          viewport and fell to the bottom of the document. */}
+      <div key={view}>
         <LaundryPicker
           mode={view === "clean" ? "soil" : "wash"}
           garments={view === "clean" ? clean : basket}
