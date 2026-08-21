@@ -154,12 +154,25 @@ export async function settlePastWornEvents(): Promise<number> {
   return events.length;
 }
 
-/** The outfit assigned to today, if any — used to hide the "menys portat"
- * suggestion once today is already decided, and to let a saved outfit's
- * own sheet offer a one-click "portar-lo avui". */
-export async function findTodayOutfitId(): Promise<string | null> {
+/**
+ * Today's committed day: the outfit, and the shoes and accessories it is
+ * being worn with.
+ *
+ * Read straight from today rather than off the week plan. The plate used
+ * to pick its extras out of the seven days the planner had loaded, which
+ * works right up until you page back a week — then the plan no longer
+ * contains today and the plate silently lost everything it was worn with.
+ */
+export async function findTodayWorn(): Promise<{
+  outfitId: string;
+  extras: GarmentWithColors[];
+} | null> {
   const event = await findWornEventForDay(dayKey(new Date()));
-  return event?.outfitId ?? null;
+  if (!event) return null;
+  return {
+    outfitId: event.outfitId,
+    extras: sortByWardrobeOrder(event.garments.map((wg) => wg.garment)),
+  };
 }
 
 /** Always returns exactly 7 entries, Monday first, one per day of the

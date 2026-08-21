@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   findAllOutfits,
-  findTodayOutfitId,
+  findTodayWorn,
   findWeekPlan,
   toSavedOutfit,
 } from "@/lib/outfits/service";
@@ -101,12 +101,13 @@ export default async function AvuiPage({
   const weekStart = startOfWeek(startParam ? isoToDay(startParam) : today);
   const weekEnd = addDays(weekStart, 6);
 
-  const [outfits, garments, todayOutfitId, days] = await Promise.all([
+  const [outfits, garments, todayWorn, days] = await Promise.all([
     findAllOutfits(),
     findAllGarments(),
-    findTodayOutfitId(),
+    findTodayWorn(),
     findWeekPlan(weekStart),
   ]);
+  const todayOutfitId = todayWorn?.outfitId ?? null;
 
   const season = getCurrentSeason();
   const todayISO = dayToISO(today);
@@ -150,7 +151,7 @@ export default async function AvuiPage({
           <TodayPlate
             committed={committed}
             candidates={ranked.filter(isWearable)}
-            todayExtras={days.find((d) => d.date === todayISO)?.extras ?? []}
+            todayExtras={todayWorn?.extras ?? []}
             palettes={palettes}
             extraCandidates={extraCandidates}
             todayISO={todayISO}
