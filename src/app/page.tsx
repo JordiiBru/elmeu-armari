@@ -8,10 +8,11 @@ export const dynamic = "force-dynamic";
 // two taps deep under Bugaderia it read as a laundry chore.
 const PRIMARY = [
   { href: "/avui", label: "Què em poso?" },
-  { href: "/armari", label: "El meu armari" },
+  { href: "/armari", label: "Armari" },
   { href: "/calendari", label: "Calendari" },
-  { href: "/paleta", label: "Paletes" },
   { href: "/bugaderia", label: "Bugaderia" },
+  // Last: it is the one entry you open to look rather than to decide.
+  { href: "/paleta", label: "Paletes" },
 ];
 
 const SECONDARY = [
@@ -28,33 +29,36 @@ export default function HomePage() {
   const palette = pickPalette();
 
   return (
-    <div className="flex-1 grid grid-rows-[1fr_auto_1fr] px-6 py-8 md:py-12">
-      <Stack as="section" gap={5} align="center" className="self-end text-center">
+    // Masthead at the top, index at the foot, one pause between them.
+    // Centred as a block it left a third of the screen empty above the
+    // title — air a cover has to earn, and up there it read as a page
+    // that had not finished loading.
+    <div className="flex-1 grid grid-rows-[auto_1fr] px-6 pt-2 pb-8 md:pt-6 md:pb-12">
+      <Stack as="section" gap={5} align="center" className="text-center">
         <Heading level="display-xl">el meu armari</Heading>
         <Text variant="subtitle" tone="secondary" italic as="p">
           un estudi d&apos;harmonia visual
         </Text>
-      </Stack>
 
-      <div className="flex justify-center py-8 md:py-12">
+        {/* The masthead's rule, in colour: today's palette as a line
+            under the title rather than a swatch adrift mid-page, which
+            turned one pause into two. */}
         <Link
           href="/paleta"
           aria-label={`Paleta ${palette.nombre}`}
-          className="group block w-40 md:w-56 outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+          className="group mt-2 block w-40 md:w-56 outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
         >
           <div className="flex h-4 md:h-6 overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-spring)] group-hover:-translate-y-0.5">
             {palette.colores.map((hex, i) => (
-              <div
-                key={i}
-                className="flex-1"
-                style={{ backgroundColor: hex }}
-              />
+              <div key={i} className="flex-1" style={{ backgroundColor: hex }} />
             ))}
           </div>
         </Link>
-      </div>
+      </Stack>
 
-      <Stack as="section" gap={6} align="center" className="self-start">
+      {/* Centred in what the masthead leaves, so the pause reads as one
+          measured gap above and below the index instead of a hole. */}
+      <Stack as="section" gap={6} align="center" className="self-center">
         <nav className="flex flex-col items-center gap-4">
           {PRIMARY.map((entry) => (
             <Link

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { UI } from "@/lib/prendas/ui-strings";
@@ -8,7 +8,13 @@ import { PieceThumb } from "./PieceThumb";
 import { pieceLabel } from "./OutfitTile";
 import { EmptyState, Icon, SegmentedControl, Stack, Text } from "@/components/ui";
 
-type Tab = "shoes" | "accessories";
+export type WearTab = "shoes" | "accessories";
+
+export interface WearGroups {
+  shoes: GarmentWithColors[];
+  accessories: GarmentWithColors[];
+  socks: GarmentWithColors[];
+}
 
 const PICKER_SIZES = "(min-width: 1024px) 12vw, (min-width: 640px) 15vw, 40vw";
 
@@ -89,23 +95,14 @@ function PickerEmpty({ title }: { title: string }) {
  * block for fixed descendants and clips overflow), and a wizard would add
  * two taps to the app's most frequent action. One tab visible at a time
  * also gives each photograph the full sheet width, which is the point.
+ *
+ * Tabs and grid ship as two components on purpose: the sheet pins
+ * `WearTabs` above its scrolling body and scrolls `WearGrids` under it,
+ * so switching tab moves the grid and nothing else. They share the one
+ * split of the catalogue this hook computes.
  */
-export function WearPicker({
-  candidates,
-  shoeId,
-  extraIds,
-  onSelectShoe,
-  onToggleExtra,
-  disabled,
-}: {
-  candidates: GarmentWithColors[];
-  shoeId: string | null;
-  extraIds: string[];
-  onSelectShoe: (id: string | null) => void;
-  onToggleExtra: (id: string) => void;
-  disabled?: boolean;
-}) {
-  const { shoes, accessories, socks } = useMemo(
+export function useWearGroups(candidates: GarmentWithColors[]): WearGroups {
+  return useMemo(
     () => ({
       shoes: candidates.filter((g) => g.category === "SHOES"),
       accessories: candidates.filter((g) => g.category === "ACCESSORI"),
@@ -117,63 +114,114 @@ export function WearPicker({
     }),
     [candidates],
   );
+}
 
-  const [tab, setTab] = useState<Tab>("shoes");
-  const selectedExtras = useMemo(() => new Set(extraIds), [extraIds]);
-
-  const countLabel = (label: string, n: number) => (
+function countLabel(label: string, n: number) {
+  return (
     <>
       {label}
       {n > 0 && <span className="tabular-nums"> {n}</span>}
     </>
   );
+}
 
-  const accessoryCount = [...accessories, ...socks].filter((g) =>
-    selectedExtras.has(g.id),
+export function WearTabs({
+  groups,
+  tab,
+  onChange,
+  shoeId,
+  extraIds,
+}: {
+  groups: WearGroups;
+  tab: WearTab;
+  onChange: (tab: WearTab) => void;
+  shoeId: string | null;
+  extraIds: string[];
+}) {
+  const selected = useMemo(() => new Set(extraIds), [extraIds]);
+  const accessoryCount = [...groups.accessories, ...groups.socks].filter((g) =>
+    selected.has(g.id),
   ).length;
 
   return (
-    <Stack gap={4}>
-      <SegmentedControl<Tab>
-        value={tab}
-        onChange={setTab}
-        ariaLabel={UI.outfits.howYouWearIt}
-        options={[
-          { value: "shoes", label: countLabel(UI.outfits.shoes, shoeId ? 1 : 0) },
-          {
-            value: "accessories",
-            label: countLabel(UI.outfits.accessories, accessoryCount),
-          },
-        ]}
-      />
+    <SegmentedControl<WearTab>
+      value={tab}
+      onChange={onChange}
+      ariaLabel={UI.outfits.howYouWearIt}
+      options={[
+        { value: "shoes", label: countLabel(UI.outfits.shoes, shoeId ? 1 : 0) },
+        {
+          value: "accessories",
+          label: countLabel(UI.outfits.accessories, accessoryCount),
+        },
+      ]}
+    />
+  );
+}
 
-      {/* Keyed on the tab so the panel re-enters instead of swapping dry. */}
-      <div key={tab} className="panel-enter">
-        {tab === "shoes" &&
-          (shoes.length === 0 ? (
-            <PickerEmpty title={UI.outfits.noShoes} />
-          ) : (
-            <PickGrid>
-              {shoes.map((g) => (
-                <PickTile
-                  key={g.id}
-                  garment={g}
-                  disabled={disabled}
-                  selected={shoeId === g.id}
-                  onClick={() => onSelectShoe(shoeId === g.id ? null : g.id)}
-                />
-              ))}
-            </PickGrid>
-          ))}
+export function WearGrids({
+  groups,
+  tab,
+  shoeId,
+  extraIds,
+  onSelectShoe,
+  onToggleExtra,
+  disabled,
+}: {
+  groups: WearGroups;
+  tab: WearTab;
+  shoeId: string | null;
+  extraIds: string[];
+  onSelectShoe: (id: string | null) => void;
+  onToggleExtra: (id: string) => void;
+  disabled?: boolean;
+}) {
+  const { shoes, accessories, socks } = groups;
+  const selectedExtras = useMemo(() => new Set(extraIds), [extraIds]);
 
-        {tab === "accessories" &&
-          (accessories.length === 0 && socks.length === 0 ? (
-            <PickerEmpty title={UI.outfits.noAccessories} />
-          ) : (
-            <Stack gap={5}>
-              {accessories.length > 0 && (
+  return (
+    // Keyed on the tab so the panel re-enters instead of swapping dry.
+    <div key={tab} className="panel-enter">
+      {tab === "shoes" &&
+        (shoes.length === 0 ? (
+          <PickerEmpty title={UI.outfits.noShoes} />
+        ) : (
+          <PickGrid>
+            {shoes.map((g) => (
+              <PickTile
+                key={g.id}
+                garment={g}
+                disabled={disabled}
+                selected={shoeId === g.id}
+                onClick={() => onSelectShoe(shoeId === g.id ? null : g.id)}
+              />
+            ))}
+          </PickGrid>
+        ))}
+
+      {tab === "accessories" &&
+        (accessories.length === 0 && socks.length === 0 ? (
+          <PickerEmpty title={UI.outfits.noAccessories} />
+        ) : (
+          <Stack gap={5}>
+            {accessories.length > 0 && (
+              <PickGrid>
+                {accessories.map((g) => (
+                  <PickTile
+                    key={g.id}
+                    garment={g}
+                    disabled={disabled}
+                    selected={selectedExtras.has(g.id)}
+                    onClick={() => onToggleExtra(g.id)}
+                  />
+                ))}
+              </PickGrid>
+            )}
+            {socks.length > 0 && (
+              <Stack gap={3}>
+                <Text variant="caption">{UI.outfits.socks}</Text>
                 <PickGrid>
-                  {accessories.map((g) => (
+                  {socks.map((g) => (
                     <PickTile
                       key={g.id}
                       garment={g}
@@ -183,26 +231,10 @@ export function WearPicker({
                     />
                   ))}
                 </PickGrid>
-              )}
-              {socks.length > 0 && (
-                <Stack gap={3}>
-                  <Text variant="caption">{UI.outfits.socks}</Text>
-                  <PickGrid>
-                    {socks.map((g) => (
-                      <PickTile
-                        key={g.id}
-                        garment={g}
-                        disabled={disabled}
-                        selected={selectedExtras.has(g.id)}
-                        onClick={() => onToggleExtra(g.id)}
-                      />
-                    ))}
-                  </PickGrid>
-                </Stack>
-              )}
-            </Stack>
-          ))}
-      </div>
-    </Stack>
+              </Stack>
+            )}
+          </Stack>
+        ))}
+    </div>
   );
 }

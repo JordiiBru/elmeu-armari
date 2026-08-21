@@ -14,7 +14,7 @@ import { dirtyGarmentsOf } from "@/lib/bugaderia/laundry";
 import { formatLastWorn, lastWornExtras } from "@/lib/outfits/worn";
 import { PieceThumb } from "./PieceThumb";
 import { OutfitCollage, outfitSubtitle, paletteName, pieceLabel } from "./OutfitTile";
-import { WearPicker } from "./WearPicker";
+import { WearGrids, WearTabs, useWearGroups, type WearTab } from "./WearPicker";
 import {
   Button,
   Sheet,
@@ -89,6 +89,8 @@ export function OutfitSheet({
   const [extraIds, setExtraIds] = useState<string[]>(() =>
     preselected.filter((g) => g.category !== "SHOES").map((g) => g.id),
   );
+  const [tab, setTab] = useState<WearTab>("shoes");
+  const groups = useWearGroups(extraCandidates);
 
   const title = outfitSubtitle(outfit) || outfit.name || "";
   const blockedBy = dirtyGarmentsOf(outfit);
@@ -150,6 +152,10 @@ export function OutfitSheet({
     <Sheet
       onClose={onClose}
       size="xl"
+      // The two tabs hold grids of very different heights, and the sheet
+      // used to resize under the tab bar every time you switched. Fixed
+      // height, tabs pinned, grid scrolls.
+      fill
       label={`Outfit ${title}`}
       media={
         <OutfitCollage
@@ -159,10 +165,10 @@ export function OutfitSheet({
           className="h-full w-full"
         />
       }
-      // 224px of photograph on a 812px phone left the body scrolling for
-      // the last row; 176 fits the whole sheet on screen at once, and the
-      // desktop panel has room to keep the taller hero.
-      mediaHeight="h-44 sm:h-64"
+      // The panel is a fixed height now, so every pixel of hero is a
+      // pixel the grid below does not get. Enough photograph to know
+      // which outfit you opened, and no more.
+      mediaHeight="h-36 sm:h-56"
       header={
         <Stack gap={1}>
           <h2 className="type-title lowercase">{title}</h2>
@@ -177,6 +183,17 @@ export function OutfitSheet({
             </div>
           )}
         </Stack>
+      }
+      headerBelow={
+        <div className="px-6 py-2">
+          <WearTabs
+            groups={groups}
+            tab={tab}
+            onChange={setTab}
+            shoeId={shoeId}
+            extraIds={extraIds}
+          />
+        </div>
       }
       footer={
         <div className="flex items-center justify-between gap-4">
@@ -227,8 +244,9 @@ export function OutfitSheet({
         </div>
       }
     >
-      <WearPicker
-        candidates={extraCandidates}
+      <WearGrids
+        groups={groups}
+        tab={tab}
         shoeId={shoeId}
         extraIds={extraIds}
         onSelectShoe={setShoeId}
@@ -236,7 +254,7 @@ export function OutfitSheet({
         disabled={pending}
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
         {confirmingDelete ? (
           <>
             <Text variant="small" italic tone="secondary" className="font-serif">

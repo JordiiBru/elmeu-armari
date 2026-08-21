@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { UI } from "@/lib/prendas/ui-strings";
 import { markDirtyAction, markCleanAction } from "@/app/bugaderia/actions";
@@ -57,7 +56,6 @@ export function LaundryPicker({
   garments: GarmentWithColors[];
 }) {
   const copy = COPY[mode];
-  const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
 
@@ -74,13 +72,20 @@ export function LaundryPicker({
   const selectAll = () => setSelected(new Set(garments.map((g) => g.id)));
   const clearSelection = () => setSelected(new Set());
 
+  /**
+   * Stays on the screen. The action revalidates this route, so the
+   * pieces you just marked leave the grid on their own — which is both
+   * the receipt and the reason to stay: sorting laundry is a handful of
+   * passes over the same pile, and bouncing back to the hub after each
+   * one meant navigating in again.
+   */
   const handleSubmit = () => {
     if (selected.size === 0) return;
     const ids = Array.from(selected);
     startTransition(async () => {
       const action = mode === "soil" ? markDirtyAction : markCleanAction;
       await action(ids);
-      router.push("/bugaderia");
+      setSelected(new Set());
     });
   };
 

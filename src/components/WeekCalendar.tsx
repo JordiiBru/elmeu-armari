@@ -79,7 +79,15 @@ export function WeekCalendar({
 
   return (
     <>
-      <div className="grid grid-cols-2 sm:grid-cols-7 gap-4">
+      {/* Seven across only once there is room for seven photographs.
+          Below that the week wraps rather than shrinking to thumbnails:
+          two up on a phone, four on a tablet. The desktop row is a
+          single line of seven, so its cells can be portrait — vertical
+          space is the one thing that screen has to spare, and squares
+          left the week reading as a strip of stamps. On a phone the
+          days stack, so there the square is what keeps the week from
+          turning into a long scroll. */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 lg:gap-3">
         {days.map((day) => (
           <DayCell
             key={day.date}
@@ -153,7 +161,7 @@ function DayCell({
         </Text>
       </div>
       <div
-        className={`relative aspect-square w-full overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0 ${
+        className={`relative aspect-square lg:aspect-[3/4] w-full overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0 ${
           isToday ? "ring-1 ring-text-primary" : ""
         }`}
       >
@@ -164,7 +172,7 @@ function DayCell({
           <OutfitCollage
             garments={[...day.outfit.garments, ...day.extras]}
             max={6}
-            sizes="(min-width: 640px) 14vw, 45vw"
+            sizes="(min-width: 1024px) 12vw, (min-width: 640px) 22vw, 45vw"
             className="h-full w-full"
           />
         ) : (
