@@ -46,22 +46,20 @@ export const UI = {
   bugaderia: {
     title: "bugaderia",
     subtitle: "què tens net i què tens al cistell.",
-    soil: "Embrutar",
-    wash: "Rentar",
     today: "Què em poso?",
-    cleanCount: (n: number) => (n === 1 ? "1 peça neta" : `${n} peces netes`),
-    basketCount: (n: number) =>
-      n === 1 ? "1 peça al cistell" : `${n} peces al cistell`,
+    viewsLabel: "Quina pila mires",
+    views: {
+      clean: "netes",
+      basket: "cistell",
+    },
     picker: {
       soil: {
-        title: "Embrutar",
         subtitle: "tria les peces que van al cistell.",
         submit: "Al cistell",
         submitting: "marcant…",
         empty: "totes les peces ja són al cistell.",
       },
       wash: {
-        title: "Rentar",
         subtitle: "tria les peces que has rentat.",
         submit: "Rentat",
         submitting: "marcant…",

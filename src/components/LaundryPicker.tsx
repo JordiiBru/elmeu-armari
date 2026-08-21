@@ -76,8 +76,8 @@ export function LaundryPicker({
    * Stays on the screen. The action revalidates this route, so the
    * pieces you just marked leave the grid on their own — which is both
    * the receipt and the reason to stay: sorting laundry is a handful of
-   * passes over the same pile, and bouncing back to the hub after each
-   * one meant navigating in again.
+   * passes over the same pile, and leaving the screen after each one
+   * meant navigating back in.
    */
   const handleSubmit = () => {
     if (selected.size === 0) return;

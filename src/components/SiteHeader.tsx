@@ -16,7 +16,6 @@ const PARENT: { prefix: string; parent: string }[] = [
   { prefix: "/add", parent: "/armari" },
   { prefix: "/edit/", parent: "/armari" },
   { prefix: "/armari/", parent: "/armari" },
-  { prefix: "/bugaderia/", parent: "/bugaderia" },
 ];
 
 function parentOf(pathname: string): string {

@@ -200,7 +200,7 @@ export function OutfitSheet({
                 {UI.outfits.blockedReason(blockedBy.map(pieceLabel))}
               </Text>
               <Link
-                href="/bugaderia/rentar"
+                href="/bugaderia?vista=cistell"
                 className="font-serif italic type-small text-text-secondary underline underline-offset-4 hover:text-text-primary transition-colors duration-[var(--duration-base)]"
               >
                 {UI.outfits.goToRentar}
