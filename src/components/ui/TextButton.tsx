@@ -37,7 +37,12 @@ export function TextButton({
   const classes = [BASE, TONE_CLASS[tone], className].filter(Boolean).join(" ");
   return (
     <button className={classes} {...rest}>
-      <span>{children}</span>
+      {/* The layout has to live on this span, not on the button: children
+          are wrapped here, so a `gap` set on the button only ever saw one
+          flex item and an icon beside a label broke onto its own line. */}
+      <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+        {children}
+      </span>
       {underline && (
         <span
           aria-hidden

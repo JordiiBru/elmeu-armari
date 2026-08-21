@@ -90,12 +90,13 @@ export const UI = {
       week: "la setmana",
       all: "tots els outfits",
     },
-    // The plate is a proposal until you accept it, and it has to say so:
-    // read as a bare state ("encara per decidir") nobody could tell the
-    // photograph was a suggestion rather than the only option.
-    todayProposal: "et proposo",
-    todayWearing: "avui portes",
-    seeAll: "veure tots els outfits",
+    // The plate is reserved for what you are actually wearing. It used to
+    // show a ranked "proposal" when the day was open, but with a handful
+    // of outfits that ranking rarely lands, and showing an arbitrary pick
+    // large and first overstates how sure the app is.
+    todayUndecided: "encara no ho has decidit",
+    chooseToday: "Triar l'outfit d'avui",
+    changeToday: "canviar d'outfit",
     filtersLabel: "Filtrar outfits",
     filters: {
       ready: "a punt",

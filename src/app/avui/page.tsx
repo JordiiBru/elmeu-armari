@@ -15,7 +15,7 @@ import { TodayPlate } from "@/components/TodayPlate";
 import { WeekCalendar } from "@/components/WeekCalendar";
 import { OutfitLibrary } from "@/components/OutfitLibrary";
 import { UI } from "@/lib/prendas/ui-strings";
-import { PageContainer, SectionHeader, Stack, Text, Icon } from "@/components/ui";
+import { PageContainer, SectionHeader, Stack, Text, Icon, EmptyState } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -111,6 +111,29 @@ export default async function AvuiPage({
   // collection must never disagree about what comes first.
   const ranked = rankOutfitsForToday(outfits.map(toSavedOutfit), season);
   const committed = ranked.find((o) => o.id === todayOutfitId) ?? null;
+
+  // Every stratum has its own empty state, and with nothing saved yet all
+  // three fired at once — three ways of saying the same thing stacked
+  // down an empty page. Say it once.
+  if (ranked.length === 0) {
+    return (
+      <PageContainer width="wide">
+        <SectionHeader title={UI.outfits.screenTitle} level="title-xl" />
+        <EmptyState
+          title={UI.outfits.emptyNoOutfitsBrowse}
+          hint={UI.outfits.emptyNoOutfitsHint}
+          action={
+            <Link
+              href="/armari"
+              className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
+            >
+              {UI.outfits.goToArmari}
+            </Link>
+          }
+        />
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer width="full">
