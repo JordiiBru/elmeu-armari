@@ -47,6 +47,13 @@ interface Props {
    * reachable however long the content is.
    */
   footer?: ReactNode;
+  /**
+   * Fixes the panel to its full height instead of letting it hug its
+   * content. For sheets whose body swaps between panels of different
+   * sizes: hugging makes the whole sheet jump every time you switch tab,
+   * and on a bottom sheet it jumps under your thumb.
+   */
+  fill?: boolean;
 }
 
 /**
@@ -64,6 +71,7 @@ export function Sheet({
   header,
   headerBelow,
   footer,
+  fill = false,
   children,
 }: Props) {
   const { open, close } = useSheetState(onClose, 420);
@@ -111,6 +119,12 @@ export function Sheet({
     };
   }, []);
 
+  // dvh, not vh: on a phone the address bar counts towards vh, so a
+  // 92vh bottom sheet parks its own footer under it.
+  const heightClass = fill
+    ? "h-[92dvh] sm:h-[min(48rem,92dvh)]"
+    : "max-h-[92dvh]";
+
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div
@@ -128,7 +142,7 @@ export function Sheet({
         role="dialog"
         aria-modal
         aria-label={label}
-        className={`relative bg-elevated w-full ${PANEL_MAX[size]} max-h-[92vh] flex flex-col overflow-hidden shadow-[var(--shadow-3)]`}
+        className={`relative bg-elevated w-full ${PANEL_MAX[size]} ${heightClass} flex flex-col overflow-hidden shadow-[var(--shadow-3)]`}
         style={{
           transform: open
             ? `translate3d(0, ${swipe.dragY}px, 0)`
@@ -177,7 +191,7 @@ export function Sheet({
           </div>
         )}
 
-        <div className="overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6">
           {children}
         </div>
 
