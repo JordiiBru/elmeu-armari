@@ -4,7 +4,8 @@ import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { CATEGORY_LABELS, SUBTYPE_LABELS } from "@/lib/prendas/labels";
 import { isWearable } from "@/lib/bugaderia/laundry";
-import { nameOf } from "@/lib/colors";
+import { nameOf, namedColors } from "@/lib/colors";
+import { oklchDistance } from "@/lib/outfits/color-matching";
 import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
 import { Card, Text } from "@/components/ui";
@@ -16,6 +17,52 @@ export function pieceLabel(garment: GarmentWithColors): string {
     (garment.subtype ? SUBTYPE_LABELS[garment.subtype] : null) ??
     CATEGORY_LABELS[garment.category]
   );
+}
+
+/**
+ * The historic name of the Sanzo Wada colour a hex is closest to.
+ *
+ * `nameOf` is an exact lookup, and clothes are almost never an exact
+ * Sanzo hex — so naming a garment's colour that way printed raw hexes
+ * into the interface most of the time. The nearest name is both honest
+ * and the vocabulary this app already speaks everywhere else.
+ *
+ * Cached: 348 comparisons per colour, and the same handful of colours
+ * are asked for on every render.
+ */
+const nearestNameCache = new Map<string, string>();
+
+function nearestSanzoName(hex: string): string {
+  const key = hex.toLowerCase();
+  const cached = nearestNameCache.get(key);
+  if (cached) return cached;
+
+  const exact = nameOf(key);
+  if (exact) {
+    nearestNameCache.set(key, exact);
+    return exact;
+  }
+
+  let best = namedColors[0];
+  let bestDistance = Infinity;
+  for (const candidate of namedColors) {
+    const distance = oklchDistance(key, candidate.hex);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      best = candidate;
+    }
+  }
+  nearestNameCache.set(key, best.name);
+  return best.name;
+}
+
+/**
+ * What tells two pieces of the same kind apart at a glance. Every shirt
+ * you own is a "samarreta"; only one of them is Salvia Blue.
+ */
+export function pieceTint(garment: GarmentWithColors): string | null {
+  const hex = garment.colors[0]?.hex;
+  return hex ? nearestSanzoName(hex) : null;
 }
 
 /** The pieces an outfit is made of: "polo · vaquers". No extras — they
