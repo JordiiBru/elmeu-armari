@@ -99,7 +99,11 @@ export const UI = {
     sections: {
       today: "avui",
       week: "la setmana",
-      all: "tots els outfits",
+      // Not "tots els outfits": these are the ones you chose, and the
+      // engine can generate a couple of hundred per piece. "Teus" says
+      // what makes them different without the filing-cabinet ring of
+      // "desats".
+      all: "els teus outfits",
     },
     // The plate is reserved for what you are actually wearing. It used to
     // show a ranked "proposal" when the day was open, but with a handful
