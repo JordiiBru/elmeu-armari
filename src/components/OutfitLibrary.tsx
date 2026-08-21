@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { isWearable } from "@/lib/bugaderia/laundry";
@@ -9,6 +10,7 @@ import { groupOutfitsBy } from "@/lib/outfits/grouping";
 import { UI } from "@/lib/prendas/ui-strings";
 import { OutfitTile, pieceTint } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
+import { OutfitBottomSheet } from "./OutfitBottomSheet";
 import { PieceThumb } from "./PieceThumb";
 import {
   EmptyState,
@@ -17,6 +19,7 @@ import {
   SegmentedControl,
   Stack,
   Text,
+  TextButton,
 } from "@/components/ui";
 
 /** The three ways to index the collection. Shirts lead: that is the one
@@ -39,6 +42,15 @@ const AXES: Axis[] = ["SHIRT", "PANTS", "SWEATER"];
  * many open as you like — it is a wardrobe, not an accordion that
  * resents you.
  *
+ * A group ends in the way out of it: "veure'n més amb aquesta peça"
+ * runs the matcher on the same piece. Your looks and every look the
+ * engine can build with that piece used to live in different rooms —
+ * these here, the other two hundred behind the piece over in the
+ * wardrobe — which is the same question asked twice in two places. Now
+ * the short list is on top and the long one is one tap under it, and
+ * saving means exactly one thing: promoting something out of the long
+ * list into the short one.
+ *
  * The clean/dirty filter is gone. It was a third selector on a screen
  * that now has two, and a tile already says "per rentar" on its own
  * face. Instead the wearable ones come first inside each group, and a
@@ -47,15 +59,21 @@ const AXES: Axis[] = ["SHIRT", "PANTS", "SWEATER"];
  */
 export function OutfitLibrary({
   outfits,
+  allGarments,
   palettes,
   extraCandidates,
+  savedOutfitKeys,
   todayISO,
   todayOutfitId,
 }: {
   /** Already ranked by the server. */
   outfits: SavedOutfit[];
+  /** The whole wardrobe, for the matcher behind "veure'n més". */
+  allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
   extraCandidates: GarmentWithColors[];
+  /** Combinations already owned, so the matcher greys them out. */
+  savedOutfitKeys: string[];
   todayISO: string;
   todayOutfitId: string | null;
 }) {
@@ -63,6 +81,12 @@ export function OutfitLibrary({
   const [axis, setAxis] = useState<Axis>(AXES[0]);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [openOutfitId, setOpenOutfitId] = useState<string | null>(null);
+  const [combineFor, setCombineFor] = useState<GarmentWithColors | null>(null);
+  // Held here rather than in the combiner, which unmounts every time you
+  // close it — reopening it on the same piece would otherwise offer to
+  // save what you had just saved.
+  const [savedHere, setSavedHere] = useState<string[]>([]);
+  const router = useRouter();
 
   const groups = useMemo(
     () =>
@@ -169,24 +193,53 @@ export function OutfitLibrary({
 
                 <div className="collapse-panel" data-open={isOpen}>
                   <div>
-                    <Grid cols="library" gapX={5} gapY={6} className="pb-6 pt-1">
-                      {group.outfits.map((outfit) => (
-                        <OutfitTile
-                          key={outfit.id}
-                          outfit={outfit}
-                          palette={paletteMap.get(outfit.paletteId) ?? null}
-                          index={numbers.get(outfit.id) ?? 0}
-                          mark={outfit.id === todayOutfitId ? UI.outfits.today : null}
-                          onOpen={() => setOpenOutfitId(outfit.id)}
-                        />
-                      ))}
-                    </Grid>
+                    <Stack gap={5} className="pb-6 pt-1">
+                      <Grid cols="library" gapX={5} gapY={6}>
+                        {group.outfits.map((outfit) => (
+                          <OutfitTile
+                            key={outfit.id}
+                            outfit={outfit}
+                            palette={paletteMap.get(outfit.paletteId) ?? null}
+                            index={numbers.get(outfit.id) ?? 0}
+                            mark={outfit.id === todayOutfitId ? UI.outfits.today : null}
+                            onOpen={() => setOpenOutfitId(outfit.id)}
+                          />
+                        ))}
+                      </Grid>
+                      {group.piece.colors.length > 0 && (
+                        <TextButton
+                          type="button"
+                          tone="secondary"
+                          onClick={() => setCombineFor(group.piece)}
+                          className="self-start"
+                        >
+                          {UI.outfits.seeMore}
+                          <Icon name="arrow-right" size={12} />
+                        </TextButton>
+                      )}
+                    </Stack>
                   </div>
                 </div>
               </div>
             );
           })}
         </div>
+      )}
+
+      {combineFor && (
+        <OutfitBottomSheet
+          garment={combineFor}
+          allGarments={allGarments}
+          palettes={palettes}
+          savedOutfitKeys={[...savedOutfitKeys, ...savedHere]}
+          onOutfitSaved={(key) => {
+            setSavedHere((prev) => [...prev, key]);
+            // A soft refresh, so the new look joins the rail underneath
+            // without tearing down which groups you have open.
+            router.refresh();
+          }}
+          onClose={() => setCombineFor(null)}
+        />
       )}
 
       {openOutfit && (

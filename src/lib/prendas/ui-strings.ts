@@ -166,6 +166,9 @@ export const UI = {
       SWEATER: "jerseis",
     },
     axisEmpty: "cap outfit amb aquesta peça encara.",
+    /** The way from your short list into everything the matcher can
+     * build with the same piece. */
+    seeMore: "veure'n més amb aquesta peça",
     plan: "planificar",
     back: "tornar",
     planned: "planificat",

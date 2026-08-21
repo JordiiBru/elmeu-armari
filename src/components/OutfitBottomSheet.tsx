@@ -25,8 +25,10 @@ interface Props {
   /** Reported upward so the mark survives this sheet being closed and
    * reopened on the same piece — the state below unmounts with it. */
   onOutfitSaved: (key: string) => void;
-  /** Up one level, back to the piece. */
-  onBack: () => void;
+  /** Up one level, back to the piece. Absent when the combiner was
+   * opened from a page rather than from another sheet — then dismissing
+   * is the only way out and there is nothing to go back to. */
+  onBack?: () => void;
   /** Out of the whole thing, back to the wardrobe. */
   onClose: () => void;
 }
@@ -176,9 +178,11 @@ export function OutfitBottomSheet({
                 .join(" · ")}
             </Text>
           </Stack>
-          <TextButton type="button" tone="secondary" onClick={onBack}>
-            {UI.outfits.back}
-          </TextButton>
+          {onBack && (
+            <TextButton type="button" tone="secondary" onClick={onBack}>
+              {UI.outfits.back}
+            </TextButton>
+          )}
         </div>
       }
       headerBelow={

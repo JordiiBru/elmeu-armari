@@ -3,6 +3,7 @@ import {
   findAllOutfits,
   findTodayWorn,
   findWeekPlan,
+  findSavedOutfitKeys,
   toSavedOutfit,
 } from "@/lib/outfits/service";
 import { findAllGarments } from "@/lib/prendas/service";
@@ -101,11 +102,12 @@ export default async function AvuiPage({
   const weekStart = startOfWeek(startParam ? isoToDay(startParam) : today);
   const weekEnd = addDays(weekStart, 6);
 
-  const [outfits, garments, todayWorn, days] = await Promise.all([
+  const [outfits, garments, todayWorn, days, savedOutfitKeys] = await Promise.all([
     findAllOutfits(),
     findAllGarments(),
     findTodayWorn(),
     findWeekPlan(weekStart),
+    findSavedOutfitKeys(),
   ]);
   const todayOutfitId = todayWorn?.outfitId ?? null;
 
@@ -174,8 +176,10 @@ export default async function AvuiPage({
         <Stratum id="tots-els-outfits" title={UI.outfits.sections.all}>
           <OutfitLibrary
             outfits={ranked}
+            allGarments={garments}
             palettes={palettes}
             extraCandidates={extraCandidates}
+            savedOutfitKeys={savedOutfitKeys}
             todayISO={todayISO}
             todayOutfitId={todayOutfitId}
           />
