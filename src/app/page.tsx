@@ -5,23 +5,21 @@ import { Stack, Text, Heading } from "@/components/ui";
 export const dynamic = "force-dynamic";
 
 /**
- * Three doors, one per thing you actually do: decide a look, keep the
- * catalogue, know what is clean. Everything else is reachable from
- * inside one of them — the week and the saved outfits live under "què em
- * poso?", combining lives on a piece — so listing them here would be
- * listing the same rooms twice.
+ * The whole app, one entry per room. The week and the saved outfits live
+ * under "què em poso?" and combining lives on a piece, so listing those
+ * here would be listing the same rooms twice.
+ *
+ * The split that matters is not how often you open something, it is
+ * whether it is *the app* or *about the app*. Paletes is the app, so it
+ * belongs in this column; estadístiques and configuració are about it,
+ * and live in the header menu instead. That is also what makes this page
+ * hold together: four items on one axis, and nothing else to centre.
  */
 const PRIMARY = [
   { href: "/avui", label: "Què em poso?" },
   { href: "/armari", label: "Armari" },
   { href: "/bugaderia", label: "Bugaderia" },
-];
-
-// The ones you open to look rather than to decide.
-const SECONDARY = [
-  { href: "/paleta", label: "paletes" },
-  { href: "/stats", label: "estadístiques" },
-  { href: "/settings", label: "configuració" },
+  { href: "/paleta", label: "Paletes" },
 ];
 
 function pickPalette() {
@@ -37,8 +35,8 @@ export default function HomePage() {
     // top with the index centred in what was left, which put the title high
     // and opened a hole between the palette rule and the links. Title,
     // rule and index are one composition, so they are centred as one.
-    <div className="flex-1 grid grid-rows-[1fr_auto] px-6 pb-8 md:pb-10">
-      <Stack as="section" gap={6} align="center" className="self-center text-center">
+    <div className="flex-1 flex flex-col justify-center px-6 pb-8 md:pb-10">
+      <Stack as="section" gap={6} align="center" className="text-center">
         <Stack gap={3} align="center">
           <Heading level="display-xl">el meu armari</Heading>
           <Text variant="subtitle" tone="secondary" italic as="p">
@@ -79,28 +77,6 @@ export default function HomePage() {
         </nav>
       </Stack>
 
-      {/* At the foot, not under the index. Three words on one line below a
-          column of three read as a fourth, badly aligned row; down here the
-          horizontal axis is the whole point and nothing has to agree with
-          it. Its own hairline says "this is the other register". */}
-      <nav className="justify-self-center flex items-center gap-5 border-t border-border-subtle pt-4 font-serif italic type-small text-text-secondary">
-        {SECONDARY.map((entry, i) => (
-          <span key={entry.href} className="inline-flex items-center gap-5">
-            {i > 0 && (
-              <span
-                aria-hidden
-                className="inline-block h-1 w-1 rounded-full bg-border"
-              />
-            )}
-            <Link
-              href={entry.href}
-              className="hover:text-text-primary transition-colors duration-[var(--duration-base)]"
-            >
-              {entry.label}
-            </Link>
-          </span>
-        ))}
-      </nav>
     </div>
   );
 }

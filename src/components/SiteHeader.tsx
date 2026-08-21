@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import BackLink from "@/components/BackLink";
+import { AppMenu } from "@/components/AppMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 /**
@@ -32,7 +33,10 @@ export default function SiteHeader() {
   return (
     <header className="w-full px-6 md:px-10 pt-6 pb-4 flex items-center justify-between">
       {isHome ? <span /> : <BackLink href={parentOf(pathname)} />}
-      <ThemeToggle />
+      <span className="flex items-center gap-1">
+        <AppMenu />
+        <ThemeToggle />
+      </span>
     </header>
   );
 }

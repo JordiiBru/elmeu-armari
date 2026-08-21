@@ -77,6 +77,17 @@ export const UI = {
       badge: "al cistell",
     },
   },
+  menu: {
+    label: "Menú",
+    title: "arxiu",
+    // Everything that is *about* the app rather than in it. When there
+    // are accounts this is where the profile, the session and the
+    // language switch join, which is why it is a sheet and not two
+    // links: it is built to grow a couple of rows.
+    subtitle: "el que no és l'armari.",
+    stats: "estadístiques",
+    settings: "configuració",
+  },
   outfits: {
     // The screen is one question, so it is titled with the question.
     screenTitle: "Què em poso?",
