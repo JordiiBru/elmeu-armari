@@ -12,6 +12,14 @@ interface Props<V extends string> {
   onChange: (value: V) => void;
   options: Option<V>[];
   ariaLabel?: string;
+  /**
+   * Wrapping is right for a long rail of filter tags and wrong inside a
+   * fixed-width row, where the control has an intrinsic width and it is
+   * the label beside it that should give way. Cannot be overridden from
+   * `className`: both utilities set the same property, so which one wins
+   * is decided by their order in the stylesheet, not in the class list.
+   */
+  wrap?: boolean;
   className?: string;
 }
 
@@ -25,13 +33,18 @@ export function SegmentedControl<V extends string>({
   onChange,
   options,
   ariaLabel,
+  wrap = true,
   className,
 }: Props<V>) {
   return (
     <div
       role="radiogroup"
       aria-label={ariaLabel}
-      className={["inline-flex flex-wrap gap-x-6 gap-y-2", className]
+      className={[
+        "inline-flex gap-x-6 gap-y-2",
+        wrap ? "flex-wrap" : "flex-nowrap",
+        className,
+      ]
         .filter(Boolean)
         .join(" ")}
     >

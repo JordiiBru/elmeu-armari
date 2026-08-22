@@ -96,7 +96,7 @@ export function AppMenu() {
           />
           <div
             role="menu"
-            className="panel-enter absolute right-0 top-full z-50 mt-2 w-56 border border-border bg-floating shadow-[var(--shadow-2)]"
+            className="panel-enter absolute right-0 top-full z-50 mt-2 w-64 border border-border bg-floating shadow-[var(--shadow-2)]"
           >
             <div className="flex flex-col divide-y divide-border-subtle">
               {links.map((entry) => (
@@ -115,7 +115,7 @@ export function AppMenu() {
               ))}
 
               <div className="flex min-h-11 items-center justify-between gap-4 px-4 py-2">
-                <Text variant="caption" as="span">
+                <Text variant="caption" as="span" className="min-w-0 truncate">
                   {t("theme")}
                 </Text>
                 {/* A sun and a moon say it faster than two words, and the
@@ -126,11 +126,12 @@ export function AppMenu() {
                   value={resolvedTheme === "dark" ? "dark" : "light"}
                   onChange={setTheme}
                   ariaLabel={t("theme")}
+                  wrap={false}
                   options={[
                     { value: "light", label: <ThemeOption name="sun" label={t("themeLight")} /> },
                     { value: "dark", label: <ThemeOption name="moon" label={t("themeDark")} /> },
                   ]}
-                  className="gap-x-4"
+                  className="shrink-0 gap-x-4"
                 />
               </div>
 
@@ -138,18 +139,24 @@ export function AppMenu() {
                   was left space for. Three flags rather than three codes:
                   the row is recognised before it is read. */}
               <div className="flex min-h-11 items-center justify-between gap-4 px-4 py-2">
-                <Text variant="caption" as="span">
+                {/* The three flags are one object, not three words: the
+                    row must never break them across two lines, however
+                    long the word beside them gets. "idioma" is seven
+                    characters and "language" eight, which was enough to
+                    fold the third flag under the other two. */}
+                <Text variant="caption" as="span" className="min-w-0 truncate">
                   {t("language")}
                 </Text>
                 <SegmentedControl<Locale>
                   value={locale}
                   onChange={changeLocale}
                   ariaLabel={t("language")}
+                  wrap={false}
                   options={locales.map((code) => ({
                     value: code,
                     label: <Flag locale={code} label={t(`languages.${code}`)} />,
                   }))}
-                  className="gap-x-4"
+                  className="shrink-0 gap-x-4"
                 />
               </div>
             </div>
