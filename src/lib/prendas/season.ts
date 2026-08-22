@@ -1,4 +1,5 @@
 import type { Season } from "./types";
+import { today } from "@/lib/outfits/week";
 
 // Northern hemisphere, meteorological seasons (fixed month boundaries
 // rather than equinox/solstice dates — good enough for a wardrobe default).
@@ -17,6 +18,9 @@ const SEASON_BY_MONTH: Season[] = [
   "WINTER", // Dec
 ];
 
-export function getCurrentSeason(date: Date = new Date()): Season {
-  return SEASON_BY_MONTH[date.getMonth()];
+// `today()` hands back the Barcelona civil day as a UTC-midnight key, so
+// the month is read in UTC on purpose — reading it locally would put the
+// server's zone back in charge of when a season turns over.
+export function getCurrentSeason(day: Date = today()): Season {
+  return SEASON_BY_MONTH[day.getUTCMonth()];
 }

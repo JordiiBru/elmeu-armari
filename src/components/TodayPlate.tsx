@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
-import { formatLastWorn } from "@/lib/outfits/worn";
-import { UI } from "@/lib/prendas/ui-strings";
+import { useFormatLastWorn } from "@/lib/outfits/useLastWorn";
 import { OutfitCollage, outfitSubtitle, paletteName, pieceLabel } from "./OutfitTile";
 import { PieceThumb } from "./PieceThumb";
 import { OutfitSheet } from "./OutfitSheet";
@@ -50,6 +50,9 @@ export function TodayPlate({
   extraCandidates: GarmentWithColors[];
   todayISO: string;
 }) {
+  const t = useTranslations("outfits");
+  const tLabel = useTranslations("labels");
+  const formatLastWorn = useFormatLastWorn();
   const [openId, setOpenId] = useState<string | null>(null);
 
   /**
@@ -112,29 +115,29 @@ export function TodayPlate({
       <Stack gap={5}>
         {candidates.length === 0 ? (
           <EmptyState
-            title={UI.outfits.emptyNoneReady}
+            title={t("emptyNoneReady")}
             action={
               <Link
                 href="/bugaderia?vista=cistell"
                 className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
               >
-                {UI.outfits.goToRentar}
+                {t("goToRentar")}
               </Link>
             }
           />
         ) : (
           <>
             <Text as="p" italic tone="secondary" className="type-subtitle">
-              {UI.outfits.todayUndecided}
+              {t("todayUndecided")}
             </Text>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
               <Button type="button" size="lg" onClick={scrollToCollection}>
-                {UI.outfits.chooseToday}
+                {t("chooseToday")}
               </Button>
               {candidates.length > 1 && (
                 <TextButton type="button" onClick={shuffle}>
                   <Icon name="sparkle" size={13} className="fill-current" />
-                  {UI.outfits.pickForMe}
+                  {t("pickForMe")}
                 </TextButton>
               )}
             </div>
@@ -146,7 +149,7 @@ export function TodayPlate({
   }
 
   const palette = paletteOf(committed);
-  const title = outfitSubtitle(committed) || committed.name || "";
+  const title = outfitSubtitle(tLabel, committed) || committed.name || "";
   const subtitle = [paletteName(palette), formatLastWorn(committed.wornEvents)]
     .filter(Boolean)
     .join(" · ");
@@ -193,7 +196,7 @@ export function TodayPlate({
             {todayExtras.length > 0 && (
               <div className="mt-5 flex flex-wrap items-center gap-2">
                 {todayExtras.map((g) => (
-                  <span key={g.id} title={pieceLabel(g)} className="flex-shrink-0">
+                  <span key={g.id} title={pieceLabel(tLabel, g)} className="flex-shrink-0">
                     <PieceThumb garment={g} thumb sizes="64px" className="h-16 w-16" />
                   </span>
                 ))}
@@ -211,7 +214,7 @@ export function TodayPlate({
         onClick={scrollToCollection}
         className="self-start"
       >
-        {UI.outfits.changeToday}
+        {t("changeToday")}
         <Icon name="arrow-right" size={12} />
       </TextButton>
 

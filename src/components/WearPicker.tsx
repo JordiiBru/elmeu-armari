@@ -2,8 +2,8 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { GarmentWithColors } from "@/lib/prendas/types";
-import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
 import { pieceLabel } from "./OutfitTile";
 import { EmptyState, Icon, SegmentedControl, Stack, Text } from "@/components/ui";
@@ -29,13 +29,15 @@ function PickTile({
   disabled?: boolean;
   onClick: () => void;
 }) {
+  const t = useTranslations("labels");
+  const label = pieceLabel(t, garment);
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
       aria-pressed={selected}
-      aria-label={pieceLabel(garment)}
+      aria-label={label}
       className="group flex min-h-11 flex-col gap-2 text-left outline-none transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] active:scale-[0.98] disabled:opacity-40 focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-4 focus-visible:ring-offset-elevated"
     >
       <div
@@ -58,7 +60,7 @@ function PickTile({
         tone={selected ? "primary" : "secondary"}
         className="font-serif lowercase leading-tight truncate"
       >
-        {pieceLabel(garment)}
+        {label}
       </Text>
     </button>
   );
@@ -73,6 +75,7 @@ function PickGrid({ children }: { children: React.ReactNode }) {
 }
 
 function PickerEmpty({ title }: { title: string }) {
+  const t = useTranslations("outfits");
   return (
     <EmptyState
       title={title}
@@ -82,7 +85,7 @@ function PickerEmpty({ title }: { title: string }) {
           href="/add"
           className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
         >
-          {UI.outfits.goToAdd}
+          {t("goToAdd")}
         </Link>
       }
     />
@@ -138,6 +141,7 @@ export function WearTabs({
   shoeId: string | null;
   extraIds: string[];
 }) {
+  const t = useTranslations("outfits");
   const selected = useMemo(() => new Set(extraIds), [extraIds]);
   const accessoryCount = [...groups.accessories, ...groups.socks].filter((g) =>
     selected.has(g.id),
@@ -147,12 +151,12 @@ export function WearTabs({
     <SegmentedControl<WearTab>
       value={tab}
       onChange={onChange}
-      ariaLabel={UI.outfits.howYouWearIt}
+      ariaLabel={t("howYouWearIt")}
       options={[
-        { value: "shoes", label: countLabel(UI.outfits.shoes, shoeId ? 1 : 0) },
+        { value: "shoes", label: countLabel(t("shoes"), shoeId ? 1 : 0) },
         {
           value: "accessories",
-          label: countLabel(UI.outfits.accessories, accessoryCount),
+          label: countLabel(t("accessories"), accessoryCount),
         },
       ]}
     />
@@ -176,6 +180,7 @@ export function WearGrids({
   onToggleExtra: (id: string) => void;
   disabled?: boolean;
 }) {
+  const t = useTranslations("outfits");
   const { shoes, accessories, socks } = groups;
   const selectedExtras = useMemo(() => new Set(extraIds), [extraIds]);
 
@@ -184,7 +189,7 @@ export function WearGrids({
     <div key={tab} className="panel-enter">
       {tab === "shoes" &&
         (shoes.length === 0 ? (
-          <PickerEmpty title={UI.outfits.noShoes} />
+          <PickerEmpty title={t("noShoes")} />
         ) : (
           <PickGrid>
             {shoes.map((g) => (
@@ -201,7 +206,7 @@ export function WearGrids({
 
       {tab === "accessories" &&
         (accessories.length === 0 && socks.length === 0 ? (
-          <PickerEmpty title={UI.outfits.noAccessories} />
+          <PickerEmpty title={t("noAccessories")} />
         ) : (
           <Stack gap={5}>
             {accessories.length > 0 && (
@@ -219,7 +224,7 @@ export function WearGrids({
             )}
             {socks.length > 0 && (
               <Stack gap={3}>
-                <Text variant="caption">{UI.outfits.socks}</Text>
+                <Text variant="caption">{t("socks")}</Text>
                 <PickGrid>
                   {socks.map((g) => (
                     <PickTile

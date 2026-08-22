@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { SEASONS } from "@/lib/prendas/types";
-import { SEASON_LABELS } from "@/lib/prendas/labels";
 import type { Season } from "@/lib/prendas/types";
 import { Checkbox } from "@/components/ui";
 
@@ -11,6 +11,7 @@ interface Props {
 }
 
 export function SeasonCheckboxes({ defaultValues = [] }: Props) {
+  const t = useTranslations("labels.season");
   const [selected, setSelected] = useState<Set<Season>>(new Set(defaultValues));
 
   function toggle(s: Season) {
@@ -31,7 +32,7 @@ export function SeasonCheckboxes({ defaultValues = [] }: Props) {
           value={s}
           checked={selected.has(s)}
           onChange={() => toggle(s)}
-          label={SEASON_LABELS[s]}
+          label={t(s)}
         />
       ))}
     </div>

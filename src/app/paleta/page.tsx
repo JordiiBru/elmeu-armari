@@ -1,8 +1,10 @@
+import { getTranslations } from "next-intl/server";
 import { palettes, namedColors, paletteColors } from "@/lib/colors";
 import PaletaBrowser from "@/components/PaletaBrowser";
 import { PageContainer, SectionHeader } from "@/components/ui";
 
-export default function PaletaPage() {
+export default async function PaletaPage() {
+  const t = await getTranslations("paleta");
   const colors = namedColors.map((c) => ({
     index: c.index,
     name: c.name,
@@ -21,18 +23,18 @@ export default function PaletaPage() {
   return (
     <PageContainer width="wide">
       <SectionHeader
-        eyebrow="catàleg cromàtic"
-        title="sanzo wada"
-        subtitle={
-          <>
-            {colors.length} colors de{" "}
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        subtitle={t.rich("subtitle", {
+          count: colors.length,
+          // The title of the book, in its own script: it is a name, not a
+          // string to translate, and it must not inherit the italic.
+          jp: (chunks) => (
             <span className="not-italic tracking-wide text-text-primary">
-              配色事典
-            </span>{" "}
-            — «a dictionary of color combinations», sis volums publicats a tòquio
-            entre 1933 i 1934. tria un color per veure amb què combinava.
-          </>
-        }
+              {chunks}
+            </span>
+          ),
+        })}
       />
 
       <PaletaBrowser colors={colors} palettesById={palettesById} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Sheet, Text, Stack } from "@/components/ui";
 
 type Palette = {
@@ -23,31 +24,32 @@ export default function PaletteSheet({
   palettes: Palette[];
   onClose: () => void;
 }) {
+  const t = useTranslations("paleta");
+
   return (
     <Sheet
       onClose={onClose}
       size="xl"
-      label={`Combinacions de ${color.name}`}
+      label={t("sheetLabel", { color: color.name })}
       media={<div className="h-full w-full" style={{ backgroundColor: color.hex }} />}
       mediaHeight="h-24 sm:h-32"
       header={
         <Stack gap={1}>
-          <Text variant="caption">color</Text>
+          <Text variant="caption">{t("colorEyebrow")}</Text>
           <h2 className="type-title-xl">{color.name}</h2>
           <p className="font-serif italic type-small text-text-secondary">
             <Text as="span" variant="mono" tone="secondary" className="not-italic">
               {color.hex.toUpperCase()}
             </Text>
             {" · "}
-            {palettes.length}{" "}
-            {palettes.length === 1 ? "combinació" : "combinacions"}
+            {t("combinations", { count: palettes.length })}
           </p>
         </Stack>
       }
     >
       {palettes.length === 0 ? (
         <Text italic tone="secondary" className="font-serif text-center py-8">
-          aquest color no forma part de cap combinacio catalogada.
+          {t("sheetEmpty")}
         </Text>
       ) : (
         <div className="flex flex-col divide-y divide-border">
@@ -67,6 +69,7 @@ function SheetPaletteRow({
   palette: Palette;
   highlightHex: string;
 }) {
+  const t = useTranslations("paleta");
   const hi = highlightHex.toLowerCase();
   const SWATCH = "w-16 sm:w-20";
   return (
@@ -99,7 +102,7 @@ function SheetPaletteRow({
                   isHi ? "text-text-primary" : "text-text-secondary"
                 }`}
               >
-                {c.name ?? "sense nom"}
+                {c.name ?? t("unnamed")}
               </span>
               <Text variant="mono" tone="secondary" as="span">
                 {c.hex.toUpperCase()}

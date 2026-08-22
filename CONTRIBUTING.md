@@ -2,7 +2,7 @@
 
 Thanks for considering a contribution. This document explains how to get the project running locally, what conventions the code follows, and how to submit a change that lands quickly.
 
-The UI is in Catalan. **Code, comments, commit messages and PR descriptions are in English.**
+The UI ships in Catalan, Spanish and English. Catalan is the source language. **Code, comments, commit messages and PR descriptions are in English.**
 
 ---
 
@@ -42,7 +42,7 @@ Read [`CLAUDE.md`](./CLAUDE.md) for the full architectural rules. The short vers
 - Server Actions: `src/app/<route>/actions.ts`, unless reused across routes.
 - Domain logic: `src/lib/<domain>/service.ts`.
 - DB access: `src/lib/<domain>/repository.ts` — **the only place** `prisma` is imported.
-- UI labels (Catalan): `src/lib/prendas/labels.ts` + `src/lib/prendas/ui-strings.ts`. Never inline translated strings in a component.
+- UI strings: `messages/ca.json` (source of truth), `messages/es.json`, `messages/en.json`. Never inline translated strings in a component. A key missing from a locale fails `npm run typecheck`.
 
 Client Components (`"use client"`) are the exception. Add one only when you need `useState`, event handlers, refs, or browser-only APIs.
 
@@ -83,7 +83,7 @@ tight-match threshold.
 
 1. `npm run check` passes locally.
 2. If you touched the schema, `npx prisma migrate dev` created the migration and it is committed.
-3. If you added a new UI string, it lives in `labels.ts` / `ui-strings.ts`, not inline.
+3. If you added a new UI string, it lives in `messages/ca.json` **and** in `es.json` and `en.json`, not inline.
 4. No `dev.db` or `.env` in the diff.
 5. Description explains the **why** and lists screens to test manually.
 

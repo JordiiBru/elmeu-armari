@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { OutfitGroup, PaletteMatch } from "@/lib/outfits/types";
-import { CATEGORY_LABELS } from "@/lib/prendas/labels";
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 import { PieceThumb } from "./PieceThumb";
 
@@ -17,11 +17,12 @@ function sortedGarments(garments: OutfitGroup["garments"]) {
 }
 
 function GarmentTile({ garment }: { garment: GarmentWithColors }) {
+  const t = useTranslations("labels");
   return (
     <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
       <PieceThumb garment={garment} className="h-20 w-20" />
       <span className="type-caption">
-        {CATEGORY_LABELS[garment.category]}
+        {t(`category.${garment.category}`)}
       </span>
     </div>
   );
@@ -38,6 +39,7 @@ export function OutfitGroupCard({
   savedPaletteIds: Set<number>;
   pending?: boolean;
 }) {
+  const t = useTranslations("combine");
   const [expanded, setExpanded] = useState(false);
   const mainPalette = group.palettes[0];
   const extraPalettes = group.palettes.slice(1);
@@ -62,14 +64,14 @@ export function OutfitGroupCard({
             disabled={mainSaved || pending}
             className="font-serif italic text-sm text-text-primary disabled:text-text-secondary transition-colors active:scale-95 disabled:cursor-default"
           >
-            {mainSaved ? "desat" : pending ? "desant…" : "desar outfit"}
+            {mainSaved ? t("saved") : pending ? t("savingOutfit") : t("save")}
           </button>
           {extraPalettes.length > 0 && (
             <button
               onClick={() => setExpanded((e) => !e)}
               className="font-serif italic text-xs text-text-secondary hover:text-text-primary transition-colors"
             >
-              {expanded ? "menys" : `+${extraPalettes.length} paletes`}
+              {expanded ? t("less") : t("morePalettes", { count: extraPalettes.length })}
             </button>
           )}
         </div>
@@ -93,6 +95,7 @@ export function OutfitGroupCard({
 }
 
 function PaletteHero({ pm }: { pm: PaletteMatch }) {
+  const t = useTranslations("combine");
   return (
     <div className="flex items-center gap-3">
       <div className="flex gap-1 flex-shrink-0">
@@ -103,7 +106,7 @@ function PaletteHero({ pm }: { pm: PaletteMatch }) {
               key={i}
               className={`inline-block w-5 h-5 ${isMatched ? "" : "opacity-35"}`}
               style={{ backgroundColor: color }}
-              title={`${color}${isMatched ? "" : " (lliure)"}`}
+              title={isMatched ? color : `${color} (${t("unmatched")})`}
             />
           );
         })}
@@ -124,6 +127,7 @@ function PaletteRow({
   saved: boolean;
   pending?: boolean;
 }) {
+  const t = useTranslations("combine");
   return (
     <div className="grid grid-cols-[auto_1fr_auto] gap-3 items-center">
       <div className="flex gap-0.5 flex-shrink-0">
@@ -146,9 +150,9 @@ function PaletteRow({
         onClick={onSave}
         disabled={saved || pending}
         className="font-serif italic text-xs text-text-secondary hover:text-text-primary disabled:opacity-40 transition-colors active:scale-95 shrink-0"
-        aria-label={saved ? "Ja desat" : "Desar paleta"}
+        aria-label={saved ? t("savedPaletteAria") : t("savePaletteAria")}
       >
-        {saved ? "desat" : "desar"}
+        {saved ? t("saved") : t("savePalette")}
       </button>
     </div>
   );

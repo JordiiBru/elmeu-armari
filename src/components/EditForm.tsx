@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { ColorPickers } from "@/components/ColorPickers";
 import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
 import { updateGarmentAction } from "@/app/edit/[id]/actions";
@@ -17,15 +18,7 @@ import {
   CATEGORIES_WITH_OPTIONAL_COLOR,
 } from "@/lib/prendas/types";
 import type { GarmentWithColors, Season, Category, Texture, Pattern } from "@/lib/prendas/types";
-import {
-  CATEGORY_LABELS,
-  TEXTURE_LABELS,
-  PATTERN_LABELS,
-  FIT_LABELS,
-  SUBTYPE_LABELS,
-  LENGTH_LABELS,
-} from "@/lib/prendas/labels";
-import { UI } from "@/lib/prendas/ui-strings";
+import { optionLabel } from "@/lib/prendas/labels";
 import {
   Button,
   TextButton,
@@ -43,6 +36,10 @@ interface Props {
 }
 
 export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
+  const t = useTranslations("form");
+  const tLabel = useTranslations("labels");
+  const tPhoto = useTranslations("photo");
+  const tError = useTranslations("errors");
   const boundAction = updateGarmentAction.bind(null, garment.id);
   const [state, formAction, isPending] = useActionState(boundAction, null);
   const [category, setCategory] = useState<Category>(garment.category);
@@ -124,7 +121,7 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
 
   return (
     <form action={formAction} className="flex flex-col gap-7">
-      <Field label={UI.form.category} required>
+      <Field label={t("category")} required>
         <Select
           name="category"
           required
@@ -141,13 +138,13 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
           }}
           options={CATEGORIES.map((c) => ({
             value: c,
-            label: CATEGORY_LABELS[c],
+            label: tLabel(`category.${c}`),
           }))}
         />
       </Field>
 
       {subtypes.length > 0 && (
-        <Field label={UI.form.subtype} required>
+        <Field label={t("subtype")} required>
           <Select
             name="subtype"
             required
@@ -155,14 +152,14 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
             onChange={setSubtype}
             options={subtypes.map((s) => ({
               value: s,
-              label: SUBTYPE_LABELS[s],
+              label: optionLabel(tLabel, "subtype", s),
             }))}
           />
         </Field>
       )}
 
       {lengths.length > 0 && (
-        <Field label={UI.form.length} required>
+        <Field label={t("length")} required>
           <Select
             name="length"
             required
@@ -170,18 +167,18 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
             onChange={setLength}
             options={lengths.map((l) => ({
               value: l,
-              label: LENGTH_LABELS[l],
+              label: optionLabel(tLabel, "length", l),
             }))}
           />
         </Field>
       )}
 
-      <Field label={UI.form.colors} required={colorsRequired}>
+      <Field label={t("colors")} required={colorsRequired}>
         <ColorPickers initialColors={defaultHexColors} />
       </Field>
 
       {textures.length > 0 && (
-        <Field label={UI.form.texture} required>
+        <Field label={t("texture")} required>
           <Select
             name="texture"
             required
@@ -189,14 +186,14 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
             onChange={setTexture}
             options={textures.map((t) => ({
               value: t,
-              label: TEXTURE_LABELS[t],
+              label: tLabel(`texture.${t}`),
             }))}
           />
         </Field>
       )}
 
       {patterns.length > 0 && (
-        <Field label={UI.form.pattern} required>
+        <Field label={t("pattern")} required>
           <Select
             name="pattern"
             required
@@ -204,18 +201,18 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
             onChange={setPattern}
             options={patterns.map((p) => ({
               value: p,
-              label: PATTERN_LABELS[p],
+              label: tLabel(`pattern.${p}`),
             }))}
           />
         </Field>
       )}
 
-      <Field label={UI.form.seasons} required>
+      <Field label={t("seasons")} required>
         <SeasonCheckboxes defaultValues={defaultSeasons} />
       </Field>
 
       {sizes.length > 0 && (
-        <Field label={UI.form.size} required>
+        <Field label={t("size")} required>
           <Select
             name="size"
             required
@@ -227,36 +224,36 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
       )}
 
       {fits.length > 0 && (
-        <Field label={UI.form.fit} required>
+        <Field label={t("fit")} required>
           <Select
             name="fit"
             required
             value={fit}
             onChange={setFit}
-            options={fits.map((f) => ({ value: f, label: FIT_LABELS[f] }))}
+            options={fits.map((f) => ({ value: f, label: optionLabel(tLabel, "fit", f) }))}
           />
         </Field>
       )}
 
-      <Field label={UI.form.notes} htmlFor="notes">
+      <Field label={t("notes")} htmlFor="notes">
         <Input
           id="notes"
           name="notes"
           defaultValue={garment.notes ?? ""}
-          placeholder="opcional…"
+          placeholder={t("notesPlaceholder")}
         />
       </Field>
 
       <Stack gap={3}>
-        <Text variant="caption" as="span">Foto (opcional)</Text>
+        <Text variant="caption" as="span">{tPhoto("label")}</Text>
         {previewUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={previewUrl} alt="Preview" className="w-32 h-32 object-cover" />
+          <img src={previewUrl} alt={tPhoto("previewAlt")} className="w-32 h-32 object-cover" />
         ) : currentImage ? (
           <div className="relative w-32 h-32">
             <Image
               src={`/api/uploads/${currentImage}?v=${garment.updatedAt.getTime()}`}
-              alt="Foto actual"
+              alt={tPhoto("currentAlt")}
               fill
               unoptimized
               className="object-cover"
@@ -271,20 +268,20 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
             onClick={() => fileInputRef.current?.click()}
           >
             {imageStatus === "uploading"
-              ? "pujant…"
+              ? tPhoto("uploading")
               : currentImage
-                ? "canviar foto"
-                : "afegir foto"}
+                ? tPhoto("change")
+                : tPhoto("add")}
           </TextButton>
           {currentImage && imageStatus !== "uploading" && (
             <TextButton type="button" tone="secondary" onClick={handleDeleteImage}>
-              treure foto
+              {tPhoto("removeCurrent")}
             </TextButton>
           )}
         </div>
         {imageStatus === "error" && (
           <Text variant="small" italic tone="secondary" className="font-serif">
-            No s&apos;ha pogut pujar la foto. Torna-ho a provar.
+            {tPhoto("uploadFailed")}
           </Text>
         )}
         <input
@@ -298,7 +295,7 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
 
       {state?.error && (
         <Text variant="small" italic className="font-serif text-danger border-t border-danger pt-3">
-          {state.error}
+          {tError(state.error)}
         </Text>
       )}
 
@@ -307,10 +304,10 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
         variant="primary"
         size="lg"
         loading={isPending}
-        loadingText="guardant…"
+        loadingText={t("saving")}
         className="self-start mt-2"
       >
-        guardar canvis
+        {t("saveChanges")}
       </Button>
     </form>
   );

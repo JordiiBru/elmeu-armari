@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui";
 
 /**
@@ -11,10 +12,12 @@ import { Icon } from "@/components/ui";
  * La jerarquia viu a `SiteHeader`.
  */
 export default function BackLink({ href }: { href: string }) {
+  const t = useTranslations("common");
+
   return (
     <Link
       href={href}
-      aria-label="Enrere"
+      aria-label={t("back")}
       className="group inline-flex items-center justify-center h-11 w-11 -ml-2 text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] active:scale-90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <Icon

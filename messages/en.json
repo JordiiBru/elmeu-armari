@@ -1,0 +1,366 @@
+{
+  "app": {
+    "title": "My wardrobe",
+    "description": "A study in visual harmony for your wardrobe.",
+    "shortName": "Wardrobe",
+    "manifestDescription": "Personal clothes manager"
+  },
+  "labels": {
+    "category": {
+      "SWEATER": "Sweater",
+      "SHIRT": "Shirt",
+      "PANTS": "Trousers",
+      "SOCKS": "Socks",
+      "SHOES": "Shoes",
+      "ACCESSORI": "Accessory"
+    },
+    "texture": {
+      "KNIT": "Knit",
+      "DENIM": "Denim",
+      "LINEN": "Linen",
+      "COTTON": "Cotton",
+      "POLYESTER": "Polyester",
+      "LEATHER": "Leather",
+      "SYNTHETIC": "Synthetic"
+    },
+    "pattern": {
+      "PLAIN": "Plain",
+      "STRIPES": "Stripes",
+      "CHECKS": "Checks",
+      "FLORAL": "Floral",
+      "PRINTED": "Printed",
+      "GEOMETRIC": "Geometric"
+    },
+    "fit": {
+      "REGULAR": "Regular",
+      "OVERSIZED": "Oversized",
+      "CROPPED": "Cropped",
+      "SLIM": "Slim",
+      "STRAIGHT": "Straight",
+      "SKINNY": "Skinny",
+      "BAGGY": "Baggy",
+      "BARREL": "Barrel",
+      "WIDE_LEG": "Wide Leg",
+      "CURT": "Short",
+      "TURMELL": "Ankle",
+      "MITJA_CANYA": "Mid-calf",
+      "GENOLLERA": "Knee",
+      "LOW_TOP": "Low Top",
+      "MID": "Mid",
+      "HIGH_TOP": "High Top"
+    },
+    "subtype": {
+      "PULLOVER": "Pullover",
+      "ZIP": "Zip",
+      "HOODIE": "Hoodie",
+      "CARDIGAN": "Cardigan",
+      "TEE": "Tee",
+      "POLO": "Polo",
+      "CAMISA": "Shirt",
+      "VAQUERS": "Jeans",
+      "CHINO": "Chino",
+      "JOGGER": "Jogger",
+      "CARGO": "Cargo",
+      "SNEAKER": "Sneaker",
+      "BOTA": "Boot",
+      "LOAFER": "Loafer",
+      "SANDALIA": "Sandal",
+      "OXFORD": "Oxford",
+      "ANELL": "Ring",
+      "RELLOTGE": "Watch",
+      "CINTURO": "Belt",
+      "BOSSA": "Bag",
+      "BARRET": "Hat",
+      "BUFANDA": "Scarf",
+      "ULLERES": "Glasses"
+    },
+    "length": {
+      "SHORT": "Short",
+      "LONG": "Long"
+    },
+    "season": {
+      "SPRING": "Spring",
+      "SUMMER": "Summer",
+      "AUTUMN": "Autumn",
+      "WINTER": "Winter",
+      "ALL_YEAR": "All year"
+    }
+  },
+  "common": {
+    "back": "Back",
+    "close": "Close",
+    "cancel": "cancel",
+    "delete": "delete",
+    "deleteConfirm": "yes, delete",
+    "deleting": "deleting…",
+    "edit": "edit",
+    "saving": "saving…"
+  },
+  "form": {
+    "category": "Category",
+    "colors": "Colours",
+    "texture": "Texture",
+    "pattern": "Pattern",
+    "seasons": "Season",
+    "size": "Size",
+    "subtype": "Type",
+    "length": "Length",
+    "fit": "Fit",
+    "notes": "Notes",
+    "notesPlaceholder": "optional…",
+    "selectPlaceholder": "Choose…",
+    "save": "save garment",
+    "saving": "saving…",
+    "saveChanges": "save changes",
+    "addColor": "+ add colour",
+    "removeColor": "remove"
+  },
+  "errors": {
+    "requiredFields": "Fill in every field marked with *",
+    "minOneSeason": "Pick at least one season",
+    "minOneColor": "Pick at least one colour",
+    "invalidColor": "Invalid colour"
+  },
+  "photo": {
+    "label": "Photo (optional)",
+    "add": "add photo",
+    "change": "change photo",
+    "remove": "remove",
+    "removeCurrent": "remove photo",
+    "uploading": "uploading…",
+    "uploadingPhoto": "uploading photo…",
+    "previewAlt": "Preview",
+    "currentAlt": "Current photo",
+    "savedWithoutPhoto": "The garment was saved but the photo could not be uploaded.",
+    "uploadFailed": "The photo could not be uploaded. Try again."
+  },
+  "modal": {
+    "sheetLabel": "{category} garment",
+    "eyebrow": "garment",
+    "combine": "What goes with it",
+    "texture": "Texture",
+    "pattern": "Pattern",
+    "colors": "Colours",
+    "seasons": "Season",
+    "note": "note",
+    "size": "size {size}"
+  },
+  "armari": {
+    "title": "my wardrobe",
+    "empty": "nothing saved yet.",
+    "count": "{count, plural, one {# garment on record.} other {# garments on record.}}",
+    "filters": "filters",
+    "searchPlaceholder": "search by size or note",
+    "autoSeason": "current season",
+    "rows": {
+      "category": "category",
+      "season": "season",
+      "fit": "fit",
+      "texture": "texture",
+      "length": "length",
+      "state": "state",
+      "color": "colour"
+    },
+    "colorFilter": "Colour {hex}",
+    "noResults": "No garment found",
+    "noResultsHint": "try removing a filter.",
+    "clearFilters": "clear filters",
+    "addGarment": "add a garment"
+  },
+  "add": {
+    "eyebrow": "new garment",
+    "title": "add to the catalogue"
+  },
+  "edit": {
+    "eyebrow": "edit garment",
+    "title": "review the entry"
+  },
+  "bugaderia": {
+    "title": "laundry",
+    "subtitle": "what is clean and what is in the basket.",
+    "viewsLabel": "Which pile you are looking at",
+    "views": {
+      "clean": "clean",
+      "basket": "basket"
+    },
+    "picker": {
+      "soil": {
+        "subtitle": "pick the garments going into the basket.",
+        "submit": "To the basket",
+        "submitting": "marking…",
+        "empty": "every garment is already in the basket."
+      },
+      "wash": {
+        "subtitle": "pick the garments you have washed.",
+        "submit": "Washed",
+        "submitting": "marking…",
+        "empty": "nothing in the basket. all clean.",
+        "didLaundry": "i did the laundry"
+      },
+      "clearSelection": "Clear the selection"
+    },
+    "grid": {
+      "clean": "Clean",
+      "dirty": "Dirty",
+      "badge": "in the basket"
+    }
+  },
+  "menu": {
+    "label": "Menu",
+    "stats": "statistics",
+    "settings": "settings",
+    "theme": "theme",
+    "themeLight": "light",
+    "themeDark": "dark",
+    "language": "language",
+    "languages": {
+      "ca": "Catalan",
+      "es": "Spanish",
+      "en": "English"
+    }
+  },
+  "home": {
+    "title": "my wardrobe",
+    "subtitle": "a study in visual harmony",
+    "paletteLink": "Palette {name}",
+    "nav": {
+      "avui": "What do I wear?",
+      "armari": "Wardrobe",
+      "bugaderia": "Laundry",
+      "paleta": "Palettes"
+    }
+  },
+  "outfits": {
+    "screenTitle": "What do I wear?",
+    "sections": {
+      "today": "today",
+      "week": "the week",
+      "all": "your outfits"
+    },
+    "todayUndecided": "you have not decided yet",
+    "chooseToday": "Choose today's outfit",
+    "changeToday": "change outfit",
+    "filtersLabel": "Filter outfits",
+    "pickForMe": "pick for me",
+    "today": "today",
+    "inBasket": "to wash",
+    "blockedReason": "needs washing: {pieces}",
+    "piecesJoin": " and ",
+    "howYouWearIt": "how you wear it",
+    "shoes": "shoes",
+    "accessories": "accessories",
+    "socks": "socks",
+    "noShoes": "no shoes saved.",
+    "noAccessories": "no accessories saved.",
+    "goToAdd": "add a garment",
+    "wearToday": "I'll wear it",
+    "wearOnDay": "Save for {day}",
+    "saving": "saving…",
+    "delete": "delete",
+    "deleteCost": "{count, plural, one {# day will be cleared from the calendar too.} other {# days will be cleared from the calendar too.}}",
+    "deleteCostMany": "the calendar days you wore it on will be cleared too.",
+    "changeOutfit": "change outfit",
+    "removeFromDay": "clear the day",
+    "emptyNoOutfitsBrowse": "nothing saved yet.",
+    "emptyNoOutfitsHint": "open a garment from the wardrobe and see what goes with it to save your first one.",
+    "emptyNoneReady": "time to do the laundry",
+    "goToArmari": "go to the wardrobe",
+    "goToRentar": "go and wash",
+    "sheetLabel": "Outfit {title}",
+    "axisLabel": "Sort by",
+    "axes": {
+      "SHIRT": "shirts",
+      "PANTS": "trousers",
+      "SWEATER": "sweaters"
+    },
+    "axisEmpty": "no outfit with this garment yet.",
+    "seeMore": "more combinations",
+    "plan": "plan",
+    "back": "back",
+    "planned": "planned",
+    "lastWorn": {
+      "never": "never worn",
+      "today": "worn today",
+      "ago": "{days, plural, one {worn # day ago} other {worn # days ago}}"
+    }
+  },
+  "week": {
+    "previous": "Previous week",
+    "next": "Next week"
+  },
+  "combine": {
+    "sheetLabel": "Combinations for {category}",
+    "eyebrow": "combine",
+    "all": "all",
+    "pieces": "{count, plural, one {# piece} other {# pieces}}",
+    "emptyFiltered": "{count, plural, one {no one-piece combinations loaded.} other {no #-piece combinations loaded.}}",
+    "loadMore": "load more",
+    "empty": "no combination found for this garment.",
+    "count": "{count, plural, one {# combination} other {# combinations}}",
+    "showMore": "show more combinations",
+    "save": "save outfit",
+    "saved": "saved",
+    "savingOutfit": "saving…",
+    "less": "less",
+    "morePalettes": "{count, plural, one {+# palette} other {+# palettes}}",
+    "unmatched": "free",
+    "savePalette": "save",
+    "savePaletteAria": "Save palette",
+    "savedPaletteAria": "Already saved"
+  },
+  "paleta": {
+    "eyebrow": "colour catalogue",
+    "title": "sanzo wada",
+    "subtitle": "{count} colours from <jp>配色事典</jp> — «a dictionary of color combinations», six volumes published in tokyo between 1933 and 1934. pick a colour to see what it combined with.",
+    "searchPlaceholder": "search a colour — in english (pink, ochre, cerulian…)",
+    "count": "{shown} / {total} colours",
+    "noResults": "no colour matches.",
+    "noResultsHint": "try another name in english.",
+    "combinations": "{count, plural, one {# combination} other {# combinations}}",
+    "sheetLabel": "Combinations of {color}",
+    "colorEyebrow": "colour",
+    "sheetEmpty": "this colour is not part of any catalogued combination.",
+    "unnamed": "unnamed"
+  },
+  "stats": {
+    "eyebrow": "archive",
+    "title": "statistics",
+    "empty": "no garments in the wardrobe yet.",
+    "total": "garments in total",
+    "sections": {
+      "category": "category",
+      "season": "season",
+      "fit": "fit",
+      "texture": "texture",
+      "topColors": "dominant colours"
+    }
+  },
+  "settings": {
+    "eyebrow": "archive",
+    "title": "settings",
+    "export": {
+      "title": "export",
+      "description": "download every garment as json. handy as a backup or to move to another device.",
+      "count": "{count, plural, one {# garment on file} other {# garments on file}}",
+      "json": "download json",
+      "zip": "download zip (with photos)"
+    },
+    "import": {
+      "title": "import",
+      "description": "upload a json file exported earlier.",
+      "modeLabel": "mode",
+      "modeAriaLabel": "Import mode",
+      "merge": "merge",
+      "replace": "replace",
+      "mergeHint": "adds the garments without deleting the existing ones.",
+      "replaceHint": "wipes the whole archive and reimports it from scratch.",
+      "fileLabel": "file",
+      "chooseFile": "choose file",
+      "submit": "import",
+      "submitting": "importing…",
+      "success": "{count, plural, one {# garment imported successfully.} other {# garments imported successfully.}}",
+      "unknownError": "Unknown error",
+      "networkError": "Invalid file or network error."
+    }
+  }
+}

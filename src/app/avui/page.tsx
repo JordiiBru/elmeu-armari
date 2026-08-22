@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import {
   findAllOutfits,
   findTodayWorn,
@@ -10,19 +11,20 @@ import { findAllGarments } from "@/lib/prendas/service";
 import { getCurrentSeason } from "@/lib/prendas/season";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { isWearable, rankOutfitsForToday } from "@/lib/bugaderia/laundry";
-import { startOfWeek, addDays, dayToISO, isoToDay } from "@/lib/outfits/week";
+import { startOfWeek, addDays, dayToISO, isoToDay, today } from "@/lib/outfits/week";
 import { palettes } from "@/lib/colors";
 import { TodayPlate } from "@/components/TodayPlate";
 import { WeekCalendar } from "@/components/WeekCalendar";
 import { OutfitLibrary } from "@/components/OutfitLibrary";
-import { UI } from "@/lib/prendas/ui-strings";
 import { PageContainer, SectionHeader, Stack, Text, Icon, EmptyState } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
-function formatWeekRange(start: Date, end: Date): string {
+function formatWeekRange(start: Date, end: Date, locale: string): string {
   const fmt = (d: Date) =>
-    d.toLocaleDateString("ca", { day: "numeric", month: "short", timeZone: "UTC" });
+    // Both ends are UTC-midnight day keys, so they are read back in UTC.
+    // Which day they name was already settled in Barcelona's zone.
+    d.toLocaleDateString(locale, { day: "numeric", month: "short", timeZone: "UTC" });
   return `${fmt(start)} — ${fmt(end)}`;
 }
 
@@ -54,7 +56,17 @@ function Stratum({
   );
 }
 
-function WeekNav({ weekStart, weekEnd }: { weekStart: Date; weekEnd: Date }) {
+function WeekNav({
+  weekStart,
+  weekEnd,
+  locale,
+  labels,
+}: {
+  weekStart: Date;
+  weekEnd: Date;
+  locale: string;
+  labels: { previous: string; next: string };
+}) {
   const link =
     "inline-flex items-center gap-1 font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]";
   return (
@@ -65,18 +77,18 @@ function WeekNav({ weekStart, weekEnd }: { weekStart: Date; weekEnd: Date }) {
           pressing an arrow asks for. */}
       <Link
         href={`/avui?start=${dayToISO(addDays(weekStart, -7))}`}
-        aria-label="Setmana anterior"
+        aria-label={labels.previous}
         scroll={false}
         className={link}
       >
         <Icon name="chevron-left" size={12} />
       </Link>
       <Text variant="caption" tabular>
-        {formatWeekRange(weekStart, weekEnd)}
+        {formatWeekRange(weekStart, weekEnd, locale)}
       </Text>
       <Link
         href={`/avui?start=${dayToISO(addDays(weekStart, 7))}`}
-        aria-label="Setmana següent"
+        aria-label={labels.next}
         scroll={false}
         className={link}
       >
@@ -98,8 +110,13 @@ export default async function AvuiPage({
   searchParams: Promise<{ start?: string }>;
 }) {
   const { start: startParam } = await searchParams;
-  const today = new Date();
-  const weekStart = startOfWeek(startParam ? isoToDay(startParam) : today);
+  const [t, tWeek, locale] = await Promise.all([
+    getTranslations("outfits"),
+    getTranslations("week"),
+    getLocale(),
+  ]);
+  const currentDay = today();
+  const weekStart = startOfWeek(startParam ? isoToDay(startParam) : currentDay);
   const weekEnd = addDays(weekStart, 6);
 
   const [outfits, garments, todayWorn, days, savedOutfitKeys] = await Promise.all([
@@ -112,7 +129,7 @@ export default async function AvuiPage({
   const todayOutfitId = todayWorn?.outfitId ?? null;
 
   const season = getCurrentSeason();
-  const todayISO = dayToISO(today);
+  const todayISO = dayToISO(currentDay);
   const extraCandidates = garments.filter((g) => EXTRA_CATEGORIES.has(g.category));
 
   // Ranked once, on the server, and shared by both the plate and the
@@ -127,16 +144,16 @@ export default async function AvuiPage({
   if (ranked.length === 0) {
     return (
       <PageContainer width="wide">
-        <SectionHeader title={UI.outfits.screenTitle} level="title-xl" />
+        <SectionHeader title={t("screenTitle")} level="title-xl" />
         <EmptyState
-          title={UI.outfits.emptyNoOutfitsBrowse}
-          hint={UI.outfits.emptyNoOutfitsHint}
+          title={t("emptyNoOutfitsBrowse")}
+          hint={t("emptyNoOutfitsHint")}
           action={
             <Link
               href="/armari"
               className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
             >
-              {UI.outfits.goToArmari}
+              {t("goToArmari")}
             </Link>
           }
         />
@@ -146,10 +163,10 @@ export default async function AvuiPage({
 
   return (
     <PageContainer width="full">
-      <SectionHeader title={UI.outfits.screenTitle} level="title-xl" />
+      <SectionHeader title={t("screenTitle")} level="title-xl" />
 
       <Stack gap={8} className="md:gap-16">
-        <Stratum title={UI.outfits.sections.today}>
+        <Stratum title={t("sections.today")}>
           <TodayPlate
             committed={committed}
             candidates={ranked.filter(isWearable)}
@@ -161,8 +178,15 @@ export default async function AvuiPage({
         </Stratum>
 
         <Stratum
-          title={UI.outfits.sections.week}
-          aside={<WeekNav weekStart={weekStart} weekEnd={weekEnd} />}
+          title={t("sections.week")}
+          aside={
+            <WeekNav
+              weekStart={weekStart}
+              weekEnd={weekEnd}
+              locale={locale}
+              labels={{ previous: tWeek("previous"), next: tWeek("next") }}
+            />
+          }
         >
           <WeekCalendar
             days={days}
@@ -173,7 +197,7 @@ export default async function AvuiPage({
           />
         </Stratum>
 
-        <Stratum id="tots-els-outfits" title={UI.outfits.sections.all}>
+        <Stratum id="tots-els-outfits" title={t("sections.all")}>
           <OutfitLibrary
             outfits={ranked}
             allGarments={garments}

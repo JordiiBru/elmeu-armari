@@ -1,0 +1,366 @@
+{
+  "app": {
+    "title": "El meu armari",
+    "description": "Un estudi d'harmonia visual per al teu armari.",
+    "shortName": "Armari",
+    "manifestDescription": "Gestor personal de roba"
+  },
+  "labels": {
+    "category": {
+      "SWEATER": "Jersei",
+      "SHIRT": "Samarreta",
+      "PANTS": "Pantalons",
+      "SOCKS": "Mitjons",
+      "SHOES": "Sabates",
+      "ACCESSORI": "Accessori"
+    },
+    "texture": {
+      "KNIT": "Punt",
+      "DENIM": "Denim",
+      "LINEN": "Lli",
+      "COTTON": "Cotó",
+      "POLYESTER": "Poliester",
+      "LEATHER": "Cuir",
+      "SYNTHETIC": "Sintètic"
+    },
+    "pattern": {
+      "PLAIN": "Llis",
+      "STRIPES": "Ratlles",
+      "CHECKS": "Quadres",
+      "FLORAL": "Flors",
+      "PRINTED": "Estampat",
+      "GEOMETRIC": "Geomètric"
+    },
+    "fit": {
+      "REGULAR": "Regular",
+      "OVERSIZED": "Oversized",
+      "CROPPED": "Cropped",
+      "SLIM": "Slim",
+      "STRAIGHT": "Straight",
+      "SKINNY": "Skinny",
+      "BAGGY": "Baggy",
+      "BARREL": "Barrel",
+      "WIDE_LEG": "Wide Leg",
+      "CURT": "Curt",
+      "TURMELL": "Turmell",
+      "MITJA_CANYA": "Mitja canya",
+      "GENOLLERA": "Genollera",
+      "LOW_TOP": "Low Top",
+      "MID": "Mid",
+      "HIGH_TOP": "High Top"
+    },
+    "subtype": {
+      "PULLOVER": "Pullover",
+      "ZIP": "Zip",
+      "HOODIE": "Hoodie",
+      "CARDIGAN": "Cardigan",
+      "TEE": "Samarreta",
+      "POLO": "Polo",
+      "CAMISA": "Camisa",
+      "VAQUERS": "Vaquers",
+      "CHINO": "Chino",
+      "JOGGER": "Jogger",
+      "CARGO": "Cargo",
+      "SNEAKER": "Sneaker",
+      "BOTA": "Bota",
+      "LOAFER": "Loafer",
+      "SANDALIA": "Sandàlia",
+      "OXFORD": "Oxford",
+      "ANELL": "Anell",
+      "RELLOTGE": "Rellotge",
+      "CINTURO": "Cinturó",
+      "BOSSA": "Bossa",
+      "BARRET": "Barret",
+      "BUFANDA": "Bufanda",
+      "ULLERES": "Ulleres"
+    },
+    "length": {
+      "SHORT": "Curts",
+      "LONG": "Llargs"
+    },
+    "season": {
+      "SPRING": "Primavera",
+      "SUMMER": "Estiu",
+      "AUTUMN": "Tardor",
+      "WINTER": "Hivern",
+      "ALL_YEAR": "Tot l'any"
+    }
+  },
+  "common": {
+    "back": "Enrere",
+    "close": "Tancar",
+    "cancel": "cancel·lar",
+    "delete": "eliminar",
+    "deleteConfirm": "sí, eliminar",
+    "deleting": "eliminant…",
+    "edit": "editar",
+    "saving": "guardant…"
+  },
+  "form": {
+    "category": "Categoria",
+    "colors": "Colors",
+    "texture": "Textura",
+    "pattern": "Dibuix",
+    "seasons": "Temporada",
+    "size": "Talla",
+    "subtype": "Tipus",
+    "length": "Llargada",
+    "fit": "Tall",
+    "notes": "Notes",
+    "notesPlaceholder": "opcional…",
+    "selectPlaceholder": "Selecciona…",
+    "save": "guardar peça",
+    "saving": "guardant…",
+    "saveChanges": "guardar canvis",
+    "addColor": "+ afegir color",
+    "removeColor": "eliminar"
+  },
+  "errors": {
+    "requiredFields": "Omple tots els camps marcats amb *",
+    "minOneSeason": "Selecciona almenys una temporada",
+    "minOneColor": "Selecciona almenys un color",
+    "invalidColor": "Color no vàlid"
+  },
+  "photo": {
+    "label": "Foto (opcional)",
+    "add": "afegir foto",
+    "change": "canviar foto",
+    "remove": "treure",
+    "removeCurrent": "treure foto",
+    "uploading": "pujant…",
+    "uploadingPhoto": "pujant foto…",
+    "previewAlt": "Vista prèvia",
+    "currentAlt": "Foto actual",
+    "savedWithoutPhoto": "La peça s'ha guardat però no s'ha pogut pujar la foto.",
+    "uploadFailed": "No s'ha pogut pujar la foto. Torna-ho a provar."
+  },
+  "modal": {
+    "sheetLabel": "Peça {category}",
+    "eyebrow": "peça",
+    "combine": "Què hi combina",
+    "texture": "Textura",
+    "pattern": "Dibuix",
+    "colors": "Colors",
+    "seasons": "Temporada",
+    "note": "nota",
+    "size": "talla {size}"
+  },
+  "armari": {
+    "title": "el meu armari",
+    "empty": "encara no hi ha res desat.",
+    "count": "{count, plural, one {# peça registrada.} other {# peces registrades.}}",
+    "filters": "filtres",
+    "searchPlaceholder": "cerca per talla o nota",
+    "autoSeason": "temporada actual",
+    "rows": {
+      "category": "categoria",
+      "season": "temporada",
+      "fit": "fit",
+      "texture": "textura",
+      "length": "llargada",
+      "state": "estat",
+      "color": "color"
+    },
+    "colorFilter": "Color {hex}",
+    "noResults": "Cap peça trobada",
+    "noResultsHint": "prova a retirar algun filtre.",
+    "clearFilters": "netejar filtres",
+    "addGarment": "afegir una peça"
+  },
+  "add": {
+    "eyebrow": "nova peça",
+    "title": "afegir al catàleg"
+  },
+  "edit": {
+    "eyebrow": "editar peça",
+    "title": "revisar la fitxa"
+  },
+  "bugaderia": {
+    "title": "bugaderia",
+    "subtitle": "què tens net i què tens al cistell.",
+    "viewsLabel": "Quina pila mires",
+    "views": {
+      "clean": "netes",
+      "basket": "cistell"
+    },
+    "picker": {
+      "soil": {
+        "subtitle": "tria les peces que van al cistell.",
+        "submit": "Al cistell",
+        "submitting": "marcant…",
+        "empty": "totes les peces ja són al cistell."
+      },
+      "wash": {
+        "subtitle": "tria les peces que has rentat.",
+        "submit": "Rentat",
+        "submitting": "marcant…",
+        "empty": "cap peça al cistell. tot net.",
+        "didLaundry": "he fet la bugada"
+      },
+      "clearSelection": "Desmarcar-ho tot"
+    },
+    "grid": {
+      "clean": "Netes",
+      "dirty": "Brutes",
+      "badge": "al cistell"
+    }
+  },
+  "menu": {
+    "label": "Menú",
+    "stats": "estadístiques",
+    "settings": "configuració",
+    "theme": "tema",
+    "themeLight": "clar",
+    "themeDark": "fosc",
+    "language": "idioma",
+    "languages": {
+      "ca": "Català",
+      "es": "Castellà",
+      "en": "Anglès"
+    }
+  },
+  "home": {
+    "title": "el meu armari",
+    "subtitle": "un estudi d'harmonia visual",
+    "paletteLink": "Paleta {name}",
+    "nav": {
+      "avui": "Què em poso?",
+      "armari": "Armari",
+      "bugaderia": "Bugaderia",
+      "paleta": "Paletes"
+    }
+  },
+  "outfits": {
+    "screenTitle": "Què em poso?",
+    "sections": {
+      "today": "avui",
+      "week": "la setmana",
+      "all": "els teus outfits"
+    },
+    "todayUndecided": "encara no ho has decidit",
+    "chooseToday": "Triar l'outfit d'avui",
+    "changeToday": "canviar d'outfit",
+    "filtersLabel": "Filtrar outfits",
+    "pickForMe": "tria per mi",
+    "today": "avui",
+    "inBasket": "per rentar",
+    "blockedReason": "cal rentar {pieces}",
+    "piecesJoin": " i ",
+    "howYouWearIt": "com el portes",
+    "shoes": "sabates",
+    "accessories": "accessoris",
+    "socks": "mitjons",
+    "noShoes": "cap sabata desada.",
+    "noAccessories": "cap accessori desat.",
+    "goToAdd": "afegir una peça",
+    "wearToday": "Me'l poso",
+    "wearOnDay": "Desar per {day}",
+    "saving": "desant…",
+    "delete": "eliminar",
+    "deleteCost": "{count, plural, one {s'esborrarà també # dia del calendari.} other {s'esborraran també # dies del calendari.}}",
+    "deleteCostMany": "s'esborraran també els dies del calendari on el portaves.",
+    "changeOutfit": "canviar d'outfit",
+    "removeFromDay": "treure del dia",
+    "emptyNoOutfitsBrowse": "encara no hi ha res desat.",
+    "emptyNoOutfitsHint": "obre una peça de l'armari i mira què hi combina per desar el primer.",
+    "emptyNoneReady": "toca fer bugada",
+    "goToArmari": "anar a l'armari",
+    "goToRentar": "anar a rentar",
+    "sheetLabel": "Outfit {title}",
+    "axisLabel": "Ordenar per",
+    "axes": {
+      "SHIRT": "samarretes",
+      "PANTS": "pantalons",
+      "SWEATER": "jerseis"
+    },
+    "axisEmpty": "cap outfit amb aquesta peça encara.",
+    "seeMore": "més combinacions",
+    "plan": "planificar",
+    "back": "tornar",
+    "planned": "planificat",
+    "lastWorn": {
+      "never": "mai portat",
+      "today": "portat avui",
+      "ago": "{days, plural, one {portat fa # dia} other {portat fa # dies}}"
+    }
+  },
+  "week": {
+    "previous": "Setmana anterior",
+    "next": "Setmana següent"
+  },
+  "combine": {
+    "sheetLabel": "Combinacions per {category}",
+    "eyebrow": "combinar",
+    "all": "totes",
+    "pieces": "{count, plural, one {# peça} other {# peces}}",
+    "emptyFiltered": "{count, plural, one {no hi ha combinacions d'una peça carregades.} other {no hi ha combinacions de # peces carregades.}}",
+    "loadMore": "carregar més",
+    "empty": "cap combinació trobada per a aquesta peça.",
+    "count": "{count, plural, one {# combinació} other {# combinacions}}",
+    "showMore": "mostrar més combinacions",
+    "save": "desar outfit",
+    "saved": "desat",
+    "savingOutfit": "desant…",
+    "less": "menys",
+    "morePalettes": "{count, plural, one {+# paleta} other {+# paletes}}",
+    "unmatched": "lliure",
+    "savePalette": "desar",
+    "savePaletteAria": "Desar paleta",
+    "savedPaletteAria": "Ja desat"
+  },
+  "paleta": {
+    "eyebrow": "catàleg cromàtic",
+    "title": "sanzo wada",
+    "subtitle": "{count} colors de <jp>配色事典</jp> — «a dictionary of color combinations», sis volums publicats a tòquio entre 1933 i 1934. tria un color per veure amb què combinava.",
+    "searchPlaceholder": "cerca un color — en anglès (pink, ochre, cerulian…)",
+    "count": "{shown} / {total} colors",
+    "noResults": "cap color coincideix.",
+    "noResultsHint": "prova amb un altre nom en anglès.",
+    "combinations": "{count, plural, one {# combinació} other {# combinacions}}",
+    "sheetLabel": "Combinacions de {color}",
+    "colorEyebrow": "color",
+    "sheetEmpty": "aquest color no forma part de cap combinació catalogada.",
+    "unnamed": "sense nom"
+  },
+  "stats": {
+    "eyebrow": "arxiu",
+    "title": "estadístiques",
+    "empty": "encara no hi ha peces a l'armari.",
+    "total": "peces en total",
+    "sections": {
+      "category": "categoria",
+      "season": "temporada",
+      "fit": "fit",
+      "texture": "textura",
+      "topColors": "colors dominants"
+    }
+  },
+  "settings": {
+    "eyebrow": "arxiu",
+    "title": "configuració",
+    "export": {
+      "title": "exportar",
+      "description": "descarrega totes les teves peces en format json. útil com a còpia de seguretat o per migrar a un altre dispositiu.",
+      "count": "{count, plural, one {# peça a l'arxiu} other {# peces a l'arxiu}}",
+      "json": "descarregar json",
+      "zip": "descarregar zip (amb fotos)"
+    },
+    "import": {
+      "title": "importar",
+      "description": "puja un fitxer json exportat prèviament.",
+      "modeLabel": "mode",
+      "modeAriaLabel": "Mode d'importació",
+      "merge": "fusionar",
+      "replace": "reemplaçar",
+      "mergeHint": "afegeix les peces sense esborrar les existents.",
+      "replaceHint": "esborra tot l'arxiu i el reimporta des de zero.",
+      "fileLabel": "fitxer",
+      "chooseFile": "seleccionar fitxer",
+      "submit": "importar",
+      "submitting": "important…",
+      "success": "{count, plural, one {# peça importada correctament.} other {# peces importades correctament.}}",
+      "unknownError": "Error desconegut",
+      "networkError": "Fitxer invàlid o error de xarxa."
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { dayKey } from "./week";
+import { today } from "./week";
 
 const GARMENT_INCLUDE = { include: { colors: true, seasons: true } } as const;
 
@@ -16,7 +16,7 @@ function outfitInclude() {
   return {
     ...GARMENTS_INCLUDE,
     wornEvents: {
-      where: { date: { lte: dayKey(new Date()) } },
+      where: { date: { lte: today() } },
       orderBy: { date: "desc" },
       take: 3,
       include: GARMENTS_INCLUDE,

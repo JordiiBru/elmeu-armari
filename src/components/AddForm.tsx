@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { ColorPickers } from "@/components/ColorPickers";
 import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
@@ -17,15 +18,7 @@ import {
   CATEGORIES_WITH_OPTIONAL_COLOR,
 } from "@/lib/prendas/types";
 import type { Category } from "@/lib/prendas/types";
-import {
-  CATEGORY_LABELS,
-  TEXTURE_LABELS,
-  PATTERN_LABELS,
-  FIT_LABELS,
-  SUBTYPE_LABELS,
-  LENGTH_LABELS,
-} from "@/lib/prendas/labels";
-import { UI } from "@/lib/prendas/ui-strings";
+import { optionLabel } from "@/lib/prendas/labels";
 import {
   Button,
   TextButton,
@@ -38,6 +31,10 @@ import {
 
 export function AddForm() {
   const router = useRouter();
+  const t = useTranslations("form");
+  const tLabel = useTranslations("labels");
+  const tPhoto = useTranslations("photo");
+  const tError = useTranslations("errors");
   const [state, formAction, isPending] = useActionState(
     createGarmentAction,
     null,
@@ -76,13 +73,13 @@ export function AddForm() {
         });
         if (!r.ok) throw new Error();
       } catch {
-        setUploadError("La peça s'ha guardat però no s'ha pogut pujar la foto.");
+        setUploadError(tPhoto("savedWithoutPhoto"));
       }
       setIsUploading(false);
       router.replace("/armari");
     }
     run();
-  }, [state, imageFile, router]);
+  }, [state, imageFile, router, tPhoto]);
 
   const fits = category ? FITS_BY_CATEGORY[category] : [];
   const subtypes = category ? SUBTYPES_BY_CATEGORY[category] : [];
@@ -103,7 +100,7 @@ export function AddForm() {
     <form action={formAction} className="flex flex-col gap-7">
       {imageFile && <input type="hidden" name="_hasImage" value="1" />}
 
-      <Field label={UI.form.category} required>
+      <Field label={t("category")} required>
         <Select
           name="category"
           required
@@ -119,13 +116,13 @@ export function AddForm() {
           }}
           options={CATEGORIES.map((c) => ({
             value: c,
-            label: CATEGORY_LABELS[c],
+            label: tLabel(`category.${c}`),
           }))}
         />
       </Field>
 
       {category && subtypes.length > 0 && (
-        <Field label={UI.form.subtype} required>
+        <Field label={t("subtype")} required>
           <Select
             name="subtype"
             required
@@ -133,14 +130,14 @@ export function AddForm() {
             onChange={setSubtype}
             options={subtypes.map((s) => ({
               value: s,
-              label: SUBTYPE_LABELS[s],
+              label: optionLabel(tLabel, "subtype", s),
             }))}
           />
         </Field>
       )}
 
       {category && lengths.length > 0 && (
-        <Field label={UI.form.length} required>
+        <Field label={t("length")} required>
           <Select
             name="length"
             required
@@ -148,18 +145,18 @@ export function AddForm() {
             onChange={setLength}
             options={lengths.map((l) => ({
               value: l,
-              label: LENGTH_LABELS[l],
+              label: optionLabel(tLabel, "length", l),
             }))}
           />
         </Field>
       )}
 
-      <Field label={UI.form.colors} required={colorsRequired}>
+      <Field label={t("colors")} required={colorsRequired}>
         <ColorPickers />
       </Field>
 
       {category && textures.length > 0 && (
-        <Field label={UI.form.texture} required>
+        <Field label={t("texture")} required>
           <Select
             name="texture"
             required
@@ -167,14 +164,14 @@ export function AddForm() {
             onChange={setTexture}
             options={textures.map((t) => ({
               value: t,
-              label: TEXTURE_LABELS[t],
+              label: tLabel(`texture.${t}`),
             }))}
           />
         </Field>
       )}
 
       {category && patterns.length > 0 && (
-        <Field label={UI.form.pattern} required>
+        <Field label={t("pattern")} required>
           <Select
             name="pattern"
             required
@@ -182,18 +179,18 @@ export function AddForm() {
             onChange={setPattern}
             options={patterns.map((p) => ({
               value: p,
-              label: PATTERN_LABELS[p],
+              label: tLabel(`pattern.${p}`),
             }))}
           />
         </Field>
       )}
 
-      <Field label={UI.form.seasons} required>
+      <Field label={t("seasons")} required>
         <SeasonCheckboxes />
       </Field>
 
       {category && sizes.length > 0 && (
-        <Field label={UI.form.size} required>
+        <Field label={t("size")} required>
           <Select
             name="size"
             required
@@ -205,26 +202,26 @@ export function AddForm() {
       )}
 
       {category && fits.length > 0 && (
-        <Field label={UI.form.fit} required>
+        <Field label={t("fit")} required>
           <Select
             name="fit"
             required
             value={fit}
             onChange={setFit}
-            options={fits.map((f) => ({ value: f, label: FIT_LABELS[f] }))}
+            options={fits.map((f) => ({ value: f, label: optionLabel(tLabel, "fit", f) }))}
           />
         </Field>
       )}
 
-      <Field label={UI.form.notes} htmlFor="notes">
-        <Input id="notes" name="notes" placeholder="opcional…" />
+      <Field label={t("notes")} htmlFor="notes">
+        <Input id="notes" name="notes" placeholder={t("notesPlaceholder")} />
       </Field>
 
       <Stack gap={3}>
-        <Text variant="caption" as="span">Foto (opcional)</Text>
+        <Text variant="caption" as="span">{tPhoto("label")}</Text>
         {previewUrl && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={previewUrl} alt="Preview" className="w-32 h-32 object-cover" />
+          <img src={previewUrl} alt={tPhoto("previewAlt")} className="w-32 h-32 object-cover" />
         )}
         <div className="flex items-center gap-4">
           <TextButton
@@ -232,7 +229,7 @@ export function AddForm() {
             tone="secondary"
             onClick={() => fileInputRef.current?.click()}
           >
-            {imageFile ? "canviar foto" : "afegir foto"}
+            {imageFile ? tPhoto("change") : tPhoto("add")}
           </TextButton>
           {imageFile && (
             <TextButton
@@ -245,7 +242,7 @@ export function AddForm() {
                 if (fileInputRef.current) fileInputRef.current.value = "";
               }}
             >
-              treure
+              {tPhoto("remove")}
             </TextButton>
           )}
         </div>
@@ -266,7 +263,7 @@ export function AddForm() {
 
       {state && "error" in state && (
         <Text variant="small" italic className="font-serif text-danger border-t border-danger pt-3">
-          {state.error}
+          {tError(state.error)}
         </Text>
       )}
 
@@ -275,10 +272,10 @@ export function AddForm() {
         variant="primary"
         size="lg"
         loading={isPending || isUploading}
-        loadingText={isUploading ? "pujant foto…" : "guardant…"}
+        loadingText={isUploading ? tPhoto("uploadingPhoto") : t("saving")}
         className="self-start mt-2"
       >
-        guardar peça
+        {t("save")}
       </Button>
     </form>
   );

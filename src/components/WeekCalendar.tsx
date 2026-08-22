@@ -1,22 +1,29 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { unassignDayAction } from "@/app/outfits/actions";
-import { UI } from "@/lib/prendas/ui-strings";
 import type { SanzoPalette, SavedOutfit, WeekDayPlan } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { OutfitCollage, OutfitTile, outfitSubtitle } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
 import { Card, Icon, Sheet, Text, TextButton, EmptyState } from "@/components/ui";
 
-const WEEKDAY_LABELS = ["dl", "dt", "dc", "dj", "dv", "ds", "dg"];
-
 function parseDay(iso: string): Date {
   return new Date(`${iso}T00:00:00Z`);
 }
 
-function longDayLabel(iso: string): string {
-  return parseDay(iso).toLocaleDateString("ca", {
+/** The seven stamps used to carry a hardcoded Catalan array. Intl knows
+ * the abbreviations for every locale; it just spells them with a
+ * trailing full stop that a 42px cell has no room for. */
+function shortWeekday(date: Date, locale: string): string {
+  return date
+    .toLocaleDateString(locale, { weekday: "short", timeZone: "UTC" })
+    .replace(/\.$/, "");
+}
+
+function longDayLabel(iso: string, locale: string): string {
+  return parseDay(iso).toLocaleDateString(locale, {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -37,6 +44,7 @@ export function WeekCalendar({
   extraCandidates: GarmentWithColors[];
   todayISO: string;
 }) {
+  const t = useTranslations("outfits");
   const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
   const [openDate, setOpenDate] = useState<string | null>(null);
   // A day that already has an outfit opens on that outfit; an empty one
@@ -71,8 +79,8 @@ export function WeekCalendar({
   if (savedOutfits.length === 0) {
     return (
       <EmptyState
-        title={UI.outfits.emptyNoOutfitsBrowse}
-        hint={UI.outfits.emptyNoOutfitsHint}
+        title={t("emptyNoOutfitsBrowse")}
+        hint={t("emptyNoOutfitsHint")}
       />
     );
   }
@@ -140,9 +148,12 @@ function DayCell({
   isToday: boolean;
   onOpen: () => void;
 }) {
+  const t = useTranslations("outfits");
+  const tLabel = useTranslations("labels");
+  const locale = useLocale();
   const d = parseDay(day.date);
-  const weekday = WEEKDAY_LABELS[(d.getUTCDay() + 6) % 7];
-  const title = day.outfit ? outfitSubtitle(day.outfit) || day.outfit.name : null;
+  const weekday = shortWeekday(d, locale);
+  const title = day.outfit ? outfitSubtitle(tLabel, day.outfit) || day.outfit.name : null;
 
   return (
     <Card
@@ -191,7 +202,7 @@ function DayCell({
         tone="secondary"
         className="font-serif lowercase mt-1.5 truncate hidden sm:block"
       >
-        {title ?? UI.outfits.plan}
+        {title ?? t("plan")}
       </Text>
     </Card>
   );
@@ -214,24 +225,26 @@ function DayPickerSheet({
   onBack?: () => void;
   onClose: () => void;
 }) {
-  const label = longDayLabel(dayISO);
+  const t = useTranslations("outfits");
+  const locale = useLocale();
+  const label = longDayLabel(dayISO, locale);
 
   return (
     <Sheet
       onClose={onClose}
       size="xl"
-      label={`${UI.outfits.plan} ${label}`}
+      label={`${t("plan")} ${label}`}
       header={
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <Text variant="caption">{UI.outfits.plan}</Text>
+            <Text variant="caption">{t("plan")}</Text>
             {/* first-letter, not capitalize: "diumenge, 23 d'agost" must
                 not become "D'agost". */}
             <h2 className="type-title first-letter:uppercase">{label}</h2>
           </div>
           {onBack && (
             <TextButton type="button" tone="secondary" onClick={onBack}>
-              {UI.outfits.back}
+              {t("back")}
             </TextButton>
           )}
         </div>
@@ -244,7 +257,7 @@ function DayPickerSheet({
             outfit={outfit}
             palette={paletteMap.get(outfit.paletteId) ?? null}
             index={i}
-            mark={outfit.id === assignedOutfitId ? UI.outfits.planned : null}
+            mark={outfit.id === assignedOutfitId ? t("planned") : null}
             onOpen={() => onPick(outfit.id)}
           />
         ))}

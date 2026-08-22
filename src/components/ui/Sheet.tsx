@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { useSheetState } from "@/lib/useSheetState";
 import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { IconButton } from "./IconButton";
@@ -74,6 +75,7 @@ export function Sheet({
   fill = false,
   children,
 }: Props) {
+  const tCommon = useTranslations("common");
   const { open, close } = useSheetState(onClose, 420);
   const swipe = useSwipeToClose(close);
   const panel = useRef<HTMLDivElement>(null);
@@ -177,7 +179,7 @@ export function Sheet({
             <IconButton
               type="button"
               onClick={close}
-              label="Tancar"
+              label={tCommon("close")}
               className="flex-shrink-0 -mr-2 -mt-2"
             >
               <Icon name="close" size={18} />

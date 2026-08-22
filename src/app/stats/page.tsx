@@ -1,12 +1,8 @@
 export const dynamic = "force-dynamic";
 
+import { getTranslations } from "next-intl/server";
 import { findAllGarments } from "@/lib/prendas/service";
-import {
-  CATEGORY_LABELS,
-  SEASON_LABELS,
-  FIT_LABELS,
-  TEXTURE_LABELS,
-} from "@/lib/prendas/labels";
+import { optionLabel } from "@/lib/prendas/labels";
 import { CATEGORIES, SEASONS, ALL_FITS, TEXTURES } from "@/lib/prendas/types";
 import {
   PageContainer,
@@ -67,15 +63,19 @@ function Section({
 }
 
 export default async function StatsPage() {
-  const raw = await findAllGarments();
+  const [t, tLabel, raw] = await Promise.all([
+    getTranslations("stats"),
+    getTranslations("labels"),
+    findAllGarments(),
+  ]);
   const total = raw.length;
 
   if (total === 0) {
     return (
       <PageContainer width="form">
-        <SectionHeader eyebrow="arxiu" title="estadístiques" level="title-xl" />
+        <SectionHeader eyebrow={t("eyebrow")} title={t("title")} level="title-xl" />
         <Text variant="subtitle" tone="secondary" italic as="p">
-          encara no hi ha peces a l&apos;armari.
+          {t("empty")}
         </Text>
       </PageContainer>
     );
@@ -107,44 +107,44 @@ export default async function StatsPage() {
 
   return (
     <PageContainer width="form">
-      <SectionHeader eyebrow="arxiu" title="estadístiques" level="title-xl" />
+      <SectionHeader eyebrow={t("eyebrow")} title={t("title")} level="title-xl" />
 
       <Cluster align="baseline" gap={3} className="pb-10 border-b border-border">
         <span className="type-display tabular-nums leading-none">{total}</span>
         <Text variant="subtitle" tone="secondary" italic>
-          peces en total
+          {t("total")}
         </Text>
       </Cluster>
 
       <Stack gap={7} className="pt-10">
-        <Section title="categoria">
+        <Section title={t("sections.category")}>
           {CATEGORIES.filter((c) => perCategory[c] > 0).map((c) => (
-            <Row key={c} label={CATEGORY_LABELS[c]} count={perCategory[c]} total={total} />
+            <Row key={c} label={tLabel(`category.${c}`)} count={perCategory[c]} total={total} />
           ))}
         </Section>
 
-        <Section title="temporada">
+        <Section title={t("sections.season")}>
           {SEASONS.filter((s) => perSeason[s] > 0).map((s) => (
-            <Row key={s} label={SEASON_LABELS[s]} count={perSeason[s]} total={total} />
+            <Row key={s} label={tLabel(`season.${s}`)} count={perSeason[s]} total={total} />
           ))}
         </Section>
 
-        <Section title="fit">
+        <Section title={t("sections.fit")}>
           {ALL_FITS.filter((f) => perFit[f] > 0).map((f) => (
-            <Row key={f} label={FIT_LABELS[f]} count={perFit[f]} total={total} />
+            <Row key={f} label={optionLabel(tLabel, "fit", f)} count={perFit[f]} total={total} />
           ))}
         </Section>
 
-        <Section title="textura">
-          {TEXTURES.filter((t) => perTexture[t] > 0).map((t) => (
-            <Row key={t} label={TEXTURE_LABELS[t]} count={perTexture[t]} total={total} />
+        <Section title={t("sections.texture")}>
+          {TEXTURES.filter((tex) => perTexture[tex] > 0).map((tex) => (
+            <Row key={tex} label={tLabel(`texture.${tex}`)} count={perTexture[tex]} total={total} />
           ))}
         </Section>
 
         {topColors.length > 0 && (
           <Stack as="section" gap={4}>
             <Text variant="caption" as="h2" className="pb-2 border-b border-border">
-              colors dominants
+              {t("sections.topColors")}
             </Text>
             <div className="grid grid-cols-4 sm:grid-cols-8 gap-x-2 gap-y-4">
               {topColors.map(([hex, count]) => (
