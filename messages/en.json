@@ -5,6 +5,47 @@
     "shortName": "Wardrobe",
     "manifestDescription": "Personal clothes manager"
   },
+  "auth": {
+    "login": {
+      "eyebrow": "access",
+      "title": "sign in",
+      "subtitle": "this wardrobe is private. sign in with the account you were given.",
+      "username": "username",
+      "password": "password",
+      "submit": "sign in",
+      "submitting": "signing in…",
+      "errors": {
+        "missingFields": "Fill in the username and the password.",
+        "invalidCredentials": "Wrong username or password.",
+        "lockedOut": "Too many attempts. Try again in {seconds, plural, one {# second} other {# seconds}}.",
+        "unexpected": "Could not sign you in. Please try again."
+      }
+    },
+    "changePassword": {
+      "eyebrow": "account",
+      "title": "password",
+      "subtitle": "change your password whenever you like.",
+      "forcedSubtitle": "the password you have is temporary. pick a new one to carry on.",
+      "current": "current password",
+      "next": "new password",
+      "confirmation": "repeat the new one",
+      "hint": "at least {count} characters.",
+      "submit": "change",
+      "submitting": "changing…",
+      "errors": {
+        "missingFields": "Fill in every field.",
+        "mismatch": "The two new passwords do not match.",
+        "wrongPassword": "That is not your current password.",
+        "samePassword": "The new one has to differ from the current one.",
+        "tooShort": "That password is too short.",
+        "tooLong": "That password is too long."
+      }
+    },
+    "menu": {
+      "changePassword": "password",
+      "signOut": "sign out"
+    }
+  },
   "labels": {
     "category": {
       "SWEATER": "Sweater",

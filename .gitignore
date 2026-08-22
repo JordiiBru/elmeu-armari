@@ -50,3 +50,8 @@ dev.db
 
 # local agent/harness state, including nested git worktrees
 /.claude/
+
+# e2e signed-in cookie jar, and Playwright's own output
+/tests/e2e/.auth/
+/test-results/
+/playwright-report/

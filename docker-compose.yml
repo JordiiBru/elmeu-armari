@@ -10,6 +10,11 @@ services:
     environment:
       DATABASE_URL: file:/data/prod.db
       UPLOAD_DIR: /data/uploads
+      # Signs and encrypts the session cookie. Required: without it every
+      # session dies with the container. Generate one with
+      # `openssl rand -base64 32` and keep it out of git — an env var
+      # locally, a k3s secret in the homelab.
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required, see README}
     volumes:
       - sqlite_data:/data
 

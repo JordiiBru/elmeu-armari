@@ -24,14 +24,24 @@ function parentOf(pathname: string): string {
   return match ? match.parent : "/";
 }
 
-export default function SiteHeader() {
+export default function SiteHeader({
+  username,
+  locked,
+}: {
+  username: string | null;
+  /** Signed in, but still carrying the temporary password. */
+  locked: boolean;
+}) {
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  // Signed out there is one screen and nowhere above it, and a locked
+  // account has only the one it is on, so in both cases the back arrow
+  // would bounce off the proxy and land right back here.
+  const isHome = pathname === "/" || !username || locked;
 
   return (
     <header className="w-full px-6 md:px-10 pt-6 pb-4 flex items-center justify-between">
       {isHome ? <span /> : <BackLink href={parentOf(pathname)} />}
-      <AppMenu />
+      <AppMenu username={username} locked={locked} />
     </header>
   );
 }
