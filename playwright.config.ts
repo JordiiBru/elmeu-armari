@@ -1,7 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
+import { STORAGE_STATE } from "./tests/e2e/credentials";
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  // Creates the account the suite signs in as, and migrates the scratch
+  // database it lives in.
+  globalSetup: "./tests/e2e/global-setup.ts",
   timeout: 30_000,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -12,9 +16,13 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   projects: [
+    { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      // Every spec but auth.spec.ts starts already signed in; that one
+      // opts out with an empty storage state.
+      use: { ...devices["Desktop Chrome"], storageState: STORAGE_STATE },
+      dependencies: ["setup"],
     },
   ],
   webServer: {
@@ -28,6 +36,9 @@ export default defineConfig({
       // `npm start` under CI); tests/e2e/garments.spec.ts sends this same
       // value as a Bearer token on /api/import.
       IMPORT_SECRET: "e2e-test-secret",
+      // Auth.js signs the session cookie with this. Deterministic here so
+      // a restarted server does not invalidate the saved storage state.
+      AUTH_SECRET: "e2e-auth-secret-not-used-anywhere-else",
     },
     timeout: 60_000,
   },

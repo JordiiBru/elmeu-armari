@@ -5,6 +5,47 @@
     "shortName": "Armario",
     "manifestDescription": "Gestor personal de ropa"
   },
+  "auth": {
+    "login": {
+      "eyebrow": "acceso",
+      "title": "entra",
+      "subtitle": "este armario es privado. entra con la cuenta que te han creado.",
+      "username": "usuario",
+      "password": "contraseña",
+      "submit": "entrar",
+      "submitting": "entrando…",
+      "errors": {
+        "missingFields": "Rellena el usuario y la contraseña.",
+        "invalidCredentials": "Usuario o contraseña incorrectos.",
+        "lockedOut": "Demasiados intentos. Vuelve a probar dentro de {seconds, plural, one {# segundo} other {# segundos}}.",
+        "unexpected": "No se ha podido completar la entrada. Inténtalo de nuevo."
+      }
+    },
+    "changePassword": {
+      "eyebrow": "cuenta",
+      "title": "contraseña",
+      "subtitle": "cambia la contraseña cuando quieras.",
+      "forcedSubtitle": "la contraseña que tienes es temporal. elige una nueva para continuar.",
+      "current": "contraseña actual",
+      "next": "contraseña nueva",
+      "confirmation": "repite la nueva",
+      "hint": "mínimo {count} caracteres.",
+      "submit": "cambiar",
+      "submitting": "cambiando…",
+      "errors": {
+        "missingFields": "Rellena todos los campos.",
+        "mismatch": "Las dos contraseñas nuevas no coinciden.",
+        "wrongPassword": "La contraseña actual no es correcta.",
+        "samePassword": "La nueva tiene que ser distinta de la actual.",
+        "tooShort": "La contraseña es demasiado corta.",
+        "tooLong": "La contraseña es demasiado larga."
+      }
+    },
+    "menu": {
+      "changePassword": "contraseña",
+      "signOut": "salir"
+    }
+  },
   "labels": {
     "category": {
       "SWEATER": "Jersey",

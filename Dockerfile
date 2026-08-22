@@ -55,6 +55,13 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=prisma-cli /prisma-cli/node_modules ./node_modules
 
+# There is no HTTP route that creates a login, so the admin needs this
+# one script inside the running container:
+#   docker exec -it <container> node scripts/create-user.mjs --username <name>
+# It talks to SQLite and Argon2 directly, both of which the standalone
+# trace already put in ./node_modules.
+COPY --from=builder /app/scripts ./scripts
+
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 

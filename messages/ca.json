@@ -5,6 +5,47 @@
     "shortName": "Armari",
     "manifestDescription": "Gestor personal de roba"
   },
+  "auth": {
+    "login": {
+      "eyebrow": "accés",
+      "title": "entra",
+      "subtitle": "aquest armari és privat. entra amb el compte que t'han creat.",
+      "username": "usuari",
+      "password": "contrasenya",
+      "submit": "entrar",
+      "submitting": "entrant…",
+      "errors": {
+        "missingFields": "Omple l'usuari i la contrasenya.",
+        "invalidCredentials": "Usuari o contrasenya incorrectes.",
+        "lockedOut": "Massa intents. Torna-ho a provar d'aquí {seconds, plural, one {# segon} other {# segons}}.",
+        "unexpected": "No s'ha pogut completar l'entrada. Torna-ho a provar."
+      }
+    },
+    "changePassword": {
+      "eyebrow": "compte",
+      "title": "contrasenya",
+      "subtitle": "canvia la contrasenya quan vulguis.",
+      "forcedSubtitle": "la contrasenya que tens és temporal. tria'n una de nova per continuar.",
+      "current": "contrasenya actual",
+      "next": "contrasenya nova",
+      "confirmation": "repeteix la nova",
+      "hint": "mínim {count} caràcters.",
+      "submit": "canviar",
+      "submitting": "canviant…",
+      "errors": {
+        "missingFields": "Omple tots els camps.",
+        "mismatch": "Les dues contrasenyes noves no coincideixen.",
+        "wrongPassword": "La contrasenya actual no és correcta.",
+        "samePassword": "La nova ha de ser diferent de l'actual.",
+        "tooShort": "La contrasenya és massa curta.",
+        "tooLong": "La contrasenya és massa llarga."
+      }
+    },
+    "menu": {
+      "changePassword": "contrasenya",
+      "signOut": "sortir"
+    }
+  },
   "labels": {
     "category": {
       "SWEATER": "Jersei",

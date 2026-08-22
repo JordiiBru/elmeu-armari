@@ -7,14 +7,15 @@ import { useTheme } from "next-themes";
 import { useLocale, useTranslations } from "next-intl";
 import { locales, type Locale } from "@/i18n/config";
 import { setLocaleAction } from "@/i18n/actions";
+import { signOutAction } from "@/lib/auth/actions";
 import { Flag, Icon, IconButton, SegmentedControl, Text } from "@/components/ui";
 
 type Theme = "light" | "dark";
 
 /**
- * Everything that is *about* the app rather than in it: the two archive
- * screens, the theme and the language. When there are accounts, the
- * profile and the session are rows in this same list.
+ * Everything that is *about* the app rather than in it: the archive
+ * screens, the theme, the language and — since there are accounts — who
+ * you are signed in as and the way out.
  *
  * A menu hung off its own button rather than a `Sheet`. Sheets in this
  * app are for content — a garment, an outfit, a palette — and they take
@@ -38,19 +39,33 @@ function ThemeOption({ name, label }: { name: "sun" | "moon"; label: string }) {
   );
 }
 
-export function AppMenu() {
+export function AppMenu({
+  username,
+  locked,
+}: {
+  username: string | null;
+  locked: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
   const root = useRef<HTMLDivElement>(null);
   const t = useTranslations("menu");
+  const tAuth = useTranslations("auth.menu");
   const locale = useLocale();
   const router = useRouter();
   const [, startTransition] = useTransition();
 
-  const links = [
-    { href: "/stats", label: t("stats") },
-    { href: "/settings", label: t("settings") },
-  ];
+  // Signed out there is only the login screen behind every one of these,
+  // and while the password is still the temporary one the proxy sends
+  // them all back to the change screen. Either way the menu keeps the
+  // theme, the language and the way out, and drops the rest.
+  const links = username && !locked
+    ? [
+        { href: "/stats", label: t("stats") },
+        { href: "/settings", label: t("settings") },
+        { href: "/change-password", label: tAuth("changePassword") },
+      ]
+    : [];
 
   // The cookie is read on the server, so the screen only changes once the
   // action has landed and the tree is re-rendered against it.
@@ -159,6 +174,32 @@ export function AppMenu() {
                   className="shrink-0 gap-x-4"
                 />
               </div>
+
+              {/* The row this menu was always going to end with: who you
+                  are, and the way out. A plain form so signing out is a
+                  POST — a link would let a page you visit sign you out
+                  by embedding an image. */}
+              {username && (
+                <form
+                  action={signOutAction}
+                  className="flex min-h-11 items-center justify-between gap-4 px-4 py-2"
+                >
+                  <Text
+                    variant="caption"
+                    as="span"
+                    tone="secondary"
+                    className="min-w-0 truncate"
+                  >
+                    {username}
+                  </Text>
+                  <button
+                    type="submit"
+                    className="shrink-0 type-caption text-text-primary hover:text-text-secondary transition-colors duration-[var(--duration-base)] outline-none focus-visible:ring-1 focus-visible:ring-focus-ring"
+                  >
+                    {tAuth("signOut")}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </>

@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
+import { requireSession } from "@/lib/auth/api";
 import { findAllGarments } from "@/lib/prendas/service";
 
 export async function GET() {
+  const denied = await requireSession();
+  if (denied) return denied;
+
   const garments = await findAllGarments();
 
   const data = garments.map((g) => ({

@@ -142,3 +142,28 @@ enum Season {
   WINTER
   ALL_YEAR
 }
+
+model User {
+  id           String    @id @default(cuid())
+  /// Stored lower-cased: SQLite's unique index is case sensitive, and
+  /// "Jordi" and "jordi" must not be two accounts.
+  username     String    @unique
+  passwordHash String
+  mustChangePw Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+}
+
+/// One row per login attempt, successful or not. It is what the lockout
+/// reads: no Redis, no in-memory counter that a restart forgets. Never
+/// stores the password or its hash — username, IP and outcome only.
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  username  String
+  ip        String
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([username, createdAt])
+  @@index([ip, createdAt])
+}
