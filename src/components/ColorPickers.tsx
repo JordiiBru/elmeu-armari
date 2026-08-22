@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface Props {
   initialColors?: string[];
 }
 
 export function ColorPickers({ initialColors }: Props) {
+  const t = useTranslations("form");
   const [colors, setColors] = useState<string[]>(
     initialColors && initialColors.length > 0 ? initialColors : ["#000000"],
   );
@@ -42,7 +44,7 @@ export function ColorPickers({ initialColors }: Props) {
               }
               className="ml-auto type-caption hover:text-text-primary transition-colors active:scale-95"
             >
-              eliminar
+              {t("removeColor")}
             </button>
           )}
         </div>
@@ -52,7 +54,7 @@ export function ColorPickers({ initialColors }: Props) {
         onClick={() => setColors((prev) => [...prev, "#000000"])}
         className="group relative self-start font-serif italic text-sm text-text-secondary hover:text-text-primary transition-colors mt-1 active:scale-[0.98]"
       >
-        <span>+ afegir color</span>
+        <span>{t("addColor")}</span>
       </button>
     </div>
   );

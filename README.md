@@ -2,7 +2,7 @@
 
 A personal wardrobe manager. Catalogue your clothes with colours and photos, then discover which of the 348 Sanzo Wada colour palettes match combinations of the pieces you actually own.
 
-> UI is in Catalan by design. Everything else in this repo — code, docs, comments — is in English.
+> The UI speaks **Catalan, Spanish and English**, switchable from the header menu and defaulting to Catalan. Catalan is the source language: keys are written there first and `npm run typecheck` fails if another locale is missing one. Everything else in this repo — code, docs, comments — is in English.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16.2-black) ![React](https://img.shields.io/badge/React-19-blue) ![Prisma](https://img.shields.io/badge/Prisma-7-2D3748) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6) ![Tailwind](https://img.shields.io/badge/Tailwind-v4-06B6D4)
 
@@ -18,7 +18,8 @@ A personal wardrobe manager. Catalogue your clothes with colours and photos, the
 - **Worn-event log** — a day holds at most one outfit. Shoes, socks and accessories attach to the *day*, not to the outfit: shoes are a single slot (picking a new pair replaces the old one), accessories have no limit, and the picker preselects whatever you last wore that outfit with. History drives the "least recently worn" ranking.
 - **Laundry** (`/bugaderia`, one screen toggling between the clean pile and the basket via `?vista=cistell`) — clean/dirty state per garment for the washable categories (sweater, shirt, pants); shoes, socks and accessories are always available. Mark pieces dirty or clean in bulk from a one-tap grid. In "què em poso?" an outfit with a piece in the basket cannot be committed, sorts below the wearable ones in its group, and says so on its own face — picking a wearable one assigns it to today, and its pieces move to the basket once that day has passed, so changing your mind mid-day never soils clothes you didn't wear.
 - **Sanzo Wada palettes** (`/paleta`) — browse all 348 historical palettes by colour name. Garment colours are named by their nearest Sanzo colour wherever the interface needs to tell two pieces of the same kind apart.
-- **Home and menu** — the home is four doors on one axis (`Què em poso?`, `Armari`, `Bugaderia`, `Paletes`); everything *about* the app rather than in it lives behind the header's ellipsis: statistics, settings and the light/dark switch. That menu is where the profile, the session and the language switch land once there are accounts.
+- **Home and menu** — the home is four doors on one axis (`Què em poso?`, `Armari`, `Bugaderia`, `Paletes`); everything *about* the app rather than in it lives behind the header's ellipsis: statistics, settings, the light/dark switch and the language. That menu is where the profile and the session land once there are accounts.
+- **Languages** — català, castellà and english, picked from three flags in the header menu. The choice is a cookie, not a URL segment, so no link in the app changes and a saved PWA shortcut keeps working. Dates, weekday names and plurals follow the active locale; the Sanzo Wada colour names stay English in all three, the way a Pantone reference would.
 - **Statistics** (`/stats`) — breakdown by category, season, fit and texture.
 - **Import / export** (`/settings`) — download all garments as JSON, or as a ZIP bundle including garment photos; upload a previously exported file to restore.
 - **PWA manifest** — installable on mobile, custom icon and theme.
@@ -59,6 +60,11 @@ src/
       uploads/[filename]/    GET  serve stored garment photo
       garments/[id]/image/   PATCH/DELETE upload/remove photo
   components/                React components (kebab-cased UI role, PascalCase file)
+  i18n/
+    config.ts                Locale list, default, cookie name
+    messages.ts              Locale → messages map (the typecheck gate)
+    request.ts               Per-request locale, read off the cookie
+    actions.ts               Server action that writes the locale cookie
   lib/
     colors/
       index.ts               Sanzo Wada loader (348 palettes, named colours)
@@ -72,10 +78,9 @@ src/
       service.ts             Business logic
     prendas/
       types.ts               Enums, category constants, GarmentWithColors
-      labels.ts              Localised UI labels (single source of truth)
+      labels.ts              Label lookup for the free-string option fields
       filtering.ts           Grid filter predicates
-      validation.ts          Form validation
-      ui-strings.ts          Copy strings for forms/errors
+      validation.ts          Form validation (returns message keys, not sentences)
       repository.ts          Prisma access (garments + colors + seasons)
       service.ts             Business logic
     prisma.ts                Prisma singleton (better-sqlite3 driver adapter)
@@ -83,6 +88,10 @@ src/
     useSheetState.ts         Bottom-sheet open/close state hook
     useSwipeToClose.ts       Swipe-down gesture hook
     ui.ts                    Small UI utilities
+messages/
+  ca.json                    Catalan — the source of truth for keys
+  es.json                    Castellà
+  en.json                    English
 prisma/
   schema.prisma              Data model
   migrations/                SQL migrations

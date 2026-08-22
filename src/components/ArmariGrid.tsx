@@ -2,19 +2,13 @@
 
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { GarmentCard, AddGarmentCard } from "@/components/GarmentCard";
 import { filterGarments } from "@/lib/prendas/filtering";
 import type { GarmentState } from "@/lib/prendas/filtering";
 import type { GarmentWithColors, Category, Texture, Season } from "@/lib/prendas/types";
 import { CATEGORIES, SEASONS, ALL_FITS, TEXTURES, ALL_LENGTHS } from "@/lib/prendas/types";
-import {
-  CATEGORY_LABELS,
-  SEASON_LABELS,
-  FIT_LABELS,
-  TEXTURE_LABELS,
-  LENGTH_LABELS,
-} from "@/lib/prendas/labels";
-import { UI } from "@/lib/prendas/ui-strings";
+import { optionLabel } from "@/lib/prendas/labels";
 import { Input, Icon, EmptyState, TextButton } from "@/components/ui";
 
 interface Props {
@@ -73,6 +67,9 @@ function FilterRow({
 }
 
 export function ArmariGrid({ garments, defaultSeason }: Props) {
+  const t = useTranslations("armari");
+  const tLabel = useTranslations("labels");
+  const tLaundry = useTranslations("bugaderia.grid");
   const initialParams = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -203,7 +200,7 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
             className="group inline-flex items-baseline gap-3 type-caption hover:text-text-primary transition-colors"
             aria-expanded={filtersOpen}
           >
-            <span>filtres</span>
+            <span>{t("filters")}</span>
             {activeCount > 0 && (
               <span className="type-caption-strong tabular-nums">
                 {activeCount}
@@ -220,7 +217,7 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
           <span className="inline-flex items-baseline gap-2">
             {isAutoSeason && (
               <span className="font-serif italic text-xs text-text-secondary">
-                temporada actual
+                {t("autoSeason")}
               </span>
             )}
             <span className="type-caption tabular-nums">
@@ -239,83 +236,83 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="cerca per talla o nota"
+                placeholder={t("searchPlaceholder")}
               />
 
-              <FilterRow label="categoria">
+              <FilterRow label={t("rows.category")}>
                 {CATEGORIES.map((c) => (
                   <FilterTag
                     key={c}
                     active={categories.includes(c)}
                     onClick={() => toggleIn(setCategories, c)}
                   >
-                    {CATEGORY_LABELS[c]}
+                    {tLabel(`category.${c}`)}
                   </FilterTag>
                 ))}
               </FilterRow>
 
-              <FilterRow label="temporada">
+              <FilterRow label={t("rows.season")}>
                 {SEASONS.map((s) => (
                   <FilterTag
                     key={s}
                     active={seasons.includes(s)}
                     onClick={() => toggleSeason(s)}
                   >
-                    {SEASON_LABELS[s]}
+                    {tLabel(`season.${s}`)}
                   </FilterTag>
                 ))}
               </FilterRow>
 
-              <FilterRow label="fit">
+              <FilterRow label={t("rows.fit")}>
                 {ALL_FITS.map((f) => (
                   <FilterTag
                     key={f}
                     active={fits.includes(f)}
                     onClick={() => toggleIn(setFits, f)}
                   >
-                    {FIT_LABELS[f]}
+                    {optionLabel(tLabel, "fit", f)}
                   </FilterTag>
                 ))}
               </FilterRow>
 
-              <FilterRow label="textura">
-                {TEXTURES.map((t) => (
+              <FilterRow label={t("rows.texture")}>
+                {TEXTURES.map((tex) => (
                   <FilterTag
-                    key={t}
-                    active={textures.includes(t)}
-                    onClick={() => toggleIn(setTextures, t)}
+                    key={tex}
+                    active={textures.includes(tex)}
+                    onClick={() => toggleIn(setTextures, tex)}
                   >
-                    {TEXTURE_LABELS[t]}
+                    {tLabel(`texture.${tex}`)}
                   </FilterTag>
                 ))}
               </FilterRow>
 
-              <FilterRow label="llargada">
+              <FilterRow label={t("rows.length")}>
                 {ALL_LENGTHS.map((l) => (
                   <FilterTag
                     key={l}
                     active={lengths.includes(l)}
                     onClick={() => toggleIn(setLengths, l)}
                   >
-                    {LENGTH_LABELS[l]}
+                    {optionLabel(tLabel, "length", l)}
                   </FilterTag>
                 ))}
               </FilterRow>
 
-              <FilterRow label={UI.bugaderia.grid.state.toLowerCase()}>
+              <FilterRow label={t("rows.state")}>
                 {(["clean", "dirty"] as const).map((s) => (
                   <FilterTag
                     key={s}
                     active={states.includes(s)}
                     onClick={() => toggleIn(setStates, s)}
                   >
-                    {s === "clean" ? UI.bugaderia.grid.clean : UI.bugaderia.grid.dirty}
+                    {s === "clean" ? tLaundry("clean") : tLaundry("dirty")}
                   </FilterTag>
                 ))}
               </FilterRow>
 
               {uniqueColors.length > 0 && (
-                <FilterRow label="color">
+                <FilterRow label={t("rows.color")}>
                   {uniqueColors.map((hex) => {
                     const active = colors.includes(hex);
                     return (
@@ -324,7 +321,7 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
                         type="button"
                         onClick={() => toggleIn(setColors, hex)}
                         aria-pressed={active}
-                        aria-label={`Color ${hex}`}
+                        aria-label={t("colorFilter", { hex })}
                         title={hex}
                         className={`inline-block h-5 w-5 shrink-0 transition-[box-shadow] duration-[var(--duration-base)] ease-[var(--ease-standard)] ${
                           active
@@ -344,7 +341,7 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
                   onClick={clearAll}
                   className="self-start font-serif italic text-sm text-text-secondary hover:text-text-primary"
                 >
-                  {UI.buttons.clearFilters}
+                  {t("clearFilters")}
                 </button>
               )}
             </div>
@@ -358,12 +355,12 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          title={UI.grid.noResults}
-          hint="prova a retirar algun filtre."
+          title={t("noResults")}
+          hint={t("noResultsHint")}
           action={
             hasFilters && (
               <TextButton type="button" onClick={clearAll} tone="secondary">
-                netejar filtres
+                {t("clearFilters")}
               </TextButton>
             )
           }

@@ -2,12 +2,13 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { deleteOutfitAction, wearOutfitAction } from "@/app/outfits/actions";
-import { UI } from "@/lib/prendas/ui-strings";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { dirtyGarmentsOf } from "@/lib/bugaderia/laundry";
-import { formatLastWorn, lastWornExtras } from "@/lib/outfits/worn";
+import { lastWornExtras } from "@/lib/outfits/worn";
+import { useFormatLastWorn } from "@/lib/outfits/useLastWorn";
 import { PieceThumb } from "./PieceThumb";
 import { OutfitCollage, outfitSubtitle, paletteName, pieceLabel } from "./OutfitTile";
 import { WearGrids, WearTabs, useWearGroups, type WearTab } from "./WearPicker";
@@ -19,9 +20,11 @@ import {
   TextButton,
 } from "@/components/ui";
 
-function weekdayLabel(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("ca", {
+function weekdayLabel(iso: string, locale: string): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString(locale, {
     weekday: "long",
+    // The ISO string is already the day's key, minted at UTC midnight —
+    // reading it back in any other zone slides it by a day.
     timeZone: "UTC",
   });
 }
@@ -71,6 +74,11 @@ export function OutfitSheet({
   onChangeOutfit,
   onClear,
 }: Props) {
+  const t = useTranslations("outfits");
+  const tLabel = useTranslations("labels");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
+  const formatLastWorn = useFormatLastWorn();
   const [pending, startTransition] = useTransition();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
@@ -88,7 +96,7 @@ export function OutfitSheet({
   const [tab, setTab] = useState<WearTab>("shoes");
   const groups = useWearGroups(extraCandidates);
 
-  const title = outfitSubtitle(outfit) || outfit.name || "";
+  const title = outfitSubtitle(tLabel, outfit) || outfit.name || "";
   const blockedBy = dirtyGarmentsOf(outfit);
   const isToday = dayISO === todayISO;
   // The clean gate is only about today and the past: a shirt in the
@@ -135,8 +143,8 @@ export function OutfitSheet({
     outfit.wornEvents.length === 0
       ? null
       : outfit.wornEvents.length < 3
-        ? UI.outfits.deleteCost(outfit.wornEvents.length)
-        : UI.outfits.deleteCostMany;
+        ? t("deleteCost", { count: outfit.wornEvents.length })
+        : t("deleteCostMany");
 
   return (
     <Sheet
@@ -146,7 +154,7 @@ export function OutfitSheet({
       // used to resize under the tab bar every time you switched. Fixed
       // height, tabs pinned, grid scrolls.
       fill
-      label={`Outfit ${title}`}
+      label={t("sheetLabel", { title })}
       media={
         <OutfitCollage
           garments={outfit.garments}
@@ -197,13 +205,17 @@ export function OutfitSheet({
                 italic
                 className="font-serif lowercase text-warning"
               >
-                {UI.outfits.blockedReason(blockedBy.map(pieceLabel))}
+                {t("blockedReason", {
+                  pieces: blockedBy
+                    .map((g) => pieceLabel(tLabel, g))
+                    .join(t("piecesJoin")),
+                })}
               </Text>
               <Link
                 href="/bugaderia?vista=cistell"
                 className="font-serif italic type-small text-text-secondary underline underline-offset-4 hover:text-text-primary transition-colors duration-[var(--duration-base)]"
               >
-                {UI.outfits.goToRentar}
+                {t("goToRentar")}
               </Link>
             </Stack>
           ) : (
@@ -224,12 +236,12 @@ export function OutfitSheet({
             onClick={handleWear}
             disabled={pending || blocked}
             loading={pending}
-            loadingText={UI.outfits.saving}
+            loadingText={t("saving")}
             className="flex-shrink-0"
           >
             {isToday
-              ? UI.outfits.wearToday
-              : UI.outfits.wearOnDay(weekdayLabel(dayISO))}
+              ? t("wearToday")
+              : t("wearOnDay", { day: weekdayLabel(dayISO, locale) })}
           </Button>
         </div>
       }
@@ -257,7 +269,7 @@ export function OutfitSheet({
                 onClick={() => setConfirmingDelete(false)}
                 disabled={pending}
               >
-                {UI.outfits.cancel}
+                {tCommon("cancel")}
               </TextButton>
               <TextButton
                 type="button"
@@ -265,7 +277,7 @@ export function OutfitSheet({
                 onClick={handleDelete}
                 disabled={pending}
               >
-                {pending ? UI.outfits.deleting : UI.outfits.deleteConfirm}
+                {pending ? tCommon("deleting") : tCommon("deleteConfirm")}
               </TextButton>
             </div>
           </>
@@ -279,7 +291,7 @@ export function OutfitSheet({
                   onClick={onChangeOutfit}
                   disabled={pending}
                 >
-                  {UI.outfits.changeOutfit}
+                  {t("changeOutfit")}
                 </TextButton>
               )}
             </div>
@@ -290,7 +302,7 @@ export function OutfitSheet({
                 onClick={() => setConfirmingDelete(true)}
                 disabled={pending}
               >
-                {UI.outfits.delete}
+                {t("delete")}
               </TextButton>
             ) : (
               isCommitted &&
@@ -301,7 +313,7 @@ export function OutfitSheet({
                   onClick={onClear}
                   disabled={pending}
                 >
-                  {UI.outfits.removeFromDay}
+                  {t("removeFromDay")}
                 </TextButton>
               )
             )}

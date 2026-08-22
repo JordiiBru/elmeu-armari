@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter_Tight, Geist_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import SiteHeader from "@/components/SiteHeader";
 import { ToastProvider } from "@/components/ui";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -22,29 +24,36 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "El meu armari",
-  description: "Un estudi d'harmonia visual per al teu armari.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("app");
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
     <html
-      lang="ca"
+      lang={locale}
       suppressHydrationWarning
       className={`${fraunces.variable} ${interTight.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-text-primary">
-        <ThemeProvider>
-          <ToastProvider>
-            <SiteHeader />
-            <main className="flex-1 flex flex-col">{children}</main>
-          </ToastProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider>
+          <ThemeProvider>
+            <ToastProvider>
+              <SiteHeader />
+              <main className="flex-1 flex flex-col">{children}</main>
+            </ToastProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

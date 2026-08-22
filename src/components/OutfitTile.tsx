@@ -1,22 +1,26 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
-import { CATEGORY_LABELS, SUBTYPE_LABELS } from "@/lib/prendas/labels";
+import { optionLabel, type LabelsTranslator } from "@/lib/prendas/labels";
 import { isWearable } from "@/lib/bugaderia/laundry";
 import { nameOf, namedColors } from "@/lib/colors";
 import { oklchDistance } from "@/lib/outfits/color-matching";
-import { UI } from "@/lib/prendas/ui-strings";
 import { PieceThumb } from "./PieceThumb";
 import { Card, Text } from "@/components/ui";
 
 /** A piece reads better by its subtype ("polo", "vaquers", "anell") than
- * by its category — every accessory shares the same category label. */
-export function pieceLabel(garment: GarmentWithColors): string {
-  return (
-    (garment.subtype ? SUBTYPE_LABELS[garment.subtype] : null) ??
-    CATEGORY_LABELS[garment.category]
-  );
+ * by its category — every accessory shares the same category label.
+ *
+ * Takes the translator rather than calling the hook: the callers that
+ * need it are already holding one, and this is used inside `.map()` and
+ * inside `useMemo`, where a hook cannot go.
+ */
+export function pieceLabel(t: LabelsTranslator, garment: GarmentWithColors): string {
+  return garment.subtype
+    ? optionLabel(t, "subtype", garment.subtype)
+    : t(`category.${garment.category}`);
 }
 
 /**
@@ -67,8 +71,8 @@ export function pieceTint(garment: GarmentWithColors): string | null {
 
 /** The pieces an outfit is made of: "polo · vaquers". No extras — they
  * belong to the day, not to the outfit. */
-export function outfitSubtitle(outfit: SavedOutfit): string {
-  return outfit.garments.map(pieceLabel).join(" · ");
+export function outfitSubtitle(t: LabelsTranslator, outfit: SavedOutfit): string {
+  return outfit.garments.map((g) => pieceLabel(t, g)).join(" · ");
 }
 
 /**
@@ -186,14 +190,17 @@ export function OutfitTile({
   mark?: string | null;
   onOpen: () => void;
 }) {
+  const t = useTranslations("labels");
+  const tOutfits = useTranslations("outfits");
+
   // The clothes name the outfit: they are what tells two looks apart at a
   // glance, and with subtypes they read as a garment rail ("polo · vaquers")
   // rather than as a taxonomy.
-  const title = outfitSubtitle(outfit) || outfit.name || "";
+  const title = outfitSubtitle(t, outfit) || outfit.name || "";
 
   // Which piece is missing is a detail for the sheet: spelled out here it
   // wrapped the caption onto two lines over the photograph.
-  const stateMark = isWearable(outfit) ? null : UI.outfits.inBasket;
+  const stateMark = isWearable(outfit) ? null : tOutfits("inBasket");
 
   return (
     <Card

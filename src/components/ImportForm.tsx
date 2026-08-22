@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   Button,
   TextButton,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui";
 
 export function ImportForm() {
+  const t = useTranslations("settings.import");
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [mode, setMode] = useState<"merge" | "replace">("merge");
@@ -38,18 +40,15 @@ export function ImportForm() {
       const data = (await res.json()) as { imported?: number; error?: string };
 
       if (!res.ok) {
-        toast.show(data.error ?? "Error desconegut", "danger");
+        toast.show(data.error ?? t("unknownError"), "danger");
       } else {
-        toast.show(
-          `${data.imported} peces importades correctament.`,
-          "success",
-        );
+        toast.show(t("success", { count: data.imported ?? 0 }), "success");
         if (inputRef.current) inputRef.current.value = "";
         setFileName(null);
         router.refresh();
       }
     } catch {
-      toast.show("Fitxer invàlid o error de xarxa.", "danger");
+      toast.show(t("networkError"), "danger");
     } finally {
       setLoading(false);
     }
@@ -58,26 +57,22 @@ export function ImportForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <Field
-        label="mode"
-        hint={
-          mode === "merge"
-            ? "afegeix les peces sense esborrar les existents."
-            : "esborra tot l'arxiu i el reimporta des de zero."
-        }
+        label={t("modeLabel")}
+        hint={mode === "merge" ? t("mergeHint") : t("replaceHint")}
       >
         <SegmentedControl
           value={mode}
           onChange={setMode}
-          ariaLabel="Mode d'importació"
+          ariaLabel={t("modeAriaLabel")}
           options={[
-            { value: "merge", label: "fusionar" },
-            { value: "replace", label: "reemplaçar" },
+            { value: "merge", label: t("merge") },
+            { value: "replace", label: t("replace") },
           ]}
         />
       </Field>
 
       <Stack gap={3}>
-        <Text variant="caption" as="span">fitxer</Text>
+        <Text variant="caption" as="span">{t("fileLabel")}</Text>
         <input
           ref={inputRef}
           type="file"
@@ -88,7 +83,7 @@ export function ImportForm() {
         />
         <div className="flex items-center gap-6">
           <TextButton type="button" onClick={() => inputRef.current?.click()}>
-            {fileName ?? "seleccionar fitxer"}
+            {fileName ?? t("chooseFile")}
           </TextButton>
           <Button
             type="submit"
@@ -96,9 +91,9 @@ export function ImportForm() {
             size="md"
             disabled={!fileName}
             loading={loading}
-            loadingText="important…"
+            loadingText={t("submitting")}
           >
-            importar
+            {t("submit")}
           </Button>
         </div>
       </Stack>

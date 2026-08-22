@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { editGarment } from "@/lib/prendas/service";
 import { validateGarmentForm } from "@/lib/prendas/validation";
+import type { ValidationError } from "@/lib/prendas/validation";
 
-export type ActionState = { error: string } | null;
+export type ActionState = { error: ValidationError } | null;
 
 export async function updateGarmentAction(
   id: string,

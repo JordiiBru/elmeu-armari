@@ -1,14 +1,14 @@
 "use client";
 
 import { useCallback, useState, useMemo, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette, OutfitGroup } from "@/lib/outfits/types";
 import { generateOutfitGroupsForGarment } from "@/lib/outfits/engine";
-import { CATEGORY_LABELS, FIT_LABELS } from "@/lib/prendas/labels";
+import { optionLabel } from "@/lib/prendas/labels";
 import { saveOutfitAction } from "@/app/outfits/actions";
 import { outfitKey } from "@/lib/outfits/key";
 import { OutfitGroupCard } from "./OutfitCard";
-import { UI } from "@/lib/prendas/ui-strings";
 import { Sheet, TextButton, Text, Stack, Icon } from "@/components/ui";
 
 const PAGE_SIZE = 6;
@@ -56,6 +56,10 @@ export function OutfitBottomSheet({
   onBack,
   onClose,
 }: Props) {
+  const t = useTranslations("combine");
+  const tLabel = useTranslations("labels");
+  const tModal = useTranslations("modal");
+  const tOutfits = useTranslations("outfits");
   const [initial] = useState(() =>
     computeInitial(garment, allGarments, palettes),
   );
@@ -143,7 +147,7 @@ export function OutfitBottomSheet({
     <Sheet
       onClose={onClose}
       size="lg"
-      label={`Combinacions per ${CATEGORY_LABELS[garment.category]}`}
+      label={t("sheetLabel", { category: tLabel(`category.${garment.category}`) })}
       media={
         <div className="flex h-full w-full">
           {garment.colors.map((c) => (
@@ -164,14 +168,14 @@ export function OutfitBottomSheet({
         // left, which reads as the popup reopening on you.
         <div className="flex items-start justify-between gap-3">
           <Stack gap={1}>
-            <Text variant="caption">combinar</Text>
+            <Text variant="caption">{t("eyebrow")}</Text>
             <h2 className="type-title leading-tight">
-              {CATEGORY_LABELS[garment.category]}
+              {tLabel(`category.${garment.category}`)}
             </h2>
             <Text variant="small" italic tone="secondary" className="font-serif">
               {[
-                garment.fit ? FIT_LABELS[garment.fit] : null,
-                garment.size ? `talla ${garment.size}` : null,
+                garment.fit ? optionLabel(tLabel, "fit", garment.fit) : null,
+                garment.size ? tModal("size", { size: garment.size }) : null,
                 garment.notes,
               ]
                 .filter(Boolean)
@@ -180,7 +184,7 @@ export function OutfitBottomSheet({
           </Stack>
           {onBack && (
             <TextButton type="button" tone="secondary" onClick={onBack}>
-              {UI.outfits.back}
+              {tOutfits("back")}
             </TextButton>
           )}
         </div>
@@ -192,7 +196,7 @@ export function OutfitBottomSheet({
               active={pieceFilter === null}
               onClick={() => setPieceFilter(null)}
             >
-              totes
+              {t("all")}
             </PieceFilterTag>
             {availablePieceCounts.map((n) => (
               <PieceFilterTag
@@ -200,7 +204,7 @@ export function OutfitBottomSheet({
                 active={pieceFilter === n}
                 onClick={() => setPieceFilter(n)}
               >
-                {n} peces
+                {t("pieces", { count: n })}
               </PieceFilterTag>
             ))}
           </div>
@@ -210,7 +214,7 @@ export function OutfitBottomSheet({
       {visibleGroups.length === 0 && pieceFilter !== null ? (
         <div className="py-8 text-center flex flex-col gap-4 items-center">
           <Text italic tone="secondary" className="font-serif">
-            no hi ha combinacions de {pieceFilter} peces carregades.
+            {t("emptyFiltered", { count: pieceFilter })}
           </Text>
           {hasMore && !loading && (
             <TextButton
@@ -218,20 +222,19 @@ export function OutfitBottomSheet({
               onClick={() => loadMore(groups.length)}
               className="self-center mt-4"
             >
-              carregar més
+              {t("loadMore")}
             </TextButton>
           )}
         </div>
       ) : ordered.length === 0 ? (
         <Text italic tone="secondary" className="font-serif text-center py-8">
-          cap combinació trobada per a aquesta peça.
+          {t("empty")}
         </Text>
       ) : (
         <>
           <Text variant="caption" tabular as="p">
-            {visibleGroups.length}{" "}
-            {visibleGroups.length === 1 ? "combinació" : "combinacions"}
-            {pieceFilter !== null && ` · ${pieceFilter} peces`}
+            {t("count", { count: visibleGroups.length })}
+            {pieceFilter !== null && ` · ${t("pieces", { count: pieceFilter })}`}
           </Text>
           <div className="flex flex-col gap-4">
             {visibleGroups.map((group, i) => (
@@ -269,7 +272,7 @@ export function OutfitBottomSheet({
               onClick={() => loadMore(groups.length)}
               className="self-center mt-4 inline-flex items-center gap-2"
             >
-              <span>mostrar més combinacions</span>
+              <span>{t("showMore")}</span>
               <Icon name="arrow-right" size={14} />
             </TextButton>
           )}

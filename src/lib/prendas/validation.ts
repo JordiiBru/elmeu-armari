@@ -10,11 +10,22 @@ import {
   PATTERNS_BY_CATEGORY,
   CATEGORIES_WITH_OPTIONAL_COLOR,
 } from "./types";
-import { UI } from "./ui-strings";
+
+/**
+ * A key under the `errors` namespace, not a sentence. Validation runs on
+ * the server inside a Server Action, where the request's locale is known
+ * but the form that renders the message is not — so it names the message
+ * and lets the form translate it.
+ */
+export type ValidationError =
+  | "requiredFields"
+  | "minOneSeason"
+  | "minOneColor"
+  | "invalidColor";
 
 export type ValidationResult =
   | { ok: true; data: GarmentInput }
-  | { ok: false; error: string; field?: keyof GarmentInput };
+  | { ok: false; error: ValidationError; field?: keyof GarmentInput };
 
 export function isHex(s: string): boolean {
   return /^#[0-9a-fA-F]{6}$/.test(s);
@@ -22,7 +33,7 @@ export function isHex(s: string): boolean {
 
 type PickResult<T extends string> =
   | { ok: true; value: T | null }
-  | { ok: false; error: string; field: keyof GarmentInput };
+  | { ok: false; error: ValidationError; field: keyof GarmentInput };
 
 // A field is "not applicable" for a category when its valid-values list is
 // empty (e.g. fit for ACCESSORI): it must then be absent from the form.
@@ -35,11 +46,11 @@ function pickOptional<T extends string>(
   if (validValues.length === 0) {
     return value === null
       ? { ok: true, value: null }
-      : { ok: false, error: UI.errors.requiredFields, field };
+      : { ok: false, error: "requiredFields", field };
   }
   return validValues.includes(value as T)
     ? { ok: true, value: value as T }
-    : { ok: false, error: UI.errors.requiredFields, field };
+    : { ok: false, error: "requiredFields", field };
 }
 
 export function validateGarmentForm(formData: FormData): ValidationResult {
@@ -54,7 +65,7 @@ export function validateGarmentForm(formData: FormData): ValidationResult {
   const seasons = formData.getAll("season") as Season[];
   const hexColors = formData.getAll("color") as string[];
 
-  if (!CATEGORIES.includes(category)) return { ok: false, error: UI.errors.requiredFields, field: "category" };
+  if (!CATEGORIES.includes(category)) return { ok: false, error: "requiredFields", field: "category" };
 
   const textureResult = pickOptional<Texture>(texture, TEXTURES_BY_CATEGORY[category], "texture");
   if (!textureResult.ok) return textureResult;
@@ -74,12 +85,12 @@ export function validateGarmentForm(formData: FormData): ValidationResult {
   const lengthResult = pickOptional(length, LENGTHS_BY_CATEGORY[category], "length");
   if (!lengthResult.ok) return lengthResult;
 
-  if (seasons.length === 0) return { ok: false, error: UI.errors.minOneSeason, field: "seasons" };
-  if (!seasons.every((s) => SEASONS.includes(s))) return { ok: false, error: UI.errors.minOneSeason, field: "seasons" };
+  if (seasons.length === 0) return { ok: false, error: "minOneSeason", field: "seasons" };
+  if (!seasons.every((s) => SEASONS.includes(s))) return { ok: false, error: "minOneSeason", field: "seasons" };
 
   const colorRequired = !CATEGORIES_WITH_OPTIONAL_COLOR.has(category);
-  if (colorRequired && hexColors.length === 0) return { ok: false, error: UI.errors.minOneColor, field: "hexColors" };
-  if (!hexColors.every(isHex)) return { ok: false, error: UI.errors.invalidColor, field: "hexColors" };
+  if (colorRequired && hexColors.length === 0) return { ok: false, error: "minOneColor", field: "hexColors" };
+  if (!hexColors.every(isHex)) return { ok: false, error: "invalidColor", field: "hexColors" };
 
   // Normalize + dedupe so the Color [garmentId, hex] unique constraint
   // can never fail at write time from picker duplicates or case variants.

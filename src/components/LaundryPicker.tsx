@@ -1,18 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import type { GarmentWithColors } from "@/lib/prendas/types";
-import { UI } from "@/lib/prendas/ui-strings";
 import { markDirtyAction, markCleanAction } from "@/app/bugaderia/actions";
 import { PieceThumb } from "./PieceThumb";
 import { Button, TextButton, IconButton, Icon, EmptyState } from "@/components/ui";
 
-type Mode = "soil" | "wash";
-
-const COPY = {
-  soil: UI.bugaderia.picker.soil,
-  wash: UI.bugaderia.picker.wash,
-};
+export type Mode = "soil" | "wash";
 
 function GarmentPickCard({
   garment,
@@ -55,7 +50,7 @@ export function LaundryPicker({
   mode: Mode;
   garments: GarmentWithColors[];
 }) {
-  const copy = COPY[mode];
+  const t = useTranslations("bugaderia.picker");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
 
@@ -90,7 +85,7 @@ export function LaundryPicker({
   };
 
   if (garments.length === 0) {
-    return <EmptyState title={copy.empty} />;
+    return <EmptyState title={t(`${mode}.empty`)} />;
   }
 
   return (
@@ -111,7 +106,7 @@ export function LaundryPicker({
 
       {mode === "wash" && (
         <TextButton type="button" tone="secondary" onClick={selectAll} className="self-start">
-          {UI.bugaderia.picker.wash.didLaundry}
+          {t("wash.didLaundry")}
         </TextButton>
       )}
 
@@ -131,7 +126,7 @@ export function LaundryPicker({
               type="button"
               onClick={clearSelection}
               disabled={pending}
-              label={UI.bugaderia.picker.clearSelection}
+              label={t("clearSelection")}
               className="border border-border text-danger hover:border-danger hover:text-danger"
             >
               <Icon name="close" size={18} />
@@ -141,12 +136,12 @@ export function LaundryPicker({
               size="lg"
               onClick={handleSubmit}
               loading={pending}
-              loadingText={copy.submitting}
+              loadingText={t(`${mode}.submitting`)}
             >
               {/* One text run: as separate flex children the browser trims
                   the space around the separator. */}
               <span className="tabular-nums">
-                {copy.submit} · {selected.size}
+                {t(`${mode}.submit`)} · {selected.size}
               </span>
             </Button>
           </div>

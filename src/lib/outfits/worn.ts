@@ -10,15 +10,6 @@ export function wornRank(events: WornDay[]): number {
   return events.length === 0 ? -Infinity : events[0].date.getTime();
 }
 
-/** Single source of the "fa X dies" / "mai portat" phrasing. */
-export function formatLastWorn(events: WornDay[]): string {
-  if (events.length === 0) return "mai portat";
-  const days = Math.floor((Date.now() - events[0].date.getTime()) / (1000 * 60 * 60 * 24));
-  if (days <= 0) return "portat avui";
-  if (days === 1) return "portat fa 1 dia";
-  return `portat fa ${days} dies`;
-}
-
 /**
  * What this outfit was last worn with, used to preselect the picker.
  * This is what replaces the deleted outfit variants: the outfit

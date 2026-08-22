@@ -3,11 +3,11 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { isWearable } from "@/lib/bugaderia/laundry";
 import { groupOutfitsBy } from "@/lib/outfits/grouping";
-import { UI } from "@/lib/prendas/ui-strings";
 import { OutfitTile, pieceTint } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
 import { OutfitBottomSheet } from "./OutfitBottomSheet";
@@ -77,6 +77,7 @@ export function OutfitLibrary({
   todayISO: string;
   todayOutfitId: string | null;
 }) {
+  const t = useTranslations("outfits");
   const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
   const [axis, setAxis] = useState<Axis>(AXES[0]);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -122,14 +123,14 @@ export function OutfitLibrary({
   if (outfits.length === 0) {
     return (
       <EmptyState
-        title={UI.outfits.emptyNoOutfitsBrowse}
-        hint={UI.outfits.emptyNoOutfitsHint}
+        title={t("emptyNoOutfitsBrowse")}
+        hint={t("emptyNoOutfitsHint")}
         action={
           <Link
             href="/armari"
             className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
           >
-            {UI.outfits.goToArmari}
+            {t("goToArmari")}
           </Link>
         }
       />
@@ -141,12 +142,12 @@ export function OutfitLibrary({
       <SegmentedControl<Axis>
         value={axis}
         onChange={setAxis}
-        ariaLabel={UI.outfits.axisLabel}
-        options={AXES.map((c) => ({ value: c, label: UI.outfits.axes[c] }))}
+        ariaLabel={t("axisLabel")}
+        options={AXES.map((c) => ({ value: c, label: t(`axes.${c}`) }))}
       />
 
       {groups.length === 0 ? (
-        <EmptyState title={UI.outfits.axisEmpty} />
+        <EmptyState title={t("axisEmpty")} />
       ) : (
         // Keyed on the axis so switching tab re-enters instead of
         // swapping dry, the same way the shoe picker does.
@@ -208,7 +209,7 @@ export function OutfitLibrary({
                             outfit={outfit}
                             palette={paletteMap.get(outfit.paletteId) ?? null}
                             index={numbers.get(outfit.id) ?? 0}
-                            mark={outfit.id === todayOutfitId ? UI.outfits.today : null}
+                            mark={outfit.id === todayOutfitId ? t("today") : null}
                             onOpen={() => setOpenOutfitId(outfit.id)}
                           />
                         ))}
@@ -220,7 +221,7 @@ export function OutfitLibrary({
                           onClick={() => setCombineFor(group.piece)}
                           className="self-start"
                         >
-                          {UI.outfits.seeMore}
+                          {t("seeMore")}
                           <Icon name="arrow-right" size={12} />
                         </TextButton>
                       )}

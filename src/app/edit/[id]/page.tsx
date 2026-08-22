@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { findGarmentById } from "@/lib/prendas/service";
 import { EditForm } from "@/components/EditForm";
 import { PageContainer, SectionHeader } from "@/components/ui";
@@ -9,14 +10,17 @@ export default async function EditPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const garment = await findGarmentById(id);
+  const [t, garment] = await Promise.all([
+    getTranslations("edit"),
+    findGarmentById(id),
+  ]);
   if (!garment) notFound();
 
   return (
     <PageContainer width="narrow">
       <SectionHeader
-        eyebrow="editar peça"
-        title="revisar la fitxa"
+        eyebrow={t("eyebrow")}
+        title={t("title")}
         level="title-xl"
       />
       <EditForm

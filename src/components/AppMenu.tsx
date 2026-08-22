@@ -1,22 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { UI } from "@/lib/prendas/ui-strings";
-import { Icon, IconButton, SegmentedControl, Text } from "@/components/ui";
+import { useLocale, useTranslations } from "next-intl";
+import { locales, type Locale } from "@/i18n/config";
+import { setLocaleAction } from "@/i18n/actions";
+import { Flag, Icon, IconButton, SegmentedControl, Text } from "@/components/ui";
 
 type Theme = "light" | "dark";
 
-const LINKS = [
-  { href: "/stats", label: UI.menu.stats },
-  { href: "/settings", label: UI.menu.settings },
-];
-
 /**
  * Everything that is *about* the app rather than in it: the two archive
- * screens and the theme. When there are accounts, the profile, the
- * session and the language switch are rows in this same list.
+ * screens, the theme and the language. When there are accounts, the
+ * profile and the session are rows in this same list.
  *
  * A menu hung off its own button rather than a `Sheet`. Sheets in this
  * app are for content — a garment, an outfit, a palette — and they take
@@ -44,6 +42,24 @@ export function AppMenu() {
   const [open, setOpen] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
   const root = useRef<HTMLDivElement>(null);
+  const t = useTranslations("menu");
+  const locale = useLocale();
+  const router = useRouter();
+  const [, startTransition] = useTransition();
+
+  const links = [
+    { href: "/stats", label: t("stats") },
+    { href: "/settings", label: t("settings") },
+  ];
+
+  // The cookie is read on the server, so the screen only changes once the
+  // action has landed and the tree is re-rendered against it.
+  const changeLocale = (next: Locale) => {
+    startTransition(async () => {
+      await setLocaleAction(next);
+      router.refresh();
+    });
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -57,7 +73,7 @@ export function AppMenu() {
   return (
     <div ref={root} className="relative">
       <IconButton
-        label={UI.menu.label}
+        label={t("label")}
         size="sm"
         aria-expanded={open}
         aria-haspopup="menu"
@@ -83,7 +99,7 @@ export function AppMenu() {
             className="panel-enter absolute right-0 top-full z-50 mt-2 w-56 border border-border bg-floating shadow-[var(--shadow-2)]"
           >
             <div className="flex flex-col divide-y divide-border-subtle">
-              {LINKS.map((entry) => (
+              {links.map((entry) => (
                 <Link
                   key={entry.href}
                   href={entry.href}
@@ -100,7 +116,7 @@ export function AppMenu() {
 
               <div className="flex min-h-11 items-center justify-between gap-4 px-4 py-2">
                 <Text variant="caption" as="span">
-                  {UI.menu.theme}
+                  {t("theme")}
                 </Text>
                 {/* A sun and a moon say it faster than two words, and the
                     control already marks the active one twice: full-ink
@@ -109,11 +125,30 @@ export function AppMenu() {
                 <SegmentedControl<Theme>
                   value={resolvedTheme === "dark" ? "dark" : "light"}
                   onChange={setTheme}
-                  ariaLabel={UI.menu.theme}
+                  ariaLabel={t("theme")}
                   options={[
-                    { value: "light", label: <ThemeOption name="sun" label={UI.menu.themeLight} /> },
-                    { value: "dark", label: <ThemeOption name="moon" label={UI.menu.themeDark} /> },
+                    { value: "light", label: <ThemeOption name="sun" label={t("themeLight")} /> },
+                    { value: "dark", label: <ThemeOption name="moon" label={t("themeDark")} /> },
                   ]}
+                  className="gap-x-4"
+                />
+              </div>
+
+              {/* Built like the theme row above it, which is what this row
+                  was left space for. Three flags rather than three codes:
+                  the row is recognised before it is read. */}
+              <div className="flex min-h-11 items-center justify-between gap-4 px-4 py-2">
+                <Text variant="caption" as="span">
+                  {t("language")}
+                </Text>
+                <SegmentedControl<Locale>
+                  value={locale}
+                  onChange={changeLocale}
+                  ariaLabel={t("language")}
+                  options={locales.map((code) => ({
+                    value: code,
+                    label: <Flag locale={code} label={t(`languages.${code}`)} />,
+                  }))}
                   className="gap-x-4"
                 />
               </div>

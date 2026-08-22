@@ -1,22 +1,24 @@
+import { getTranslations } from "next-intl/server";
 import { ImportForm } from "@/components/ImportForm";
 import { findAllGarments } from "@/lib/prendas/service";
 import { PageContainer, SectionHeader, Stack, Text, Icon } from "@/components/ui";
 
 export default async function SettingsPage() {
+  const t = await getTranslations("settings");
   const garments = await findAllGarments();
 
   return (
     <PageContainer width="form">
-      <SectionHeader eyebrow="arxiu" title="configuració" level="title-xl" />
+      <SectionHeader eyebrow={t("eyebrow")} title={t("title")} level="title-xl" />
 
       <div className="flex flex-col divide-y divide-border">
         <Stack as="section" gap={4} className="py-10">
-          <Text variant="caption" as="h2">exportar</Text>
+          <Text variant="caption" as="h2">{t("export.title")}</Text>
           <Text variant="subtitle" tone="secondary" as="p" className="max-w-md">
-            descarrega totes les teves peces en format json. útil com a còpia de seguretat o per migrar a un altre dispositiu.
+            {t("export.description")}
           </Text>
           <Text variant="caption" tabular>
-            {garments.length} peces a l&apos;arxiu
+            {t("export.count", { count: garments.length })}
           </Text>
           <div className="flex flex-col gap-3">
             <a
@@ -24,7 +26,7 @@ export default async function SettingsPage() {
               download
               className="group relative self-start type-subtitle text-text-primary inline-flex items-center gap-2 active:scale-[0.98]"
             >
-              <span>descarregar json</span>
+              <span>{t("export.json")}</span>
               <Icon name="arrow-right" size={14} />
               <span
                 aria-hidden
@@ -36,7 +38,7 @@ export default async function SettingsPage() {
               download
               className="group relative self-start type-subtitle text-text-primary inline-flex items-center gap-2 active:scale-[0.98]"
             >
-              <span>descarregar zip (amb fotos)</span>
+              <span>{t("export.zip")}</span>
               <Icon name="arrow-right" size={14} />
               <span
                 aria-hidden
@@ -47,9 +49,9 @@ export default async function SettingsPage() {
         </Stack>
 
         <Stack as="section" gap={4} className="py-10">
-          <Text variant="caption" as="h2">importar</Text>
+          <Text variant="caption" as="h2">{t("import.title")}</Text>
           <Text variant="subtitle" tone="secondary" as="p" className="max-w-md">
-            puja un fitxer json exportat prèviament.
+            {t("import.description")}
           </Text>
           <ImportForm />
         </Stack>

@@ -27,9 +27,21 @@ Rules:
 
 ## UI text
 
-- All UI strings are in **Catalan**. Code, comments and PR descriptions are in **English**.
-- Category / texture / fit / pattern / season labels always come from `src/lib/prendas/labels.ts`. **Never inline a translated string in a component.** If a label is missing, add it there.
-- Copy for forms, errors and empty states lives in `src/lib/prendas/ui-strings.ts`.
+Three locales — **català**, **castellà**, **english** — through `next-intl`, with no `[locale]` URL segment: the choice is the `locale` cookie, read in `src/i18n/request.ts`. Code, comments and PR descriptions are in **English**.
+
+- **Strings live in `messages/<locale>.json`, never in a component.** Read them with `useTranslations` (client and non-async server components) or `getTranslations` (async ones).
+- **Catalan is the source language.** Write `messages/ca.json` first; it is what `AppConfig.Messages` is typed against, so an unknown key is a type error. `src/i18n/messages.ts` types `es` and `en` against `ca`, which makes a missing translation fail `npm run typecheck` — a CI gate. Do not hand-translate one locale and leave the others for later; the build will not let you.
+- **Write whole sentences, never concatenate.** `t('you have') + count + t('items')` produces broken translations *silently*, because word order differs between languages and there is nothing to fail on. The holes go inside the message.
+- **Plurals in ICU, not ternaries**: `"{count, plural, one {# combinació} other {# combinacions}}"`. One message instead of the same ternary copied into three components.
+- **Dates and numbers through the active locale**, never a hardcoded `"ca"`. `useLocale()` / `getLocale()` gives it; day keys are still read back with `timeZone: "UTC"` (see *Days and time*).
+- `fit`, `subtype` and `length` are free strings in the data model, so they go through `optionLabel()` in `src/lib/prendas/labels.ts`, which falls back to the raw value for a key this build no longer has. Category, texture, pattern and season are real unions and index `labels` directly.
+- Validation returns **message keys**, not sentences (`ValidationError` in `src/lib/prendas/validation.ts`): it runs on the server, where the form that renders the message is not in scope.
+- **Sanzo Wada colour names stay English in every locale.** They are the historic names from the 1933 dictionary, not UI copy — the interface leans on them to tell two shirts of the same kind apart.
+- The three flags in the header menu are inline SVGs in `src/components/ui/Flag.tsx`, not emoji: flag emoji do not render as flags on Windows, and `Icon` is stroke-only and never coloured. Catalan gets the Senyera — there is no country flag for a language, and that is a deliberate choice rather than a default.
+
+## Days and time
+
+The wardrobe is in Barcelona, the container runs on UTC. **`today()` in `src/lib/outfits/week.ts` is the only way to ask what day it is** — never `dayKey(new Date())`, which reads the instant's UTC date and therefore kept yesterday until 02:00 local in summer. Stored days are still UTC-midnight keys, so anything reading one back formats it with `timeZone: "UTC"`; what those keys *name* was already settled in `APP_TIME_ZONE`. Elapsed-day counts go through `daysBetween()`, not a millisecond subtraction.
 
 ## Data model
 
@@ -90,7 +102,8 @@ Individual gates: `npm run lint`, `npm run typecheck`, `npm run build`. `npm run
 ## What not to do
 
 - Do not import `prisma` outside `repository.ts`.
-- Do not add translated strings inline in components. Use `labels.ts` / `ui-strings.ts`.
+- Do not add translated strings inline in components. Use `messages/<locale>.json`, all three of them.
+- Do not call `dayKey(new Date())` or `new Date()` to find out what day it is. Use `today()`.
 - Do not add `useEffect` to fetch data. Use Server Components + Server Actions.
 - Do not switch the Prisma client type. The driver adapter is a deliberate choice.
 - Do not commit `dev.db` changes. It is gitignored for a reason; if you accidentally staged it, unstage.

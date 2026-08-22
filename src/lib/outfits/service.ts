@@ -17,7 +17,7 @@ import { sortByWardrobeOrder } from "@/lib/prendas/filtering";
 import { AUTO_SOIL_CATEGORIES, EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { dirtyGarmentsOf } from "@/lib/bugaderia/laundry";
 import { palettes } from "@/lib/colors";
-import { dayKey, addDays, dayToISO } from "./week";
+import { dayKey, addDays, dayToISO, today } from "./week";
 import { outfitKey } from "./key";
 import type { SavedOutfit, WeekDayPlan } from "./types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
@@ -94,7 +94,7 @@ export async function wearOutfit(
   if (!outfit) throw new Error(`Outfit not found: ${outfitId}`);
 
   const day = dayKey(date);
-  if (day.getTime() <= dayKey(new Date()).getTime()) {
+  if (day.getTime() <= today().getTime()) {
     const dirty = dirtyGarmentsOf(outfit);
     if (dirty.length > 0) {
       throw new Error(
@@ -138,7 +138,7 @@ export async function unassignDay(date: Date) {
  * ever settled once, strictly after it ends.
  */
 export async function settlePastWornEvents(): Promise<number> {
-  const events = await findUnsettledPastWornEvents(dayKey(new Date()));
+  const events = await findUnsettledPastWornEvents(today());
   for (const event of events) {
     // Only what one wear actually soils. Trousers are washable but are
     // not dirtied by having been worn — that stays a manual decision.
@@ -167,7 +167,7 @@ export async function findTodayWorn(): Promise<{
   outfitId: string;
   extras: GarmentWithColors[];
 } | null> {
-  const event = await findWornEventForDay(dayKey(new Date()));
+  const event = await findWornEventForDay(today());
   if (!event) return null;
   return {
     outfitId: event.outfitId,

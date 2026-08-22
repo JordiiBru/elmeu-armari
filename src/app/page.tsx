@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { palettes } from "@/lib/colors";
 import { Stack, Text, Heading } from "@/components/ui";
 
@@ -15,19 +16,15 @@ export const dynamic = "force-dynamic";
  * and live in the header menu instead. That is also what makes this page
  * hold together: four items on one axis, and nothing else to centre.
  */
-const PRIMARY = [
-  { href: "/avui", label: "Què em poso?" },
-  { href: "/armari", label: "Armari" },
-  { href: "/bugaderia", label: "Bugaderia" },
-  { href: "/paleta", label: "Paletes" },
-];
+const PRIMARY = ["avui", "armari", "bugaderia", "paleta"] as const;
 
 function pickPalette() {
   const i = Math.floor(Math.random() * palettes.length);
   return palettes[i];
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const t = await getTranslations("home");
   const palette = pickPalette();
 
   return (
@@ -38,9 +35,9 @@ export default function HomePage() {
     <div className="flex-1 flex flex-col justify-center px-6 pb-8 md:pb-10">
       <Stack as="section" gap={6} align="center" className="text-center">
         <Stack gap={3} align="center">
-          <Heading level="display-xl">el meu armari</Heading>
+          <Heading level="display-xl">{t("title")}</Heading>
           <Text variant="subtitle" tone="secondary" italic as="p">
-            un estudi d&apos;harmonia visual
+            {t("subtitle")}
           </Text>
         </Stack>
 
@@ -48,7 +45,7 @@ export default function HomePage() {
             read as the line between a title and its contents. */}
         <Link
           href="/paleta"
-          aria-label={`Paleta ${palette.nombre}`}
+          aria-label={t("paletteLink", { name: palette.nombre })}
           className="group block w-32 md:w-40 outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
         >
           <div className="flex h-3 md:h-4 overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-spring)] group-hover:-translate-y-0.5">
@@ -61,12 +58,12 @@ export default function HomePage() {
         <nav className="flex flex-col items-center gap-4 pt-1">
           {PRIMARY.map((entry) => (
             <Link
-              key={entry.href}
-              href={entry.href}
+              key={entry}
+              href={`/${entry}`}
               className="group relative font-serif text-xl text-text-primary transition-transform duration-[var(--duration-fast)] active:scale-[0.96]"
             >
               <span className="transition-opacity duration-[var(--duration-fast)] group-active:opacity-70">
-                {entry.label}
+                {t(`nav.${entry}`)}
               </span>
               <span
                 aria-hidden

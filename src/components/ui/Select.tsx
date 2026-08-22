@@ -38,7 +38,7 @@ export function Select({
   value,
   onChange,
   options,
-  placeholder = "Selecciona…",
+  placeholder,
   disabled,
   required,
   invalid,

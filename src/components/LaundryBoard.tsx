@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import type { GarmentWithColors } from "@/lib/prendas/types";
-import { UI } from "@/lib/prendas/ui-strings";
 import { LaundryPicker } from "./LaundryPicker";
 import { SegmentedControl, Stack, Text } from "@/components/ui";
 
@@ -41,6 +41,7 @@ export function LaundryBoard({
   clean: GarmentWithColors[];
   basket: GarmentWithColors[];
 }) {
+  const t = useTranslations("bugaderia");
   const initialParams = useSearchParams();
   const [view, setView] = useState<View>(() => parseView(initialParams.get(VIEW_PARAM)));
 
@@ -58,7 +59,7 @@ export function LaundryBoard({
     );
   };
 
-  const copy = view === "clean" ? UI.bugaderia.picker.soil : UI.bugaderia.picker.wash;
+  const mode = view === "clean" ? "soil" : "wash";
 
   return (
     <Stack gap={5}>
@@ -66,15 +67,15 @@ export function LaundryBoard({
         <SegmentedControl<View>
           value={view}
           onChange={changeView}
-          ariaLabel={UI.bugaderia.viewsLabel}
+          ariaLabel={t("viewsLabel")}
           options={[
-            { value: "clean", label: countLabel(UI.bugaderia.views.clean, clean.length) },
-            { value: "basket", label: countLabel(UI.bugaderia.views.basket, basket.length) },
+            { value: "clean", label: countLabel(t("views.clean"), clean.length) },
+            { value: "basket", label: countLabel(t("views.basket"), basket.length) },
           ]}
           className="self-start"
         />
         <Text variant="small" italic tone="secondary">
-          {copy.subtitle}
+          {t(`picker.${mode}.subtitle`)}
         </Text>
       </Stack>
 
@@ -87,7 +88,7 @@ export function LaundryBoard({
           viewport and fell to the bottom of the document. */}
       <div key={view}>
         <LaundryPicker
-          mode={view === "clean" ? "soil" : "wash"}
+          mode={mode}
           garments={view === "clean" ? clean : basket}
         />
       </div>

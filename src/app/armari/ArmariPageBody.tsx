@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import { findAllGarments } from "@/lib/prendas/service";
 import { getCurrentSeason } from "@/lib/prendas/season";
 import { ArmariGrid } from "@/components/ArmariGrid";
@@ -15,16 +16,17 @@ import { PageContainer, SectionHeader, GridSkeleton } from "@/components/ui";
  * saved outfits used to be another tab and now live in "què em poso?".
  */
 export async function ArmariPageBody() {
+  const t = await getTranslations("armari");
   const garments = await findAllGarments();
 
   return (
     <PageContainer width="wide">
       <SectionHeader
-        title="el meu armari"
+        title={t("title")}
         subtitle={
           garments.length === 0
-            ? "encara no hi ha res desat."
-            : `${garments.length} peces registrades.`
+            ? t("empty")
+            : t("count", { count: garments.length })
         }
       />
 

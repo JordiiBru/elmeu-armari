@@ -2,21 +2,13 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { deleteGarmentAction } from "@/app/armari/actions";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import type { SanzoPalette } from "@/lib/outfits/types";
 import { OutfitBottomSheet } from "./OutfitBottomSheet";
-import {
-  CATEGORY_LABELS,
-  TEXTURE_LABELS,
-  PATTERN_LABELS,
-  FIT_LABELS,
-  SUBTYPE_LABELS,
-  LENGTH_LABELS,
-  SEASON_LABELS,
-} from "@/lib/prendas/labels";
-import { UI } from "@/lib/prendas/ui-strings";
+import { optionLabel } from "@/lib/prendas/labels";
 import { PieceThumb } from "./PieceThumb";
 import { Button, Sheet, Text, TextButton, Stack } from "@/components/ui";
 
@@ -35,6 +27,9 @@ export function GarmentModal({
   savedOutfitKeys,
   onClose,
 }: Props) {
+  const t = useTranslations("modal");
+  const tLabel = useTranslations("labels");
+  const tCommon = useTranslations("common");
   const [confirming, setConfirming] = useState(false);
   const [combineOpen, setCombineOpen] = useState(false);
   // What you saved during this visit. It lives here rather than in the
@@ -94,7 +89,7 @@ export function GarmentModal({
     <Sheet
       onClose={onClose}
       size="md"
-      label={`Peça ${CATEGORY_LABELS[garment.category]}`}
+      label={t("sheetLabel", { category: tLabel(`category.${garment.category}`) })}
       media={<PieceThumb garment={garment} priority className="h-full w-full" />}
       mediaHeight="h-40"
       // The reason this modal replaced a whole screen: matching a piece
@@ -108,31 +103,31 @@ export function GarmentModal({
             onClick={() => setCombineOpen(true)}
             className="w-full justify-center"
           >
-            {UI.modal.combine}
+            {t("combine")}
           </Button>
         ) : undefined
       }
       header={
         <Stack gap={1}>
-          <Text variant="caption">peça</Text>
+          <Text variant="caption">{t("eyebrow")}</Text>
           <h2 className="type-title">
-            {CATEGORY_LABELS[garment.category]}
+            {tLabel(`category.${garment.category}`)}
             {garment.subtype && (
               <Text as="span" italic tone="secondary" className="font-serif">
-                {" "}· {SUBTYPE_LABELS[garment.subtype]}
+                {" "}· {optionLabel(tLabel, "subtype", garment.subtype)}
               </Text>
             )}
             {garment.length && (
               <Text as="span" italic tone="secondary" className="font-serif">
-                {" "}· {LENGTH_LABELS[garment.length]}
+                {" "}· {optionLabel(tLabel, "length", garment.length)}
               </Text>
             )}
           </h2>
           {(garment.fit || garment.size) && (
             <Text variant="small" italic tone="secondary" className="font-serif">
-              {garment.fit && FIT_LABELS[garment.fit]}
+              {garment.fit && optionLabel(tLabel, "fit", garment.fit)}
               {garment.fit && garment.size && " · "}
-              {garment.size && `talla ${garment.size}`}
+              {garment.size && t("size", { size: garment.size })}
             </Text>
           )}
         </Stack>
@@ -140,13 +135,13 @@ export function GarmentModal({
     >
       {(garment.texture || garment.pattern) && (
         <dl className="grid grid-cols-2 gap-y-4 gap-x-6">
-          {garment.texture && <Meta label={UI.modal.texture} value={TEXTURE_LABELS[garment.texture]} />}
-          {garment.pattern && <Meta label={UI.modal.pattern} value={PATTERN_LABELS[garment.pattern]} />}
+          {garment.texture && <Meta label={t("texture")} value={tLabel(`texture.${garment.texture}`)} />}
+          {garment.pattern && <Meta label={t("pattern")} value={tLabel(`pattern.${garment.pattern}`)} />}
         </dl>
       )}
 
       <Stack gap={2}>
-        <Text variant="caption">{UI.modal.colors}</Text>
+        <Text variant="caption">{t("colors")}</Text>
         <div className="flex flex-wrap gap-x-4 gap-y-2">
           {garment.colors.map((c) => (
             <div key={c.id} className="flex items-center gap-2">
@@ -164,7 +159,7 @@ export function GarmentModal({
 
       {garment.seasons.length > 0 && (
         <Stack gap={2}>
-          <Text variant="caption">{UI.modal.seasons}</Text>
+          <Text variant="caption">{t("seasons")}</Text>
           <div className="flex flex-wrap gap-x-4 gap-y-1 font-serif italic">
             {garment.seasons.map((s, i) => (
               <span key={s.id} className="inline-flex items-center gap-4">
@@ -174,7 +169,7 @@ export function GarmentModal({
                     className="inline-block h-1 w-1 rounded-full bg-border"
                   />
                 )}
-                {SEASON_LABELS[s.season]}
+                {tLabel(`season.${s.season}`)}
               </span>
             ))}
           </div>
@@ -183,7 +178,7 @@ export function GarmentModal({
 
       {garment.notes && (
         <Stack gap={1}>
-          <Text variant="caption">nota</Text>
+          <Text variant="caption">{t("note")}</Text>
           <Text as="p" italic className="font-serif">
             {garment.notes}
           </Text>
@@ -195,7 +190,7 @@ export function GarmentModal({
           href={`/edit/${garment.id}`}
           className="font-serif italic type-small text-text-primary hover:text-text-secondary transition-colors"
         >
-          editar
+          {tCommon("edit")}
         </Link>
         {confirming ? (
           <div className="flex items-center gap-4">
@@ -205,7 +200,7 @@ export function GarmentModal({
               onClick={() => setConfirming(false)}
               disabled={pending}
             >
-              cancel·lar
+              {tCommon("cancel")}
             </TextButton>
             <TextButton
               type="button"
@@ -213,7 +208,7 @@ export function GarmentModal({
               onClick={handleDelete}
               disabled={pending}
             >
-              {pending ? "eliminant…" : `sí, ${UI.buttons.delete.toLowerCase()}`}
+              {pending ? tCommon("deleting") : tCommon("deleteConfirm")}
             </TextButton>
           </div>
         ) : (
@@ -222,7 +217,7 @@ export function GarmentModal({
             tone="danger"
             onClick={() => setConfirming(true)}
           >
-            eliminar
+            {tCommon("delete")}
           </TextButton>
         )}
       </div>

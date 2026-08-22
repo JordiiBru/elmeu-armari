@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import PaletteSheet from "@/components/PaletteSheet";
 import { Input, Card, Text, EmptyState } from "@/components/ui";
 
@@ -23,6 +24,7 @@ export default function PaletaBrowser({
   colors: ColorEntry[];
   palettesById: Record<number, Palette>;
 }) {
+  const t = useTranslations("paleta");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<ColorEntry | null>(null);
 
@@ -41,19 +43,19 @@ export default function PaletaBrowser({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="search a color — english (pink, ochre, cerulian…)"
+          placeholder={t("searchPlaceholder")}
         />
         <div className="flex items-baseline justify-between pt-2">
           <span className="type-caption tabular-nums">
-            {filtered.length} / {colors.length} colors
+            {t("count", { shown: filtered.length, total: colors.length })}
           </span>
         </div>
       </div>
 
       {filtered.length === 0 ? (
         <EmptyState
-          title="cap color coincideix."
-          hint="prova amb un altre nom en anglès."
+          title={t("noResults")}
+          hint={t("noResultsHint")}
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-12">
@@ -83,8 +85,7 @@ export default function PaletaBrowser({
                 </Text>
                 {c.combinations.length > 0 && (
                   <Text variant="small" italic tone="secondary" className="font-serif">
-                    {c.combinations.length}{" "}
-                    {c.combinations.length === 1 ? "combinació" : "combinacions"}
+                    {t("combinations", { count: c.combinations.length })}
                   </Text>
                 )}
               </div>

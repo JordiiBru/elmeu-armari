@@ -2,8 +2,8 @@ import { Suspense } from "react";
 import { findAllGarments } from "@/lib/prendas/service";
 import { isWashable, isClean, isDirty } from "@/lib/bugaderia/laundry";
 import { sortByWardrobeOrder } from "@/lib/prendas/filtering";
+import { getTranslations } from "next-intl/server";
 import { LaundryBoard } from "@/components/LaundryBoard";
-import { UI } from "@/lib/prendas/ui-strings";
 import { PageContainer, SectionHeader } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +14,7 @@ export const dynamic = "force-dynamic";
  * row. One fetch, no navigation between passes.
  */
 export default async function BugaderiaPage() {
+  const t = await getTranslations("bugaderia");
   const washable = (await findAllGarments()).filter(isWashable);
 
   return (
@@ -21,7 +22,7 @@ export default async function BugaderiaPage() {
     // front of the wardrobe; at max-w-lg a desktop showed a phone-sized
     // column stranded in the middle of the screen.
     <PageContainer width="wide">
-      <SectionHeader title={UI.bugaderia.title} subtitle={UI.bugaderia.subtitle} />
+      <SectionHeader title={t("title")} subtitle={t("subtitle")} />
 
       <Suspense fallback={null}>
         <LaundryBoard
