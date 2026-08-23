@@ -89,15 +89,16 @@ export function AppMenu({
     <div ref={root} className="relative">
       <IconButton
         label={t("label")}
-        size="sm"
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => setOpen((v) => !v)}
         className={open ? "text-text-primary" : undefined}
       >
         {/* Signed in, the button is the way to your own account before
-            it is the way to anything else, and the icon says so. */}
-        <Icon name={username ? "user" : "ellipsis"} size={18} />
+            it is the way to anything else, and the icon says so — drawn
+            larger than the rest of the set, because it is the one control
+            that is always on screen. */}
+        <Icon name={username ? "user" : "ellipsis"} size={username ? 24 : 18} />
       </IconButton>
 
       {open && (
