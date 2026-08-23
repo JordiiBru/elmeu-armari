@@ -154,7 +154,11 @@ export function Sheet({
 
   const mediaBox = media && (
     <div
-      className={`${mediaHeight} flex-shrink-0 touch-none ${
+      // overflow-hidden is not decoration: the band has a height the
+      // panel's layout depends on, and a child that measures itself
+      // wrong paints straight over the header underneath it. WebKit did
+      // exactly that with an aspect-ratio box.
+      className={`${mediaHeight} flex-shrink-0 overflow-hidden touch-none ${
         split ? "sm:h-auto sm:w-[45%]" : ""
       }`}
       {...swipe.handlers}

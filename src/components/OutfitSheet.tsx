@@ -184,11 +184,20 @@ export function OutfitSheet({
             className="h-full w-full"
           />
         ) : isRecord ? (
-          // No photograph taken: the collage stands in for it, but boxed
-          // to its own proportion rather than stretched up a whole
-          // column, which turns two garments into two slivers.
-          <div className="flex h-full w-full items-center justify-center p-6">
-            <div className="aspect-[3/4] max-h-full w-full">
+          // No photograph taken: the collage stands in for it. Wide, it
+          // is boxed to its own proportion rather than stretched up a
+          // whole column, which turns two garments into two slivers —
+          // and the proportion is taken from the height, which is the
+          // definite one. Deriving it from the width and capping the
+          // height with `max-h-full` is what Safari ignores: it drew the
+          // box at 523px inside a 224px band and spilled it over the
+          // pieces. So the column derives the height from the width, the
+          // direction every engine agrees on, and the column is always
+          // taller than the box that comes out of it. Stacked there is
+          // no proportion to keep at all: the band is already the shape
+          // of a photograph.
+          <div className="flex h-full w-full items-center justify-center p-4 sm:p-6">
+            <div className="h-full w-full sm:h-auto sm:max-h-full sm:aspect-[3/4]">
               <OutfitCollage
                 garments={outfit.garments}
                 thumb={false}
