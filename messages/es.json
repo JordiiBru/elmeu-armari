@@ -320,7 +320,7 @@
   "dayPhoto": {
     "add": "foto",
     "change": "cambiar",
-    "remove": "quitar",
+    "remove": "quitar foto",
     "uploading": "subiendo…",
     "failed": "no se ha podido subir. inténtalo de nuevo."
   },

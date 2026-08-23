@@ -3,36 +3,38 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Icon, Stack, Text, TextButton } from "@/components/ui";
-
-type Variant = "strip" | "quiet";
+import { Icon, Stack, Text } from "@/components/ui";
 
 interface Props {
   /** The day the photo belongs to — a worn event id. */
   eventId: string;
   hasPhoto: boolean;
-  /** `strip`: the wide slot under the week. `quiet`: an italic action. */
-  variant?: Variant;
-  /** Offer "treure foto" beside the trigger when there is one to remove. */
+  /** Offer removal beside the trigger when there is a photo to remove. */
   withRemove?: boolean;
   disabled?: boolean;
 }
 
+const BOX =
+  "flex h-14 items-center justify-center gap-3 border text-text-secondary outline-none " +
+  "transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] " +
+  "disabled:opacity-40 focus-visible:ring-1 focus-visible:ring-focus-ring " +
+  "focus-visible:ring-offset-2 focus-visible:ring-offset-elevated";
+
 /**
- * Adding, replacing and removing the photo of a day.
+ * Adding, replacing and removing the photograph of a day.
+ *
+ * A box rather than the app's usual italic link: this is the one thing on
+ * the day that is still optional, and an empty frame standing where the
+ * photograph will stand says what it is for without a sentence explaining
+ * it. Dashed while there is nothing in it, the same way the wardrobe
+ * marks the slot for a piece it does not have yet.
  *
  * No `capture` attribute on the input: forcing the camera would be right
- * for a snapshot, and wrong here — the picture is a mirror selfie that
- * has already been through a background remover, so it comes from the
+ * for a snapshot and is wrong here, because the picture is a mirror selfie
+ * that has already been through a background remover and comes from the
  * gallery. `accept` alone still offers the camera on a phone.
  */
-export function DayPhotoInput({
-  eventId,
-  hasPhoto,
-  variant = "quiet",
-  withRemove = false,
-  disabled,
-}: Props) {
+export function DayPhotoInput({ eventId, hasPhoto, withRemove = false, disabled }: Props) {
   const t = useTranslations("dayPhoto");
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
@@ -62,58 +64,47 @@ export function DayPhotoInput({
     if (r.ok) router.refresh();
   }
 
-  const label = status === "busy" ? t("uploading") : hasPhoto ? t("change") : t("add");
-
-  const file = (
-    <input
-      ref={input}
-      type="file"
-      accept="image/jpeg,image/png,image/webp"
-      className="hidden"
-      onChange={upload}
-    />
-  );
-
-  const error = status === "error" && (
-    <Text variant="small" italic tone="secondary" className="font-serif">
-      {t("failed")}
-    </Text>
-  );
-
-  // A wide, empty frame rather than a button: it stands where the photo
-  // will stand, which says what it is for without a sentence explaining
-  // it. Same dashed hairline the wardrobe uses for "add a piece".
-  if (variant === "strip") {
-    return (
-      <Stack gap={2}>
+  return (
+    <Stack gap={2}>
+      <div className="flex items-stretch gap-2">
         <button
           type="button"
           onClick={() => input.current?.click()}
           disabled={busy}
-          className="flex h-14 w-full items-center justify-center gap-3 border border-dashed border-border text-text-secondary outline-none transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:border-text-primary hover:text-text-primary disabled:opacity-40 focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className={`${BOX} flex-1 hover:border-text-primary hover:text-text-primary ${
+            hasPhoto ? "border-border" : "border-dashed border-border"
+          }`}
         >
           <Icon name="camera" size={20} />
-          <span className="font-serif italic type-small lowercase">{label}</span>
+          <span className="font-serif italic type-small lowercase">
+            {status === "busy" ? t("uploading") : hasPhoto ? t("change") : t("add")}
+          </span>
         </button>
-        {error}
-        {file}
-      </Stack>
-    );
-  }
-
-  return (
-    <div className="flex flex-wrap items-center gap-4">
-      <TextButton type="button" tone="secondary" disabled={busy} onClick={() => input.current?.click()}>
-        <Icon name="camera" size={14} />
-        {label}
-      </TextButton>
-      {hasPhoto && withRemove && status !== "busy" && (
-        <TextButton type="button" tone="danger" onClick={remove}>
-          {t("remove")}
-        </TextButton>
+        {hasPhoto && withRemove && (
+          <button
+            type="button"
+            onClick={remove}
+            disabled={busy}
+            aria-label={t("remove")}
+            title={t("remove")}
+            className={`${BOX} w-14 border-border hover:border-danger hover:text-danger`}
+          >
+            <Icon name="close" size={16} />
+          </button>
+        )}
+      </div>
+      {status === "error" && (
+        <Text variant="small" italic tone="secondary" className="font-serif">
+          {t("failed")}
+        </Text>
       )}
-      {error}
-      {file}
-    </div>
+      <input
+        ref={input}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={upload}
+      />
+    </Stack>
   );
 }

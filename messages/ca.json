@@ -320,7 +320,7 @@
   "dayPhoto": {
     "add": "foto",
     "change": "canviar",
-    "remove": "treure",
+    "remove": "treure foto",
     "uploading": "pujant…",
     "failed": "no s'ha pogut pujar. torna-ho a provar."
   },

@@ -8,12 +8,14 @@ import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { IconButton } from "./IconButton";
 import { Icon } from "./Icon";
 
-type Size = "md" | "lg" | "xl";
+type Size = "md" | "lg" | "xl" | "2xl";
 
 const PANEL_MAX: Record<Size, string> = {
   md: "sm:max-w-md",
   lg: "sm:max-w-lg",
   xl: "sm:max-w-2xl",
+  // Only for `split`: two columns need the width of two columns.
+  "2xl": "sm:max-w-4xl",
 };
 
 interface Props {
@@ -55,6 +57,15 @@ interface Props {
    * and on a bottom sheet it jumps under your thumb.
    */
   fill?: boolean;
+  /**
+   * Stands the media up as a column beside the content instead of a band
+   * above it. For a tall photograph: stacked, a standing figure either
+   * gets a strip of itself or eats the panel, and everything that
+   * explains it is pushed under the fold. A phone has one column and
+   * falls back to stacked, which is why `mediaHeight` still applies
+   * there.
+   */
+  split?: boolean;
 }
 
 /**
@@ -73,6 +84,7 @@ export function Sheet({
   headerBelow,
   footer,
   fill = false,
+  split = false,
   children,
 }: Props) {
   const tCommon = useTranslations("common");
@@ -164,44 +176,60 @@ export function Sheet({
           <span className="block h-1 w-10 rounded-full bg-border" />
         </div>
 
-        {media && (
-          <div
-            className={`${mediaHeight} flex-shrink-0 touch-none`}
-            {...swipe.handlers}
-          >
-            {media}
-          </div>
-        )}
-
-        {header && (
-          <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-3 border-b border-border">
-            <div className="flex-1 min-w-0">{header}</div>
-            <IconButton
-              type="button"
-              onClick={close}
-              label={tCommon("close")}
-              className="flex-shrink-0 -mr-2 -mt-2"
+        <div
+          className={
+            split
+              ? "flex min-h-0 flex-1 flex-col sm:flex-row"
+              : "flex min-h-0 flex-1 flex-col"
+          }
+        >
+          {media && (
+            <div
+              className={`${mediaHeight} flex-shrink-0 touch-none ${
+                split ? "sm:h-auto sm:w-[45%]" : ""
+              }`}
+              {...swipe.handlers}
             >
-              <Icon name="close" size={18} />
-            </IconButton>
-          </div>
-        )}
+              {media}
+            </div>
+          )}
 
-        {headerBelow && (
-          <div className="flex-shrink-0 border-b border-border">
-            {headerBelow}
-          </div>
-        )}
+          <div
+            className={`flex min-h-0 flex-1 flex-col ${
+              split && media ? "sm:border-l sm:border-border" : ""
+            }`}
+          >
+            {header && (
+              <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-3 border-b border-border">
+                <div className="flex-1 min-w-0">{header}</div>
+                <IconButton
+                  type="button"
+                  onClick={close}
+                  label={tCommon("close")}
+                  className="flex-shrink-0 -mr-2 -mt-2"
+                >
+                  <Icon name="close" size={18} />
+                </IconButton>
+              </div>
+            )}
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6">
-          {children}
+            {headerBelow && (
+              <div className="flex-shrink-0 border-b border-border">
+                {headerBelow}
+              </div>
+            )}
+
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-6 pb-8 flex flex-col gap-6">
+              {children}
+            </div>
+
+            {footer && (
+              <div className="flex-shrink-0 border-t border-border px-6 py-4">
+                {footer}
+              </div>
+            )}
+          </div>
         </div>
-
-        {footer && (
-          <div className="flex-shrink-0 border-t border-border px-6 py-4">
-            {footer}
-          </div>
-        )}
       </div>
     </div>
   );

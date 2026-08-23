@@ -167,7 +167,10 @@ export function OutfitSheet({
   return (
     <Sheet
       onClose={onClose}
-      size="xl"
+      // A record stands the photograph up beside what it is a photograph
+      // of; the picker is one column of grids and stays one column wide.
+      size={isRecord ? "2xl" : "xl"}
+      split={isRecord}
       // The two tabs hold grids of very different heights, and the sheet
       // used to resize under the tab bar every time you switched. Fixed
       // height, tabs pinned, grid scrolls.
@@ -177,9 +180,23 @@ export function OutfitSheet({
         photo ? (
           <DayPhoto
             event={photo}
-            sizes="(min-width: 640px) 32rem, 100vw"
+            sizes="(min-width: 640px) 24rem, 100vw"
             className="h-full w-full"
           />
+        ) : isRecord ? (
+          // No photograph taken: the collage stands in for it, but boxed
+          // to its own proportion rather than stretched up a whole
+          // column, which turns two garments into two slivers.
+          <div className="flex h-full w-full items-center justify-center p-6">
+            <div className="aspect-[3/4] max-h-full w-full">
+              <OutfitCollage
+                garments={outfit.garments}
+                thumb={false}
+                sizes="(min-width: 640px) 20rem, 80vw"
+                className="h-full w-full"
+              />
+            </div>
+          </div>
         ) : (
           <OutfitCollage
             garments={outfit.garments}
@@ -189,11 +206,20 @@ export function OutfitSheet({
           />
         )
       }
-      // A collage is a reminder of which outfit you opened, and the panel
-      // is a fixed height, so it gets no more room than that. A photograph
-      // of you wearing it is the reason the sheet exists, and gets the
-      // half of the panel a standing figure needs.
-      mediaHeight={photo ? "h-[38dvh] sm:h-[26rem]" : "h-36 sm:h-56"}
+      // On a phone a record is stacked, so the photograph takes a third of
+      // the panel and leaves the rest to the pieces. While picking it goes
+      // away entirely there — a standing figure over a grid of shoes is a
+      // grid of shoes you cannot see. Wide, the column keeps it: there is
+      // room for both, and it is what you are dressing.
+      mediaHeight={
+        isRecord
+          ? editing
+            ? "hidden sm:block"
+            : photo
+              ? "h-[38dvh]"
+              : "h-56"
+          : "h-36 sm:h-56"
+      }
       header={
         <Stack gap={1}>
           <h2 className="type-title lowercase">{title}</h2>
@@ -291,93 +317,98 @@ export function OutfitSheet({
         <DayPieces garments={[...outfit.garments, ...(dayExtras ?? [])]} />
       )}
 
-      <div className="mt-auto flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
-        {confirmingDelete ? (
-          <>
-            <Text variant="small" italic tone="secondary" className="font-serif">
-              {deleteCost}
-            </Text>
-            <div className="flex items-center gap-4">
-              <TextButton
-                type="button"
-                tone="secondary"
-                onClick={() => setConfirmingDelete(false)}
-                disabled={pending}
-              >
-                {tCommon("cancel")}
-              </TextButton>
-              <TextButton
-                type="button"
-                tone="danger"
-                onClick={handleDelete}
-                disabled={pending}
-              >
-                {pending ? tCommon("deleting") : tCommon("deleteConfirm")}
-              </TextButton>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="flex flex-wrap items-center gap-4">
-              {/* The optional half of the day, and the first thing offered:
-                  everything else here amends a decision already taken. */}
-              {isRecord && !editing && dayEvent && (
-                <>
-                  <DayPhotoInput
-                    eventId={dayEvent.id}
-                    hasPhoto={photo !== null}
-                    withRemove
-                    disabled={pending}
-                  />
+      <Stack gap={4} className="mt-auto">
+        {/* The optional half of the day, in a frame of its own: it is the
+            one thing here that adds something rather than amending what
+            is already decided, and an italic link buried in the row below
+            read as neither. */}
+        {isRecord && !editing && dayEvent && !confirmingDelete && (
+          <DayPhotoInput
+            eventId={dayEvent.id}
+            hasPhoto={photo !== null}
+            withRemove
+            disabled={pending}
+          />
+        )}
+
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
+          {confirmingDelete ? (
+            <>
+              <Text variant="small" italic tone="secondary" className="font-serif">
+                {deleteCost}
+              </Text>
+              <div className="flex items-center gap-4">
+                <TextButton
+                  type="button"
+                  tone="secondary"
+                  onClick={() => setConfirmingDelete(false)}
+                  disabled={pending}
+                >
+                  {tCommon("cancel")}
+                </TextButton>
+                <TextButton
+                  type="button"
+                  tone="danger"
+                  onClick={handleDelete}
+                  disabled={pending}
+                >
+                  {pending ? tCommon("deleting") : tCommon("deleteConfirm")}
+                </TextButton>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center gap-4">
+                {isRecord && !editing && (
                   <TextButton
                     type="button"
                     tone="secondary"
                     onClick={() => setEditing(true)}
                     disabled={pending}
                   >
-                    {t("howYouWearIt")}
+                    {tCommon("edit")}
                   </TextButton>
-                </>
-              )}
-              {/* Only while picking. A record already offers the way into
-                  the picker, and the two together made a row of five
-                  italic links under a photograph. */}
-              {onChangeOutfit && showPicker && (
-                <TextButton
-                  type="button"
-                  tone="secondary"
-                  onClick={onChangeOutfit}
-                  disabled={pending}
-                >
-                  {t("changeOutfit")}
-                </TextButton>
-              )}
-            </div>
-            {allowDelete ? (
-              <TextButton
-                type="button"
-                tone="danger"
-                onClick={() => setConfirmingDelete(true)}
-                disabled={pending}
-              >
-                {t("delete")}
-              </TextButton>
-            ) : (
-              isCommitted &&
-              onClear && (
+                )}
+                {/* Only while picking. A record already offers the way into
+                    the picker, and the two together made a row of five
+                    italic links under a photograph. */}
+                {onChangeOutfit && showPicker && (
+                  <TextButton
+                    type="button"
+                    tone="secondary"
+                    onClick={onChangeOutfit}
+                    disabled={pending}
+                  >
+                    {t("changeOutfit")}
+                  </TextButton>
+                )}
+              </div>
+              {allowDelete ? (
                 <TextButton
                   type="button"
                   tone="danger"
-                  onClick={onClear}
+                  onClick={() => setConfirmingDelete(true)}
                   disabled={pending}
                 >
-                  {t("removeFromDay")}
+                  {t("delete")}
                 </TextButton>
-              )
-            )}
-          </>
-        )}
-      </div>
+              ) : (
+                isCommitted &&
+                onClear && (
+                  <TextButton
+                    type="button"
+                    tone="danger"
+                    onClick={onClear}
+                    disabled={pending}
+                  >
+                    {t("removeFromDay")}
+                  </TextButton>
+                )
+              )}
+            </>
+          )}
+        </div>
+      </Stack>
     </Sheet>
   );
 }

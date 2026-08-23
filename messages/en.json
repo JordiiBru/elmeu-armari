@@ -320,7 +320,7 @@
   "dayPhoto": {
     "add": "photo",
     "change": "change",
-    "remove": "remove",
+    "remove": "remove photo",
     "uploading": "uploading…",
     "failed": "couldn't upload. try again."
   },

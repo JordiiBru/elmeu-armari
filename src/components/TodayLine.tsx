@@ -95,7 +95,7 @@ export function TodayLine({
   // Decided, and not photographed yet. Once there is a photo the line has
   // nothing left to say: the picture is in the week, where it belongs.
   if (todayEvent && !todayEvent.image) {
-    return <DayPhotoInput eventId={todayEvent.id} hasPhoto={false} variant="strip" />;
+    return <DayPhotoInput eventId={todayEvent.id} hasPhoto={false} />;
   }
 
   return null;
