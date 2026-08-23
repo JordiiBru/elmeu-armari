@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
 import { addGarment, findAllGarments, deleteGarment } from "@/lib/prendas/service";
 import {
   CATEGORIES,
@@ -85,11 +86,20 @@ function validate(body: unknown): { ok: true; payload: ImportPayload } | { ok: f
   return { ok: true, payload: b as unknown as ImportPayload };
 }
 
-function checkAuth(req: NextRequest): NextResponse | null {
+/**
+ * Two ways in. A signed-in session is the app's own /settings screen
+ * importing a file the owner just picked; `IMPORT_SECRET` is for a
+ * script with no browser, restoring a backup over curl. Before there
+ * were accounts the secret was the only lock on a destructive endpoint,
+ * which is why an unconfigured production deploy still refuses the
+ * token path rather than falling open.
+ */
+async function checkAuth(req: NextRequest): Promise<NextResponse | null> {
+  const session = await auth();
+  if (session?.user && !session.user.mustChangePw) return null;
+
   const importSecret = process.env.IMPORT_SECRET;
 
-  // In production, IMPORT_SECRET is required. An unconfigured prod deploy
-  // would otherwise expose a destructive endpoint to anyone on the network.
   if (!importSecret) {
     if (process.env.NODE_ENV === "production") {
       return NextResponse.json(
@@ -100,8 +110,8 @@ function checkAuth(req: NextRequest): NextResponse | null {
     return null; // dev: open
   }
 
-  const auth = req.headers.get("Authorization");
-  const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
+  const header = req.headers.get("Authorization");
+  const token = header?.startsWith("Bearer ") ? header.slice(7) : null;
   if (token !== importSecret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -109,7 +119,7 @@ function checkAuth(req: NextRequest): NextResponse | null {
 }
 
 export async function POST(req: NextRequest) {
-  const authError = checkAuth(req);
+  const authError = await checkAuth(req);
   if (authError) return authError;
 
   const mode = req.nextUrl.searchParams.get("mode") ?? "merge";

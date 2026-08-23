@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
+import { requireSession } from "@/lib/auth/api";
 import { getUploadDir } from "@/lib/uploads";
 
 const SAFE_FILENAME = /^[a-z0-9]+(?:-thumb)?\.webp$/;
@@ -18,6 +19,9 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ filename: string }> }
 ) {
+  const denied = await requireSession();
+  if (denied) return denied;
+
   const { filename } = await params;
 
   if (!SAFE_FILENAME.test(filename)) {
@@ -39,7 +43,9 @@ export async function GET(
   return new NextResponse(new Uint8Array(data), {
     headers: {
       "Content-Type": "image/webp",
-      "Cache-Control": "public, max-age=31536000, immutable",
+      // Private, not public: these are photographs of one person's
+      // clothes, and a shared cache has no business holding a copy.
+      "Cache-Control": "private, max-age=31536000, immutable",
     },
   });
 }

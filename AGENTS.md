@@ -8,6 +8,7 @@ Read this before writing code. It captures the non-obvious rules that keep the c
 - **React 19** — Server Actions, `useActionState`. **Do not use `useEffect` for data fetching.**
 - **Tailwind CSS v4** — no config file; theming via CSS custom properties and `@theme` in `src/app/globals.css`.
 - **Prisma 7** + SQLite via `@prisma/adapter-better-sqlite3` (driver adapter, **not** the standard client).
+- **Auth.js v5** (`next-auth`) with a Credentials provider, plus `@node-rs/argon2` for hashing.
 - **TypeScript 5**, strict.
 
 ## Layered architecture
@@ -39,6 +40,19 @@ Three locales — **català**, **castellà**, **english** — through `next-intl
 - **Sanzo Wada colour names stay English in every locale.** They are the historic names from the 1933 dictionary, not UI copy — the interface leans on them to tell two shirts of the same kind apart.
 - The three flags in the header menu are inline SVGs in `src/components/ui/Flag.tsx`, not emoji: flag emoji do not render as flags on Windows, and `Icon` is stroke-only and never coloured. Catalan gets the Senyera — there is no country flag for a language, and that is a deliberate choice rather than a default.
 
+## Auth
+
+The whole app is private. There is **no public sign-up**: accounts come from `npm run create-user`, and a new one carries a temporary password the app forces the owner to replace.
+
+- **`src/proxy.ts` is the gate, and it must stay the only one.** Next 16 renamed the `middleware.ts` convention to `proxy.ts` (both are detected, the old name warns, having both is a build error) and it always runs on the Node.js runtime — the Edge-compatibility contortions Auth.js documents for middleware do not apply here. It lives under `src/` because that is where this project's convention-level files go; in the repo root it builds without complaint and never runs.
+- **The decision itself is `src/lib/auth/access.ts`, a pure function.** Add a public path to `PUBLIC_EXACT` / `PUBLIC_PREFIXES` there, not to the proxy's `matcher`, which exists only to keep static assets from paying for a session lookup. Everything not named there is closed, including every `/api/*` route — which answers 401 rather than redirecting, because a `fetch` cannot follow a login page.
+- **Throttling belongs in `authorize()`, not in the login action.** `/api/auth/callback/credentials` is a public endpoint anyone can POST to directly, so a lockout enforced only in the Server Action would be one an attacker walks straight past. The action reads the lockout too, but only to say "try again in 40 seconds" instead of a third wrong-password message.
+- **`auth.config.ts` must not import the database.** The proxy builds its own Auth.js instance from it, and pulling `service.ts` in would put Prisma, better-sqlite3 and Argon2 in the file that runs before every request. The credentials provider lives in `auth.ts`, which is the half that may.
+- **`policy.ts` is the client-safe half of `password.ts`.** A Client Component that imports the hashing module fails the build: Argon2's native binding cannot go to the browser. Length constants and validation live in `policy.ts` for that reason.
+- **`mustChangePw` is carried in the session cookie**, so changing the password updates the row *and* calls `unstable_update` — the row alone would leave the proxy bouncing the user back to the change screen forever.
+- **Never log a password or a hash**, `LoginAttempt` included: it stores username, IP and outcome, nothing else. And the IP is not trustworthy — behind the tunnel every visitor can share one address, which is why the per-username lockout is the real defence and an unattributable request is never throttled by IP at all.
+- The route handlers call `requireSession()` (`src/lib/auth/api.ts`) as a second lock. Keep it that way: it is what makes a mistake in the proxy a bug instead of a breach.
+
 ## Days and time
 
 The wardrobe is in Barcelona, the container runs on UTC. **`today()` in `src/lib/outfits/week.ts` is the only way to ask what day it is** — never `dayKey(new Date())`, which reads the instant's UTC date and therefore kept yesterday until 02:00 local in summer. Stored days are still UTC-midnight keys, so anything reading one back formats it with `timeZone: "UTC"`; what those keys *name* was already settled in `APP_TIME_ZONE`. Elapsed-day counts go through `daysBetween()`, not a millisecond subtraction.
@@ -64,6 +78,8 @@ The wardrobe is in Barcelona, the container runs on UTC. **`today()` in `src/lib
   ```
 
 ## Environment
+
+`AUTH_SECRET` is required at runtime (not at build time): it signs and encrypts the session cookie, and changing it signs everyone out. `openssl rand -base64 32`.
 
 `DATABASE_URL` points to a SQLite file:
 - Dev: `file:./dev.db` (`.env`)
@@ -101,7 +117,8 @@ Individual gates: `npm run lint`, `npm run typecheck`, `npm run build`. `npm run
 
 ## What not to do
 
-- Do not import `prisma` outside `repository.ts`.
+- Do not import `prisma` outside `repository.ts`. (`scripts/create-user.mjs` talks to SQLite directly instead — it has to run inside the production image, where the Prisma client is TypeScript nothing compiles.)
+- Do not add a route, page or API handler that assumes the proxy will let it through unauthenticated. Nothing is public unless `access.ts` says so.
 - Do not add translated strings inline in components. Use `messages/<locale>.json`, all three of them.
 - Do not call `dayKey(new Date())` or `new Date()` to find out what day it is. Use `today()`.
 - Do not add `useEffect` to fetch data. Use Server Components + Server Actions.

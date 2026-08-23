@@ -15,8 +15,15 @@ git clone https://github.com/JordiiBru/elmeu-armari.git
 cd elmeu-armari
 npm install
 npx prisma migrate dev        # creates dev.db and generates the Prisma client
+
+# Signs the session cookie. Required — the app cannot authenticate without it.
+echo "AUTH_SECRET=\"$(openssl rand -base64 32)\"" >> .env
+
+npm run create-user -- --username you   # prints a temporary password
 npm run dev                   # http://localhost:3000
 ```
+
+The app has no public sign-up: `create-user` is the only way an account exists, and the password it prints has to be replaced the first time you sign in.
 
 The dev DB (`dev.db`) is git-ignored. Deleting it and re-running `npx prisma migrate dev` gives you a clean slate.
 
@@ -30,7 +37,8 @@ The dev DB (`dev.db`) is git-ignored. Deleting it and re-running `npx prisma mig
 | `npm run build` | To reproduce CI's build step. |
 | `npm run check` | Runs lint + typecheck + build. **Run before opening a PR.** |
 | `npm run test:unit` | Vitest unit tests. Runs in CI on every PR. |
-| `npm run test:e2e` | Playwright e2e tests. Local only — not run in CI. |
+| `npm run test:e2e` | Playwright e2e tests. Local only — not run in CI. It signs in first, creating its own account in the e2e database. |
+| `npm run create-user` | Create an account, or reset its password with `--reset`. |
 
 ---
 
@@ -108,6 +116,7 @@ The CI workflow (PRs only) runs lint + typecheck + `npm run test:unit` + build. 
 
 Run `npm run test:unit` for the Vitest suite (colour-matching engine, etc.) and `npm run test:e2e` for the Playwright suite before a PR that touches their covered areas. Beyond that, test manually against these paths after any UI change:
 
+- `/login` — wrong password, then the right one; the return path after being bounced from a protected screen.
 - `/` — home nav.
 - `/armari` — grid with several filter combinations (empty / one category / one season / crossed).
 - `/armari` → tab `Combinar` — pick a piece with colours, verify a palette appears, save, and check it lands in `Desats`.
@@ -116,6 +125,7 @@ Run `npm run test:unit` for the Vitest suite (colour-matching engine, etc.) and 
 - `/paleta` — browse, click a palette, see matching pieces.
 - `/stats` — non-empty and empty DB.
 - `/settings` — export a JSON, wipe DB, import it back.
+- `/change-password` — from the menu, and the forced version a fresh account lands on.
 
 Do this on desktop **and** a mobile viewport (375 px wide is a good baseline).
 

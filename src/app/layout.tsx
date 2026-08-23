@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Inter_Tight, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
+import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
 import { ToastProvider } from "@/components/ui";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -37,7 +38,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
+  const [locale, session] = await Promise.all([getLocale(), auth()]);
 
   return (
     <html
@@ -49,7 +50,10 @@ export default async function RootLayout({
         <NextIntlClientProvider>
           <ThemeProvider>
             <ToastProvider>
-              <SiteHeader />
+              <SiteHeader
+                username={session?.user?.username ?? null}
+                locked={session?.user?.mustChangePw ?? false}
+              />
               <main className="flex-1 flex flex-col">{children}</main>
             </ToastProvider>
           </ThemeProvider>

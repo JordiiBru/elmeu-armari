@@ -5,6 +5,43 @@
     "shortName": "Armario",
     "manifestDescription": "Gestor personal de ropa"
   },
+  "auth": {
+    "login": {
+      "title": "iniciar sesión",
+      "username": "usuario",
+      "password": "contraseña",
+      "submit": "entrar",
+      "submitting": "entrando…",
+      "errors": {
+        "missingFields": "Rellena los dos campos.",
+        "invalidCredentials": "Usuario o contraseña incorrectos.",
+        "lockedOut": "Demasiados intentos. Vuelve a probar dentro de {seconds, plural, one {# segundo} other {# segundos}}.",
+        "unexpected": "No se ha podido completar la entrada."
+      }
+    },
+    "changePassword": {
+      "title": "nueva contraseña",
+      "temporary": "la contraseña actual es temporal.",
+      "current": "actual",
+      "next": "nueva",
+      "confirmation": "repite",
+      "hint": "mínimo {count} caracteres",
+      "submit": "guardar",
+      "submitting": "guardando…",
+      "errors": {
+        "missingFields": "Rellena todos los campos.",
+        "mismatch": "Las dos no coinciden.",
+        "wrongPassword": "La contraseña actual no es correcta.",
+        "samePassword": "Tiene que ser distinta de la actual.",
+        "tooShort": "Demasiado corta.",
+        "tooLong": "Demasiado larga."
+      }
+    },
+    "menu": {
+      "changePassword": "contraseña",
+      "signOut": "salir"
+    }
+  },
   "labels": {
     "category": {
       "SWEATER": "Jersey",

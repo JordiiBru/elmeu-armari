@@ -5,6 +5,43 @@
     "shortName": "Wardrobe",
     "manifestDescription": "Personal clothes manager"
   },
+  "auth": {
+    "login": {
+      "title": "sign in",
+      "username": "username",
+      "password": "password",
+      "submit": "continue",
+      "submitting": "signing in…",
+      "errors": {
+        "missingFields": "Fill in both fields.",
+        "invalidCredentials": "Wrong username or password.",
+        "lockedOut": "Too many attempts. Try again in {seconds, plural, one {# second} other {# seconds}}.",
+        "unexpected": "Could not sign you in."
+      }
+    },
+    "changePassword": {
+      "title": "new password",
+      "temporary": "your current password is temporary.",
+      "current": "current",
+      "next": "new",
+      "confirmation": "repeat",
+      "hint": "at least {count} characters",
+      "submit": "save",
+      "submitting": "saving…",
+      "errors": {
+        "missingFields": "Fill in every field.",
+        "mismatch": "The two do not match.",
+        "wrongPassword": "That is not your current password.",
+        "samePassword": "It has to differ from the current one.",
+        "tooShort": "Too short.",
+        "tooLong": "Too long."
+      }
+    },
+    "menu": {
+      "changePassword": "password",
+      "signOut": "sign out"
+    }
+  },
   "labels": {
     "category": {
       "SWEATER": "Sweater",

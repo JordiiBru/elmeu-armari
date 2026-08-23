@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
+import { requireSession } from "@/lib/auth/api";
 import { findAllGarments } from "@/lib/prendas/service";
 import { getUploadDir } from "@/lib/uploads";
 import { buildZip, type ZipEntry } from "@/lib/zip";
@@ -15,6 +16,9 @@ async function readImageFile(filename: string): Promise<Buffer | null> {
 }
 
 export async function GET() {
+  const denied = await requireSession();
+  if (denied) return denied;
+
   const garments = await findAllGarments();
 
   const data = garments.map((g) => ({

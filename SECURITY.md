@@ -17,7 +17,9 @@ Please include:
 
 ## Scope
 
-This app has no user accounts — it is designed to run as a single-tenant instance behind a network you control. Reports about "no authentication on X" are welcome as hardening suggestions but are a known, accepted design trade-off rather than a vulnerability in isolation. Reports involving path traversal, injection, secret leakage, or issues that could compromise the host running the container are always in scope.
+The app is behind a login: every screen and every `/api/*` route requires a session, accounts are created by the admin with `npm run create-user` (there is no public sign-up, and no password recovery by e-mail), and passwords are hashed with Argon2id. Reports about authentication, session handling, the login throttling, path traversal, injection, secret leakage, or anything that could compromise the host running the container are in scope.
+
+Two deliberate trade-offs, so they are not reported as findings: the Content-Security-Policy allows `'unsafe-inline'` for scripts, because Next and the theme switcher inline their own (tightening it means per-request nonces); and the per-IP throttle is secondary to the per-account one, because a tunnelled deployment can present every visitor with the same address.
 
 ## Response
 

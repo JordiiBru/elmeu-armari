@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { requireSession } from "@/lib/auth/api";
 import { findGarmentById, setGarmentImage } from "@/lib/prendas/service";
 import { saveGarmentImage, deleteGarmentImage, getUploadMaxMb } from "@/lib/uploads";
 
@@ -9,6 +10,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireSession();
+  if (denied) return denied;
+
   const { id } = await params;
 
   const formData = await request.formData();
@@ -52,6 +56,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireSession();
+  if (denied) return denied;
+
   const { id } = await params;
 
   const garment = await findGarmentById(id);
