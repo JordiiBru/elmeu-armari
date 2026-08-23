@@ -88,13 +88,16 @@ export function WeekCalendar({
 
   return (
     <>
-      {/* Always seven across: a week is one line of time, and wrapping it
-          two-up turned it into four rows of squares. What changed is that
-          this is now the top of the screen rather than the middle of it —
-          the day's answer used to sit above in a plate of its own, and
-          the calendar carries it instead. So the cells are portrait at
-          every width: it is a standing figure they have to hold. */}
-      <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
+      {/* Seven across is right the moment there is width for it: a week
+          is one line of time. On a phone there is not — seven columns of
+          a 390px screen is a 45px stamp, and a 45px stamp cannot hold a
+          standing figure, which is now what a day is a picture of.
+          Wrapping was rejected once (#103) because the week was then the
+          middle stratum and four rows of squares buried the day's answer
+          and the collection between them. That plate is gone and the week
+          is the top of the screen, so the objection went with it: four
+          across, two rows, and cells that are nearly twice as wide. */}
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-7 sm:gap-3">
         {days.map((day) => (
           <DayCell
             key={day.date}

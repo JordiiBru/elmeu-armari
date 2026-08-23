@@ -38,10 +38,23 @@ export function PieceThumb({
 }: Props) {
   const src = thumb ? garmentThumbSrc(garment) : garmentImageSrc(garment);
   const [loaded, setLoaded] = useState(false);
+  /**
+   * Which src failed, rather than a boolean: the flag has to clear
+   * itself when this tile is handed a different garment, and a list that
+   * reorders does exactly that.
+   *
+   * A photo can go missing — a file lost to a restore, an upload that
+   * never landed — and the tile then stayed empty forever, because the
+   * crossfade only ever runs on `load`. An empty tile in a grid reads as
+   * a broken app; the colours read as a garment nobody has photographed
+   * yet, which is what it is.
+   */
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const broken = src !== null && src === failedSrc;
 
   return (
     <div className={`relative overflow-hidden bg-surface ${className ?? ""}`.trim()}>
-      {src ? (
+      {src && !broken ? (
         <Image
           src={src}
           alt=""
@@ -57,6 +70,7 @@ export function PieceThumb({
           priority={priority}
           draggable={false}
           onLoad={() => setLoaded(true)}
+          onError={() => setFailedSrc(src)}
         />
       ) : (
         <div

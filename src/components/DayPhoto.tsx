@@ -26,8 +26,12 @@ interface Props {
 export function DayPhoto({ event, thumb = false, sizes, priority, className }: Props) {
   const src = thumb ? dayPhotoThumbSrc(event) : dayPhotoSrc(event);
   const [loaded, setLoaded] = useState(false);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
-  if (!src) return null;
+  // Nothing to fall back to — a day photograph is of one thing only — so
+  // a missing file leaves the frame to whatever is under it rather than
+  // to a tile that never fades in.
+  if (!src || src === failedSrc) return null;
 
   return (
     <div className={`relative overflow-hidden ${className ?? ""}`.trim()}>
@@ -45,6 +49,7 @@ export function DayPhoto({ event, thumb = false, sizes, priority, className }: P
         priority={priority}
         draggable={false}
         onLoad={() => setLoaded(true)}
+        onError={() => setFailedSrc(src)}
       />
     </div>
   );

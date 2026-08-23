@@ -30,14 +30,19 @@ export function DayPieces({ garments }: { garments: GarmentWithColors[] }) {
               sizes="48px"
               className="h-12 w-12 flex-shrink-0"
             />
-            <Text as="span" truncate className="min-w-0 flex-1 font-serif lowercase">
-              {pieceLabel(t, g)}
-            </Text>
-            {tint && (
-              <Text variant="caption" tone="secondary" className="flex-shrink-0">
-                {tint}
+            {/* Stacked, not side by side: a Sanzo name runs as long as
+                "Deep Violet / Plumbeous", and on one line it ate the
+                piece it was describing down to an ellipsis. */}
+            <div className="min-w-0 flex-1">
+              <Text as="span" truncate className="block font-serif lowercase">
+                {pieceLabel(t, g)}
               </Text>
-            )}
+              {tint && (
+                <Text variant="caption" tone="secondary" truncate className="block">
+                  {tint}
+                </Text>
+              )}
+            </div>
             <span aria-hidden className="flex flex-shrink-0 gap-1">
               {g.colors.map((c) => (
                 <span

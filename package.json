@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "create-user": "node --env-file-if-exists=.env scripts/create-user.mjs",
+    "rebuild-thumbs": "node --env-file-if-exists=.env scripts/rebuild-thumbs.mjs",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "check": "npm run lint && npm run typecheck && npm run build",

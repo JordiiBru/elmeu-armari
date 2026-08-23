@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { shrinkForUpload } from "@/lib/image-client";
 import { Icon, Stack, Text } from "@/components/ui";
 
 interface Props {
@@ -46,7 +47,7 @@ export function DayPhotoInput({ eventId, hasPhoto, withRemove = false, disabled 
     if (!file) return;
     setStatus("busy");
     const body = new FormData();
-    body.append("file", file);
+    body.append("file", await shrinkForUpload(file));
     const r = await fetch(`/api/worn/${eventId}/image`, { method: "POST", body });
     if (input.current) input.current.value = "";
     if (!r.ok) {
