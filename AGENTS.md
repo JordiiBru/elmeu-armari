@@ -111,9 +111,11 @@ Individual gates: `npm run lint`, `npm run typecheck`, `npm run build`. `npm run
 
 ## Photos
 
-- Upload path: `/api/garments/[id]/image` (POST for upload, DELETE to remove).
+- Upload paths: `/api/garments/[id]/image` for a garment, `/api/worn/[id]/image` for a day (POST to upload, DELETE to remove). Both are the same guards and the same pipeline; `saveUploadImage` / `deleteUploadImage` in `src/lib/uploads.ts` are keyed by whatever id they are given, which is why they are not called `…GarmentImage` any more.
 - Serve path: `/api/uploads/[filename]` — the filename regex is a security-relevant allowlist (`[a-z0-9]+(?:-thumb)?\.webp`). Do not loosen it without a security review.
-- `sharp` re-encodes to WebP 800 px @ q80, strips EXIF, generates a `-thumb` companion.
+- `sharp` re-encodes to WebP 800 px @ q80, strips EXIF, generates a `-thumb` companion. Alpha survives, and day photos rely on it: they are background-removed cut-outs, drawn `object-contain` on the page's own ground (`DayPhoto`), unlike every other photo in the app.
+- **A day photo belongs to the day, not to the outfit** (`WornEvent.image`): the same outfit worn twice is two mornings and two pictures. Deleting the day deletes the file — `unassignDay` and `deleteOutfit` (which cascades to its days) both clean up, or the uploads directory silently fills with files nothing points at. `WornEvent.updatedAt` exists only to cache-bust the photo, whose filename never changes.
+- `/api/export/zip` walks garment photos **and** day photos. A new kind of image means a new walk there, or a restore loses it silently.
 
 ## What not to do
 

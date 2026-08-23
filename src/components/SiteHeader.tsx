@@ -39,8 +39,15 @@ export default function SiteHeader({
   const isHome = pathname === "/" || !username || locked;
 
   return (
+    // The two children are both 44px tall, and the placeholder matches
+    // them: an empty span made the header 8px shorter on the home screen,
+    // so every page you opened from it started by nudging itself down.
     <header className="w-full px-6 md:px-10 pt-6 pb-4 flex items-center justify-between">
-      {isHome ? <span /> : <BackLink href={parentOf(pathname)} />}
+      {isHome ? (
+        <span aria-hidden className="block h-11 w-11" />
+      ) : (
+        <BackLink href={parentOf(pathname)} />
+      )}
       <AppMenu username={username} locked={locked} />
     </header>
   );

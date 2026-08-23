@@ -270,13 +270,9 @@
   "outfits": {
     "screenTitle": "What do I wear?",
     "sections": {
-      "today": "today",
       "week": "the week",
       "all": "your outfits"
     },
-    "todayUndecided": "you have not decided yet",
-    "chooseToday": "Choose today's outfit",
-    "changeToday": "change outfit",
     "filtersLabel": "Filter outfits",
     "pickForMe": "pick for me",
     "today": "today",
@@ -320,6 +316,13 @@
       "today": "worn today",
       "ago": "{days, plural, one {worn # day ago} other {worn # days ago}}"
     }
+  },
+  "dayPhoto": {
+    "add": "photo",
+    "change": "change",
+    "remove": "remove photo",
+    "uploading": "uploading…",
+    "failed": "couldn't upload. try again."
   },
   "week": {
     "previous": "Previous week",

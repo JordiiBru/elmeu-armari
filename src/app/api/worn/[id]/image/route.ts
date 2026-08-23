@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth/api";
-import { findGarmentById, setGarmentImage } from "@/lib/prendas/service";
+import { findDayById, setDayPhoto } from "@/lib/outfits/service";
 import { saveUploadImage, deleteUploadImage, getUploadMaxMb } from "@/lib/uploads";
 
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
+/**
+ * The photo of you wearing the day, mirrored from
+ * `/api/garments/[id]/image`: same guards, same pipeline, keyed by the
+ * worn event instead of the garment. A day only has a photo once it has
+ * an outfit, which is what makes the event id the natural key.
+ */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -37,17 +43,17 @@ export async function POST(
     );
   }
 
-  const garment = await findGarmentById(id);
-  if (!garment) {
-    return NextResponse.json({ error: "Garment not found" }, { status: 404 });
+  const day = await findDayById(id);
+  if (!day) {
+    return NextResponse.json({ error: "Day not found" }, { status: 404 });
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const filename = await saveUploadImage(buffer, id);
 
-  await setGarmentImage(id, filename);
+  await setDayPhoto(id, filename);
 
-  revalidatePath("/armari");
+  revalidatePath("/avui");
 
   return NextResponse.json({ image: filename });
 }
@@ -61,15 +67,15 @@ export async function DELETE(
 
   const { id } = await params;
 
-  const garment = await findGarmentById(id);
-  if (!garment) {
-    return NextResponse.json({ error: "Garment not found" }, { status: 404 });
+  const day = await findDayById(id);
+  if (!day) {
+    return NextResponse.json({ error: "Day not found" }, { status: 404 });
   }
 
   await deleteUploadImage(id);
-  await setGarmentImage(id, null);
+  await setDayPhoto(id, null);
 
-  revalidatePath("/armari");
+  revalidatePath("/avui");
 
   return NextResponse.json({ ok: true });
 }
