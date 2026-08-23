@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs/promises";
 import { requireSession } from "@/lib/auth/api";
 import { findAllGarments } from "@/lib/prendas/service";
+import { findDayPhotoFilenames } from "@/lib/outfits/service";
 import { getUploadDir } from "@/lib/uploads";
 import { buildZip, type ZipEntry } from "@/lib/zip";
 
@@ -15,11 +16,25 @@ async function readImageFile(filename: string): Promise<Buffer | null> {
   }
 }
 
+/** A photo and its thumbnail companion, when the files are still there. */
+async function pushImage(entries: ZipEntry[], filename: string): Promise<void> {
+  const thumbName = filename.replace(/\.webp$/, "-thumb.webp");
+  const [full, thumb] = await Promise.all([
+    readImageFile(filename),
+    readImageFile(thumbName),
+  ]);
+  if (full) entries.push({ name: `images/${filename}`, data: full });
+  if (thumb) entries.push({ name: `images/${thumbName}`, data: thumb });
+}
+
 export async function GET() {
   const denied = await requireSession();
   if (denied) return denied;
 
-  const garments = await findAllGarments();
+  const [garments, dayPhotos] = await Promise.all([
+    findAllGarments(),
+    findDayPhotoFilenames(),
+  ]);
 
   const data = garments.map((g) => ({
     id: g.id,
@@ -44,14 +59,15 @@ export async function GET() {
   ];
 
   for (const g of garments) {
-    if (!g.image) continue;
-    const thumbName = g.image.replace(/\.webp$/, "-thumb.webp");
-    const [full, thumb] = await Promise.all([
-      readImageFile(g.image),
-      readImageFile(thumbName),
-    ]);
-    if (full) entries.push({ name: `images/${g.image}`, data: full });
-    if (thumb) entries.push({ name: `images/${thumbName}`, data: thumb });
+    if (g.image) await pushImage(entries, g.image);
+  }
+
+  // Day photos have no row in `data.json` — the payload is garments only,
+  // and neither outfits nor the calendar are exported. The files still
+  // travel, because losing the pictures you took of yourself to a backup
+  // that looked complete is the one failure this export cannot afford.
+  for (const image of dayPhotos) {
+    await pushImage(entries, image);
   }
 
   const zip = buildZip(entries);

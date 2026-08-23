@@ -101,6 +101,24 @@ export async function clearWornDay(day: Date) {
   await prisma.wornEvent.deleteMany({ where: { date: day } });
 }
 
+export async function findWornEventById(id: string) {
+  return prisma.wornEvent.findUnique({ where: { id } });
+}
+
+export async function setWornEventImage(id: string, image: string | null) {
+  return prisma.wornEvent.update({ where: { id }, data: { image } });
+}
+
+/** Every day that carries a photo. The export walks it, and so does
+ * whatever is about to delete rows that own files on disk. */
+export async function findWornEventImages(where: { outfitId?: string; date?: Date } = {}) {
+  const rows = await prisma.wornEvent.findMany({
+    where: { ...where, image: { not: null } },
+    select: { id: true, image: true },
+  });
+  return rows as { id: string; image: string }[];
+}
+
 export async function findUnsettledPastWornEvents(beforeDay: Date) {
   return prisma.wornEvent.findMany({
     where: { date: { lt: beforeDay }, settledAt: null },

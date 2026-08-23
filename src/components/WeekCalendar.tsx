@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { unassignDayAction } from "@/app/outfits/actions";
 import type { SanzoPalette, SavedOutfit, WeekDayPlan } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
+import { DayPhoto } from "./DayPhoto";
 import { OutfitCollage, OutfitTile, outfitSubtitle } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
 import { Card, Icon, Sheet, Text, TextButton, EmptyState } from "@/components/ui";
@@ -87,14 +88,12 @@ export function WeekCalendar({
 
   return (
     <>
-      {/* Always seven across. The week used to wrap two-up on a phone,
-          which was right when it was a screen of its own; as the middle
-          stratum of "què em poso?" that same layout became four rows of
-          large squares sitting between the day's answer and the
-          collection, and the secondary thing outweighed both. Seven
-          small stamps read as one line of time, which is all this
-          stratum has to say. Desktop keeps portrait cells — there the
-          row has width to spend. */}
+      {/* Always seven across: a week is one line of time, and wrapping it
+          two-up turned it into four rows of squares. What changed is that
+          this is now the top of the screen rather than the middle of it —
+          the day's answer used to sit above in a plate of its own, and
+          the calendar carries it instead. So the cells are portrait at
+          every width: it is a standing figure they have to hold. */}
       <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
         {days.map((day) => (
           <DayCell
@@ -130,6 +129,7 @@ export function WeekCalendar({
           todayISO={todayISO}
           isCommitted={openDay.outfit?.id === pickedOutfit.id}
           dayExtras={openDay.extras}
+          dayEvent={openDay.outfit?.id === pickedOutfit.id ? openDay.event : null}
           onChangeOutfit={() => setPicking(true)}
           onClear={() => handleClear(openDay.date)}
           onClose={close}
@@ -166,19 +166,36 @@ function DayCell({
       {/* Stacked and centred at seven-across, back to a baseline row
           once a cell is wide enough to hold both on one line. */}
       <div className="flex flex-col items-center gap-0 pb-1 sm:flex-row sm:items-baseline sm:justify-between sm:pb-2">
-        <Text variant="caption" tone={isToday ? "primary" : "secondary"}>
+        {/* Which day is today is now the calendar's job alone, so it says
+            it twice: full ink at the heavier caption weight, and the
+            hairline around the photograph below. */}
+        <Text variant={isToday ? "caption-strong" : "caption"} tone={isToday ? "primary" : "secondary"}>
           {weekday}
         </Text>
-        <Text variant="caption" tabular tone={isToday ? "primary" : "secondary"}>
+        <Text
+          variant={isToday ? "caption-strong" : "caption"}
+          tabular
+          tone={isToday ? "primary" : "secondary"}
+        >
           {String(d.getUTCDate()).padStart(2, "0")}
         </Text>
       </div>
       <div
-        className={`relative aspect-square lg:aspect-[3/4] w-full overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0 ${
+        className={`relative aspect-[2/3] w-full overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0 ${
           isToday ? "ring-1 ring-text-primary" : ""
         }`}
       >
-        {day.outfit ? (
+        {day.event?.image ? (
+          // You, in what you wore. A portrait of a person reads as
+          // different from a grid of clothes even at this size, so the
+          // week tells you at a glance which days you photographed.
+          <DayPhoto
+            event={day.event}
+            thumb
+            sizes="(min-width: 1024px) 12vw, (min-width: 640px) 22vw, 45vw"
+            className="h-full w-full bg-surface"
+          />
+        ) : day.outfit ? (
           // The whole look, clothes and what you wore them with: a day is
           // not the outfit, it is the outfit plus the shoes and
           // accessories you actually put on.

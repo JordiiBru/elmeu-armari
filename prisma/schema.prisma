@@ -51,6 +51,14 @@ model WornEvent {
   /// (see settlePastWornEvents), so reconsidering same-day never soils
   /// clothes you didn't actually wear.
   settledAt DateTime?
+  /// Filename of the photo you took of yourself that day, or null. Same
+  /// shape as Garment.image: the file lives under UPLOAD_DIR, only its
+  /// name is stored. It belongs to the day, not to the outfit — the same
+  /// outfit worn twice is two different mornings.
+  image     String?
+  /// Only reason this exists: cache-busting the photo, whose filename is
+  /// derived from the row id and therefore never changes when replaced.
+  updatedAt DateTime @default(now()) @updatedAt
   outfit   Outfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
   /// Shoes / socks / accessories worn that day. The outfit itself is
   /// clothes only — what you put on your feet is a property of the day,

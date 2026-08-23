@@ -12,6 +12,7 @@ export type IconName =
   | "sparkle"
   | "ellipsis"
   | "user"
+  | "camera"
   | "sun"
   | "moon";
 
@@ -104,6 +105,16 @@ const PATHS: Record<IconName, ReactElement> = {
     <>
       <circle cx="12" cy="8.2" r="3.4" />
       <path d="M5.6 19.8a6.4 6.4 0 0 1 12.8 0" />
+    </>
+  ),
+  // The optional half of a day: once the outfit is decided you can add a
+  // photograph of yourself in it. Same hairline as `user`, because the two
+  // are the only icons in the set that stand for you rather than for a
+  // direction or an action.
+  camera: (
+    <>
+      <path d="M3 8.8h4.1L8.6 6.2h6.8l1.5 2.6H21v10H3Z" />
+      <circle cx="12" cy="13.4" r="3.3" />
     </>
   ),
   sun: (

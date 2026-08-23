@@ -13,7 +13,7 @@ import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { isWearable, rankOutfitsForToday } from "@/lib/bugaderia/laundry";
 import { startOfWeek, addDays, dayToISO, isoToDay, today } from "@/lib/outfits/week";
 import { palettes } from "@/lib/colors";
-import { TodayPlate } from "@/components/TodayPlate";
+import { TodayLine } from "@/components/TodayLine";
 import { WeekCalendar } from "@/components/WeekCalendar";
 import { OutfitLibrary } from "@/components/OutfitLibrary";
 import { PageContainer, SectionHeader, Stack, Text, Icon, EmptyState } from "@/components/ui";
@@ -99,10 +99,12 @@ function WeekNav({
 }
 
 /**
- * "Què em poso?" — the one place outfits live, in three strata: the
- * day's answer, the week it sits in, and the whole collection. Same
- * noun at three distances in time, so they belong on one screen rather
- * than behind three tabs and two routes.
+ * "Què em poso?" — the one place outfits live, in two strata now: the
+ * week, and the whole collection. The day's answer used to be a third,
+ * above both, and it was the same photograph the calendar was already
+ * showing one cell down. Folding it into the week gives the calendar the
+ * top of the screen and the room to be read, and leaves the day with
+ * only what a cell cannot carry: the action it still wants.
  */
 export default async function AvuiPage({
   searchParams,
@@ -166,17 +168,6 @@ export default async function AvuiPage({
       <SectionHeader title={t("screenTitle")} level="title-xl" />
 
       <Stack gap={8} className="md:gap-16">
-        <Stratum title={t("sections.today")}>
-          <TodayPlate
-            committed={committed}
-            candidates={ranked.filter(isWearable)}
-            todayExtras={todayWorn?.extras ?? []}
-            palettes={palettes}
-            extraCandidates={extraCandidates}
-            todayISO={todayISO}
-          />
-        </Stratum>
-
         <Stratum
           title={t("sections.week")}
           aside={
@@ -194,6 +185,14 @@ export default async function AvuiPage({
             palettes={palettes}
             extraCandidates={extraCandidates}
             todayISO={todayISO}
+          />
+          <TodayLine
+            committed={committed}
+            candidates={ranked.filter(isWearable)}
+            palettes={palettes}
+            extraCandidates={extraCandidates}
+            todayISO={todayISO}
+            todayEvent={todayWorn?.event ?? null}
           />
         </Stratum>
 

@@ -270,13 +270,9 @@
   "outfits": {
     "screenTitle": "¿Qué me pongo?",
     "sections": {
-      "today": "hoy",
       "week": "la semana",
       "all": "tus outfits"
     },
-    "todayUndecided": "todavía no lo has decidido",
-    "chooseToday": "Elegir el outfit de hoy",
-    "changeToday": "cambiar de outfit",
     "filtersLabel": "Filtrar outfits",
     "pickForMe": "elige por mí",
     "today": "hoy",
@@ -320,6 +316,13 @@
       "today": "llevado hoy",
       "ago": "{days, plural, one {llevado hace # día} other {llevado hace # días}}"
     }
+  },
+  "dayPhoto": {
+    "add": "foto",
+    "change": "cambiar",
+    "remove": "quitar",
+    "uploading": "subiendo…",
+    "failed": "no se ha podido subir. inténtalo de nuevo."
   },
   "week": {
     "previous": "Semana anterior",

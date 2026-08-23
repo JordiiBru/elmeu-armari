@@ -270,13 +270,9 @@
   "outfits": {
     "screenTitle": "Què em poso?",
     "sections": {
-      "today": "avui",
       "week": "la setmana",
       "all": "els teus outfits"
     },
-    "todayUndecided": "encara no ho has decidit",
-    "chooseToday": "Triar l'outfit d'avui",
-    "changeToday": "canviar d'outfit",
     "filtersLabel": "Filtrar outfits",
     "pickForMe": "tria per mi",
     "today": "avui",
@@ -320,6 +316,13 @@
       "today": "portat avui",
       "ago": "{days, plural, one {portat fa # dia} other {portat fa # dies}}"
     }
+  },
+  "dayPhoto": {
+    "add": "foto",
+    "change": "canviar",
+    "remove": "treure",
+    "uploading": "pujant…",
+    "failed": "no s'ha pogut pujar. torna-ho a provar."
   },
   "week": {
     "previous": "Setmana anterior",

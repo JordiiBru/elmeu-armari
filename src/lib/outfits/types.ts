@@ -53,10 +53,25 @@ export interface WornDay {
   extras: GarmentWithColors[];
 }
 
+/**
+ * The committed day itself, as opposed to the outfit on it. It is the row
+ * that owns the photo you took of yourself that morning: the same outfit
+ * worn twice is two different days and two different photographs.
+ */
+export interface DayEvent {
+  id: string;
+  image: string | null;
+  /** Only ever read to cache-bust the photo, whose filename is the id. */
+  updatedAt: Date;
+}
+
 /** One cell of the weekly planner: a calendar day, whatever outfit
  * (if any) is assigned to it, and what it is worn with. */
 export interface WeekDayPlan {
   date: string; // YYYY-MM-DD
   outfit: SavedOutfit | null;
   extras: GarmentWithColors[];
+  /** null on an empty day: there is no day to photograph until one is
+   * decided. */
+  event: DayEvent | null;
 }

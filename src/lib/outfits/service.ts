@@ -3,15 +3,19 @@ import {
   findAllOutfits,
   findOutfitByGarmentsAndPalette,
   findOutfitById,
-  deleteOutfit,
+  deleteOutfit as deleteOutfitRow,
   countOutfits,
   setWornDay,
   clearWornDay,
   findWornEventsInRange,
   findWornEventForDay,
+  findWornEventById,
+  findWornEventImages,
+  setWornEventImage,
   findUnsettledPastWornEvents,
   markWornEventSettled,
 } from "./repository";
+import { deleteUploadImage } from "@/lib/uploads";
 import { findGarmentCategories, markGarmentsDirty } from "@/lib/prendas/service";
 import { sortByWardrobeOrder } from "@/lib/prendas/filtering";
 import { AUTO_SOIL_CATEGORIES, EXTRA_CATEGORIES } from "@/lib/prendas/types";
@@ -19,10 +23,10 @@ import { dirtyGarmentsOf } from "@/lib/bugaderia/laundry";
 import { palettes } from "@/lib/colors";
 import { dayKey, addDays, dayToISO, today } from "./week";
 import { outfitKey } from "./key";
-import type { SavedOutfit, WeekDayPlan } from "./types";
+import type { DayEvent, SavedOutfit, WeekDayPlan } from "./types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 
-export { findAllOutfits, deleteOutfit };
+export { findAllOutfits };
 
 interface WornEventWithGarments {
   id: string;
@@ -60,6 +64,10 @@ export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
       extras: sortByWardrobeOrder(w.garments.map((wg) => wg.garment)),
     })),
   };
+}
+
+function toDayEvent(event: { id: string; image: string | null; updatedAt: Date }): DayEvent {
+  return { id: event.id, image: event.image, updatedAt: event.updatedAt };
 }
 
 /** Every combination already in the wardrobe, for the combiner to grey
@@ -126,8 +134,43 @@ export async function wearOutfit(
   await setWornDay(outfitId, day, garmentIds);
 }
 
+/**
+ * Emptying a day destroys the day, and with it the only thing that ever
+ * pointed at its photograph — so the file goes with the row. Same for
+ * deleting an outfit, which cascades to every day it was worn on.
+ */
 export async function unassignDay(date: Date) {
-  return clearWornDay(dayKey(date));
+  const day = dayKey(date);
+  const photos = await findWornEventImages({ date: day });
+  await clearWornDay(day);
+  await Promise.all(photos.map((p) => deleteUploadImage(p.id)));
+}
+
+export async function deleteOutfit(id: string) {
+  const photos = await findWornEventImages({ outfitId: id });
+  const outfit = await deleteOutfitRow(id);
+  await Promise.all(photos.map((p) => deleteUploadImage(p.id)));
+  return outfit;
+}
+
+/**
+ * The photo you took of yourself on a day. It belongs to the day and not
+ * to the outfit, so it is keyed by the worn event: wearing the same look
+ * again is a different morning and gets its own picture.
+ */
+export async function setDayPhoto(eventId: string, filename: string | null): Promise<void> {
+  await setWornEventImage(eventId, filename);
+}
+
+export async function findDayById(id: string): Promise<DayEvent | null> {
+  const event = await findWornEventById(id);
+  return event ? toDayEvent(event) : null;
+}
+
+/** Filenames of every day photo, for the export to carry. */
+export async function findDayPhotoFilenames(): Promise<string[]> {
+  const rows = await findWornEventImages();
+  return rows.map((r) => r.image);
 }
 
 /**
@@ -166,12 +209,14 @@ export async function settlePastWornEvents(): Promise<number> {
 export async function findTodayWorn(): Promise<{
   outfitId: string;
   extras: GarmentWithColors[];
+  event: DayEvent;
 } | null> {
   const event = await findWornEventForDay(today());
   if (!event) return null;
   return {
     outfitId: event.outfitId,
     extras: sortByWardrobeOrder(event.garments.map((wg) => wg.garment)),
+    event: toDayEvent(event),
   };
 }
 
@@ -190,6 +235,7 @@ export async function findWeekPlan(weekStart: Date): Promise<WeekDayPlan[]> {
       date,
       outfit: event ? toSavedOutfit(event.outfit) : null,
       extras: event ? sortByWardrobeOrder(event.garments.map((wg) => wg.garment)) : [],
+      event: event ? toDayEvent(event) : null,
     };
   });
 }
