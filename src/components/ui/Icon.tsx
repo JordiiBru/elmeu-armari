@@ -11,6 +11,7 @@ export type IconName =
   | "star"
   | "sparkle"
   | "ellipsis"
+  | "user"
   | "sun"
   | "moon";
 
@@ -93,6 +94,16 @@ const PATHS: Record<IconName, ReactElement> = {
       <circle cx="5" cy="12" r="1.1" />
       <circle cx="12" cy="12" r="1.1" />
       <circle cx="19" cy="12" r="1.1" />
+    </>
+  ),
+  // Stands in for the person whose wardrobe this is, on the button that
+  // opens their own menu. A head and the line of two shoulders, drawn
+  // with the same hairline as everything else — not a filled avatar,
+  // which would be the only solid shape in the set.
+  user: (
+    <>
+      <circle cx="12" cy="8.2" r="3.4" />
+      <path d="M5.6 19.8a6.4 6.4 0 0 1 12.8 0" />
     </>
   ),
   sun: (

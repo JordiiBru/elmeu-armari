@@ -95,7 +95,9 @@ export function AppMenu({
         onClick={() => setOpen((v) => !v)}
         className={open ? "text-text-primary" : undefined}
       >
-        <Icon name="ellipsis" size={18} />
+        {/* Signed in, the button is the way to your own account before
+            it is the way to anything else, and the icon says so. */}
+        <Icon name={username ? "user" : "ellipsis"} size={18} />
       </IconButton>
 
       {open && (
@@ -120,7 +122,7 @@ export function AppMenu({
                   href={entry.href}
                   role="menuitem"
                   onClick={() => setOpen(false)}
-                  className="group flex min-h-11 items-center justify-between gap-4 px-4 outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-inset"
+                  className="group flex h-11 items-center justify-between gap-4 px-4 outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-inset"
                 >
                   <span className="font-serif type-body">{entry.label}</span>
                   <span className="text-text-muted transition-colors duration-[var(--duration-base)] group-hover:text-text-primary">
@@ -129,7 +131,7 @@ export function AppMenu({
                 </Link>
               ))}
 
-              <div className="flex min-h-11 items-center justify-between gap-4 px-4 py-2">
+              <div className="flex h-11 items-center justify-between gap-4 px-4">
                 <Text variant="caption" as="span" className="min-w-0 truncate">
                   {t("theme")}
                 </Text>
@@ -153,7 +155,7 @@ export function AppMenu({
               {/* Built like the theme row above it, which is what this row
                   was left space for. Three flags rather than three codes:
                   the row is recognised before it is read. */}
-              <div className="flex min-h-11 items-center justify-between gap-4 px-4 py-2">
+              <div className="flex h-11 items-center justify-between gap-4 px-4">
                 {/* The three flags are one object, not three words: the
                     row must never break them across two lines, however
                     long the word beside them gets. "idioma" is seven
@@ -182,7 +184,7 @@ export function AppMenu({
               {username && (
                 <form
                   action={signOutAction}
-                  className="flex min-h-11 items-center justify-between gap-4 px-4 py-2"
+                  className="flex h-11 items-center justify-between gap-4 px-4"
                 >
                   <Text
                     variant="caption"
@@ -194,7 +196,7 @@ export function AppMenu({
                   </Text>
                   <button
                     type="submit"
-                    className="shrink-0 type-caption text-text-primary hover:text-text-secondary transition-colors duration-[var(--duration-base)] outline-none focus-visible:ring-1 focus-visible:ring-focus-ring"
+                    className="shrink-0 inline-flex min-h-11 items-center type-caption text-text-primary hover:text-text-secondary transition-colors duration-[var(--duration-base)] outline-none focus-visible:ring-1 focus-visible:ring-focus-ring"
                   >
                     {tAuth("signOut")}
                   </button>

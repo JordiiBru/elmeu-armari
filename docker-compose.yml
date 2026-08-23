@@ -15,6 +15,10 @@ services:
       # `openssl rand -base64 32` and keep it out of git — an env var
       # locally, a k3s secret in the homelab.
       AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required, see README}
+      # Uncomment behind a public hostname. It is what marks the session
+      # cookie `Secure`, rather than trusting the X-Forwarded-Proto the
+      # tunnel happens to send.
+      # AUTH_URL: https://armari.example.com
     volumes:
       - sqlite_data:/data
 

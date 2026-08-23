@@ -36,8 +36,9 @@ export default defineConfig({
       // `npm start` under CI); tests/e2e/garments.spec.ts sends this same
       // value as a Bearer token on /api/import.
       IMPORT_SECRET: "e2e-test-secret",
-      // Auth.js signs the session cookie with this. Deterministic here so
-      // a restarted server does not invalidate the saved storage state.
+      // Not a secret: it signs cookies for a throwaway database on
+      // localhost. Deterministic so a restarted server does not
+      // invalidate the saved storage state.
       AUTH_SECRET: "e2e-auth-secret-not-used-anywhere-else",
     },
     timeout: 60_000,

@@ -234,6 +234,24 @@ There is no sign-up screen, by design: the account you just created is
 how you get in, and the app asks you to replace that temporary password
 the first time you use it.
 
+### Accounts
+
+There is no sign-up screen and no HTTP route that creates an account. One script does it, and it is the whole story:
+
+```bash
+npm run create-user -- --username jordi            # prints a temporary password
+npm run create-user -- --username jordi --reset    # forgot it? same command
+pbpaste | npm run create-user -- --username jordi --stdin   # choose it yourself
+```
+
+Every account created this way starts with `mustChangePw`, so the first sign-in lands on `/change-password` and nothing else opens until the password is replaced. `--reset` is also the recovery flow: there is no e-mail, no security questions, and nothing to phish.
+
+In production the script lives inside the container:
+
+```bash
+docker exec -it elmeu-armari node scripts/create-user.mjs --username jordi
+```
+
 To reach it from another device on the same network:
 
 ```bash
@@ -293,19 +311,14 @@ docker run -d \
 
 The entrypoint runs `prisma migrate deploy` before starting the server.
 
-A fresh deployment has no accounts and nothing but the login screen. Create the first one from inside the container:
-
-```bash
-docker exec -it elmeu-armari node scripts/create-user.mjs --username jordi
-```
-
-It prints a temporary password once. The same command with `--reset` is also the password-recovery flow: there is no e-mail, and no self-service.
+A fresh deployment has no accounts and nothing but the login screen. Create the first one as described under [Accounts](#accounts).
 
 ### Environment variables
 
 | Variable | Default | Purpose |
 |---|---|---|
 | `AUTH_SECRET` | — | **Required.** Signs and encrypts the session cookie. `openssl rand -base64 32`. Changing it signs everyone out. |
+| `AUTH_URL` | — | Recommended in production: the public origin, e.g. `https://armari.example.com`. Auth.js marks the session cookie `Secure` when this is `https://`, instead of trusting the `X-Forwarded-Proto` a reverse proxy may or may not send. |
 | `DATABASE_URL` | `file:/data/prod.db` | SQLite file path |
 | `UPLOAD_DIR` | `/data/uploads` | Where garment photos are written |
 | `UPLOAD_MAX_MB` | `10` | Max upload size (pre-resize) |
