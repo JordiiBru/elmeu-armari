@@ -7,38 +7,34 @@
   },
   "auth": {
     "login": {
-      "eyebrow": "access",
       "title": "sign in",
-      "subtitle": "this wardrobe is private. sign in with the account you were given.",
       "username": "username",
       "password": "password",
-      "submit": "sign in",
+      "submit": "continue",
       "submitting": "signing in…",
       "errors": {
-        "missingFields": "Fill in the username and the password.",
+        "missingFields": "Fill in both fields.",
         "invalidCredentials": "Wrong username or password.",
         "lockedOut": "Too many attempts. Try again in {seconds, plural, one {# second} other {# seconds}}.",
-        "unexpected": "Could not sign you in. Please try again."
+        "unexpected": "Could not sign you in."
       }
     },
     "changePassword": {
-      "eyebrow": "account",
-      "title": "password",
-      "subtitle": "change your password whenever you like.",
-      "forcedSubtitle": "the password you have is temporary. pick a new one to carry on.",
-      "current": "current password",
-      "next": "new password",
-      "confirmation": "repeat the new one",
-      "hint": "at least {count} characters.",
-      "submit": "change",
-      "submitting": "changing…",
+      "title": "new password",
+      "temporary": "your current password is temporary.",
+      "current": "current",
+      "next": "new",
+      "confirmation": "repeat",
+      "hint": "at least {count} characters",
+      "submit": "save",
+      "submitting": "saving…",
       "errors": {
         "missingFields": "Fill in every field.",
-        "mismatch": "The two new passwords do not match.",
+        "mismatch": "The two do not match.",
         "wrongPassword": "That is not your current password.",
-        "samePassword": "The new one has to differ from the current one.",
-        "tooShort": "That password is too short.",
-        "tooLong": "That password is too long."
+        "samePassword": "It has to differ from the current one.",
+        "tooShort": "Too short.",
+        "tooLong": "Too long."
       }
     },
     "menu": {

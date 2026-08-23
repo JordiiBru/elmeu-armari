@@ -17,7 +17,7 @@ export function ChangePasswordForm() {
   >(changePasswordAction, null);
 
   return (
-    <form action={formAction} className="flex flex-col gap-7">
+    <form action={formAction} className="flex flex-col gap-6">
       <Field label={t("current")} htmlFor="current">
         <Input
           id="current"
@@ -56,9 +56,15 @@ export function ChangePasswordForm() {
         />
       </Field>
 
-      <Stack gap={3}>
+      <Stack gap={4} className="pt-2">
         {state && (
-          <Text variant="small" italic className="text-danger font-serif" role="alert">
+          <Text
+            variant="small"
+            italic
+            as="p"
+            className="text-danger font-serif text-center"
+            role="alert"
+          >
             {t(`errors.${state.error}`)}
           </Text>
         )}
@@ -66,7 +72,7 @@ export function ChangePasswordForm() {
           type="submit"
           variant="primary"
           size="md"
-          className="self-start"
+          className="w-full"
           loading={isPending}
           loadingText={t("submitting")}
         >

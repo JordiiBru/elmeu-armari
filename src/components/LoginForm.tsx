@@ -2,27 +2,21 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import { loginAction, type LoginState } from "@/app/login/actions";
+import { loginAction } from "@/app/login/actions";
 import { Button, Field, Input, Stack, Text } from "@/components/ui";
-
-function errorMessage(
-  state: LoginState,
-  t: ReturnType<typeof useTranslations<"auth.login">>,
-): string | null {
-  if (!state) return null;
-  if (state.error === "lockedOut") {
-    return t("errors.lockedOut", { seconds: state.seconds });
-  }
-  return t(`errors.${state.error}`);
-}
 
 export function LoginForm({ next }: { next: string | null }) {
   const t = useTranslations("auth.login");
   const [state, formAction, isPending] = useActionState(loginAction, null);
-  const message = errorMessage(state, t);
+
+  const message = !state
+    ? null
+    : state.error === "lockedOut"
+      ? t("errors.lockedOut", { seconds: state.seconds })
+      : t(`errors.${state.error}`);
 
   return (
-    <form action={formAction} className="flex flex-col gap-7">
+    <form action={formAction} className="flex flex-col gap-6">
       {next && <input type="hidden" name="next" value={next} />}
 
       <Field label={t("username")} htmlFor="username">
@@ -50,9 +44,15 @@ export function LoginForm({ next }: { next: string | null }) {
         />
       </Field>
 
-      <Stack gap={3}>
+      <Stack gap={4} className="pt-2">
         {message && (
-          <Text variant="small" italic className="text-danger font-serif" role="alert">
+          <Text
+            variant="small"
+            italic
+            as="p"
+            className="text-danger font-serif text-center"
+            role="alert"
+          >
             {message}
           </Text>
         )}
@@ -60,7 +60,7 @@ export function LoginForm({ next }: { next: string | null }) {
           type="submit"
           variant="primary"
           size="md"
-          className="self-start"
+          className="w-full"
           loading={isPending}
           loadingText={t("submitting")}
         >

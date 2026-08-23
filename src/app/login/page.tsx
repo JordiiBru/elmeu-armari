@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
+import { AuthScreen } from "@/components/AuthScreen";
 import { LoginForm } from "@/components/LoginForm";
 import { safeNextPath } from "@/lib/auth/access";
-import { PageContainer, SectionHeader } from "@/components/ui";
 
 /**
  * The only screen anyone sees without a session, and the only one with
@@ -17,14 +17,8 @@ export default async function LoginPage({
   const { next } = await searchParams;
 
   return (
-    <PageContainer width="narrow">
-      <SectionHeader
-        eyebrow={t("eyebrow")}
-        title={t("title")}
-        subtitle={t("subtitle")}
-        level="title-xl"
-      />
+    <AuthScreen title={t("title")}>
       <LoginForm next={safeNextPath(next)} />
-    </PageContainer>
+    </AuthScreen>
   );
 }
