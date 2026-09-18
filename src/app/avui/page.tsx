@@ -4,7 +4,6 @@ import {
   findAllOutfits,
   findTodayWorn,
   findWeekPlan,
-  findSavedOutfitKeys,
   toSavedOutfit,
 } from "@/lib/outfits/service";
 import { findAllGarments } from "@/lib/prendas/service";
@@ -121,12 +120,11 @@ export default async function AvuiPage({
   const weekStart = startOfWeek(startParam ? isoToDay(startParam) : currentDay);
   const weekEnd = addDays(weekStart, 6);
 
-  const [outfits, garments, todayWorn, days, savedOutfitKeys] = await Promise.all([
+  const [outfits, garments, todayWorn, days] = await Promise.all([
     findAllOutfits(),
     findAllGarments(),
     findTodayWorn(),
     findWeekPlan(weekStart),
-    findSavedOutfitKeys(),
   ]);
   const todayOutfitId = todayWorn?.outfitId ?? null;
 
@@ -136,8 +134,11 @@ export default async function AvuiPage({
 
   // Ranked once, on the server, and shared by both the plate and the
   // grid: the proposal at the top of the page and the first tile of the
-  // collection must never disagree about what comes first.
-  const ranked = rankOutfitsForToday(outfits.map(toSavedOutfit), season);
+  // collection must never disagree about what comes first. Favourites
+  // only — an outfit saved from the wardrobe's discovery sheet is a
+  // candidate; favouriting it is what promotes it into daily rotation.
+  const favorites = outfits.map(toSavedOutfit).filter((o) => o.favorite);
+  const ranked = rankOutfitsForToday(favorites, season);
   const committed = ranked.find((o) => o.id === todayOutfitId) ?? null;
 
   // Every stratum has its own empty state, and with nothing saved yet all
@@ -199,10 +200,8 @@ export default async function AvuiPage({
         <Stratum id="tots-els-outfits" title={t("sections.all")}>
           <OutfitLibrary
             outfits={ranked}
-            allGarments={garments}
             palettes={palettes}
             extraCandidates={extraCandidates}
-            savedOutfitKeys={savedOutfitKeys}
             todayISO={todayISO}
             todayOutfitId={todayOutfitId}
           />

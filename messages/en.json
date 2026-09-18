@@ -202,7 +202,14 @@
     "noResults": "No garment found",
     "noResultsHint": "try removing a filter.",
     "clearFilters": "clear filters",
-    "addGarment": "add a garment"
+    "addGarment": "add a garment",
+    "sweaterMode": {
+      "label": "sweaters",
+      "AUTO": "automatic",
+      "ON": "always",
+      "OFF": "never",
+      "hint": "decides when sweaters show up first in combinations."
+    }
   },
   "add": {
     "eyebrow": "new garment",
@@ -274,6 +281,10 @@
       "all": "your outfits"
     },
     "filtersLabel": "Filter outfits",
+    "filterAll": "all",
+    "unfavorite": "remove from favourites",
+    "removedFromFavorites": "removed from favourites",
+    "undo": "undo",
     "pickForMe": "pick for me",
     "today": "today",
     "inBasket": "to wash",
@@ -306,7 +317,7 @@
       "PANTS": "trousers",
       "SWEATER": "sweaters"
     },
-    "axisEmpty": "no outfit with this garment yet.",
+    "axisEmpty": "no outfit for this filter yet.",
     "seeMore": "more combinations",
     "plan": "plan",
     "back": "back",
@@ -346,7 +357,8 @@
     "unmatched": "free",
     "savePalette": "save",
     "savePaletteAria": "Save palette",
-    "savedPaletteAria": "Already saved"
+    "savedPaletteAria": "Already saved",
+    "shoeSuggestion": "suggested shoes"
   },
   "paleta": {
     "eyebrow": "colour catalogue",

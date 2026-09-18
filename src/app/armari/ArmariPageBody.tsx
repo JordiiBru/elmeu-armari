@@ -1,8 +1,11 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
+import { auth } from "@/auth";
 import { findAllGarments } from "@/lib/prendas/service";
 import { getCurrentSeason } from "@/lib/prendas/season";
+import { getSweaterMode } from "@/lib/auth/service";
 import { ArmariGrid } from "@/components/ArmariGrid";
+import { SweaterModeToggle } from "@/components/SweaterModeToggle";
 import { PageContainer, SectionHeader, GridSkeleton } from "@/components/ui";
 
 /**
@@ -17,7 +20,11 @@ import { PageContainer, SectionHeader, GridSkeleton } from "@/components/ui";
  */
 export async function ArmariPageBody() {
   const t = await getTranslations("armari");
-  const garments = await findAllGarments();
+  const session = await auth();
+  const [garments, sweaterMode] = await Promise.all([
+    findAllGarments(),
+    session?.user?.id ? getSweaterMode(session.user.id) : Promise.resolve("AUTO" as const),
+  ]);
 
   return (
     <PageContainer width="wide">
@@ -29,6 +36,10 @@ export async function ArmariPageBody() {
             : t("count", { count: garments.length })
         }
       />
+
+      <div className="mb-6">
+        <SweaterModeToggle initialMode={sweaterMode} />
+      </div>
 
       <Suspense fallback={<GridSkeleton />}>
         <ArmariGrid garments={garments} defaultSeason={getCurrentSeason()} />

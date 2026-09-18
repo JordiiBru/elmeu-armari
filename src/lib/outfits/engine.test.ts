@@ -143,5 +143,69 @@ describe("engine", () => {
       // No outfit should be valid because there is no PANTS
       expect(groups).toHaveLength(0);
     });
+
+    it("suggests the best-matching shoe for a group's palette without adding it to garments", () => {
+      const shirt = createTestGarment("1", "SHIRT", ["#ff0000"]);
+      const pants = createTestGarment("2", "PANTS", ["#ff8800"]);
+      // Exact hex match to the palette's third, otherwise-unmatched colour.
+      const shoe = createTestGarment("3", "SHOES", ["#ffcccc"]);
+
+      const { groups } = generateOutfitGroups([shirt, pants, shoe], testPalettes);
+
+      expect(groups.length).toBeGreaterThan(0);
+      const group = groups[0];
+      expect(group.garments.map((g) => g.category)).not.toContain("SHOES");
+      expect(group.shoeSuggestion).not.toBeNull();
+      expect(group.shoeSuggestion?.garment.id).toBe("3");
+      expect(group.shoeSuggestion?.distance).toBeLessThan(1);
+    });
+
+    it("leaves shoeSuggestion null when no shoe in the wardrobe combines", () => {
+      const shirt = createTestGarment("1", "SHIRT", ["#ff0000"]);
+      const pants = createTestGarment("2", "PANTS", ["#ff8800"]);
+
+      const { groups } = generateOutfitGroups([shirt, pants], testPalettes);
+
+      expect(groups[0].shoeSuggestion).toBeNull();
+    });
+
+    it("keeps sweater-anchored groups in normal order when in season", () => {
+      const sweater = createTestGarment("sw", "SWEATER", ["#ff0000"]);
+      const pantsA = createTestGarment("pa", "PANTS", ["#ff8800"]);
+      const shirt = createTestGarment("sh", "SHIRT", ["#ff0000"]);
+      const pantsB = createTestGarment("pb", "PANTS", ["#ff8800"]);
+
+      const { groups } = generateOutfitGroups(
+        [sweater, pantsA, shirt, pantsB],
+        testPalettes,
+        50,
+        0,
+        true,
+      );
+
+      expect(groups.some((g) => g.garments.some((x) => x.category === "SWEATER"))).toBe(true);
+    });
+
+    it("sinks every sweater-anchored group behind non-sweater ones when out of season", () => {
+      const sweater = createTestGarment("sw", "SWEATER", ["#ff0000"]);
+      const pantsA = createTestGarment("pa", "PANTS", ["#ff8800"]);
+      const shirt = createTestGarment("sh", "SHIRT", ["#ff0000"]);
+      const pantsB = createTestGarment("pb", "PANTS", ["#ff8800"]);
+
+      const { groups } = generateOutfitGroups(
+        [sweater, pantsA, shirt, pantsB],
+        testPalettes,
+        50,
+        0,
+        false,
+      );
+
+      const hasSweater = groups.map((g) => g.garments.some((x) => x.category === "SWEATER"));
+      const lastNonSweater = hasSweater.lastIndexOf(false);
+      const firstSweater = hasSweater.indexOf(true);
+      expect(firstSweater).toBeGreaterThan(-1);
+      expect(lastNonSweater).toBeGreaterThan(-1);
+      expect(firstSweater).toBeGreaterThan(lastNonSweater);
+    });
   });
 });

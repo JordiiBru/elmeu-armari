@@ -1,124 +1,116 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { setOutfitFavoriteAction } from "@/app/outfits/actions";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { isWearable } from "@/lib/bugaderia/laundry";
-import { groupOutfitsBy } from "@/lib/outfits/grouping";
-import { OutfitTile, pieceTint } from "./OutfitTile";
+import { groupOutfitsByColor } from "@/lib/outfits/grouping";
+import { OutfitTile } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
-import { OutfitBottomSheet } from "./OutfitBottomSheet";
-import { PieceThumb } from "./PieceThumb";
-import {
-  EmptyState,
-  Grid,
-  Icon,
-  SegmentedControl,
-  Stack,
-  Text,
-  TextButton,
-} from "@/components/ui";
+import { EmptyState, Grid, SegmentedControl, Stack, Text, useToast } from "@/components/ui";
+import { TOAST_DURATION_MS } from "@/components/ui/toast";
 
-/** The three ways to index the collection. Shirts lead: that is the one
- * you have in your hand most mornings. Narrowed to these three because
- * they are the only categories an outfit is made of — shoes, socks and
- * accessories belong to the day, not to the look. */
-type Axis = "SHIRT" | "PANTS" | "SWEATER";
+/** The three categories an outfit is made of — shoes, socks and
+ * accessories belong to the day, not to the look, so filtering by them
+ * has nothing to group on here. */
+type Filter = "ALL" | "SWEATER" | "SHIRT" | "PANTS";
 
-const AXES: Axis[] = ["SHIRT", "PANTS", "SWEATER"];
+const FILTERS: Filter[] = ["ALL", "SWEATER", "SHIRT", "PANTS"];
 
 /**
- * The whole collection, indexed by whichever piece you have decided on.
- * Every look built on one shirt sits under that shirt, and the tabs
- * re-index the same collection by trousers or by sweater — because some
- * mornings the decision starts at the other end.
+ * "Què em poso?"'s whole answer, now that discovery lives in the
+ * wardrobe: your favourited outfits, filterable by what you feel like
+ * wearing, as a mosaic rather than a list. Tapping one opens it straight
+ * onto today, because that is the only question this screen exists to
+ * settle in the morning.
  *
- * Collapsed by default, all of it. Open, this is a photograph of every
- * outfit you own, which is a lot of page to scroll past to reach one
- * shirt; closed it is a rail of pieces you take in at a glance. Hold as
- * many open as you like — it is a wardrobe, not an accordion that
- * resents you.
- *
- * A group ends in the way out of it: "veure'n més amb aquesta peça"
- * runs the matcher on the same piece. Your looks and every look the
- * engine can build with that piece used to live in different rooms —
- * these here, the other two hundred behind the piece over in the
- * wardrobe — which is the same question asked twice in two places. Now
- * the short list is on top and the long one is one tap under it, and
- * saving means exactly one thing: promoting something out of the long
- * list into the short one.
- *
- * The clean/dirty filter is gone. It was a third selector on a screen
- * that now has two, and a tile already says "per rentar" on its own
- * face. Instead the wearable ones come first inside each group, and a
- * piece with nothing wearable left reads dimmer in the rail — the same
- * information, no control.
+ * A filter is also a grouping axis, not just a narrowing one: choosing
+ * "pantalons" does not just hide outfits without trousers, it blocks the
+ * rest by trouser colour — grey together, then the next colour — because
+ * "which trousers" is usually the decision that started the morning.
  */
 export function OutfitLibrary({
   outfits,
-  allGarments,
   palettes,
   extraCandidates,
-  savedOutfitKeys,
   todayISO,
   todayOutfitId,
 }: {
-  /** Already ranked by the server. */
+  /** Already ranked by the server, already favourites-only. */
   outfits: SavedOutfit[];
-  /** The whole wardrobe, for the matcher behind "veure'n més". */
-  allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
   extraCandidates: GarmentWithColors[];
-  /** Combinations already owned, so the matcher greys them out. */
-  savedOutfitKeys: string[];
   todayISO: string;
   todayOutfitId: string | null;
 }) {
   const t = useTranslations("outfits");
+  const toast = useToast();
   const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
-  const [axis, setAxis] = useState<Axis>(AXES[0]);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [filter, setFilter] = useState<Filter>("ALL");
   const [openOutfitId, setOpenOutfitId] = useState<string | null>(null);
-  const [combineFor, setCombineFor] = useState<GarmentWithColors | null>(null);
-  // Held here rather than in the combiner, which unmounts every time you
-  // close it — reopening it on the same piece would otherwise offer to
-  // save what you had just saved.
-  const [savedHere, setSavedHere] = useState<string[]>([]);
-  const router = useRouter();
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const [, startTransition] = useTransition();
+  // Tiles are dense and thumb-reachable, so a mistap on the star is the
+  // likely failure mode, not the exception. The write is held for exactly
+  // as long as the toast offering to undo it is on screen — see
+  // TOAST_DURATION_MS — rather than committed the instant the star is hit.
+  const pendingRemovals = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  const groups = useMemo(
-    () =>
-      groupOutfitsBy(outfits, axis).map((group) => ({
-        ...group,
-        outfits: [...group.outfits].sort(
-          (a, b) => Number(isWearable(b)) - Number(isWearable(a)),
-        ),
-      })),
-    [outfits, axis],
+  // Stable across filters, so an outfit keeps the same catalogue number
+  // however you arrived at it — the incoming order is already the one
+  // ranking every other surface on this page agrees on.
+  const numbers = useMemo(
+    () => new Map(outfits.map((o, i) => [o.id, i])),
+    [outfits],
   );
 
-  // Numbered off one fixed index — the shirt rail — rather than whichever
-  // tab you are on, so an outfit keeps the same catalogue number however
-  // you arrived at it.
-  const numbers = useMemo(() => {
-    const byShirt = groupOutfitsBy(outfits, "SHIRT").flatMap((g) => g.outfits);
-    const seen = new Set(byShirt.map((o) => o.id));
-    const rest = outfits.filter((o) => !seen.has(o.id));
-    return new Map([...byShirt, ...rest].map((o, i) => [o.id, i]));
-  }, [outfits]);
+  // Wearable outfits first, same as the old rail: a tile you cannot
+  // actually put on this morning shouldn't be the first thing you tap.
+  // Stable, so it only ever breaks ties the server ranking left standing.
+  const visible = useMemo(
+    () =>
+      outfits
+        .filter((o) => !hiddenIds.has(o.id))
+        .sort((a, b) => Number(isWearable(b)) - Number(isWearable(a))),
+    [outfits, hiddenIds],
+  );
 
-  const toggle = (id: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const colorGroups = useMemo(
+    () => (filter === "ALL" ? null : groupOutfitsByColor(visible, filter)),
+    [visible, filter],
+  );
 
   const openOutfit = outfits.find((o) => o.id === openOutfitId) ?? null;
+
+  const handleUnfavorite = (id: string) => {
+    setHiddenIds((prev) => new Set(prev).add(id));
+    const timer = setTimeout(() => {
+      pendingRemovals.current.delete(id);
+      startTransition(async () => {
+        await setOutfitFavoriteAction(id, false);
+      });
+    }, TOAST_DURATION_MS);
+    pendingRemovals.current.set(id, timer);
+
+    toast.show(t("removedFromFavorites"), "neutral", {
+      label: t("undo"),
+      onClick: () => {
+        const pending = pendingRemovals.current.get(id);
+        if (pending) {
+          clearTimeout(pending);
+          pendingRemovals.current.delete(id);
+        }
+        setHiddenIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      },
+    });
+  };
 
   if (outfits.length === 0) {
     return (
@@ -139,115 +131,66 @@ export function OutfitLibrary({
 
   return (
     <Stack gap={6}>
-      <SegmentedControl<Axis>
-        value={axis}
-        onChange={setAxis}
-        ariaLabel={t("axisLabel")}
-        options={AXES.map((c) => ({ value: c, label: t(`axes.${c}`) }))}
+      <SegmentedControl<Filter>
+        value={filter}
+        onChange={setFilter}
+        ariaLabel={t("filtersLabel")}
+        options={FILTERS.map((f) => ({
+          value: f,
+          label: f === "ALL" ? t("filterAll") : t(`axes.${f}`),
+        }))}
       />
 
-      {groups.length === 0 ? (
+      {visible.length === 0 ? (
         <EmptyState title={t("axisEmpty")} />
-      ) : (
-        // Keyed on the axis so switching tab re-enters instead of
-        // swapping dry, the same way the shoe picker does.
-        <div key={axis} className="panel-enter flex flex-col">
-          {groups.map((group) => {
-            const isOpen = expanded.has(group.piece.id);
-            const anyWearable = group.outfits.some(isWearable);
-            return (
-              <div key={group.piece.id} className="border-b border-border-subtle">
-                <button
-                  type="button"
-                  onClick={() => toggle(group.piece.id)}
-                  aria-expanded={isOpen}
-                  className={`group flex w-full items-center gap-4 py-3 text-left outline-none transition-opacity duration-[var(--duration-base)] focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                    anyWearable ? "" : "opacity-50"
-                  }`}
-                >
-                  <PieceThumb
-                    garment={group.piece}
-                    thumb
-                    sizes="48px"
-                    className="h-12 w-12 flex-shrink-0"
-                  />
-                  {/* The tab already said "samarretes", so the row does not
-                      repeat it. What is left is the only thing that tells
-                      one from another in words. */}
-                  <Text as="span" className="min-w-0 truncate font-serif lowercase">
-                    {pieceTint(group.piece)}
+      ) : colorGroups ? (
+        <div key={filter} className="panel-enter flex flex-col gap-10">
+          {colorGroups.length === 0 ? (
+            <EmptyState title={t("axisEmpty")} />
+          ) : (
+            colorGroups.map((group) => (
+              <Stack key={group.colorName} gap={4}>
+                <div className="flex items-baseline gap-3 border-b border-border-subtle pb-2">
+                  <Text as="span" className="font-serif lowercase">
+                    {group.colorName}
                   </Text>
-                  <Text variant="caption" tabular className="ml-auto flex-shrink-0">
+                  <Text variant="caption" tabular tone="secondary">
                     {group.outfits.length}
                   </Text>
-                  {/* The whole affordance, and the same one the wardrobe
-                      filters use: a chevron that turns over when it opens. */}
-                  <span
-                    aria-hidden
-                    className={`flex-shrink-0 text-text-secondary transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:text-text-primary ${
-                      isOpen ? "rotate-180" : ""
-                    }`}
-                  >
-                    <Icon name="chevron-down" size={14} />
-                  </span>
-                </button>
-
-                {/* `inert` while closed. The panel stays in the DOM so it
-                    can animate open, but `height: 0` alone does not take
-                    its contents out of the tab order — you could tab into
-                    buttons nobody can see. */}
-                <div className="collapse-panel" data-open={isOpen} inert={!isOpen}>
-                  <div>
-                    {/* Generous foot: on a phone this action ended up a
-                        hair above the next group's rule, and the two read
-                        as one block. */}
-                    <Stack gap={5} className="pb-9 pt-1">
-                      <Grid cols="library" gapX={5} gapY={6}>
-                        {group.outfits.map((outfit) => (
-                          <OutfitTile
-                            key={outfit.id}
-                            outfit={outfit}
-                            palette={paletteMap.get(outfit.paletteId) ?? null}
-                            index={numbers.get(outfit.id) ?? 0}
-                            mark={outfit.id === todayOutfitId ? t("today") : null}
-                            onOpen={() => setOpenOutfitId(outfit.id)}
-                          />
-                        ))}
-                      </Grid>
-                      {group.piece.colors.length > 0 && (
-                        <TextButton
-                          type="button"
-                          tone="secondary"
-                          onClick={() => setCombineFor(group.piece)}
-                          className="self-start"
-                        >
-                          {t("seeMore")}
-                          <Icon name="arrow-right" size={12} />
-                        </TextButton>
-                      )}
-                    </Stack>
-                  </div>
                 </div>
-              </div>
-            );
-          })}
+                <Grid cols="mosaic" gapX={5} gapY={8}>
+                  {group.outfits.map((outfit) => (
+                    <OutfitTile
+                      key={outfit.id}
+                      outfit={outfit}
+                      palette={paletteMap.get(outfit.paletteId) ?? null}
+                      index={numbers.get(outfit.id) ?? 0}
+                      mark={outfit.id === todayOutfitId ? t("today") : null}
+                      onOpen={() => setOpenOutfitId(outfit.id)}
+                      onToggleFavorite={() => handleUnfavorite(outfit.id)}
+                    />
+                  ))}
+                </Grid>
+              </Stack>
+            ))
+          )}
         </div>
-      )}
-
-      {combineFor && (
-        <OutfitBottomSheet
-          garment={combineFor}
-          allGarments={allGarments}
-          palettes={palettes}
-          savedOutfitKeys={[...savedOutfitKeys, ...savedHere]}
-          onOutfitSaved={(key) => {
-            setSavedHere((prev) => [...prev, key]);
-            // A soft refresh, so the new look joins the rail underneath
-            // without tearing down which groups you have open.
-            router.refresh();
-          }}
-          onClose={() => setCombineFor(null)}
-        />
+      ) : (
+        <div key={filter} className="panel-enter">
+          <Grid cols="mosaic" gapX={5} gapY={8}>
+            {visible.map((outfit) => (
+              <OutfitTile
+                key={outfit.id}
+                outfit={outfit}
+                palette={paletteMap.get(outfit.paletteId) ?? null}
+                index={numbers.get(outfit.id) ?? 0}
+                mark={outfit.id === todayOutfitId ? t("today") : null}
+                onOpen={() => setOpenOutfitId(outfit.id)}
+                onToggleFavorite={() => handleUnfavorite(outfit.id)}
+              />
+            ))}
+          </Grid>
+        </div>
       )}
 
       {openOutfit && (

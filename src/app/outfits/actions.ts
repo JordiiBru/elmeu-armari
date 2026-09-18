@@ -5,6 +5,7 @@ import {
   deleteOutfit,
   wearOutfit,
   unassignDay,
+  setOutfitFavorite,
 } from "@/lib/outfits/service";
 import { revalidatePath } from "next/cache";
 
@@ -53,5 +54,10 @@ export async function wearOutfitAction(
 
 export async function unassignDayAction(dayISO: string) {
   await unassignDay(new Date(dayISO));
+  revalidatePath("/avui");
+}
+
+export async function setOutfitFavoriteAction(id: string, favorite: boolean) {
+  await setOutfitFavorite(id, favorite);
   revalidatePath("/avui");
 }

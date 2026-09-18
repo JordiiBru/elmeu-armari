@@ -152,14 +152,24 @@ enum Season {
 }
 
 model User {
-  id           String    @id @default(cuid())
+  id           String      @id @default(cuid())
   /// Stored lower-cased: SQLite's unique index is case sensitive, and
   /// "Jordi" and "jordi" must not be two accounts.
-  username     String    @unique
+  username     String      @unique
   passwordHash String
-  mustChangePw Boolean   @default(true)
-  createdAt    DateTime  @default(now())
+  mustChangePw Boolean     @default(true)
+  /// AUTO follows the calendar (see getCurrentSeason / resolveSweaterInSeason);
+  /// ON and OFF are an explicit override for when the calendar and the
+  /// weather disagree, set from /armari and independent of the date.
+  sweaterMode  SweaterMode @default(AUTO)
+  createdAt    DateTime    @default(now())
   lastLoginAt  DateTime?
+}
+
+enum SweaterMode {
+  AUTO
+  ON
+  OFF
 }
 
 /// One row per login attempt, successful or not. It is what the lockout

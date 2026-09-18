@@ -17,6 +17,7 @@ interface Props {
   allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
   savedOutfitKeys: string[];
+  sweaterInSeason: boolean;
   onClose: () => void;
 }
 
@@ -25,6 +26,7 @@ export function GarmentModal({
   allGarments,
   palettes,
   savedOutfitKeys,
+  sweaterInSeason,
   onClose,
 }: Props) {
   const t = useTranslations("modal");
@@ -81,6 +83,7 @@ export function GarmentModal({
         onOutfitSaved={(key) => setSavedHere((prev) => [...prev, key])}
         onBack={() => setCombineOpen(false)}
         onClose={onClose}
+        sweaterInSeason={sweaterInSeason}
       />
     );
   }

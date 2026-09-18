@@ -202,7 +202,14 @@
     "noResults": "Ninguna prenda encontrada",
     "noResultsHint": "prueba a quitar algún filtro.",
     "clearFilters": "limpiar filtros",
-    "addGarment": "añadir una prenda"
+    "addGarment": "añadir una prenda",
+    "sweaterMode": {
+      "label": "jerséis",
+      "AUTO": "automático",
+      "ON": "siempre",
+      "OFF": "nunca",
+      "hint": "decide cuándo los jerséis salen primero en las combinaciones."
+    }
   },
   "add": {
     "eyebrow": "nueva prenda",
@@ -274,6 +281,10 @@
       "all": "tus outfits"
     },
     "filtersLabel": "Filtrar outfits",
+    "filterAll": "todos",
+    "unfavorite": "quitar de favoritos",
+    "removedFromFavorites": "quitado de favoritos",
+    "undo": "deshacer",
     "pickForMe": "elige por mí",
     "today": "hoy",
     "inBasket": "por lavar",
@@ -306,7 +317,7 @@
       "PANTS": "pantalones",
       "SWEATER": "jerséis"
     },
-    "axisEmpty": "ningún outfit con esta prenda todavía.",
+    "axisEmpty": "ningún outfit para este filtro todavía.",
     "seeMore": "más combinaciones",
     "plan": "planificar",
     "back": "volver",
@@ -346,7 +357,8 @@
     "unmatched": "libre",
     "savePalette": "guardar",
     "savePaletteAria": "Guardar paleta",
-    "savedPaletteAria": "Ya guardado"
+    "savedPaletteAria": "Ya guardado",
+    "shoeSuggestion": "zapatos sugeridos"
   },
   "paleta": {
     "eyebrow": "catálogo cromático",

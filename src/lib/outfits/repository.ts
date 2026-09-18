@@ -58,12 +58,20 @@ export async function createOutfit(data: {
     data: {
       name: data.name ?? null,
       paletteId: data.paletteId,
+      // Saving an outfit is already the deliberate keep action (the
+      // combiner greys out ones you own), so it starts in "què em poso?"
+      // rather than behind a second, separate favouriting step.
+      favorite: true,
       garments: {
         create: data.garmentIds.map((garmentId) => ({ garmentId })),
       },
     },
     include: outfitInclude(),
   });
+}
+
+export async function setOutfitFavorite(id: string, favorite: boolean) {
+  return prisma.outfit.update({ where: { id }, data: { favorite } });
 }
 
 export async function findAllOutfits() {

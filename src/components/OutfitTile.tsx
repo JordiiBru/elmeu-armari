@@ -8,7 +8,7 @@ import { isWearable } from "@/lib/bugaderia/laundry";
 import { nameOf, namedColors } from "@/lib/colors";
 import { oklchDistance } from "@/lib/outfits/color-matching";
 import { PieceThumb } from "./PieceThumb";
-import { Card, Text } from "@/components/ui";
+import { Card, Icon, Text } from "@/components/ui";
 
 /** A piece reads better by its subtype ("polo", "vaquers", "anell") than
  * by its category — every accessory shares the same category label.
@@ -181,6 +181,7 @@ export function OutfitTile({
   index,
   mark,
   onOpen,
+  onToggleFavorite,
 }: {
   outfit: SavedOutfit;
   palette: SanzoPalette | null;
@@ -189,6 +190,10 @@ export function OutfitTile({
    * ("avui" in the collection, "planificat" in the week). */
   mark?: string | null;
   onOpen: () => void;
+  /** Present only where curating the favourites list makes sense — the
+   * calendar's day picker, for one, is choosing an outfit, not pruning
+   * the collection, so it never passes this. */
+  onToggleFavorite?: () => void;
 }) {
   const t = useTranslations("labels");
   const tOutfits = useTranslations("outfits");
@@ -203,43 +208,66 @@ export function OutfitTile({
   const stateMark = isWearable(outfit) ? null : tOutfits("inBasket");
 
   return (
-    <Card
-      as="button"
-      type="button"
-      interactive="clickable"
-      onClick={onOpen}
-      data-testid="saved-outfit-card"
-    >
-      <div className="relative aspect-[3/4] w-full overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0">
-        <OutfitCollage
-          garments={outfit.garments}
-          sizes={TILE_SIZES}
-          className="h-full w-full"
-        />
-        {mark && <Mark position="top-left">{mark}</Mark>}
-        {stateMark && <Mark position="bottom-left">{stateMark}</Mark>}
-      </div>
-      <div className="flex items-baseline justify-between gap-2 pt-3">
-        <Text as="span" className="font-serif lowercase leading-tight line-clamp-2">
-          {title}
-        </Text>
-        <Text variant="caption" tabular className="flex-shrink-0">
-          n{String(index + 1).padStart(3, "0")}
-        </Text>
-      </div>
-      {/* The harmony this outfit was built on, as itself. It used to be
-          its name in italics, which is a paint chip described in words. */}
-      {palette && (
-        <div
-          aria-hidden
-          className="mt-2 flex h-1 w-full overflow-hidden"
-          title={palette.nombre}
-        >
-          {palette.colores.map((hex, i) => (
-            <span key={i} className="flex-1" style={{ backgroundColor: hex }} />
-          ))}
+    // The favourite toggle is a real <button>, and HTML forbids nesting
+    // one interactive control inside another (<button> in <button> is a
+    // hydration error, not just invalid markup) — so it sits beside the
+    // card's button as a sibling, positioned against this wrapper rather
+    // than against the card itself.
+    <div className="relative">
+      <Card
+        as="button"
+        type="button"
+        interactive="clickable"
+        onClick={onOpen}
+        data-testid="saved-outfit-card"
+      >
+        <div className="relative aspect-[3/4] w-full overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0">
+          <OutfitCollage
+            garments={outfit.garments}
+            sizes={TILE_SIZES}
+            className="h-full w-full"
+          />
+          {mark && <Mark position="top-left">{mark}</Mark>}
+          {stateMark && <Mark position="bottom-left">{stateMark}</Mark>}
         </div>
+        <div className="flex items-baseline justify-between gap-2 pt-3">
+          <Text as="span" className="font-serif lowercase leading-tight line-clamp-2">
+            {title}
+          </Text>
+          <Text variant="caption" tabular className="flex-shrink-0">
+            n{String(index + 1).padStart(3, "0")}
+          </Text>
+        </div>
+        {/* The harmony this outfit was built on, as itself. It used to be
+            its name in italics, which is a paint chip described in words. */}
+        {palette && (
+          <div
+            aria-hidden
+            className="mt-2 flex h-1 w-full overflow-hidden"
+            title={palette.nombre}
+          >
+            {palette.colores.map((hex, i) => (
+              <span key={i} className="flex-1" style={{ backgroundColor: hex }} />
+            ))}
+          </div>
+        )}
+      </Card>
+      {onToggleFavorite && (
+        <button
+          type="button"
+          onClick={onToggleFavorite}
+          aria-label={tOutfits("unfavorite")}
+          aria-pressed
+          className="absolute top-0 right-0 inline-flex min-h-11 min-w-11 items-center justify-center text-text-primary"
+        >
+          {/* The tap target is the full 44px corner; the visual chip
+              inside it stays the same small badge size as `Mark`, so the
+              photograph is still what the eye reads. */}
+          <span className="inline-flex bg-elevated p-1.5 transition-transform active:scale-90">
+            <Icon name="star" size={14} className="fill-current" />
+          </span>
+        </button>
       )}
-    </Card>
+    </div>
   );
 }

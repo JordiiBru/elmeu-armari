@@ -31,12 +31,16 @@ interface Props {
   onBack?: () => void;
   /** Out of the whole thing, back to the wardrobe. */
   onClose: () => void;
+  /** Whether a sweater-anchored group should rank normally or sink to the
+   * end — the season, or the user's manual override from /armari. */
+  sweaterInSeason: boolean;
 }
 
 function computeInitial(
   garment: GarmentWithColors,
   allGarments: GarmentWithColors[],
   palettes: SanzoPalette[],
+  sweaterInSeason: boolean,
 ) {
   return generateOutfitGroupsForGarment(
     garment,
@@ -44,6 +48,7 @@ function computeInitial(
     palettes,
     PAGE_SIZE,
     0,
+    sweaterInSeason,
   );
 }
 
@@ -55,13 +60,14 @@ export function OutfitBottomSheet({
   onOutfitSaved,
   onBack,
   onClose,
+  sweaterInSeason,
 }: Props) {
   const t = useTranslations("combine");
   const tLabel = useTranslations("labels");
   const tModal = useTranslations("modal");
   const tOutfits = useTranslations("outfits");
   const [initial] = useState(() =>
-    computeInitial(garment, allGarments, palettes),
+    computeInitial(garment, allGarments, palettes, sweaterInSeason),
   );
   const [groups, setGroups] = useState<OutfitGroup[]>(initial.groups);
   const [hasMore, setHasMore] = useState(initial.hasMore);
@@ -114,6 +120,7 @@ export function OutfitBottomSheet({
         palettes,
         PAGE_SIZE,
         offset,
+        sweaterInSeason,
       );
       setGroups((prev) => [...prev, ...g]);
       setHasMore(hm);

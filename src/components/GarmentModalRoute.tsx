@@ -28,11 +28,13 @@ export function GarmentModalRoute({
   allGarments,
   palettes,
   savedOutfitKeys,
+  sweaterInSeason,
 }: {
   garment: GarmentWithColors;
   allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
   savedOutfitKeys: string[];
+  sweaterInSeason: boolean;
 }) {
   const router = useRouter();
   return (
@@ -41,6 +43,7 @@ export function GarmentModalRoute({
       allGarments={allGarments}
       palettes={palettes}
       savedOutfitKeys={savedOutfitKeys}
+      sweaterInSeason={sweaterInSeason}
       onClose={() => {
         router.back();
         setTimeout(() => {

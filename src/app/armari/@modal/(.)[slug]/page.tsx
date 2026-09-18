@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
+import { auth } from "@/auth";
 import { findGarmentByIdSuffix, findAllGarments } from "@/lib/prendas/service";
 import { findSavedOutfitKeys } from "@/lib/outfits/service";
+import { getSweaterMode } from "@/lib/auth/service";
+import { resolveSweaterInSeason } from "@/lib/prendas/season";
 import { idSuffixFromSlug } from "@/lib/prendas/slug";
 import { palettes } from "@/lib/colors";
 import { GarmentModalRoute } from "@/components/GarmentModalRoute";
@@ -18,10 +21,12 @@ export default async function InterceptedGarmentModal({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [garment, allGarments, savedOutfitKeys] = await Promise.all([
+  const session = await auth();
+  const [garment, allGarments, savedOutfitKeys, sweaterMode] = await Promise.all([
     findGarmentByIdSuffix(idSuffixFromSlug(slug)),
     findAllGarments(),
     findSavedOutfitKeys(),
+    session?.user?.id ? getSweaterMode(session.user.id) : Promise.resolve("AUTO" as const),
   ]);
   if (!garment) notFound();
 
@@ -31,6 +36,7 @@ export default async function InterceptedGarmentModal({
       allGarments={allGarments}
       palettes={palettes}
       savedOutfitKeys={savedOutfitKeys}
+      sweaterInSeason={resolveSweaterInSeason(sweaterMode)}
     />
   );
 }

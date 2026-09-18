@@ -30,7 +30,7 @@ const GAP_Y_CLASS: Record<Gap, string> = {
  * `cols` for one-off layouts.
  */
 interface Props extends ComponentPropsWithoutRef<"div"> {
-  cols?: "editorial" | "stats" | "palette" | "library";
+  cols?: "editorial" | "stats" | "palette" | "library" | "mosaic";
   gapX?: Gap;
   gapY?: Gap;
   className?: string;
@@ -47,6 +47,10 @@ const COLS_CLASS = {
   // needs more width than a single piece, not less: at five columns the
   // captions wrapped onto two lines and the row went ragged.
   library: "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
+  // "Què em poso?"'s mosaic is the page's whole reason for being open,
+  // not a rail of thumbnails leading somewhere else — fewer, larger
+  // tiles so every outfit reads as a look rather than a swatch.
+  mosaic: "grid grid-cols-2 lg:grid-cols-3",
 } as const;
 
 export function Grid({

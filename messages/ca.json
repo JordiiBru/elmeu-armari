@@ -202,7 +202,14 @@
     "noResults": "Cap peça trobada",
     "noResultsHint": "prova a retirar algun filtre.",
     "clearFilters": "netejar filtres",
-    "addGarment": "afegir una peça"
+    "addGarment": "afegir una peça",
+    "sweaterMode": {
+      "label": "jerseis",
+      "AUTO": "automàtic",
+      "ON": "sempre",
+      "OFF": "mai",
+      "hint": "decideix quan els jerseis surten primer a les combinacions."
+    }
   },
   "add": {
     "eyebrow": "nova peça",
@@ -274,6 +281,10 @@
       "all": "els teus outfits"
     },
     "filtersLabel": "Filtrar outfits",
+    "filterAll": "tots",
+    "unfavorite": "treure de favorits",
+    "removedFromFavorites": "tret de favorits",
+    "undo": "desfer",
     "pickForMe": "tria per mi",
     "today": "avui",
     "inBasket": "per rentar",
@@ -306,7 +317,7 @@
       "PANTS": "pantalons",
       "SWEATER": "jerseis"
     },
-    "axisEmpty": "cap outfit amb aquesta peça encara.",
+    "axisEmpty": "cap outfit per aquest filtre encara.",
     "seeMore": "més combinacions",
     "plan": "planificar",
     "back": "tornar",
@@ -346,7 +357,8 @@
     "unmatched": "lliure",
     "savePalette": "desar",
     "savePaletteAria": "Desar paleta",
-    "savedPaletteAria": "Ja desat"
+    "savedPaletteAria": "Ja desat",
+    "shoeSuggestion": "sabates suggerides"
   },
   "paleta": {
     "eyebrow": "catàleg cromàtic",

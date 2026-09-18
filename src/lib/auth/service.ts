@@ -7,6 +7,7 @@ import {
 import { hashPassword, verifyAgainstDummy, verifyPassword } from "./password";
 import { passwordPolicyError, type PasswordPolicyError } from "./policy";
 import { UNKNOWN_IP } from "./request";
+import type { SweaterMode } from "@/generated/prisma/enums";
 import {
   deleteAttemptsBefore,
   findUserById,
@@ -16,6 +17,7 @@ import {
   recordAttempt,
   setPassword,
   touchLastLogin,
+  updateSweaterMode,
 } from "./repository";
 
 /**
@@ -35,6 +37,20 @@ export interface AuthenticatedUser {
   id: string;
   username: string;
   mustChangePw: boolean;
+}
+
+/** The manual jersey-mode override, per account: AUTO follows the
+ * calendar, ON/OFF ignores it until the user changes it again from
+ * /armari. `findUserById` returning `null` here means the caller is
+ * about to redirect to login anyway — AUTO is a harmless value to hand
+ * back in the meantime. */
+export async function getSweaterMode(userId: string): Promise<SweaterMode> {
+  const user = await findUserById(userId);
+  return user?.sweaterMode ?? "AUTO";
+}
+
+export async function setSweaterMode(userId: string, mode: SweaterMode): Promise<void> {
+  await updateSweaterMode(userId, mode);
 }
 
 export function normalizeUsername(raw: string): string {

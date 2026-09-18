@@ -28,6 +28,29 @@ function GarmentTile({ garment }: { garment: GarmentWithColors }) {
   );
 }
 
+/**
+ * A shoe is a suggestion, not a committed member of the group — it never
+ * becomes part of a saved outfit (shoes live on the day, see AGENTS.md).
+ * Told apart the same way an unmatched palette colour already is
+ * elsewhere in this sheet: lower opacity plus a caption, not a new
+ * border style DESIGN-BIBLE.md doesn't define.
+ */
+function ShoeSuggestionTile({ garment }: { garment: GarmentWithColors }) {
+  const t = useTranslations("combine");
+  const tLabel = useTranslations("labels");
+  return (
+    <div className="flex flex-col items-center gap-1.5 flex-shrink-0 opacity-60">
+      <PieceThumb garment={garment} className="h-20 w-20" />
+      <span className="type-caption">
+        {tLabel(`category.${garment.category}`)}
+      </span>
+      <span className="font-serif italic text-xs">
+        {t("shoeSuggestion")}
+      </span>
+    </div>
+  );
+}
+
 export function OutfitGroupCard({
   group,
   onSave,
@@ -53,6 +76,9 @@ export function OutfitGroupCard({
         {ordered.map((g) => (
           <GarmentTile key={g.id} garment={g} />
         ))}
+        {group.shoeSuggestion && (
+          <ShoeSuggestionTile garment={group.shoeSuggestion.garment} />
+        )}
       </div>
 
       {/* Paleta principal */}

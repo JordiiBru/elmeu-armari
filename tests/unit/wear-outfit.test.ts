@@ -41,6 +41,7 @@ function outfitRow(
     id,
     name: id,
     paletteId: 1,
+    favorite: true,
     createdAt: new Date("2026-01-01T00:00:00Z"),
     garments: clothes.map((g) => ({ garment: g })),
     wornEvents: wornEvents.map((w) => ({
@@ -197,6 +198,7 @@ describe("lastWornExtras", () => {
       id: "o1",
       name: "o1",
       paletteId: 1,
+      favorite: true,
       createdAt: new Date("2026-01-01T00:00:00Z"),
       garments: [],
       wornEvents: events,
@@ -209,6 +211,7 @@ describe("lastWornExtras", () => {
       id: "o1",
       name: "o1",
       paletteId: 1,
+      favorite: true,
       createdAt: new Date("2026-01-01T00:00:00Z"),
       garments: [],
       wornEvents: [],

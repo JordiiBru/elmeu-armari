@@ -5,6 +5,7 @@ import {
   findOutfitById,
   deleteOutfit as deleteOutfitRow,
   countOutfits,
+  setOutfitFavorite as setOutfitFavoriteRow,
   setWornDay,
   clearWornDay,
   findWornEventsInRange,
@@ -38,6 +39,7 @@ interface OutfitWithGarments {
   id: string;
   name: string | null;
   paletteId: number;
+  favorite: boolean;
   createdAt: Date;
   garments: { garment: GarmentWithColors }[];
   wornEvents?: WornEventWithGarments[];
@@ -56,6 +58,7 @@ export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
     id: outfit.id,
     name: outfit.name,
     paletteId: outfit.paletteId,
+    favorite: outfit.favorite,
     createdAt: outfit.createdAt,
     garments: sortByWardrobeOrder(outfit.garments.map((og) => og.garment)),
     wornEvents: (outfit.wornEvents ?? []).map((w) => ({
@@ -144,6 +147,10 @@ export async function unassignDay(date: Date) {
   const photos = await findWornEventImages({ date: day });
   await clearWornDay(day);
   await Promise.all(photos.map((p) => deleteUploadImage(p.id)));
+}
+
+export async function setOutfitFavorite(id: string, favorite: boolean): Promise<void> {
+  await setOutfitFavoriteRow(id, favorite);
 }
 
 export async function deleteOutfit(id: string) {

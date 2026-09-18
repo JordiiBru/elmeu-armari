@@ -12,14 +12,20 @@ import {
 
 type Tone = "neutral" | "success" | "danger";
 
+interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 interface ToastItem {
   id: number;
   message: string;
   tone: Tone;
+  action?: ToastAction;
 }
 
 interface ToastAPI {
-  show: (message: string, tone?: Tone) => void;
+  show: (message: string, tone?: Tone, action?: ToastAction) => void;
 }
 
 const ToastContext = createContext<ToastAPI | null>(null);
@@ -30,10 +36,12 @@ export function useToast(): ToastAPI {
   return ctx;
 }
 
-// Long enough to read one line, short enough not to loiter. The only
-// toasts left are the import result on /settings: everywhere else the
-// action changes something on screen, which says it better.
-const DURATION_MS = 2600;
+// Long enough to read one line, short enough not to loiter. Exported so
+// an "undo" caller (OutfitLibrary's unfavourite) can delay the write it
+// is describing until exactly the moment the button offering to cancel
+// it disappears — the window to undo is the toast's own lifetime, not a
+// second timer that could drift from what's on screen.
+export const TOAST_DURATION_MS = 2600;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
@@ -44,9 +52,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const show = useCallback<ToastAPI["show"]>(
-    (message, tone = "neutral") => {
+    (message, tone = "neutral", action) => {
       const id = ++idRef.current;
-      setItems((prev) => [...prev, { id, message, tone }]);
+      setItems((prev) => [...prev, { id, message, tone, action }]);
     },
     [],
   );
@@ -79,8 +87,8 @@ function ToastLine({
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setShown(true));
-    const hideAt = window.setTimeout(() => setClosing(true), DURATION_MS - 300);
-    const doneAt = window.setTimeout(onDone, DURATION_MS);
+    const hideAt = window.setTimeout(() => setClosing(true), TOAST_DURATION_MS - 300);
+    const doneAt = window.setTimeout(onDone, TOAST_DURATION_MS);
     return () => {
       cancelAnimationFrame(raf);
       window.clearTimeout(hideAt);
@@ -100,12 +108,25 @@ function ToastLine({
       className={[
         "pointer-events-auto bg-elevated border-t border-b px-5 py-2 shadow-[var(--shadow-2)]",
         toneBorder,
+        "flex items-center gap-4",
         "font-serif italic type-small text-text-primary",
         "transition-[opacity,transform] duration-[var(--duration-base)] ease-[var(--ease-standard)]",
         shown && !closing ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
       ].join(" ")}
     >
-      {item.message}
+      <span>{item.message}</span>
+      {item.action && (
+        <button
+          type="button"
+          onClick={() => {
+            item.action?.onClick();
+            onDone();
+          }}
+          className="not-italic underline underline-offset-4 decoration-border-strong hover:decoration-text-primary transition-colors"
+        >
+          {item.action.label}
+        </button>
+      )}
     </div>
   );
 }

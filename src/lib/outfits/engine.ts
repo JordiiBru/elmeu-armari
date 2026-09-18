@@ -1,5 +1,5 @@
 import type { GarmentWithColors } from "@/lib/prendas/types";
-import type { SanzoPalette, PaletteMatch, OutfitGroup } from "./types";
+import type { SanzoPalette, PaletteMatch, OutfitGroup, GarmentMatch } from "./types";
 import { namedColors } from "@/lib/colors";
 import type { NamedColor } from "@/lib/colors";
 import {
@@ -309,6 +309,45 @@ function sortOutfitGarments(garments: GarmentWithColors[]): GarmentWithColors[] 
   return [...garments].sort((a, b) => rank(a.category) - rank(b.category));
 }
 
+/**
+ * The best shoe in the wardrobe for a given palette, or `null` when none
+ * combines. Independent of `buildContext`/`enumerateOutfits`: shoes never
+ * take part in the categorical enumeration (AGENTS.md — shoes live on the
+ * day, never on the outfit), so this is a direct distance check against
+ * the palette a top+bottom(+sweater) group already settled on, not
+ * another membership search.
+ */
+function bestShoeMatch(shoes: GarmentWithColors[], palette: SanzoPalette): GarmentMatch | null {
+  let best: GarmentMatch | null = null;
+  for (const shoe of shoes) {
+    for (const c of shoe.colors) {
+      for (let i = 0; i < palette.colores.length; i++) {
+        const d = perceptualDistance(c.hex, palette.colores[i]);
+        if (d < OKLCH_DISTANCE_THRESHOLD && (!best || d < best.distance)) {
+          best = { garment: shoe, paletteColorIndex: i, paletteColorHex: palette.colores[i], distance: d };
+        }
+      }
+    }
+  }
+  return best;
+}
+
+/**
+ * Push sweater-anchored groups to the very end when the sweater is out of
+ * season — never dropped, only deprioritised, per the product rule. A
+ * pure post-sort: it never touches which groups exist, only their order,
+ * so it composes with whatever the caller already sorted by.
+ */
+function sortBySweaterSeason(groups: OutfitGroup[], sweaterInSeason: boolean): OutfitGroup[] {
+  if (sweaterInSeason) return groups;
+  const inSeason: OutfitGroup[] = [];
+  const outOfSeason: OutfitGroup[] = [];
+  for (const g of groups) {
+    (g.garments.some((garment) => garment.category === "SWEATER") ? outOfSeason : inSeason).push(g);
+  }
+  return [...inSeason, ...outOfSeason];
+}
+
 function refinePalettes(
   paletteIds: number[],
   ctxs: Ctx[],
@@ -336,6 +375,10 @@ export function generateOutfitGroupsForGarment(
   palettes: SanzoPalette[],
   limit: number = 10,
   offset: number = 0,
+  /** Whether sweater-anchored groups should rank normally (true, the
+   * default — jersey season, or the user forced it on) or sink to the end
+   * (false — out of season, or forced off). Never excludes them. */
+  sweaterInSeason: boolean = true,
 ): { groups: OutfitGroup[]; hasMore: boolean } {
   const targetCtx = buildContext(targetGarment);
   if (!targetCtx) return { groups: [], hasMore: false };
@@ -360,10 +403,12 @@ export function generateOutfitGroupsForGarment(
     if (groupsByKey.has(key)) return;
     const paletteMatches = refinePalettes([...commonPalettes], ctxs, palettes);
     if (paletteMatches.length === 0) return;
+    const shoes = allGarments.filter((cand) => cand.category === "SHOES");
     groupsByKey.set(key, {
       garments: sortOutfitGarments(ctxs.map((c) => c.garment)),
       palettes: paletteMatches,
       bestDistance: paletteMatches[0].totalDistance,
+      shoeSuggestion: bestShoeMatch(shoes, paletteMatches[0].palette),
     });
   });
 
@@ -374,9 +419,10 @@ export function generateOutfitGroupsForGarment(
     }
     return a.bestDistance - b.bestDistance;
   });
+  const ranked = sortBySweaterSeason(groups, sweaterInSeason);
 
-  const paginated = groups.slice(offset, offset + limit);
-  return { groups: paginated, hasMore: groups.length > offset + limit };
+  const paginated = ranked.slice(offset, offset + limit);
+  return { groups: paginated, hasMore: ranked.length > offset + limit };
 }
 
 export function generateOutfitGroups(
@@ -384,6 +430,7 @@ export function generateOutfitGroups(
   palettes: SanzoPalette[],
   limit: number = 10,
   offset: number = 0,
+  sweaterInSeason: boolean = true,
 ): { groups: OutfitGroup[]; hasMore: boolean } {
   const groupsByKey = new Map<string, OutfitGroup>();
   const contexts: Ctx[] = [];
@@ -391,6 +438,7 @@ export function generateOutfitGroups(
     const ctx = buildContext(g);
     if (ctx) contexts.push(ctx);
   }
+  const shoes = garments.filter((g) => g.category === "SHOES");
 
   // Use each garment as an anchor in turn — same enumeration as the
   // targeted variant, deduped by garment set.
@@ -410,6 +458,7 @@ export function generateOutfitGroups(
         garments: sortOutfitGarments(ctxs.map((c) => c.garment)),
         palettes: paletteMatches,
         bestDistance: paletteMatches[0].totalDistance,
+        shoeSuggestion: bestShoeMatch(shoes, paletteMatches[0].palette),
       });
     });
   }
@@ -421,6 +470,7 @@ export function generateOutfitGroups(
     }
     return a.bestDistance - b.bestDistance;
   });
+  const ranked = sortBySweaterSeason(all, sweaterInSeason);
 
-  return { groups: all.slice(offset, offset + limit), hasMore: all.length > offset + limit };
+  return { groups: ranked.slice(offset, offset + limit), hasMore: ranked.length > offset + limit };
 }
