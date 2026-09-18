@@ -197,13 +197,22 @@ export function OutfitLibrary({
 
   return (
     <Stack gap={6}>
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      {/* items-start on mobile: stacked one-per-line, the category
+          column now reads much taller than the button beside it, and
+          items-end pinned the button to the bottom of that column —
+          level with "sabates", a long reach down from "descobreix"'s
+          own natural place beside the filter. sm: and up the column
+          is a single short line again, where bottom-aligning the
+          button against the chip row (not the caption above it) is
+          what actually looks right. */}
+      <div className="flex flex-wrap items-start sm:items-end justify-between gap-4">
         <Stack gap={1}>
           <FilterLabel>{t("categoryFilterLabel")}</FilterLabel>
           <SegmentedControl<Filter>
             value={filter}
             onChange={setFilter}
             ariaLabel={t("filtersLabel")}
+            stackOnMobile
             options={FILTERS.map((f) => ({
               value: f,
               label: f === "ALL" ? t("filterAll") : t(`axes.${f}`),
