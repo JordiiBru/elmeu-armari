@@ -58,6 +58,14 @@ export function OutfitLibrary({
   // they've favourited regardless of the calendar.
   const [seasonFilter, setSeasonFilter] = useState<"SEASON" | "ALL">("SEASON");
   const seasonOnly = seasonFilter === "SEASON";
+  // Also on by default, same reasoning: a dirty outfit is already blocked
+  // from being worn today (see OutfitSheet), so offering it here as if it
+  // were a real option is misleading. Its own toggle rather than folded
+  // into the season one — season is a preference, this is a fact about
+  // the wardrobe right now, and conflating the two names would hide which
+  // one to turn off when a look goes missing.
+  const [cleanFilter, setCleanFilter] = useState<"CLEAN" | "ALL">("CLEAN");
+  const cleanOnly = cleanFilter === "CLEAN";
   const [openOutfitId, setOpenOutfitId] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
@@ -83,8 +91,9 @@ export function OutfitLibrary({
       outfits
         .filter((o) => !hiddenIds.has(o.id))
         .filter((o) => !seasonOnly || isInSeason(o, season))
+        .filter((o) => !cleanOnly || isWearable(o))
         .sort((a, b) => Number(isWearable(b)) - Number(isWearable(a))),
-    [outfits, hiddenIds, seasonOnly, season],
+    [outfits, hiddenIds, seasonOnly, season, cleanOnly],
   );
 
   const colorGroups = useMemo(
@@ -150,30 +159,55 @@ export function OutfitLibrary({
             label: f === "ALL" ? t("filterAll") : t(`axes.${f}`),
           }))}
         />
-        <SegmentedControl<"SEASON" | "ALL">
-          value={seasonFilter}
-          onChange={setSeasonFilter}
-          wrap={false}
-          ariaLabel={t("seasonFilterLabel")}
-          options={[
-            { value: "SEASON", label: t("seasonOnly") },
-            { value: "ALL", label: t("allSeasons") },
-          ]}
-        />
+        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+          <SegmentedControl<"SEASON" | "ALL">
+            value={seasonFilter}
+            onChange={setSeasonFilter}
+            wrap={false}
+            ariaLabel={t("seasonFilterLabel")}
+            options={[
+              { value: "SEASON", label: t("seasonOnly") },
+              { value: "ALL", label: t("allSeasons") },
+            ]}
+          />
+          <SegmentedControl<"CLEAN" | "ALL">
+            value={cleanFilter}
+            onChange={setCleanFilter}
+            wrap={false}
+            ariaLabel={t("cleanFilterLabel")}
+            options={[
+              { value: "CLEAN", label: t("cleanOnly") },
+              { value: "ALL", label: t("allClean") },
+            ]}
+          />
+        </div>
       </div>
 
       {visible.length === 0 ? (
         <EmptyState
           title={t("axisEmpty")}
           action={
-            seasonOnly && (
-              <button
-                type="button"
-                onClick={() => setSeasonFilter("ALL")}
-                className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
-              >
-                {t("allSeasons")}
-              </button>
+            (seasonOnly || cleanOnly) && (
+              <Stack gap={2} align="center">
+                {seasonOnly && (
+                  <button
+                    type="button"
+                    onClick={() => setSeasonFilter("ALL")}
+                    className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
+                  >
+                    {t("allSeasons")}
+                  </button>
+                )}
+                {cleanOnly && (
+                  <button
+                    type="button"
+                    onClick={() => setCleanFilter("ALL")}
+                    className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
+                  >
+                    {t("allClean")}
+                  </button>
+                )}
+              </Stack>
             )
           }
         />
