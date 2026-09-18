@@ -10,7 +10,7 @@ import { groupOutfitsBy } from "@/lib/outfits/grouping";
 import { useViewTransition } from "@/lib/useViewTransition";
 import { OutfitTile, pieceTint } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
-import { OutfitBottomSheet } from "./OutfitBottomSheet";
+import { DiscoverPicker } from "./DiscoverPicker";
 import { PieceThumb } from "./PieceThumb";
 import { Grid, Icon, SegmentedControl, Sheet, Stack, Text, TextButton } from "@/components/ui";
 
@@ -139,7 +139,7 @@ export function DiscoverSheet({
 
   if (step.kind === "combine") {
     return (
-      <OutfitBottomSheet
+      <DiscoverPicker
         garment={step.garment}
         allGarments={allGarments}
         palettes={palettes}
@@ -152,6 +152,9 @@ export function DiscoverSheet({
         onClose={onClose}
         sweaterInSeason={sweaterInSeason}
         shortsInSeason={shortsInSeason}
+        seasonOnly={seasonOnly}
+        cleanOnly={cleanOnly}
+        season={season}
         skipEnter
       />
     );
