@@ -149,37 +149,52 @@ export function OutfitLibrary({
 
   return (
     <Stack gap={6}>
-      <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3">
-        <SegmentedControl<Filter>
-          value={filter}
-          onChange={setFilter}
-          ariaLabel={t("filtersLabel")}
-          options={FILTERS.map((f) => ({
-            value: f,
-            label: f === "ALL" ? t("filterAll") : t(`axes.${f}`),
-          }))}
-        />
-        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-          <SegmentedControl<"SEASON" | "ALL">
-            value={seasonFilter}
-            onChange={setSeasonFilter}
-            wrap={false}
-            ariaLabel={t("seasonFilterLabel")}
-            options={[
-              { value: "SEASON", label: t("seasonOnly") },
-              { value: "ALL", label: t("allSeasons") },
-            ]}
+      <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
+        <Stack gap={1}>
+          <Text variant="caption" tone="secondary">
+            {t("categoryFilterLabel")}
+          </Text>
+          <SegmentedControl<Filter>
+            value={filter}
+            onChange={setFilter}
+            ariaLabel={t("filtersLabel")}
+            options={FILTERS.map((f) => ({
+              value: f,
+              label: f === "ALL" ? t("filterAll") : t(`axes.${f}`),
+            }))}
           />
-          <SegmentedControl<"CLEAN" | "ALL">
-            value={cleanFilter}
-            onChange={setCleanFilter}
-            wrap={false}
-            ariaLabel={t("cleanFilterLabel")}
-            options={[
-              { value: "CLEAN", label: t("cleanOnly") },
-              { value: "ALL", label: t("allClean") },
-            ]}
-          />
+        </Stack>
+        <div className="flex flex-wrap items-start gap-x-8 gap-y-4">
+          <Stack gap={1}>
+            <Text variant="caption" tone="secondary">
+              {t("seasonFilterLabel")}
+            </Text>
+            <SegmentedControl<"SEASON" | "ALL">
+              value={seasonFilter}
+              onChange={setSeasonFilter}
+              wrap={false}
+              ariaLabel={t("seasonFilterLabel")}
+              options={[
+                { value: "SEASON", label: t("seasonOnly") },
+                { value: "ALL", label: t("allSeasons") },
+              ]}
+            />
+          </Stack>
+          <Stack gap={1}>
+            <Text variant="caption" tone="secondary">
+              {t("cleanFilterLabel")}
+            </Text>
+            <SegmentedControl<"CLEAN" | "ALL">
+              value={cleanFilter}
+              onChange={setCleanFilter}
+              wrap={false}
+              ariaLabel={t("cleanFilterLabel")}
+              options={[
+                { value: "CLEAN", label: t("cleanOnly") },
+                { value: "ALL", label: t("allClean") },
+              ]}
+            />
+          </Stack>
         </div>
       </div>
 

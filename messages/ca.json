@@ -274,6 +274,7 @@
       "all": "els teus outfits"
     },
     "filtersLabel": "Filtrar outfits",
+    "categoryFilterLabel": "peça",
     "seasonFilterLabel": "Filtrar per temporada",
     "seasonOnly": "de temporada",
     "allSeasons": "tot l'any",
