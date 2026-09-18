@@ -209,6 +209,7 @@ export function GarmentModal({
               tone="secondary"
               onClick={() => setConfirming(false)}
               disabled={pending}
+              className="type-small"
             >
               {tCommon("cancel")}
             </TextButton>
@@ -217,6 +218,7 @@ export function GarmentModal({
               tone="danger"
               onClick={handleDelete}
               disabled={pending}
+              className="type-small"
             >
               {pending ? tCommon("deleting") : tCommon("deleteConfirm")}
             </TextButton>
@@ -226,6 +228,7 @@ export function GarmentModal({
             type="button"
             tone="danger"
             onClick={() => setConfirming(true)}
+            className="type-small"
           >
             {tCommon("delete")}
           </TextButton>

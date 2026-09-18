@@ -88,7 +88,7 @@ export function DayPhotoInput({ eventId, hasPhoto, withRemove = false, disabled 
             disabled={busy}
             aria-label={t("remove")}
             title={t("remove")}
-            className={`${BOX} w-14 border-border hover:border-danger hover:text-danger`}
+            className={`${BOX} w-14 border-border text-danger hover:border-danger`}
           >
             <Icon name="close" size={16} />
           </button>

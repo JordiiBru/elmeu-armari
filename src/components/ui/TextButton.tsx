@@ -7,7 +7,11 @@ type Tone = "primary" | "secondary" | "danger";
 const TONE_CLASS: Record<Tone, string> = {
   primary: "text-text-primary",
   secondary: "text-text-secondary hover:text-text-primary",
-  danger: "text-text-secondary hover:text-danger",
+  // Red at rest, not only on hover: a delete action is exactly the one
+  // place this component should not read as quiet — see `Button`'s own
+  // danger variant, which was already red by default and left this one
+  // as the odd inconsistent pairing next to it.
+  danger: "text-danger hover:text-danger/70",
 };
 
 const BASE =
