@@ -18,6 +18,7 @@ interface Props {
   palettes: SanzoPalette[];
   savedOutfitKeys: string[];
   sweaterInSeason: boolean;
+  shortsInSeason: boolean;
   onClose: () => void;
 }
 
@@ -27,6 +28,7 @@ export function GarmentModal({
   palettes,
   savedOutfitKeys,
   sweaterInSeason,
+  shortsInSeason,
   onClose,
 }: Props) {
   const t = useTranslations("modal");
@@ -41,8 +43,8 @@ export function GarmentModal({
   const [savedHere, setSavedHere] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
 
-  // Shoes, socks and accessories do not take part in the colour matching,
-  // and a piece with no colour has nothing to match on.
+  // Socks and accessories do not take part in the colour matching, and a
+  // piece with no colour has nothing to match on.
   const canCombine =
     garment.colors.length > 0 && !EXTRA_CATEGORIES.has(garment.category);
 
@@ -84,6 +86,7 @@ export function GarmentModal({
         onBack={() => setCombineOpen(false)}
         onClose={onClose}
         sweaterInSeason={sweaterInSeason}
+        shortsInSeason={shortsInSeason}
       />
     );
   }

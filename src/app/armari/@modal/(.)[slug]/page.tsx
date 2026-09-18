@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { findGarmentByIdSuffix, findAllGarments } from "@/lib/prendas/service";
 import { findSavedOutfitKeys } from "@/lib/outfits/service";
-import { isSweaterInSeason } from "@/lib/prendas/season";
+import { isSweaterInSeason, isShortsInSeason } from "@/lib/prendas/season";
 import { idSuffixFromSlug } from "@/lib/prendas/slug";
 import { palettes } from "@/lib/colors";
 import { GarmentModalRoute } from "@/components/GarmentModalRoute";
@@ -33,6 +33,7 @@ export default async function InterceptedGarmentModal({
       palettes={palettes}
       savedOutfitKeys={savedOutfitKeys}
       sweaterInSeason={isSweaterInSeason()}
+      shortsInSeason={isShortsInSeason()}
     />
   );
 }

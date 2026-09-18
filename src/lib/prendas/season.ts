@@ -40,3 +40,14 @@ const SWEATER_SEASONS = new Set<Season>(["AUTUMN", "WINTER", "SPRING"]);
 export function isSweaterInSeason(day: Date = today()): boolean {
   return SWEATER_SEASONS.has(getCurrentSeason(day));
 }
+
+/**
+ * Shorts, unlike a sweater, have exactly one season — there's no
+ * shoulder-season reading of a pair of shorts the way spring and autumn
+ * both work for a jumper. Narrower window than `isSweaterInSeason` on
+ * purpose, same reasoning: a category-level ranking signal, not a
+ * per-garment season tag.
+ */
+export function isShortsInSeason(day: Date = today()): boolean {
+  return getCurrentSeason(day) === "SUMMER";
+}

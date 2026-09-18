@@ -329,6 +329,27 @@ function sortBySweaterSeason(groups: OutfitGroup[], sweaterInSeason: boolean): O
   return [...inSeason, ...outOfSeason];
 }
 
+/**
+ * Same idea as `sortBySweaterSeason`, for the one category with exactly
+ * one season: a group built around shorts only sinks — it's still the
+ * most literal answer to "what goes with this", just not the one worth
+ * leading with in November. Independent of the sweater sink: summer
+ * (shorts out) and sweater-season (autumn/winter/spring) never overlap,
+ * so the two sinks never fight over the same group.
+ */
+function sortByShortsSeason(groups: OutfitGroup[], shortsInSeason: boolean): OutfitGroup[] {
+  if (shortsInSeason) return groups;
+  const inSeason: OutfitGroup[] = [];
+  const outOfSeason: OutfitGroup[] = [];
+  for (const g of groups) {
+    const hasShorts = g.garments.some(
+      (garment) => garment.category === "PANTS" && garment.length === "SHORT",
+    );
+    (hasShorts ? outOfSeason : inSeason).push(g);
+  }
+  return [...inSeason, ...outOfSeason];
+}
+
 function refinePalettes(
   paletteIds: number[],
   ctxs: Ctx[],
@@ -360,6 +381,8 @@ export function generateOutfitGroupsForGarment(
    * default — jersey season, or the user forced it on) or sink to the end
    * (false — out of season, or forced off). Never excludes them. */
   sweaterInSeason: boolean = true,
+  /** Same, for groups built around shorts. */
+  shortsInSeason: boolean = true,
 ): { groups: OutfitGroup[]; hasMore: boolean } {
   const targetCtx = buildContext(targetGarment);
   if (!targetCtx) return { groups: [], hasMore: false };
@@ -398,7 +421,7 @@ export function generateOutfitGroupsForGarment(
     }
     return a.bestDistance - b.bestDistance;
   });
-  const ranked = sortBySweaterSeason(groups, sweaterInSeason);
+  const ranked = sortByShortsSeason(sortBySweaterSeason(groups, sweaterInSeason), shortsInSeason);
 
   const paginated = ranked.slice(offset, offset + limit);
   return { groups: paginated, hasMore: ranked.length > offset + limit };
@@ -410,6 +433,7 @@ export function generateOutfitGroups(
   limit: number = 10,
   offset: number = 0,
   sweaterInSeason: boolean = true,
+  shortsInSeason: boolean = true,
 ): { groups: OutfitGroup[]; hasMore: boolean } {
   const groupsByKey = new Map<string, OutfitGroup>();
   const contexts: Ctx[] = [];
@@ -447,7 +471,7 @@ export function generateOutfitGroups(
     }
     return a.bestDistance - b.bestDistance;
   });
-  const ranked = sortBySweaterSeason(all, sweaterInSeason);
+  const ranked = sortByShortsSeason(sortBySweaterSeason(all, sweaterInSeason), shortsInSeason);
 
   return { groups: ranked.slice(offset, offset + limit), hasMore: ranked.length > offset + limit };
 }
