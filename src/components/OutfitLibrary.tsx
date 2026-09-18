@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { setOutfitFavoriteAction } from "@/app/outfits/actions";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
@@ -10,7 +11,17 @@ import { isInSeason, isWearable } from "@/lib/bugaderia/laundry";
 import { groupOutfitsByColor } from "@/lib/outfits/grouping";
 import { OutfitTile } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
-import { EmptyState, Grid, SegmentedControl, Stack, Text, useToast } from "@/components/ui";
+import { DiscoverSheet } from "./DiscoverSheet";
+import {
+  Button,
+  EmptyState,
+  Grid,
+  Icon,
+  SegmentedControl,
+  Stack,
+  Text,
+  useToast,
+} from "@/components/ui";
 import { TOAST_DURATION_MS } from "@/components/ui/toast";
 
 /** The categories an outfit is made of — socks and accessories still
@@ -19,6 +30,19 @@ import { TOAST_DURATION_MS } from "@/components/ui/toast";
 type Filter = "ALL" | "SWEATER" | "SHIRT" | "PANTS" | "SHOES";
 
 const FILTERS: Filter[] = ["ALL", "SWEATER", "SHIRT", "PANTS", "SHOES"];
+
+/** A caption above a control, set apart from the control's own labels
+ * on purpose: both used to be the same small uppercase caps and read as
+ * one continuous row of chips. Serif italic against sans-serif caps is
+ * the same pairing the rest of the app already uses for a quiet label
+ * over a louder value. */
+function FilterLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <Text variant="small" italic tone="secondary" className="font-serif">
+      {children}
+    </Text>
+  );
+}
 
 /**
  * "Què em poso?"'s whole answer, now that discovery lives in the
@@ -31,31 +55,53 @@ const FILTERS: Filter[] = ["ALL", "SWEATER", "SHIRT", "PANTS", "SHOES"];
  * "pantalons" does not just hide outfits without trousers, it blocks the
  * rest by trouser colour — grey together, then the next colour — because
  * "which trousers" is usually the decision that started the morning.
+ *
+ * "Descobreix" is the wardrobe's piece-by-piece rail, back as its own
+ * sheet rather than a second tab fighting the mosaic for the top of the
+ * screen: this page opens on Desats and should read as Desats, and
+ * discovery is one explicit tap away, not the other half of the layout.
  */
 export function OutfitLibrary({
   outfits,
+  allOutfits,
+  allGarments,
   palettes,
   extraCandidates,
+  savedOutfitKeys,
   todayISO,
   todayOutfitId,
   season,
+  sweaterInSeason,
+  shortsInSeason,
 }: {
   /** Already ranked by the server, already favourites-only. */
   outfits: SavedOutfit[];
+  /** Every saved outfit, favourited or not, ranked the same way — what
+   * "descobreix" shows already exists for a piece, and where every
+   * outfit's stable catalogue number comes from. */
+  allOutfits: SavedOutfit[];
+  /** The whole wardrobe, for "descobreix"'s rail and its combine sheet. */
+  allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
   extraCandidates: GarmentWithColors[];
+  /** Combinations already owned, so the combine sheet greys them out. */
+  savedOutfitKeys: string[];
   todayISO: string;
   todayOutfitId: string | null;
   /** Today's season, for the in-season toggle below. */
   season: Season;
+  sweaterInSeason: boolean;
+  shortsInSeason: boolean;
 }) {
   const t = useTranslations("outfits");
   const toast = useToast();
+  const router = useRouter();
   const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
   const [filter, setFilter] = useState<Filter>("ALL");
   // On by default: a shorts outfit has no business being recommended in
   // November. Off is one tap away for whoever wants to see everything
-  // they've favourited regardless of the calendar.
+  // they've favourited regardless of the calendar. Shared with
+  // "descobreix" — opening it should not restart the exploration.
   const [seasonFilter, setSeasonFilter] = useState<"SEASON" | "ALL">("SEASON");
   const seasonOnly = seasonFilter === "SEASON";
   // Also on by default, same reasoning: a dirty outfit is already blocked
@@ -67,6 +113,7 @@ export function OutfitLibrary({
   const [cleanFilter, setCleanFilter] = useState<"CLEAN" | "ALL">("CLEAN");
   const cleanOnly = cleanFilter === "CLEAN";
   const [openOutfitId, setOpenOutfitId] = useState<string | null>(null);
+  const [discoverOpen, setDiscoverOpen] = useState(false);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
   // Tiles are dense and thumb-reachable, so a mistap on the star is the
@@ -75,12 +122,13 @@ export function OutfitLibrary({
   // TOAST_DURATION_MS — rather than committed the instant the star is hit.
   const pendingRemovals = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  // Stable across filters, so an outfit keeps the same catalogue number
-  // however you arrived at it — the incoming order is already the one
-  // ranking every other surface on this page agrees on.
+  // Off the full saved collection, not just the favourites shown here —
+  // an outfit discovered but not (yet) favourited still needs a number
+  // the moment "descobreix" shows it, and it has to be the same number
+  // if it is favourited later.
   const numbers = useMemo(
-    () => new Map(outfits.map((o, i) => [o.id, i])),
-    [outfits],
+    () => new Map(allOutfits.map((o, i) => [o.id, i])),
+    [allOutfits],
   );
 
   // Wearable outfits first, same as the old rail: a tile you cannot
@@ -130,30 +178,24 @@ export function OutfitLibrary({
     });
   };
 
-  if (outfits.length === 0) {
-    return (
-      <EmptyState
-        title={t("emptyNoOutfitsBrowse")}
-        hint={t("emptyNoOutfitsHint")}
-        action={
-          <Link
-            href="/armari"
-            className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
-          >
-            {t("goToArmari")}
-          </Link>
-        }
-      />
-    );
-  }
+  const discoverButton = (
+    <Button
+      type="button"
+      variant="secondary"
+      size="sm"
+      onClick={() => setDiscoverOpen(true)}
+      className="flex-shrink-0"
+    >
+      <Icon name="sparkle" size={13} className="mr-2" />
+      {t("discover")}
+    </Button>
+  );
 
   return (
     <Stack gap={6}>
-      <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <Stack gap={1}>
-          <Text variant="caption" tone="secondary">
-            {t("categoryFilterLabel")}
-          </Text>
+          <FilterLabel>{t("categoryFilterLabel")}</FilterLabel>
           <SegmentedControl<Filter>
             value={filter}
             onChange={setFilter}
@@ -164,68 +206,91 @@ export function OutfitLibrary({
             }))}
           />
         </Stack>
-        <div className="flex flex-wrap items-start gap-x-8 gap-y-4">
-          <Stack gap={1}>
-            <Text variant="caption" tone="secondary">
-              {t("seasonFilterLabel")}
-            </Text>
-            <SegmentedControl<"SEASON" | "ALL">
-              value={seasonFilter}
-              onChange={setSeasonFilter}
-              wrap={false}
-              ariaLabel={t("seasonFilterLabel")}
-              options={[
-                { value: "SEASON", label: t("seasonOnly") },
-                { value: "ALL", label: t("allSeasons") },
-              ]}
-            />
-          </Stack>
-          <Stack gap={1}>
-            <Text variant="caption" tone="secondary">
-              {t("cleanFilterLabel")}
-            </Text>
-            <SegmentedControl<"CLEAN" | "ALL">
-              value={cleanFilter}
-              onChange={setCleanFilter}
-              wrap={false}
-              ariaLabel={t("cleanFilterLabel")}
-              options={[
-                { value: "CLEAN", label: t("cleanOnly") },
-                { value: "ALL", label: t("allClean") },
-              ]}
-            />
-          </Stack>
-        </div>
+        {discoverButton}
+      </div>
+
+      <div className="flex flex-wrap items-end gap-x-10 gap-y-4">
+        <Stack gap={1}>
+          <FilterLabel>{t("seasonFilterLabel")}</FilterLabel>
+          <SegmentedControl<"SEASON" | "ALL">
+            value={seasonFilter}
+            onChange={setSeasonFilter}
+            wrap={false}
+            ariaLabel={t("seasonFilterLabel")}
+            options={[
+              { value: "SEASON", label: t("seasonOnly") },
+              { value: "ALL", label: t("allSeasons") },
+            ]}
+          />
+        </Stack>
+        <Stack gap={1} className="sm:border-l sm:border-border-subtle sm:pl-10">
+          <FilterLabel>{t("cleanFilterLabel")}</FilterLabel>
+          <SegmentedControl<"CLEAN" | "ALL">
+            value={cleanFilter}
+            onChange={setCleanFilter}
+            wrap={false}
+            ariaLabel={t("cleanFilterLabel")}
+            options={[
+              { value: "CLEAN", label: t("cleanOnly") },
+              { value: "ALL", label: t("allClean") },
+            ]}
+          />
+        </Stack>
       </div>
 
       {visible.length === 0 ? (
-        <EmptyState
-          title={t("axisEmpty")}
-          action={
-            (seasonOnly || cleanOnly) && (
-              <Stack gap={2} align="center">
-                {seasonOnly && (
-                  <button
-                    type="button"
-                    onClick={() => setSeasonFilter("ALL")}
-                    className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
-                  >
-                    {t("allSeasons")}
-                  </button>
-                )}
-                {cleanOnly && (
-                  <button
-                    type="button"
-                    onClick={() => setCleanFilter("ALL")}
-                    className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
-                  >
-                    {t("allClean")}
-                  </button>
-                )}
-              </Stack>
-            )
-          }
-        />
+        outfits.length === 0 ? (
+          <EmptyState
+            title={t("emptyNoOutfitsBrowse")}
+            hint={t("emptyNoOutfitsHintDiscover")}
+            action={
+              allGarments.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setDiscoverOpen(true)}
+                  className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
+                >
+                  {t("discover")}
+                </button>
+              ) : (
+                <Link
+                  href="/armari"
+                  className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
+                >
+                  {t("goToArmari")}
+                </Link>
+              )
+            }
+          />
+        ) : (
+          <EmptyState
+            title={t("axisEmpty")}
+            action={
+              (seasonOnly || cleanOnly) && (
+                <Stack gap={2} align="center">
+                  {seasonOnly && (
+                    <button
+                      type="button"
+                      onClick={() => setSeasonFilter("ALL")}
+                      className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
+                    >
+                      {t("allSeasons")}
+                    </button>
+                  )}
+                  {cleanOnly && (
+                    <button
+                      type="button"
+                      onClick={() => setCleanFilter("ALL")}
+                      className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
+                    >
+                      {t("allClean")}
+                    </button>
+                  )}
+                </Stack>
+              )
+            }
+          />
+        )
       ) : colorGroups ? (
         <div key={filter} className="panel-enter flex flex-col gap-10">
           {colorGroups.length === 0 ? (
@@ -286,6 +351,26 @@ export function OutfitLibrary({
           isCommitted={openOutfit.id === todayOutfitId}
           allowDelete
           onClose={() => setOpenOutfitId(null)}
+        />
+      )}
+
+      {discoverOpen && (
+        <DiscoverSheet
+          allGarments={allGarments}
+          allOutfits={allOutfits}
+          palettes={palettes}
+          extraCandidates={extraCandidates}
+          savedOutfitKeys={savedOutfitKeys}
+          numbers={numbers}
+          todayISO={todayISO}
+          todayOutfitId={todayOutfitId}
+          season={season}
+          seasonOnly={seasonOnly}
+          cleanOnly={cleanOnly}
+          sweaterInSeason={sweaterInSeason}
+          shortsInSeason={shortsInSeason}
+          onOutfitSaved={() => router.refresh()}
+          onClose={() => setDiscoverOpen(false)}
         />
       )}
     </Stack>
