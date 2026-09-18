@@ -10,12 +10,16 @@ import { Icon } from "./Icon";
 
 type Size = "md" | "lg" | "xl" | "2xl";
 
+// A second, wider step at `xl:` (1280px) rather than `lg:` (1024px):
+// growing it on a mid-size laptop window left it crowding the browser
+// chrome, and the complaint was specifically about a genuinely large
+// screen reading as "a little square in the middle" of it.
 const PANEL_MAX: Record<Size, string> = {
-  md: "sm:max-w-md",
-  lg: "sm:max-w-lg",
-  xl: "sm:max-w-2xl",
+  md: "sm:max-w-md xl:max-w-lg",
+  lg: "sm:max-w-lg xl:max-w-xl",
+  xl: "sm:max-w-2xl xl:max-w-3xl",
   // Only for `split`: two columns need the width of two columns.
-  "2xl": "sm:max-w-4xl",
+  "2xl": "sm:max-w-4xl xl:max-w-5xl",
 };
 
 interface Props {
@@ -159,7 +163,7 @@ export function Sheet({
   // dvh, not vh: on a phone the address bar counts towards vh, so a
   // 92vh bottom sheet parks its own footer under it.
   const heightClass = fill
-    ? "h-[92dvh] sm:h-[min(48rem,92dvh)]"
+    ? "h-[92dvh] sm:h-[min(48rem,92dvh)] xl:h-[min(56rem,92dvh)]"
     : "max-h-[92dvh]";
 
   const mediaBox = media && (
