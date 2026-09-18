@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import BackLink from "@/components/BackLink";
 import { AppMenu } from "@/components/AppMenu";
@@ -38,11 +39,28 @@ export default function SiteHeader({
   // would bounce off the proxy and land right back here.
   const isHome = pathname === "/" || !username || locked;
 
+  // Back and the account menu are the one constant across every screen —
+  // scrolling past them used to mean leaving the way out behind. Flat at
+  // rest so it reads exactly as before at the top of the page; the
+  // hairline only appears once there is content sliding under it to
+  // separate from.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     // The two children are both 44px tall, and the placeholder matches
     // them: an empty span made the header 8px shorter on the home screen,
     // so every page you opened from it started by nudging itself down.
-    <header className="w-full px-6 md:px-10 pt-6 pb-4 flex items-center justify-between">
+    <header
+      className={`sticky top-0 z-40 w-full px-6 md:px-10 pt-6 pb-4 flex items-center justify-between bg-background transition-shadow duration-[var(--duration-slow)] ease-[var(--ease-standard)] ${
+        scrolled ? "shadow-[var(--shadow-1)]" : "shadow-none"
+      }`}
+    >
       {isHome ? (
         <span aria-hidden className="block h-11 w-11" />
       ) : (
