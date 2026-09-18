@@ -346,7 +346,7 @@
     "loadMore": "cargar más",
     "empty": "ninguna combinación encontrada para esta prenda.",
     "count": "{count, plural, one {# combinación} other {# combinaciones}}",
-    "showMore": "mostrar más combinaciones",
+    "showMore": "ver todas las combinaciones",
     "save": "guardar outfit",
     "saved": "guardado",
     "savingOutfit": "guardando…",

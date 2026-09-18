@@ -346,7 +346,7 @@
     "loadMore": "carregar més",
     "empty": "cap combinació trobada per a aquesta peça.",
     "count": "{count, plural, one {# combinació} other {# combinacions}}",
-    "showMore": "mostrar més combinacions",
+    "showMore": "veure totes les combinacions",
     "save": "desar outfit",
     "saved": "desat",
     "savingOutfit": "desant…",

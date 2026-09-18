@@ -346,7 +346,7 @@
     "loadMore": "load more",
     "empty": "no combination found for this garment.",
     "count": "{count, plural, one {# combination} other {# combinations}}",
-    "showMore": "show more combinations",
+    "showMore": "show all combinations",
     "save": "save outfit",
     "saved": "saved",
     "savingOutfit": "saving…",

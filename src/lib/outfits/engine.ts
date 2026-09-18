@@ -86,6 +86,14 @@ const MIN_DISTINCT_PALETTE_COLORS = 2;
 // Order in which garments should be laid out in a rendered outfit.
 const CATEGORY_LAYOUT_ORDER = ["SHIRT", "SWEATER", "PANTS", "SHOES"] as const;
 
+// A well-stocked wardrobe with shoes mandatory and black/white riding
+// in for free clears a thousand valid combinations without trying —
+// mathematically real, but nobody is choosing among a thousand outfits
+// for one shirt. Capped to the best of them (already sorted by piece
+// count then colour distance before this runs) rather than left to
+// pagination to hide the scale of it one page at a time.
+const MAX_GROUPS = 60;
+
 /** A candidate canonical reading of one garment colour. */
 interface Candidate {
   canonical: NamedColor;
@@ -462,7 +470,8 @@ export function generateOutfitGroupsForGarment(
     }
     return a.bestDistance - b.bestDistance;
   });
-  const ranked = sortByShortsSeason(sortBySweaterSeason(groups, sweaterInSeason), shortsInSeason);
+  const ranked = sortByShortsSeason(sortBySweaterSeason(groups, sweaterInSeason), shortsInSeason)
+    .slice(0, MAX_GROUPS);
 
   const paginated = ranked.slice(offset, offset + limit);
   return { groups: paginated, hasMore: ranked.length > offset + limit };
@@ -512,7 +521,8 @@ export function generateOutfitGroups(
     }
     return a.bestDistance - b.bestDistance;
   });
-  const ranked = sortByShortsSeason(sortBySweaterSeason(all, sweaterInSeason), shortsInSeason);
+  const ranked = sortByShortsSeason(sortBySweaterSeason(all, sweaterInSeason), shortsInSeason)
+    .slice(0, MAX_GROUPS);
 
   return { groups: ranked.slice(offset, offset + limit), hasMore: ranked.length > offset + limit };
 }
