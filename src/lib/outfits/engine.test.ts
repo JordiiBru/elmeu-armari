@@ -164,6 +164,27 @@ describe("engine", () => {
       expect(groups).toHaveLength(0);
     });
 
+    it("falls back to a black or white shoe when no real shoe match exists", () => {
+      // Rust + teal (combination 1) has no black/white anchor of its
+      // own — confirmed by inspecting colorAssignments directly: a black
+      // shoe here has none, which is exactly the free pass in action,
+      // not a coincidental real match.
+      const shirt = createTestGarment("1", "SHIRT", [RUST]);
+      const pants = createTestGarment("2", "PANTS", [TEAL]);
+      const blackShoe = createTestGarment("3", "SHOES", [BLACK]);
+
+      const { groups } = generateOutfitGroups([shirt, pants, blackShoe], palettes);
+
+      const withShoe = groups.find((g) => g.garments.some((x) => x.id === "3"));
+      expect(withShoe).toBeDefined();
+      const primary = withShoe?.palettes[0];
+      const shoeAssignment = primary?.colorAssignments.find((a) => a.garmentId === "3");
+      expect(shoeAssignment).toBeUndefined();
+      // The outfit itself is still a real, tight match — only the shoe
+      // rode in for free, not the whole group.
+      expect(primary?.colorAssignments.length).toBeGreaterThanOrEqual(2);
+    });
+
     it("keeps sweater-anchored groups in normal order when in season", () => {
       const sweater = createTestGarment("sw", "SWEATER", [RUST]);
       const pantsA = createTestGarment("pa", "PANTS", [TEAL]);

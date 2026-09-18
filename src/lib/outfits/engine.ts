@@ -228,6 +228,21 @@ function hasShoes(cats: Set<string>): boolean {
   return cats.has("SHOES");
 }
 
+// Pure black and pure white are the one deliberate exception to "these
+// two garments are on the same page of the book": real styling doesn't
+// wait for the Sanzo Wada catalogue to agree that a black shoe goes
+// with a saturated outfit — it just does. Without this, making shoes
+// mandatory would have meant some outfits stop being suggested at all
+// the moment their real colour has no genuine match in the wardrobe,
+// which is a worse outcome than a "wrong" match that's actually safe.
+const SAFE_NEUTRAL_SHOE_HEXES = new Set(["#000000", "#ffffff"]);
+function isSafeNeutralShoe(g: GarmentWithColors): boolean {
+  return (
+    g.category === "SHOES" &&
+    g.colors.some((c) => SAFE_NEUTRAL_SHOE_HEXES.has(c.hex.toLowerCase()))
+  );
+}
+
 /**
  * Build a PaletteMatch (the shape the UI expects) from a set of
  * garments and a palette id, using the precomputed contexts.
@@ -305,9 +320,22 @@ function enumerateOutfits(
       // No two garments of the same category in an outfit.
       if (current.some((c) => c.garment.category === cand.garment.category)) continue;
       if (cand.garment.category === target.garment.category) continue;
-      const nextSets = commonSets.concat(cand.paletteIds);
-      const nextIntersection = intersectSets(nextSets);
-      if (nextIntersection.size === 0) continue;
+
+      const withCandSets = commonSets.concat(cand.paletteIds);
+      const withCandIntersection = intersectSets(withCandSets);
+
+      let nextSets: Set<number>[];
+      if (withCandIntersection.size > 0) {
+        nextSets = withCandSets;
+      } else if (isSafeNeutralShoe(cand.garment)) {
+        // Real match failed, but black/white never needed one — ride
+        // along without narrowing the palette any further, rather than
+        // costing the outfit its only possible shoe.
+        nextSets = commonSets;
+      } else {
+        continue;
+      }
+
       current.push(cand);
       pick(i + 1, current, nextSets);
       current.pop();
@@ -404,10 +432,12 @@ export function generateOutfitGroupsForGarment(
     if (g.category === targetGarment.category) continue;
     const ctx = buildContext(g);
     if (!ctx) continue;
-    // Prune: if target + candidate share no palette, we can drop
-    // early because deeper sets can only shrink.
+    // Prune: if target + candidate share no palette, we can drop early
+    // because deeper sets can only shrink — except a safe black/white
+    // shoe, which `enumerateOutfits` lets ride along regardless of a
+    // real match, so it needs the chance to be tried at all.
     const shared = intersectSets([targetCtx.paletteIds, ctx.paletteIds]);
-    if (shared.size === 0) continue;
+    if (shared.size === 0 && !isSafeNeutralShoe(g)) continue;
     candidates.push(ctx);
   }
 
