@@ -16,6 +16,21 @@ export interface GarmentFilters {
   query: string;
 }
 
+function matchesSeason(g: GarmentWithColors, seasons: Season[]): boolean {
+  const garmentSeasons = g.seasons.map((s) => s.season);
+  return garmentSeasons.includes("ALL_YEAR") || seasons.some((s) => garmentSeasons.includes(s));
+}
+
+// Shorts are summer-only by definition — there's no autumn/winter reading
+// of a pair of shorts the way an all-year shirt has one. Excluding them
+// outright the moment the season filter moves off summer would make them
+// vanish from the wardrobe for three seasons a year, which reads as lost
+// rather than seasonal. They stay visible and sink to the end instead —
+// see the sort pass below.
+function isSeasonExempt(g: GarmentWithColors): boolean {
+  return g.category === "PANTS" && g.length === "SHORT";
+}
+
 export function filterGarments(
   garments: GarmentWithColors[],
   filters: GarmentFilters
@@ -23,20 +38,14 @@ export function filterGarments(
   const { categories, seasons, fits, textures, lengths, colors, states, query } = filters;
   const q = query.toLowerCase().trim();
 
-  return garments.filter((g) => {
+  const filtered = garments.filter((g) => {
     if (categories.length > 0 && !categories.includes(g.category)) return false;
     if (fits.length > 0 && (!g.fit || !fits.includes(g.fit))) return false;
     if (textures.length > 0 && (!g.texture || !textures.includes(g.texture))) return false;
     if (lengths.length > 0 && (!g.length || !lengths.includes(g.length))) return false;
     if (states.length > 0 && !states.includes(isDirty(g) ? "dirty" : "clean")) return false;
 
-    if (seasons.length > 0) {
-      const garmentSeasons = g.seasons.map((s) => s.season);
-      const passesSeason =
-        garmentSeasons.includes("ALL_YEAR") ||
-        seasons.some((s) => garmentSeasons.includes(s));
-      if (!passesSeason) return false;
-    }
+    if (seasons.length > 0 && !matchesSeason(g, seasons) && !isSeasonExempt(g)) return false;
 
     if (colors.length > 0) {
       const passesColor = g.colors.some((c) =>
@@ -53,6 +62,14 @@ export function filterGarments(
 
     return true;
   });
+
+  if (seasons.length === 0) return filtered;
+
+  // Stable partition, not a full re-sort: within "matches" and "doesn't"
+  // everything keeps the order filtering already left it in.
+  const inSeason = filtered.filter((g) => matchesSeason(g, seasons));
+  const outOfSeason = filtered.filter((g) => !matchesSeason(g, seasons));
+  return [...inSeason, ...outOfSeason];
 }
 
 /**
