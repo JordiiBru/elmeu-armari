@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import BackLink from "@/components/BackLink";
 import { AppMenu } from "@/components/AppMenu";
+import { usePageTitleContext } from "@/lib/PageTitleContext";
 
 /**
  * Jerarquia de pantalles. "Enrere" puja un nivell, i cada pantalla te un
@@ -52,6 +53,13 @@ export default function SiteHeader({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Reported by whatever `SectionHeader` the current page rendered, via
+  // `PageTitleSentinel` — a large-title-collapsing-into-the-nav-bar
+  // pattern. Hugs the back arrow rather than sitting centred: it is a
+  // caption for the control beside it, not a second, competing headline.
+  const { title, visible: titleVisible } = usePageTitleContext();
+  const showCompactTitle = !!title && !titleVisible;
+
   return (
     // The two children are both 44px tall, and the placeholder matches
     // them: an empty span made the header 8px shorter on the home screen,
@@ -61,11 +69,23 @@ export default function SiteHeader({
         scrolled ? "shadow-[var(--shadow-1)]" : "shadow-none"
       }`}
     >
-      {isHome ? (
-        <span aria-hidden className="block h-11 w-11" />
-      ) : (
-        <BackLink href={parentOf(pathname)} />
-      )}
+      <div className="flex min-w-0 items-center gap-4">
+        {isHome ? (
+          <span aria-hidden className="block h-11 w-11 flex-shrink-0" />
+        ) : (
+          <BackLink href={parentOf(pathname)} />
+        )}
+        <span
+          aria-hidden={!showCompactTitle}
+          className={`min-w-0 truncate font-serif type-title transition-[opacity,transform] duration-[var(--duration-base)] ease-[var(--ease-standard)] ${
+            showCompactTitle
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-1 pointer-events-none"
+          }`}
+        >
+          {title}
+        </span>
+      </div>
       <AppMenu username={username} locked={locked} />
     </header>
   );
