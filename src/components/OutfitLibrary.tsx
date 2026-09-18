@@ -8,7 +8,7 @@ import { setOutfitFavoriteAction } from "@/app/outfits/actions";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
 import type { GarmentWithColors, Season } from "@/lib/prendas/types";
 import { isInSeason, isWearable } from "@/lib/bugaderia/laundry";
-import { groupOutfitsByColor } from "@/lib/outfits/grouping";
+import { groupOutfitsBy } from "@/lib/outfits/grouping";
 import { OutfitTile } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
 import { DiscoverSheet } from "./DiscoverSheet";
@@ -51,10 +51,10 @@ function FilterLabel({ children }: { children: React.ReactNode }) {
  * onto today, because that is the only question this screen exists to
  * settle in the morning.
  *
- * A filter is also a grouping axis, not just a narrowing one: choosing
- * "pantalons" does not just hide outfits without trousers, it blocks the
- * rest by trouser colour — grey together, then the next colour — because
- * "which trousers" is usually the decision that started the morning.
+ * A filter is also a sort order, not just a narrowing one: choosing
+ * "pantalons" does not just hide outfits without trousers, it clusters
+ * the rest by which trousers — one flat four-column mosaic, not a
+ * colour-grouped list one row deep that made scrolling the whole point.
  *
  * "Descobreix" is the wardrobe's piece-by-piece rail, back as its own
  * sheet rather than a second tab fighting the mosaic for the top of the
@@ -144,8 +144,12 @@ export function OutfitLibrary({
     [outfits, hiddenIds, seasonOnly, season, cleanOnly],
   );
 
-  const colorGroups = useMemo(
-    () => (filter === "ALL" ? null : groupOutfitsByColor(visible, filter)),
+  // A category filter clusters by piece rather than narrowing to a
+  // sparser list: every look built on the same trousers sits together,
+  // wardrobe-ordered, still one dense four-column mosaic rather than a
+  // heading per colour with two tiles under it.
+  const ordered = useMemo(
+    () => (filter === "ALL" ? visible : groupOutfitsBy(visible, filter).flatMap((g) => g.outfits)),
     [visible, filter],
   );
 
@@ -291,42 +295,10 @@ export function OutfitLibrary({
             }
           />
         )
-      ) : colorGroups ? (
-        <div key={filter} className="panel-enter flex flex-col gap-10">
-          {colorGroups.length === 0 ? (
-            <EmptyState title={t("axisEmpty")} />
-          ) : (
-            colorGroups.map((group) => (
-              <Stack key={group.colorName} gap={4}>
-                <div className="flex items-baseline gap-3 border-b border-border-subtle pb-2">
-                  <Text as="span" className="font-serif lowercase">
-                    {group.colorName}
-                  </Text>
-                  <Text variant="caption" tabular tone="secondary">
-                    {group.outfits.length}
-                  </Text>
-                </div>
-                <Grid cols="mosaic" gapX={5} gapY={8}>
-                  {group.outfits.map((outfit) => (
-                    <OutfitTile
-                      key={outfit.id}
-                      outfit={outfit}
-                      palette={paletteMap.get(outfit.paletteId) ?? null}
-                      index={numbers.get(outfit.id) ?? 0}
-                      mark={outfit.id === todayOutfitId ? t("today") : null}
-                      onOpen={() => setOpenOutfitId(outfit.id)}
-                      onToggleFavorite={() => handleUnfavorite(outfit.id)}
-                    />
-                  ))}
-                </Grid>
-              </Stack>
-            ))
-          )}
-        </div>
       ) : (
         <div key={filter} className="panel-enter">
           <Grid cols="mosaic" gapX={5} gapY={8}>
-            {visible.map((outfit) => (
+            {ordered.map((outfit) => (
               <OutfitTile
                 key={outfit.id}
                 outfit={outfit}

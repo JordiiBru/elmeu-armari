@@ -1,7 +1,5 @@
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 import { sortByWardrobeOrder } from "@/lib/prendas/filtering";
-import { nameOf, namedColors } from "@/lib/colors";
-import { oklchDistance } from "./color-matching";
 import type { SavedOutfit } from "./types";
 
 export interface OutfitsByPiece {
@@ -53,64 +51,3 @@ export function groupOutfitsBy(
   );
 }
 
-/** The nearest Sanzo Wada historic name for a hex — same lookup the
- * collage captions use, duplicated in this pure lib module rather than
- * imported from a "use client" component so this stays importable from a
- * plain Node test. */
-const nearestNameCache = new Map<string, string>();
-function nearestColorName(hex: string): string {
-  const key = hex.toLowerCase();
-  const cached = nearestNameCache.get(key);
-  if (cached) return cached;
-  const exact = nameOf(key);
-  if (exact) {
-    nearestNameCache.set(key, exact);
-    return exact;
-  }
-  let best = namedColors[0];
-  let bestDistance = Infinity;
-  for (const candidate of namedColors) {
-    const distance = oklchDistance(key, candidate.hex);
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      best = candidate;
-    }
-  }
-  nearestNameCache.set(key, best.name);
-  return best.name;
-}
-
-export interface OutfitsByColor {
-  colorName: string;
-  outfits: SavedOutfit[];
-}
-
-/**
- * Files saved outfits by the *colour* of their piece of `category`,
- * rather than by the exact piece — two different grey trousers land in
- * the same block. This is what a filter tap in "què em poso?" groups by:
- * "pantalons" doesn't ask which trousers, it asks which colour.
- *
- * Largest block first, so filtering by a category surfaces its most
- * common colour rather than whichever piece happened to be added first.
- */
-export function groupOutfitsByColor(
-  outfits: SavedOutfit[],
-  category: Category,
-): OutfitsByColor[] {
-  const groups = new Map<string, SavedOutfit[]>();
-
-  for (const outfit of outfits) {
-    const piece = outfit.garments.find((g) => g.category === category);
-    const hex = piece?.colors[0]?.hex;
-    if (!hex) continue;
-    const colorName = nearestColorName(hex);
-    const existing = groups.get(colorName);
-    if (existing) existing.push(outfit);
-    else groups.set(colorName, [outfit]);
-  }
-
-  return [...groups.entries()]
-    .map(([colorName, groupOutfits]) => ({ colorName, outfits: groupOutfits }))
-    .sort((a, b) => b.outfits.length - a.outfits.length || a.colorName.localeCompare(b.colorName));
-}

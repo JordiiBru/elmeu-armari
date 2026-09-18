@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { groupOutfitsBy, groupOutfitsByColor } from "@/lib/outfits/grouping";
+import { groupOutfitsBy } from "@/lib/outfits/grouping";
 import type { SavedOutfit } from "@/lib/outfits/types";
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 
@@ -87,55 +87,5 @@ describe("groupOutfitsBy", () => {
 
   it("returns nothing for nothing", () => {
     expect(groupOutfitsBy([], "SHIRT")).toEqual([]);
-  });
-});
-
-describe("groupOutfitsByColor", () => {
-  it("blocks outfits by the named colour of their piece, not the exact piece", () => {
-    // Two different pairs of grey trousers, one navy pair.
-    const greyA = garment("grey-a", "PANTS", new Date(0), "#808080");
-    const greyB = garment("grey-b", "PANTS", new Date(0), "#7d7d7d");
-    const navy = garment("navy", "PANTS", new Date(0), "#000080");
-
-    const groups = groupOutfitsByColor(
-      [
-        outfit("1", [greyA]),
-        outfit("2", [greyB]),
-        outfit("3", [navy]),
-      ],
-      "PANTS",
-    );
-
-    const greyGroup = groups.find((g) => g.outfits.some((o) => o.id === "1"));
-    expect(greyGroup?.outfits.map((o) => o.id).sort()).toEqual(["1", "2"]);
-    expect(groups.some((g) => g.outfits.some((o) => o.id === "3"))).toBe(true);
-  });
-
-  it("orders blocks by size, largest first", () => {
-    const grey = garment("grey", "PANTS", new Date(0), "#808080");
-    const navy = garment("navy", "PANTS", new Date(0), "#000080");
-
-    const groups = groupOutfitsByColor(
-      [
-        outfit("1", [grey]),
-        outfit("2", [grey]),
-        outfit("3", [navy]),
-      ],
-      "PANTS",
-    );
-
-    expect(groups[0].outfits).toHaveLength(2);
-  });
-
-  it("leaves out outfits with no coloured piece of that category", () => {
-    const pants = garment("pants", "PANTS", new Date(0), "#808080");
-    const noColorSweater = garment("sweater", "SWEATER");
-
-    const groups = groupOutfitsByColor(
-      [outfit("1", [pants, noColorSweater])],
-      "SWEATER",
-    );
-
-    expect(groups).toHaveLength(0);
   });
 });
