@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { setOutfitFavoriteAction } from "@/app/outfits/actions";
 import type { SanzoPalette, SavedOutfit } from "@/lib/outfits/types";
-import type { GarmentWithColors } from "@/lib/prendas/types";
-import { isWearable } from "@/lib/bugaderia/laundry";
+import type { GarmentWithColors, Season } from "@/lib/prendas/types";
+import { isInSeason, isWearable } from "@/lib/bugaderia/laundry";
 import { groupOutfitsByColor } from "@/lib/outfits/grouping";
 import { OutfitTile } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
@@ -38,6 +38,7 @@ export function OutfitLibrary({
   extraCandidates,
   todayISO,
   todayOutfitId,
+  season,
 }: {
   /** Already ranked by the server, already favourites-only. */
   outfits: SavedOutfit[];
@@ -45,11 +46,18 @@ export function OutfitLibrary({
   extraCandidates: GarmentWithColors[];
   todayISO: string;
   todayOutfitId: string | null;
+  /** Today's season, for the in-season toggle below. */
+  season: Season;
 }) {
   const t = useTranslations("outfits");
   const toast = useToast();
   const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
   const [filter, setFilter] = useState<Filter>("ALL");
+  // On by default: a shorts outfit has no business being recommended in
+  // November. Off is one tap away for whoever wants to see everything
+  // they've favourited regardless of the calendar.
+  const [seasonFilter, setSeasonFilter] = useState<"SEASON" | "ALL">("SEASON");
+  const seasonOnly = seasonFilter === "SEASON";
   const [openOutfitId, setOpenOutfitId] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
@@ -74,8 +82,9 @@ export function OutfitLibrary({
     () =>
       outfits
         .filter((o) => !hiddenIds.has(o.id))
+        .filter((o) => !seasonOnly || isInSeason(o, season))
         .sort((a, b) => Number(isWearable(b)) - Number(isWearable(a))),
-    [outfits, hiddenIds],
+    [outfits, hiddenIds, seasonOnly, season],
   );
 
   const colorGroups = useMemo(
@@ -131,18 +140,43 @@ export function OutfitLibrary({
 
   return (
     <Stack gap={6}>
-      <SegmentedControl<Filter>
-        value={filter}
-        onChange={setFilter}
-        ariaLabel={t("filtersLabel")}
-        options={FILTERS.map((f) => ({
-          value: f,
-          label: f === "ALL" ? t("filterAll") : t(`axes.${f}`),
-        }))}
-      />
+      <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3">
+        <SegmentedControl<Filter>
+          value={filter}
+          onChange={setFilter}
+          ariaLabel={t("filtersLabel")}
+          options={FILTERS.map((f) => ({
+            value: f,
+            label: f === "ALL" ? t("filterAll") : t(`axes.${f}`),
+          }))}
+        />
+        <SegmentedControl<"SEASON" | "ALL">
+          value={seasonFilter}
+          onChange={setSeasonFilter}
+          wrap={false}
+          ariaLabel={t("seasonFilterLabel")}
+          options={[
+            { value: "SEASON", label: t("seasonOnly") },
+            { value: "ALL", label: t("allSeasons") },
+          ]}
+        />
+      </div>
 
       {visible.length === 0 ? (
-        <EmptyState title={t("axisEmpty")} />
+        <EmptyState
+          title={t("axisEmpty")}
+          action={
+            seasonOnly && (
+              <button
+                type="button"
+                onClick={() => setSeasonFilter("ALL")}
+                className="font-serif italic type-small text-text-secondary hover:text-text-primary transition-colors duration-[var(--duration-base)]"
+              >
+                {t("allSeasons")}
+              </button>
+            )
+          }
+        />
       ) : colorGroups ? (
         <div key={filter} className="panel-enter flex flex-col gap-10">
           {colorGroups.length === 0 ? (

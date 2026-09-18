@@ -274,6 +274,9 @@
       "all": "your outfits"
     },
     "filtersLabel": "Filter outfits",
+    "seasonFilterLabel": "Filter by season",
+    "seasonOnly": "in season",
+    "allSeasons": "all year",
     "filterAll": "all",
     "unfavorite": "remove from favourites",
     "removedFromFavorites": "removed from favourites",

@@ -274,6 +274,9 @@
       "all": "tus outfits"
     },
     "filtersLabel": "Filtrar outfits",
+    "seasonFilterLabel": "Filtrar por temporada",
+    "seasonOnly": "de temporada",
+    "allSeasons": "todo el año",
     "filterAll": "todos",
     "unfavorite": "quitar de favoritos",
     "removedFromFavorites": "quitado de favoritos",

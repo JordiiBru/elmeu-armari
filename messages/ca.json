@@ -274,6 +274,9 @@
       "all": "els teus outfits"
     },
     "filtersLabel": "Filtrar outfits",
+    "seasonFilterLabel": "Filtrar per temporada",
+    "seasonOnly": "de temporada",
+    "allSeasons": "tot l'any",
     "filterAll": "tots",
     "unfavorite": "treure de favorits",
     "removedFromFavorites": "tret de favorits",

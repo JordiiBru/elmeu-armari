@@ -204,6 +204,7 @@ export default async function AvuiPage({
             extraCandidates={extraCandidates}
             todayISO={todayISO}
             todayOutfitId={todayOutfitId}
+            season={season}
           />
         </Stratum>
       </Stack>
