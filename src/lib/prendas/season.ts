@@ -1,8 +1,5 @@
 import type { Season } from "./types";
-import type { SweaterMode } from "@/generated/prisma/enums";
 import { today } from "@/lib/outfits/week";
-
-export type { SweaterMode };
 
 // Northern hemisphere, meteorological seasons (fixed month boundaries
 // rather than equinox/solstice dates — good enough for a wardrobe default).
@@ -36,11 +33,10 @@ const SWEATER_SEASONS = new Set<Season>(["AUTUMN", "WINTER", "SPRING"]);
 
 /**
  * Whether a sweater-anchored outfit should rank normally right now.
- * `AUTO` follows the calendar; `ON`/`OFF` is the user's manual override
- * from /armari and ignores the date entirely.
+ * Follows the calendar only — a manual override was tried and dropped:
+ * a second control for a value that's already right 95% of the time
+ * wasn't worth the screen space or the explanation it needed.
  */
-export function resolveSweaterInSeason(mode: SweaterMode, day: Date = today()): boolean {
-  if (mode === "ON") return true;
-  if (mode === "OFF") return false;
+export function isSweaterInSeason(day: Date = today()): boolean {
   return SWEATER_SEASONS.has(getCurrentSeason(day));
 }

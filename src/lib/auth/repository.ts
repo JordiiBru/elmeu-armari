@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import type { SweaterMode } from "@/generated/prisma/enums";
 
 export async function findUserByUsername(username: string) {
   return prisma.user.findUnique({ where: { username } });
@@ -15,10 +14,6 @@ export async function countUsers() {
 
 export async function touchLastLogin(id: string) {
   return prisma.user.update({ where: { id }, data: { lastLoginAt: new Date() } });
-}
-
-export async function updateSweaterMode(id: string, sweaterMode: SweaterMode) {
-  return prisma.user.update({ where: { id }, data: { sweaterMode } });
 }
 
 export async function setPassword(id: string, passwordHash: string) {

@@ -202,14 +202,7 @@
     "noResults": "Ninguna prenda encontrada",
     "noResultsHint": "prueba a quitar algún filtro.",
     "clearFilters": "limpiar filtros",
-    "addGarment": "añadir una prenda",
-    "sweaterMode": {
-      "label": "jerséis",
-      "AUTO": "automático",
-      "ON": "siempre",
-      "OFF": "nunca",
-      "hint": "decide cuándo los jerséis salen primero en las combinaciones."
-    }
+    "addGarment": "añadir una prenda"
   },
   "add": {
     "eyebrow": "nueva prenda",

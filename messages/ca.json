@@ -202,14 +202,7 @@
     "noResults": "Cap peça trobada",
     "noResultsHint": "prova a retirar algun filtre.",
     "clearFilters": "netejar filtres",
-    "addGarment": "afegir una peça",
-    "sweaterMode": {
-      "label": "jerseis",
-      "AUTO": "automàtic",
-      "ON": "sempre",
-      "OFF": "mai",
-      "hint": "decideix quan els jerseis surten primer a les combinacions."
-    }
+    "addGarment": "afegir una peça"
   },
   "add": {
     "eyebrow": "nova peça",

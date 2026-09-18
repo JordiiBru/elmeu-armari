@@ -202,14 +202,7 @@
     "noResults": "No garment found",
     "noResultsHint": "try removing a filter.",
     "clearFilters": "clear filters",
-    "addGarment": "add a garment",
-    "sweaterMode": {
-      "label": "sweaters",
-      "AUTO": "automatic",
-      "ON": "always",
-      "OFF": "never",
-      "hint": "decides when sweaters show up first in combinations."
-    }
+    "addGarment": "add a garment"
   },
   "add": {
     "eyebrow": "new garment",

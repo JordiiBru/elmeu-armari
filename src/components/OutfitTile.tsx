@@ -213,13 +213,14 @@ export function OutfitTile({
     // hydration error, not just invalid markup) — so it sits beside the
     // card's button as a sibling, positioned against this wrapper rather
     // than against the card itself.
-    <div className="relative">
+    <div className="relative w-full">
       <Card
         as="button"
         type="button"
         interactive="clickable"
         onClick={onOpen}
         data-testid="saved-outfit-card"
+        className="w-full"
       >
         <div className="relative aspect-[3/4] w-full overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0">
           <OutfitCollage
