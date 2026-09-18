@@ -243,57 +243,121 @@ export function OutfitSheet({
         </Stack>
       }
       footer={
-        showPicker ? (
-        <div className="flex items-center justify-between gap-4">
-          {/* A disabled button with a grey whisper next to it reads as a
-              broken button. The reason carries the warning ink and, next
-              to it, the way out of the situation. */}
-          {blocked ? (
-            <Stack gap={1} className="min-w-0 flex-1">
-              <Text
-                variant="small"
-                italic
-                className="font-serif lowercase text-warning"
+        confirmingDelete ? (
+          // Its own footer state rather than squeezed in beside "me'l
+          // poso": on a phone the two rows together didn't fit, and a
+          // decision this final shouldn't compete with an unrelated
+          // button for the thumb reaching for it.
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <Text variant="small" italic tone="secondary" className="font-serif">
+              {deleteCost}
+            </Text>
+            <div className="flex items-center gap-4 flex-shrink-0">
+              <TextButton
+                type="button"
+                tone="secondary"
+                onClick={() => setConfirmingDelete(false)}
+                disabled={pending}
+                className="type-small"
               >
-                {t("blockedReason", {
-                  pieces: blockedBy
-                    .map((g) => pieceLabel(tLabel, g))
-                    .join(t("piecesJoin")),
-                })}
-              </Text>
-              <Link
-                href="/bugaderia?vista=cistell"
-                className="font-serif italic type-small text-text-secondary underline underline-offset-4 hover:text-text-primary transition-colors duration-[var(--duration-base)]"
+                {tCommon("cancel")}
+              </TextButton>
+              <TextButton
+                type="button"
+                tone="danger"
+                onClick={handleDelete}
+                disabled={pending}
+                className="type-small"
               >
-                {t("goToRentar")}
-              </Link>
-            </Stack>
-          ) : (
-            <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto">
-              {picked.map((g) => (
-                <PieceThumb
-                  key={g.id}
-                  garment={g}
-                  thumb
-                  sizes="40px"
-                  className="h-10 w-10 flex-shrink-0"
-                />
-              ))}
+                {pending ? tCommon("deleting") : tCommon("deleteConfirm")}
+              </TextButton>
             </div>
-          )}
-          <Button
-            type="button"
-            onClick={handleWear}
-            disabled={pending || blocked}
-            loading={pending}
-            loadingText={t("saving")}
-            className="flex-shrink-0"
-          >
-            {isToday
-              ? t("wearToday")
-              : t("wearOnDay", { day: weekdayLabel(dayISO, locale) })}
-          </Button>
-        </div>
+          </div>
+        ) : allowDelete || (isCommitted && onClear) || showPicker ? (
+          <div className="flex items-center justify-between gap-4">
+            {/* Pinned rather than left at the bottom of the scrolling
+                body: on a well-stocked wardrobe's WearGrid, "eliminar"
+                sat a full screen of socks and accessories below the
+                fold. It is destructive and irreversible — the one
+                action here that should never cost a scroll to reach. */}
+            {allowDelete ? (
+              <TextButton
+                type="button"
+                tone="danger"
+                onClick={() => setConfirmingDelete(true)}
+                disabled={pending}
+                className="flex-shrink-0 type-small"
+              >
+                {t("delete")}
+              </TextButton>
+            ) : (
+              isCommitted &&
+              onClear && (
+                <TextButton
+                  type="button"
+                  tone="danger"
+                  onClick={onClear}
+                  disabled={pending}
+                  className="flex-shrink-0 type-small"
+                >
+                  {t("removeFromDay")}
+                </TextButton>
+              )
+            )}
+
+            {showPicker && (
+              <>
+                {/* A disabled button with a grey whisper next to it reads
+                    as a broken button. The reason carries the warning ink
+                    and, next to it, the way out of the situation. */}
+                {blocked ? (
+                  <Stack gap={1} className="min-w-0 flex-1">
+                    <Text
+                      variant="small"
+                      italic
+                      className="font-serif lowercase text-warning"
+                    >
+                      {t("blockedReason", {
+                        pieces: blockedBy
+                          .map((g) => pieceLabel(tLabel, g))
+                          .join(t("piecesJoin")),
+                      })}
+                    </Text>
+                    <Link
+                      href="/bugaderia?vista=cistell"
+                      className="font-serif italic type-small text-text-secondary underline underline-offset-4 hover:text-text-primary transition-colors duration-[var(--duration-base)]"
+                    >
+                      {t("goToRentar")}
+                    </Link>
+                  </Stack>
+                ) : (
+                  <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto">
+                    {picked.map((g) => (
+                      <PieceThumb
+                        key={g.id}
+                        garment={g}
+                        thumb
+                        sizes="40px"
+                        className="h-10 w-10 flex-shrink-0"
+                      />
+                    ))}
+                  </div>
+                )}
+                <Button
+                  type="button"
+                  onClick={handleWear}
+                  disabled={pending || blocked}
+                  loading={pending}
+                  loadingText={t("saving")}
+                  className="flex-shrink-0"
+                >
+                  {isToday
+                    ? t("wearToday")
+                    : t("wearOnDay", { day: weekdayLabel(dayISO, locale) })}
+                </Button>
+              </>
+            )}
+          </div>
         ) : undefined
       }
     >
@@ -308,98 +372,48 @@ export function OutfitSheet({
         <DayPieces garments={[...outfit.garments, ...(dayExtras ?? [])]} />
       )}
 
-      <Stack gap={4} className="mt-auto">
-        {/* The optional half of the day, in a frame of its own: it is the
-            one thing here that adds something rather than amending what
-            is already decided, and an italic link buried in the row below
-            read as neither. */}
-        {isRecord && !editing && dayEvent && !confirmingDelete && (
-          <DayPhotoInput
-            eventId={dayEvent.id}
-            hasPhoto={photo !== null}
-            withRemove
-            disabled={pending}
-          />
-        )}
+      {/* What's left once the destructive action moved to the pinned
+          footer: quieter, occasional actions that earning a scroll past
+          the grid is a fair price for. */}
+      {(isRecord || onChangeOutfit) && (
+        <Stack gap={4} className="mt-auto">
+          {isRecord && !editing && dayEvent && (
+            <DayPhotoInput
+              eventId={dayEvent.id}
+              hasPhoto={photo !== null}
+              withRemove
+              disabled={pending}
+            />
+          )}
 
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
-          {confirmingDelete ? (
-            <>
-              <Text variant="small" italic tone="secondary" className="font-serif">
-                {deleteCost}
-              </Text>
-              <div className="flex items-center gap-4">
+          {((isRecord && !editing) || (onChangeOutfit && showPicker)) && (
+            <div className="flex flex-wrap items-center gap-4 border-t border-border pt-4">
+              {isRecord && !editing && (
                 <TextButton
                   type="button"
                   tone="secondary"
-                  onClick={() => setConfirmingDelete(false)}
+                  onClick={() => setEditing(true)}
                   disabled={pending}
                 >
-                  {tCommon("cancel")}
+                  {tCommon("edit")}
                 </TextButton>
-                <TextButton
-                  type="button"
-                  tone="danger"
-                  onClick={handleDelete}
-                  disabled={pending}
-                >
-                  {pending ? tCommon("deleting") : tCommon("deleteConfirm")}
-                </TextButton>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex flex-wrap items-center gap-4">
-                {isRecord && !editing && (
-                  <TextButton
-                    type="button"
-                    tone="secondary"
-                    onClick={() => setEditing(true)}
-                    disabled={pending}
-                  >
-                    {tCommon("edit")}
-                  </TextButton>
-                )}
-                {/* Only while picking. A record already offers the way into
-                    the picker, and the two together made a row of five
-                    italic links under a photograph. */}
-                {onChangeOutfit && showPicker && (
-                  <TextButton
-                    type="button"
-                    tone="secondary"
-                    onClick={onChangeOutfit}
-                    disabled={pending}
-                  >
-                    {t("changeOutfit")}
-                  </TextButton>
-                )}
-              </div>
-              {allowDelete ? (
-                <TextButton
-                  type="button"
-                  tone="danger"
-                  onClick={() => setConfirmingDelete(true)}
-                  disabled={pending}
-                >
-                  {t("delete")}
-                </TextButton>
-              ) : (
-                isCommitted &&
-                onClear && (
-                  <TextButton
-                    type="button"
-                    tone="danger"
-                    onClick={onClear}
-                    disabled={pending}
-                  >
-                    {t("removeFromDay")}
-                  </TextButton>
-                )
               )}
-            </>
+              {/* Only while picking. A record already offers the way into
+                  the picker. */}
+              {onChangeOutfit && showPicker && (
+                <TextButton
+                  type="button"
+                  tone="secondary"
+                  onClick={onChangeOutfit}
+                  disabled={pending}
+                >
+                  {t("changeOutfit")}
+                </TextButton>
+              )}
+            </div>
           )}
-        </div>
-      </Stack>
+        </Stack>
+      )}
     </Sheet>
   );
 }

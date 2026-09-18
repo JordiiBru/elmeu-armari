@@ -105,17 +105,55 @@ export function GarmentModal({
       // The reason this modal replaced a whole screen: matching a piece
       // against Sanzo Wada is the app's centre of gravity, not a footnote
       // to its swatches. Pinned, primary, and the widest thing here.
+      // "Eliminar" is pinned beside it rather than left at the bottom of
+      // the body — a piece with texture, pattern, several colours,
+      // several seasons and a note pushed it below the fold, and it is
+      // irreversible: the one action here that should never cost a
+      // scroll to reach.
       footer={
-        canCombine ? (
-          <Button
-            type="button"
-            size="lg"
-            onClick={() => runViewTransition(() => setCombineOpen(true))}
-            className="w-full justify-center"
-          >
-            {t("combine")}
-          </Button>
-        ) : undefined
+        confirming ? (
+          <div className="flex items-center justify-end gap-4">
+            <TextButton
+              type="button"
+              tone="secondary"
+              onClick={() => setConfirming(false)}
+              disabled={pending}
+              className="type-small"
+            >
+              {tCommon("cancel")}
+            </TextButton>
+            <TextButton
+              type="button"
+              tone="danger"
+              onClick={handleDelete}
+              disabled={pending}
+              className="type-small"
+            >
+              {pending ? tCommon("deleting") : tCommon("deleteConfirm")}
+            </TextButton>
+          </div>
+        ) : (
+          <div className="flex items-center gap-4">
+            <TextButton
+              type="button"
+              tone="danger"
+              onClick={() => setConfirming(true)}
+              className="flex-shrink-0 type-small"
+            >
+              {tCommon("delete")}
+            </TextButton>
+            {canCombine && (
+              <Button
+                type="button"
+                size="lg"
+                onClick={() => runViewTransition(() => setCombineOpen(true))}
+                className="flex-1 justify-center"
+              >
+                {t("combine")}
+              </Button>
+            )}
+          </div>
+        )
       }
       header={
         <Stack gap={1}>
@@ -195,46 +233,14 @@ export function GarmentModal({
         </Stack>
       )}
 
-      <div className="flex items-center justify-between pt-4 border-t border-border">
+      <div className="pt-4 border-t border-border">
         <Link
           href={`/edit/${garment.id}`}
           className="font-serif italic type-small text-text-primary hover:text-text-secondary transition-colors"
         >
           {tCommon("edit")}
         </Link>
-        {confirming ? (
-          <div className="flex items-center gap-4">
-            <TextButton
-              type="button"
-              tone="secondary"
-              onClick={() => setConfirming(false)}
-              disabled={pending}
-              className="type-small"
-            >
-              {tCommon("cancel")}
-            </TextButton>
-            <TextButton
-              type="button"
-              tone="danger"
-              onClick={handleDelete}
-              disabled={pending}
-              className="type-small"
-            >
-              {pending ? tCommon("deleting") : tCommon("deleteConfirm")}
-            </TextButton>
-          </div>
-        ) : (
-          <TextButton
-            type="button"
-            tone="danger"
-            onClick={() => setConfirming(true)}
-            className="type-small"
-          >
-            {tCommon("delete")}
-          </TextButton>
-        )}
       </div>
-
     </Sheet>
   );
 }
