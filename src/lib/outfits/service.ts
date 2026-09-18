@@ -117,19 +117,11 @@ export async function wearOutfit(
   const categories = new Map(
     (await findGarmentCategories(extraIds)).map((g) => [g.id, g.category]),
   );
-  // Shoes are a single slot: you wear one pair a day. Everything else
-  // accumulates. Walking `extraIds` rather than the query result keeps the
-  // caller's order, which is what decides the surviving pair.
-  let shoesTaken = false;
   const garmentIds: string[] = [];
   const seen = new Set<string>();
   for (const id of extraIds) {
     const category = categories.get(id);
     if (!category || !EXTRA_CATEGORIES.has(category) || seen.has(id)) continue;
-    if (category === "SHOES") {
-      if (shoesTaken) continue;
-      shoesTaken = true;
-    }
     seen.add(id);
     garmentIds.push(id);
   }
@@ -205,8 +197,8 @@ export async function settlePastWornEvents(): Promise<number> {
 }
 
 /**
- * Today's committed day: the outfit, and the shoes and accessories it is
- * being worn with.
+ * Today's committed day: the outfit (shoes included), and the socks and
+ * accessories it is being worn with.
  *
  * Read straight from today rather than off the week plan. The plate used
  * to pick its extras out of the seven days the planner had loaded, which

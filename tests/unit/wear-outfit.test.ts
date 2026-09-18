@@ -122,15 +122,15 @@ describe("wearOutfit", () => {
     );
   });
 
-  it("collapses two pairs of shoes to the first", async () => {
+  it("drops shoes from the extras — they're part of the outfit now, not the day", async () => {
     findOutfitById.mockResolvedValue(outfitRow("o1", [garment("sh", "SHIRT")]));
 
-    await wearOutfit("o1", new Date("2026-08-20T00:00:00Z"), ["shoes1", "shoes2"]);
+    await wearOutfit("o1", new Date("2026-08-20T00:00:00Z"), ["shoes1", "shoes2", "ring"]);
 
     expect(setWornDay).toHaveBeenCalledWith(
       "o1",
       expect.any(Date),
-      ["shoes1"],
+      ["ring"],
     );
   });
 
@@ -159,12 +159,12 @@ describe("wearOutfit", () => {
   it("wears today when every piece is clean", async () => {
     findOutfitById.mockResolvedValue(outfitRow("o1", [garment("sh", "SHIRT")]));
 
-    await wearOutfit("o1", new Date("2026-08-15T18:30:00Z"), ["shoes1"]);
+    await wearOutfit("o1", new Date("2026-08-15T18:30:00Z"), ["ring"]);
 
     expect(setWornDay).toHaveBeenCalledWith(
       "o1",
       new Date("2026-08-15T00:00:00Z"),
-      ["shoes1"],
+      ["ring"],
     );
   });
 
@@ -191,8 +191,8 @@ describe("wearOutfit", () => {
 describe("lastWornExtras", () => {
   it("returns the most recent day's extras", () => {
     const events: WornDay[] = [
-      { id: "w2", date: new Date("2026-08-10T00:00:00Z"), extras: [garment("shoes1", "SHOES")] },
-      { id: "w1", date: new Date("2026-08-01T00:00:00Z"), extras: [garment("shoes2", "SHOES")] },
+      { id: "w2", date: new Date("2026-08-10T00:00:00Z"), extras: [garment("ring1", "ACCESSORI")] },
+      { id: "w1", date: new Date("2026-08-01T00:00:00Z"), extras: [garment("ring2", "ACCESSORI")] },
     ];
     const outfit = {
       id: "o1",
@@ -203,7 +203,7 @@ describe("lastWornExtras", () => {
       garments: [],
       wornEvents: events,
     };
-    expect(lastWornExtras(outfit).map((g) => g.id)).toEqual(["shoes1"]);
+    expect(lastWornExtras(outfit).map((g) => g.id)).toEqual(["ring1"]);
   });
 
   it("returns an empty array for a never-worn outfit", () => {

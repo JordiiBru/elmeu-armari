@@ -1,5 +1,5 @@
 import type { GarmentWithColors } from "@/lib/prendas/types";
-import type { SanzoPalette, PaletteMatch, OutfitGroup, GarmentMatch } from "./types";
+import type { SanzoPalette, PaletteMatch, OutfitGroup } from "./types";
 import { namedColors } from "@/lib/colors";
 import type { NamedColor } from "@/lib/colors";
 import {
@@ -56,7 +56,7 @@ function isAchromatic(hex: string): boolean {
  *   3. A set of garments forms a valid outfit when the intersection
  *      of their palette sets is non-empty and the categorical
  *      constraints hold (≥ 1 pants + ≥ 1 top, no repeated category,
- *      no socks or shoes).
+ *      no socks).
  *
  * There is no palette-coverage requirement: if a palette contains a
  * colour the outfit doesn't wear, that's fine — you're just not
@@ -65,7 +65,11 @@ function isAchromatic(hex: string): boolean {
  * together."
  */
 
-const EXCLUDED_CATEGORIES = new Set(["SOCKS", "SHOES"]);
+// Socks are the one category that never joins an outfit: nobody picks a
+// look around them. Shoes used to be excluded here too — the model has
+// since changed to let the outfit commit to the shoes it was matched
+// with, rather than picking them separately each time it's worn.
+const EXCLUDED_CATEGORIES = new Set(["SOCKS"]);
 const MIN_PIECES = 2;
 
 // A palette is a meaningful anchor for an outfit only if the outfit
@@ -76,7 +80,7 @@ const MIN_PIECES = 2;
 const MIN_DISTINCT_PALETTE_COLORS = 2;
 
 // Order in which garments should be laid out in a rendered outfit.
-const CATEGORY_LAYOUT_ORDER = ["SHIRT", "SWEATER", "PANTS"] as const;
+const CATEGORY_LAYOUT_ORDER = ["SHIRT", "SWEATER", "PANTS", "SHOES"] as const;
 
 /** A candidate canonical reading of one garment colour. */
 interface Candidate {
@@ -310,29 +314,6 @@ function sortOutfitGarments(garments: GarmentWithColors[]): GarmentWithColors[] 
 }
 
 /**
- * The best shoe in the wardrobe for a given palette, or `null` when none
- * combines. Independent of `buildContext`/`enumerateOutfits`: shoes never
- * take part in the categorical enumeration (AGENTS.md — shoes live on the
- * day, never on the outfit), so this is a direct distance check against
- * the palette a top+bottom(+sweater) group already settled on, not
- * another membership search.
- */
-function bestShoeMatch(shoes: GarmentWithColors[], palette: SanzoPalette): GarmentMatch | null {
-  let best: GarmentMatch | null = null;
-  for (const shoe of shoes) {
-    for (const c of shoe.colors) {
-      for (let i = 0; i < palette.colores.length; i++) {
-        const d = perceptualDistance(c.hex, palette.colores[i]);
-        if (d < OKLCH_DISTANCE_THRESHOLD && (!best || d < best.distance)) {
-          best = { garment: shoe, paletteColorIndex: i, paletteColorHex: palette.colores[i], distance: d };
-        }
-      }
-    }
-  }
-  return best;
-}
-
-/**
  * Push sweater-anchored groups to the very end when the sweater is out of
  * season — never dropped, only deprioritised, per the product rule. A
  * pure post-sort: it never touches which groups exist, only their order,
@@ -403,12 +384,10 @@ export function generateOutfitGroupsForGarment(
     if (groupsByKey.has(key)) return;
     const paletteMatches = refinePalettes([...commonPalettes], ctxs, palettes);
     if (paletteMatches.length === 0) return;
-    const shoes = allGarments.filter((cand) => cand.category === "SHOES");
     groupsByKey.set(key, {
       garments: sortOutfitGarments(ctxs.map((c) => c.garment)),
       palettes: paletteMatches,
       bestDistance: paletteMatches[0].totalDistance,
-      shoeSuggestion: bestShoeMatch(shoes, paletteMatches[0].palette),
     });
   });
 
@@ -438,7 +417,6 @@ export function generateOutfitGroups(
     const ctx = buildContext(g);
     if (ctx) contexts.push(ctx);
   }
-  const shoes = garments.filter((g) => g.category === "SHOES");
 
   // Use each garment as an anchor in turn — same enumeration as the
   // targeted variant, deduped by garment set.
@@ -458,7 +436,6 @@ export function generateOutfitGroups(
         garments: sortOutfitGarments(ctxs.map((c) => c.garment)),
         palettes: paletteMatches,
         bestDistance: paletteMatches[0].totalDistance,
-        shoeSuggestion: bestShoeMatch(shoes, paletteMatches[0].palette),
       });
     });
   }

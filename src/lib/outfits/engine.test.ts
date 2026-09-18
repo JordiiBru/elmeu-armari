@@ -66,7 +66,7 @@ describe("engine", () => {
       expect(groups).toHaveLength(0);
     });
 
-    it("excludes socks and shoes from outfit generation", () => {
+    it("excludes socks from outfit generation", () => {
       const shirt = createTestGarment("1", "SHIRT", ["#ff0000"]);
       const sock = createTestGarment("2", "SOCKS", ["#000000"]);
       const pants = createTestGarment("3", "PANTS", ["#000000"]);
@@ -144,7 +144,7 @@ describe("engine", () => {
       expect(groups).toHaveLength(0);
     });
 
-    it("suggests the best-matching shoe for a group's palette without adding it to garments", () => {
+    it("includes a matching shoe as a normal member of the outfit", () => {
       const shirt = createTestGarment("1", "SHIRT", ["#ff0000"]);
       const pants = createTestGarment("2", "PANTS", ["#ff8800"]);
       // Exact hex match to the palette's third, otherwise-unmatched colour.
@@ -152,21 +152,19 @@ describe("engine", () => {
 
       const { groups } = generateOutfitGroups([shirt, pants, shoe], testPalettes);
 
-      expect(groups.length).toBeGreaterThan(0);
-      const group = groups[0];
-      expect(group.garments.map((g) => g.category)).not.toContain("SHOES");
-      expect(group.shoeSuggestion).not.toBeNull();
-      expect(group.shoeSuggestion?.garment.id).toBe("3");
-      expect(group.shoeSuggestion?.distance).toBeLessThan(1);
+      const withShoe = groups.find((g) => g.garments.some((x) => x.id === "3"));
+      expect(withShoe).toBeDefined();
+      expect(withShoe?.garments.map((g) => g.category)).toContain("SHOES");
     });
 
-    it("leaves shoeSuggestion null when no shoe in the wardrobe combines", () => {
+    it("still forms a valid outfit with no matching shoe in the wardrobe", () => {
       const shirt = createTestGarment("1", "SHIRT", ["#ff0000"]);
       const pants = createTestGarment("2", "PANTS", ["#ff8800"]);
 
       const { groups } = generateOutfitGroups([shirt, pants], testPalettes);
 
-      expect(groups[0].shoeSuggestion).toBeNull();
+      expect(groups.length).toBeGreaterThan(0);
+      expect(groups[0].garments.map((g) => g.category)).not.toContain("SHOES");
     });
 
     it("keeps sweater-anchored groups in normal order when in season", () => {

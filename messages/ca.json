@@ -283,11 +283,8 @@
     "inBasket": "per rentar",
     "blockedReason": "cal rentar {pieces}",
     "piecesJoin": " i ",
-    "howYouWearIt": "com el portes",
-    "shoes": "sabates",
     "accessories": "accessoris",
     "socks": "mitjons",
-    "noShoes": "cap sabata desada.",
     "noAccessories": "cap accessori desat.",
     "goToAdd": "afegir una peça",
     "wearToday": "Me'l poso",
@@ -308,7 +305,8 @@
     "axes": {
       "SHIRT": "samarretes",
       "PANTS": "pantalons",
-      "SWEATER": "jerseis"
+      "SWEATER": "jerseis",
+      "SHOES": "sabates"
     },
     "axisEmpty": "cap outfit per aquest filtre encara.",
     "seeMore": "més combinacions",
@@ -350,8 +348,7 @@
     "unmatched": "lliure",
     "savePalette": "desar",
     "savePaletteAria": "Desar paleta",
-    "savedPaletteAria": "Ja desat",
-    "shoeSuggestion": "sabates suggerides"
+    "savedPaletteAria": "Ja desat"
   },
   "paleta": {
     "eyebrow": "catàleg cromàtic",

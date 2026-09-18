@@ -24,11 +24,6 @@ export interface OutfitGroup {
   garments: GarmentWithColors[];
   palettes: PaletteMatch[];
   bestDistance: number;
-  /** The best-matching shoe for this group's primary palette, or `null`
-   * when no shoe in the wardrobe combines. A suggestion only — shoes stay
-   * out of `garments` and are never saved into the outfit itself (see
-   * AGENTS.md: shoes live on the day, never on the outfit). */
-  shoeSuggestion: GarmentMatch | null;
 }
 
 export interface OutfitResult {
@@ -55,7 +50,7 @@ export interface SavedOutfit {
 export interface WornDay {
   id: string;
   date: Date;
-  /** Shoes / socks / accessories worn that day. */
+  /** Socks / accessories worn that day. */
   extras: GarmentWithColors[];
 }
 

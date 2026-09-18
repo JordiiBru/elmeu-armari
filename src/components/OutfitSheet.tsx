@@ -14,7 +14,7 @@ import { DayPhoto } from "./DayPhoto";
 import { DayPieces } from "./DayPieces";
 import { DayPhotoInput } from "./DayPhotoInput";
 import { OutfitCollage, outfitSubtitle, paletteName, pieceLabel } from "./OutfitTile";
-import { WearGrids, WearTabs, useWearGroups, type WearTab } from "./WearPicker";
+import { WearGrid, useWearGroups } from "./WearPicker";
 import {
   Button,
   Sheet,
@@ -105,13 +105,7 @@ export function OutfitSheet({
     [isCommitted, dayExtras, outfit],
   );
 
-  const [shoeId, setShoeId] = useState<string | null>(
-    () => preselected.find((g) => g.category === "SHOES")?.id ?? null,
-  );
-  const [extraIds, setExtraIds] = useState<string[]>(() =>
-    preselected.filter((g) => g.category !== "SHOES").map((g) => g.id),
-  );
-  const [tab, setTab] = useState<WearTab>("shoes");
+  const [extraIds, setExtraIds] = useState<string[]>(() => preselected.map((g) => g.id));
   const groups = useWearGroups(extraCandidates);
 
   const title = outfitSubtitle(tLabel, outfit) || outfit.name || "";
@@ -123,11 +117,10 @@ export function OutfitSheet({
 
   const picked = useMemo(() => {
     const byId = new Map(extraCandidates.map((g) => [g.id, g]));
-    return [shoeId, ...extraIds]
-      .filter((id): id is string => id !== null)
+    return extraIds
       .map((id) => byId.get(id))
       .filter((g): g is GarmentWithColors => g !== undefined);
-  }, [extraCandidates, shoeId, extraIds]);
+  }, [extraCandidates, extraIds]);
 
   const subtitle = [paletteName(palette), formatLastWorn(outfit.wornEvents)]
     .filter(Boolean)
@@ -171,9 +164,9 @@ export function OutfitSheet({
       // of; the picker is one column of grids and stays one column wide.
       size={isRecord ? "2xl" : "xl"}
       split={isRecord}
-      // The two tabs hold grids of very different heights, and the sheet
-      // used to resize under the tab bar every time you switched. Fixed
-      // height, tabs pinned, grid scrolls.
+      // A record's photograph and a picker's grid are different heights,
+      // and the sheet used to resize under the header on every state
+      // change. Fixed height, grid scrolls.
       fill
       label={t("sheetLabel", { title })}
       media={
@@ -244,19 +237,6 @@ export function OutfitSheet({
           )}
         </Stack>
       }
-      headerBelow={
-        showPicker ? (
-          <div className="px-6 py-2">
-            <WearTabs
-              groups={groups}
-              tab={tab}
-              onChange={setTab}
-              shoeId={shoeId}
-              extraIds={extraIds}
-            />
-          </div>
-        ) : undefined
-      }
       footer={
         showPicker ? (
         <div className="flex items-center justify-between gap-4">
@@ -313,12 +293,9 @@ export function OutfitSheet({
       }
     >
       {showPicker ? (
-        <WearGrids
+        <WearGrid
           groups={groups}
-          tab={tab}
-          shoeId={shoeId}
           extraIds={extraIds}
-          onSelectShoe={setShoeId}
           onToggleExtra={toggleExtra}
           disabled={pending}
         />

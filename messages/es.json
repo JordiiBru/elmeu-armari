@@ -283,11 +283,8 @@
     "inBasket": "por lavar",
     "blockedReason": "hay que lavar {pieces}",
     "piecesJoin": " y ",
-    "howYouWearIt": "cómo lo llevas",
-    "shoes": "zapatos",
     "accessories": "accesorios",
     "socks": "calcetines",
-    "noShoes": "ningún zapato guardado.",
     "noAccessories": "ningún accesorio guardado.",
     "goToAdd": "añadir una prenda",
     "wearToday": "Me lo pongo",
@@ -308,7 +305,8 @@
     "axes": {
       "SHIRT": "camisetas",
       "PANTS": "pantalones",
-      "SWEATER": "jerséis"
+      "SWEATER": "jerséis",
+      "SHOES": "zapatos"
     },
     "axisEmpty": "ningún outfit para este filtro todavía.",
     "seeMore": "más combinaciones",
@@ -350,8 +348,7 @@
     "unmatched": "libre",
     "savePalette": "guardar",
     "savePaletteAria": "Guardar paleta",
-    "savedPaletteAria": "Ya guardado",
-    "shoeSuggestion": "zapatos sugeridos"
+    "savedPaletteAria": "Ya guardado"
   },
   "paleta": {
     "eyebrow": "catálogo cromático",

@@ -13,12 +13,12 @@ import { OutfitSheet } from "./OutfitSheet";
 import { EmptyState, Grid, SegmentedControl, Stack, Text, useToast } from "@/components/ui";
 import { TOAST_DURATION_MS } from "@/components/ui/toast";
 
-/** The three categories an outfit is made of — shoes, socks and
- * accessories belong to the day, not to the look, so filtering by them
- * has nothing to group on here. */
-type Filter = "ALL" | "SWEATER" | "SHIRT" | "PANTS";
+/** The categories an outfit is made of — socks and accessories still
+ * belong to the day, not to the look, so filtering by them has nothing
+ * to group on here. Shoes do belong to the outfit now. */
+type Filter = "ALL" | "SWEATER" | "SHIRT" | "PANTS" | "SHOES";
 
-const FILTERS: Filter[] = ["ALL", "SWEATER", "SHIRT", "PANTS"];
+const FILTERS: Filter[] = ["ALL", "SWEATER", "SHIRT", "PANTS", "SHOES"];
 
 /**
  * "Què em poso?"'s whole answer, now that discovery lives in the

@@ -283,11 +283,8 @@
     "inBasket": "to wash",
     "blockedReason": "needs washing: {pieces}",
     "piecesJoin": " and ",
-    "howYouWearIt": "how you wear it",
-    "shoes": "shoes",
     "accessories": "accessories",
     "socks": "socks",
-    "noShoes": "no shoes saved.",
     "noAccessories": "no accessories saved.",
     "goToAdd": "add a garment",
     "wearToday": "I'll wear it",
@@ -308,7 +305,8 @@
     "axes": {
       "SHIRT": "shirts",
       "PANTS": "trousers",
-      "SWEATER": "sweaters"
+      "SWEATER": "sweaters",
+      "SHOES": "shoes"
     },
     "axisEmpty": "no outfit for this filter yet.",
     "seeMore": "more combinations",
@@ -350,8 +348,7 @@
     "unmatched": "free",
     "savePalette": "save",
     "savePaletteAria": "Save palette",
-    "savedPaletteAria": "Already saved",
-    "shoeSuggestion": "suggested shoes"
+    "savedPaletteAria": "Already saved"
   },
   "paleta": {
     "eyebrow": "colour catalogue",
