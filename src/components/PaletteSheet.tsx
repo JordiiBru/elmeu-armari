@@ -30,6 +30,7 @@ export default function PaletteSheet({
     <Sheet
       onClose={onClose}
       size="xl"
+      fill
       label={t("sheetLabel", { color: color.name })}
       media={<div className="h-full w-full" style={{ backgroundColor: color.hex }} />}
       mediaHeight="h-24 sm:h-32"

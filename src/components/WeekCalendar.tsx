@@ -253,6 +253,7 @@ function DayPickerSheet({
     <Sheet
       onClose={onClose}
       size="xl"
+      fill
       label={`${t("plan")} ${label}`}
       header={
         <div className="flex items-start justify-between gap-3">

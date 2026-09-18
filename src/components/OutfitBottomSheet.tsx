@@ -171,6 +171,7 @@ export function OutfitBottomSheet({
     <Sheet
       onClose={onClose}
       size="xl"
+      fill
       label={t("sheetLabel", { category: tLabel(`category.${garment.category}`) })}
       media={
         <div className="flex h-full w-full">

@@ -94,7 +94,8 @@ export function GarmentModal({
   return (
     <Sheet
       onClose={onClose}
-      size="md"
+      size="xl"
+      fill
       label={t("sheetLabel", { category: tLabel(`category.${garment.category}`) })}
       media={<PieceThumb garment={garment} priority className="h-full w-full" />}
       mediaHeight="h-40"

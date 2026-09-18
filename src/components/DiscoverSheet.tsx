@@ -92,9 +92,18 @@ export function DiscoverSheet({
 
   const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
 
+  const outfitsByPiece = useMemo(() => {
+    const groups = groupOutfitsBy(allOutfits, axis);
+    return new Map(groups.map((g) => [g.piece.id, g.outfits]));
+  }, [allOutfits, axis]);
+
+  // Pieces with something already saved lead the rail — they are the
+  // proven starting points — and nothing saved yet is not the same as
+  // filtered out: it still gets a row, just after the ones that already
+  // have an answer.
   const axisGarments = useMemo(() => {
     const base = sortByWardrobeOrder(allGarments.filter((g) => g.category === axis));
-    return filterGarments(base, {
+    const filtered = filterGarments(base, {
       categories: [],
       seasons: seasonOnly ? [season] : [],
       fits: [],
@@ -104,12 +113,10 @@ export function DiscoverSheet({
       states: cleanOnly ? ["clean"] : [],
       query: "",
     });
-  }, [allGarments, axis, seasonOnly, season, cleanOnly]);
-
-  const outfitsByPiece = useMemo(() => {
-    const groups = groupOutfitsBy(allOutfits, axis);
-    return new Map(groups.map((g) => [g.piece.id, g.outfits]));
-  }, [allOutfits, axis]);
+    const withOutfits = filtered.filter((g) => (outfitsByPiece.get(g.id)?.length ?? 0) > 0);
+    const withoutOutfits = filtered.filter((g) => (outfitsByPiece.get(g.id)?.length ?? 0) === 0);
+    return [...withOutfits, ...withoutOutfits];
+  }, [allGarments, axis, seasonOnly, season, cleanOnly, outfitsByPiece]);
 
   const toggle = (id: string) =>
     setExpanded((prev) => {
@@ -157,6 +164,7 @@ export function DiscoverSheet({
     <Sheet
       onClose={onClose}
       size="xl"
+      fill
       label={t("discoverSheetLabel", { category: tLabel(`category.${axis}`) })}
       header={
         <Stack gap={1}>
