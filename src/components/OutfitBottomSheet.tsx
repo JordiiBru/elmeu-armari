@@ -11,7 +11,12 @@ import { outfitKey } from "@/lib/outfits/key";
 import { OutfitGroupCard } from "./OutfitCard";
 import { Sheet, TextButton, Text, Stack, Icon } from "@/components/ui";
 
-const PAGE_SIZE = 6;
+// A real wardrobe with shoes mandatory easily clears 50 combinations,
+// and a page of 6 meant clicking "mostrar més" close to ten times to
+// see all of it. Paired with the two-column layout below, this cuts
+// that by roughly four times over rather than trying to solve it with
+// page size alone.
+const PAGE_SIZE = 10;
 
 interface Props {
   garment: GarmentWithColors;
@@ -116,6 +121,12 @@ export function OutfitBottomSheet({
       ? ordered
       : ordered.filter((g) => g.garments.length === pieceFilter);
 
+  // The first page is a peek (PAGE_SIZE), but "mostrar més" loads
+  // everything left rather than the next page-sized chunk. With shoes
+  // mandatory and black/white riding in for free, a well-stocked
+  // wardrobe clears 100 combinations easily — paging through that ten
+  // clicks at a time was the exact complaint this replaces. Computing
+  // the rest is cheap; clicking through it by hand wasn't.
   const loadMore = (offset: number) => {
     setLoading(true);
     setTimeout(() => {
@@ -123,7 +134,7 @@ export function OutfitBottomSheet({
         garment,
         allGarments,
         palettes,
-        PAGE_SIZE,
+        Number.MAX_SAFE_INTEGER,
         offset,
         sweaterInSeason,
         shortsInSeason,
@@ -159,7 +170,7 @@ export function OutfitBottomSheet({
   return (
     <Sheet
       onClose={onClose}
-      size="lg"
+      size="xl"
       label={t("sheetLabel", { category: tLabel(`category.${garment.category}`) })}
       media={
         <div className="flex h-full w-full">
@@ -249,7 +260,7 @@ export function OutfitBottomSheet({
             {t("count", { count: visibleGroups.length })}
             {pieceFilter !== null && ` · ${t("pieces", { count: pieceFilter })}`}
           </Text>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:grid sm:grid-cols-2 sm:gap-x-8 gap-y-4">
             {visibleGroups.map((group, i) => (
               <OutfitGroupCard
                 key={

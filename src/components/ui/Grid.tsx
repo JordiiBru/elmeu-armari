@@ -49,8 +49,11 @@ const COLS_CLASS = {
   library: "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
   // "Què em poso?"'s mosaic is the page's whole reason for being open,
   // not a rail of thumbnails leading somewhere else — fewer, larger
-  // tiles so every outfit reads as a look rather than a swatch.
-  mosaic: "grid grid-cols-2 lg:grid-cols-3",
+  // tiles so every outfit reads as a look rather than a swatch. Four
+  // at desktop rather than three: with a real wardrobe's worth of
+  // favourites, three read as generously large but meant more
+  // scrolling to see the same number of options.
+  mosaic: "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
 } as const;
 
 export function Grid({
