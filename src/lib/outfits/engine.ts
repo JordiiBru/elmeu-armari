@@ -55,8 +55,12 @@ function isAchromatic(hex: string): boolean {
  *      every colour of the piece.
  *   3. A set of garments forms a valid outfit when the intersection
  *      of their palette sets is non-empty and the categorical
- *      constraints hold (≥ 1 pants + ≥ 1 top, no repeated category,
- *      no socks).
+ *      constraints hold (≥ 1 pants + ≥ 1 top + ≥ 1 shoe, no repeated
+ *      category, no socks). A shirt under a sweater is the one
+ *      optional top: hidden, so any colour does, and the engine only
+ *      surfaces one when it happens to match. A shoe is never
+ *      optional — always visible, so no match means no suggestion,
+ *      not an incomplete one.
  *
  * There is no palette-coverage requirement: if a palette contains a
  * colour the outfit doesn't wear, that's fine — you're just not
@@ -216,6 +220,13 @@ function hasTop(cats: Set<string>): boolean {
 function hasBottom(cats: Set<string>): boolean {
   return cats.has("PANTS");
 }
+// A shirt under a sweater stays optional — it's hidden, so any colour
+// does, and the engine already only surfaces one when it happens to
+// match. Shoes are the opposite: always visible, so a suggestion with
+// none isn't an incomplete outfit, it's a wrong one.
+function hasShoes(cats: Set<string>): boolean {
+  return cats.has("SHOES");
+}
 
 /**
  * Build a PaletteMatch (the shape the UI expects) from a set of
@@ -283,7 +294,7 @@ function enumerateOutfits(
       const common = intersectSets(commonSets);
       if (common.size > 0) {
         const cats = new Set([target.garment.category, ...current.map((c) => c.garment.category)]);
-        if (hasBottom(cats) && hasTop(cats)) {
+        if (hasBottom(cats) && hasTop(cats) && hasShoes(cats)) {
           onOutfit([target, ...current], common);
         }
       }

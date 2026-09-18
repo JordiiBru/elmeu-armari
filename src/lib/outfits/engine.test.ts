@@ -11,11 +11,14 @@ import type { GarmentWithColors } from "@/lib/prendas/types";
 // against zero groups. Caught only once this file was actually wired
 // into `vitest.config.ts`'s `include`, which it wasn't before.
 //
-// Combination 1: rust + teal.
+// Combination 1: rust + teal. The shoe reuses rust exactly — repeating
+// a colour is legal, and it's simplest way to hand this combination a
+// shoe that's guaranteed to intersect it.
 const RUST = "#de4500";
 const TEAL = "#29bdad";
-// Combination 122: crimson + amber + green — three colours, so there's
-// a slot left over for a third piece (a shoe) to land on.
+const SHOE_FOR_RUST_TEAL = RUST;
+// Combination 122: crimson + amber + green — three colours, so a shirt,
+// pants and shoe can each take a different one.
 const CRIMSON = "#d60036";
 const AMBER = "#ffb852";
 const GREEN = "#00d973";
@@ -67,8 +70,9 @@ describe("engine", () => {
       const shirt = createTestGarment("1", "SHIRT", [RUST]);
       const sock = createTestGarment("2", "SOCKS", [TEAL]);
       const pants = createTestGarment("3", "PANTS", [TEAL]);
+      const shoe = createTestGarment("4", "SHOES", [SHOE_FOR_RUST_TEAL]);
 
-      const { groups } = generateOutfitGroups([shirt, sock, pants], palettes);
+      const { groups } = generateOutfitGroups([shirt, sock, pants, shoe], palettes);
 
       const hasShirtAndPants = groups.some((g) => {
         const cats = g.garments.map((gar) => gar.category);
@@ -86,8 +90,9 @@ describe("engine", () => {
       const shirt1 = createTestGarment("1", "SHIRT", [RUST]);
       const shirt2 = createTestGarment("2", "SHIRT", [CRIMSON]);
       const pants = createTestGarment("3", "PANTS", [TEAL]);
+      const shoe = createTestGarment("4", "SHOES", [SHOE_FOR_RUST_TEAL]);
 
-      const { groups } = generateOutfitGroups([shirt1, shirt2, pants], palettes);
+      const { groups } = generateOutfitGroups([shirt1, shirt2, pants, shoe], palettes);
 
       // Real match (rust + teal), so this is checking the rule against
       // groups that genuinely exist, not vacuously against zero of them.
@@ -100,24 +105,31 @@ describe("engine", () => {
     });
 
     it("enforces MIN_DISTINCT_PALETTE_COLORS requirement", () => {
-      // Same colour twice occupies one palette slot, however many
-      // palettes contain black — MIN_DISTINCT_PALETTE_COLORS is 2.
+      // Same colour three times over occupies one palette slot, however
+      // many palettes contain black — MIN_DISTINCT_PALETTE_COLORS is 2.
+      // A matching shoe is included so this fails on that rule alone,
+      // not on the (also true) absence of one.
       const blackShirt = createTestGarment("1", "SHIRT", [BLACK]);
       const blackPants = createTestGarment("2", "PANTS", [BLACK]);
+      const blackShoe = createTestGarment("3", "SHOES", [BLACK]);
 
-      const { groups } = generateOutfitGroups([blackShirt, blackPants], palettes);
+      const { groups } = generateOutfitGroups(
+        [blackShirt, blackPants, blackShoe],
+        palettes,
+      );
       expect(groups).toHaveLength(0);
     });
 
     it("accepts outfits that use at least MIN_DISTINCT_PALETTE_COLORS slots", () => {
       const shirt = createTestGarment("1", "SHIRT", [RUST]);
       const pants = createTestGarment("2", "PANTS", [TEAL]);
+      const shoe = createTestGarment("3", "SHOES", [SHOE_FOR_RUST_TEAL]);
 
-      const { groups } = generateOutfitGroups([shirt, pants], palettes);
+      const { groups } = generateOutfitGroups([shirt, pants, shoe], palettes);
 
       expect(groups.length).toBeGreaterThan(0);
       const outfit = groups[0];
-      expect(outfit.garments).toHaveLength(2);
+      expect(outfit.garments).toHaveLength(3);
       expect(outfit.palettes.length).toBeGreaterThan(0);
       expect(outfit.palettes[0].totalDistance).toBe(0);
     });
@@ -143,24 +155,25 @@ describe("engine", () => {
       expect(withShoe?.garments.map((g) => g.category)).toContain("SHOES");
     });
 
-    it("still forms a valid outfit with no matching shoe in the wardrobe", () => {
+    it("shoes are a must: no group forms when no shoe is in the wardrobe at all", () => {
       const shirt = createTestGarment("1", "SHIRT", [CRIMSON]);
       const pants = createTestGarment("2", "PANTS", [AMBER]);
 
       const { groups } = generateOutfitGroups([shirt, pants], palettes);
 
-      expect(groups.length).toBeGreaterThan(0);
-      expect(groups[0].garments.map((g) => g.category)).not.toContain("SHOES");
+      expect(groups).toHaveLength(0);
     });
 
     it("keeps sweater-anchored groups in normal order when in season", () => {
       const sweater = createTestGarment("sw", "SWEATER", [RUST]);
       const pantsA = createTestGarment("pa", "PANTS", [TEAL]);
+      const shoeA = createTestGarment("shA", "SHOES", [SHOE_FOR_RUST_TEAL]);
       const shirt = createTestGarment("sh", "SHIRT", [CRIMSON]);
       const pantsB = createTestGarment("pb", "PANTS", [AMBER]);
+      const shoeB = createTestGarment("shB", "SHOES", [GREEN]);
 
       const { groups } = generateOutfitGroups(
-        [sweater, pantsA, shirt, pantsB],
+        [sweater, pantsA, shoeA, shirt, pantsB, shoeB],
         palettes,
         50,
         0,
@@ -173,11 +186,13 @@ describe("engine", () => {
     it("sinks every sweater-anchored group behind non-sweater ones when out of season", () => {
       const sweater = createTestGarment("sw", "SWEATER", [RUST]);
       const pantsA = createTestGarment("pa", "PANTS", [TEAL]);
+      const shoeA = createTestGarment("shA", "SHOES", [SHOE_FOR_RUST_TEAL]);
       const shirt = createTestGarment("sh", "SHIRT", [CRIMSON]);
       const pantsB = createTestGarment("pb", "PANTS", [AMBER]);
+      const shoeB = createTestGarment("shB", "SHOES", [GREEN]);
 
       const { groups } = generateOutfitGroups(
-        [sweater, pantsA, shirt, pantsB],
+        [sweater, pantsA, shoeA, shirt, pantsB, shoeB],
         palettes,
         50,
         0,
@@ -195,9 +210,10 @@ describe("engine", () => {
     it("keeps shorts-anchored groups in normal order in season", () => {
       const shirt = createTestGarment("sh", "SHIRT", [RUST]);
       const shorts = createTestGarment("po", "PANTS", [TEAL], "SHORT");
+      const shoe = createTestGarment("shoe", "SHOES", [SHOE_FOR_RUST_TEAL]);
 
       const { groups } = generateOutfitGroups(
-        [shirt, shorts],
+        [shirt, shorts, shoe],
         palettes,
         50,
         0,
@@ -211,11 +227,13 @@ describe("engine", () => {
     it("sinks every shorts-anchored group behind non-shorts ones out of season", () => {
       const shirtA = createTestGarment("sa", "SHIRT", [RUST]);
       const shorts = createTestGarment("po", "PANTS", [TEAL], "SHORT");
+      const shoeA = createTestGarment("shA", "SHOES", [SHOE_FOR_RUST_TEAL]);
       const shirtB = createTestGarment("sb", "SHIRT", [CRIMSON]);
       const longPants = createTestGarment("pl", "PANTS", [AMBER], "LONG");
+      const shoeB = createTestGarment("shB", "SHOES", [GREEN]);
 
       const { groups } = generateOutfitGroups(
-        [shirtA, shorts, shirtB, longPants],
+        [shirtA, shorts, shoeA, shirtB, longPants, shoeB],
         palettes,
         50,
         0,
