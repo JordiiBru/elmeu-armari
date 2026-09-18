@@ -388,6 +388,22 @@ button, a, input, textarea, select {
   animation: panel-enter var(--duration-base) var(--ease-standard) both;
 }
 
+/* One sheet stepping into another of the same kind — piece detail into
+   "què hi combina", discover's rail into a piece's combinations —
+   named so the browser morphs the outgoing panel into the incoming one
+   instead of cross-fading the whole page. Only takes effect inside a
+   `document.startViewTransition` call (see useViewTransition); an
+   ordinary open or close never triggers one, so this is otherwise
+   inert. `prefers-reduced-motion` is handled in JS, before the
+   transition is ever started, not here. */
+.vt-sheet-panel {
+  view-transition-name: sheet-panel;
+}
+::view-transition-group(sheet-panel) {
+  animation-duration: var(--duration-base);
+  animation-timing-function: var(--ease-standard);
+}
+
 .cv-auto {
   content-visibility: auto;
   contain-intrinsic-size: auto 320px;

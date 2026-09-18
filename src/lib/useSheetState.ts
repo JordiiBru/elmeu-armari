@@ -21,9 +21,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * sense aquest guard, onClose (que ara sovint dispara una navegació,
  * `router.back()`) trigaria els mateixos 420ms encara que l'usuari no
  * vegi cap animació.
+ *
+ * `skipEnter` starts the panel already open instead of sliding it up
+ * from the bottom on the next frame. For a sheet replacing a sibling
+ * sheet inside `useViewTransition` — the panel's "after" DOM snapshot
+ * has to already read as open, or the browser morphs into the closed
+ * position and the panel's own entrance transition then fights it a
+ * frame later.
  */
-export function useSheetState(onClose: () => void, exitMs = 420) {
-  const [shown, setShown] = useState(false);
+export function useSheetState(onClose: () => void, exitMs = 420, skipEnter = false) {
+  const [shown, setShown] = useState(skipEnter);
   const [closing, setClosing] = useState(false);
   // The guard has to be a ref, not the `closing` state. It used to live
   // inside the `setClosing` updater, which made scheduling `onClose` a
@@ -36,12 +43,16 @@ export function useSheetState(onClose: () => void, exitMs = 420) {
   const closingRef = useRef(false);
 
   useEffect(() => {
-    const raf = requestAnimationFrame(() => setShown(true));
     document.body.style.overflow = "hidden";
+    if (skipEnter) return () => { document.body.style.overflow = ""; };
+    const raf = requestAnimationFrame(() => setShown(true));
     return () => {
       cancelAnimationFrame(raf);
       document.body.style.overflow = "";
     };
+    // Read once, at mount: which sheet instance this is never changes
+    // after it exists.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const close = useCallback(() => {

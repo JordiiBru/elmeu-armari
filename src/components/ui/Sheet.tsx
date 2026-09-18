@@ -66,6 +66,15 @@ interface Props {
    * there.
    */
   split?: boolean;
+  /**
+   * For a sheet that is replacing a sibling sheet — piece detail into
+   * "què hi combina", discover's rail into a piece's combinations —
+   * rather than opening fresh. Starts already open instead of sliding
+   * up from the bottom, so pairing this with `useViewTransition` morphs
+   * one panel into the other instead of a slide-up cutting in on top of
+   * it. Leave it off for a sheet's first open.
+   */
+  skipEnter?: boolean;
 }
 
 /**
@@ -85,10 +94,11 @@ export function Sheet({
   footer,
   fill = false,
   split = false,
+  skipEnter = false,
   children,
 }: Props) {
   const tCommon = useTranslations("common");
-  const { open, close } = useSheetState(onClose, 420);
+  const { open, close } = useSheetState(onClose, 420, skipEnter);
   const swipe = useSwipeToClose(close);
   const panel = useRef<HTMLDivElement>(null);
 
@@ -219,7 +229,12 @@ export function Sheet({
         // trapped inside it, and a browser's default ring around a whole
         // sheet is not a focus indicator anybody asked for. The controls
         // inside keep theirs.
-        className={`relative bg-elevated w-full ${PANEL_MAX[size]} ${heightClass} flex flex-col overflow-hidden outline-none shadow-[var(--shadow-3)]`}
+        // vt-sheet-panel: inert unless a `useViewTransition` update is
+        // actually in flight — only then does the browser look at
+        // `view-transition-name` at all. Safe to leave on every sheet:
+        // the app's own rule that only one is ever open means the name
+        // is never claimed twice at once.
+        className={`vt-sheet-panel relative bg-elevated w-full ${PANEL_MAX[size]} ${heightClass} flex flex-col overflow-hidden outline-none shadow-[var(--shadow-3)]`}
         style={{
           transform: open
             ? `translate3d(0, ${swipe.dragY}px, 0)`

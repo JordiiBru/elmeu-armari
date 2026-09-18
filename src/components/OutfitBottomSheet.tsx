@@ -41,6 +41,9 @@ interface Props {
   sweaterInSeason: boolean;
   /** Same, for groups anchored around shorts. */
   shortsInSeason: boolean;
+  /** True when this sheet is stepping in for a sibling sheet rather than
+   * opening fresh — see `Sheet`'s own doc on the prop it forwards to. */
+  skipEnter?: boolean;
 }
 
 function computeInitial(
@@ -71,6 +74,7 @@ export function OutfitBottomSheet({
   onClose,
   sweaterInSeason,
   shortsInSeason,
+  skipEnter,
 }: Props) {
   const t = useTranslations("combine");
   const tLabel = useTranslations("labels");
@@ -172,6 +176,7 @@ export function OutfitBottomSheet({
       onClose={onClose}
       size="xl"
       fill
+      skipEnter={skipEnter}
       label={t("sheetLabel", { category: tLabel(`category.${garment.category}`) })}
       media={
         <div className="flex h-full w-full">

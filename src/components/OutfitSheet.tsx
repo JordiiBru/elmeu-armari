@@ -58,6 +58,9 @@ interface Props {
   onChangeOutfit?: () => void;
   /** Calendar only: empty the day. */
   onClear?: () => void;
+  /** True when this sheet is stepping in for a sibling sheet rather than
+   * opening fresh — see `Sheet`'s own doc on the prop it forwards to. */
+  skipEnter?: boolean;
 }
 
 /**
@@ -80,6 +83,7 @@ export function OutfitSheet({
   onCommitted,
   onChangeOutfit,
   onClear,
+  skipEnter,
 }: Props) {
   const t = useTranslations("outfits");
   const tLabel = useTranslations("labels");
@@ -164,6 +168,7 @@ export function OutfitSheet({
       // of; the picker is one column of grids and stays one column wide.
       size={isRecord ? "2xl" : "xl"}
       split={isRecord}
+      skipEnter={skipEnter}
       // A record's photograph and a picker's grid are different heights,
       // and the sheet used to resize under the header on every state
       // change. Fixed height, grid scrolls.

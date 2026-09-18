@@ -7,6 +7,7 @@ import type { GarmentWithColors, Season } from "@/lib/prendas/types";
 import { isDirty } from "@/lib/bugaderia/laundry";
 import { filterGarments, sortByWardrobeOrder } from "@/lib/prendas/filtering";
 import { groupOutfitsBy } from "@/lib/outfits/grouping";
+import { useViewTransition } from "@/lib/useViewTransition";
 import { OutfitTile, pieceTint } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
 import { OutfitBottomSheet } from "./OutfitBottomSheet";
@@ -89,6 +90,16 @@ export function DiscoverSheet({
   // piece does not offer to save what you just saved — the sheet
   // unmounts on every step change and would otherwise forget.
   const [savedHere, setSavedHere] = useState<string[]>([]);
+  const runViewTransition = useViewTransition();
+  // The rail's own sheet slides up normally the first time — that is a
+  // real open, triggered by the "descobreix" button. Only once a step
+  // has taken you away from it does coming back count as stepping back
+  // into a sibling sheet rather than opening one.
+  const [steppedAway, setSteppedAway] = useState(false);
+  const goToStep = (next: Step) => {
+    setSteppedAway(true);
+    runViewTransition(() => setStep(next));
+  };
 
   const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
 
@@ -137,10 +148,11 @@ export function DiscoverSheet({
           setSavedHere((prev) => [...prev, key]);
           onOutfitSaved();
         }}
-        onBack={() => setStep({ kind: "rail" })}
+        onBack={() => goToStep({ kind: "rail" })}
         onClose={onClose}
         sweaterInSeason={sweaterInSeason}
         shortsInSeason={shortsInSeason}
+        skipEnter
       />
     );
   }
@@ -155,7 +167,8 @@ export function DiscoverSheet({
         todayISO={todayISO}
         isCommitted={step.outfit.id === todayOutfitId}
         allowDelete
-        onClose={() => setStep({ kind: "rail" })}
+        onClose={() => goToStep({ kind: "rail" })}
+        skipEnter
       />
     );
   }
@@ -165,6 +178,7 @@ export function DiscoverSheet({
       onClose={onClose}
       size="xl"
       fill
+      skipEnter={steppedAway}
       label={t("discoverSheetLabel", { category: tLabel(`category.${axis}`) })}
       header={
         <Stack gap={1}>
@@ -242,7 +256,7 @@ export function DiscoverSheet({
                               palette={paletteMap.get(outfit.paletteId) ?? null}
                               index={numbers.get(outfit.id) ?? 0}
                               mark={outfit.id === todayOutfitId ? t("today") : null}
-                              onOpen={() => setStep({ kind: "detail", outfit })}
+                              onOpen={() => goToStep({ kind: "detail", outfit })}
                             />
                           ))}
                         </Grid>
@@ -255,7 +269,7 @@ export function DiscoverSheet({
                         <TextButton
                           type="button"
                           tone="secondary"
-                          onClick={() => setStep({ kind: "combine", garment: piece })}
+                          onClick={() => goToStep({ kind: "combine", garment: piece })}
                           className="self-start"
                         >
                           {t("seeMore")}

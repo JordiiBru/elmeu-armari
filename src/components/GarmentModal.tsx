@@ -10,6 +10,7 @@ import type { SanzoPalette } from "@/lib/outfits/types";
 import { OutfitBottomSheet } from "./OutfitBottomSheet";
 import { optionLabel } from "@/lib/prendas/labels";
 import { PieceThumb } from "./PieceThumb";
+import { useViewTransition } from "@/lib/useViewTransition";
 import { Button, Sheet, Text, TextButton, Stack } from "@/components/ui";
 
 interface Props {
@@ -42,6 +43,7 @@ export function GarmentModal({
   // outfits you had just saved.
   const [savedHere, setSavedHere] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
+  const runViewTransition = useViewTransition();
 
   // Socks and accessories do not take part in the colour matching, and a
   // piece with no colour has nothing to match on.
@@ -83,10 +85,11 @@ export function GarmentModal({
         palettes={palettes}
         savedOutfitKeys={[...savedOutfitKeys, ...savedHere]}
         onOutfitSaved={(key) => setSavedHere((prev) => [...prev, key])}
-        onBack={() => setCombineOpen(false)}
+        onBack={() => runViewTransition(() => setCombineOpen(false))}
         onClose={onClose}
         sweaterInSeason={sweaterInSeason}
         shortsInSeason={shortsInSeason}
+        skipEnter
       />
     );
   }
@@ -107,7 +110,7 @@ export function GarmentModal({
           <Button
             type="button"
             size="lg"
-            onClick={() => setCombineOpen(true)}
+            onClick={() => runViewTransition(() => setCombineOpen(true))}
             className="w-full justify-center"
           >
             {t("combine")}
