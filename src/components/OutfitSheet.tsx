@@ -234,7 +234,7 @@ export function OutfitSheet({
             {subtitle}
           </Text>
           {palette && (
-            <div aria-hidden className="mt-1 flex h-1 w-full max-w-40 overflow-hidden">
+            <div aria-hidden className="mt-1.5 flex h-2 w-full max-w-40 overflow-hidden">
               {palette.colores.map((hex, i) => (
                 <span key={i} className="flex-1" style={{ backgroundColor: hex }} />
               ))}
