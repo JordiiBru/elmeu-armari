@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ColorPickers } from "@/components/ColorPickers";
 import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
 import { createGarmentAction } from "@/app/add/actions";
+import { shrinkForUpload } from "@/lib/image-client";
 import {
   CATEGORIES,
   FITS_BY_CATEGORY,
@@ -65,7 +66,7 @@ export function AddForm() {
       }
       setIsUploading(true);
       const fd = new FormData();
-      fd.append("file", imageFile);
+      fd.append("file", await shrinkForUpload(imageFile));
       try {
         const r = await fetch(`/api/garments/${newId}/image`, {
           method: "POST",
@@ -99,6 +100,44 @@ export function AddForm() {
   return (
     <form action={formAction} className="flex flex-col gap-7">
       {imageFile && <input type="hidden" name="_hasImage" value="1" />}
+
+      <Stack gap={3}>
+        <Text variant="caption" as="span">{tPhoto("label")}</Text>
+        {previewUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={previewUrl} alt={tPhoto("previewAlt")} className="w-32 h-32 object-cover" />
+        )}
+        <div className="flex items-center gap-4">
+          <TextButton
+            type="button"
+            tone="secondary"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {imageFile ? tPhoto("change") : tPhoto("add")}
+          </TextButton>
+          {imageFile && (
+            <TextButton
+              type="button"
+              tone="secondary"
+              onClick={() => {
+                setImageFile(null);
+                if (previewUrl) URL.revokeObjectURL(previewUrl);
+                setPreviewUrl(null);
+                if (fileInputRef.current) fileInputRef.current.value = "";
+              }}
+            >
+              {tPhoto("remove")}
+            </TextButton>
+          )}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+      </Stack>
 
       <Field label={t("category")} required>
         <Select
@@ -217,43 +256,6 @@ export function AddForm() {
         <Input id="notes" name="notes" placeholder={t("notesPlaceholder")} />
       </Field>
 
-      <Stack gap={3}>
-        <Text variant="caption" as="span">{tPhoto("label")}</Text>
-        {previewUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={previewUrl} alt={tPhoto("previewAlt")} className="w-32 h-32 object-cover" />
-        )}
-        <div className="flex items-center gap-4">
-          <TextButton
-            type="button"
-            tone="secondary"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {imageFile ? tPhoto("change") : tPhoto("add")}
-          </TextButton>
-          {imageFile && (
-            <TextButton
-              type="button"
-              tone="secondary"
-              onClick={() => {
-                setImageFile(null);
-                if (previewUrl) URL.revokeObjectURL(previewUrl);
-                setPreviewUrl(null);
-                if (fileInputRef.current) fileInputRef.current.value = "";
-              }}
-            >
-              {tPhoto("remove")}
-            </TextButton>
-          )}
-        </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-      </Stack>
 
       {uploadError && (
         <Text variant="small" italic className="font-serif border-t border-border-strong pt-3">

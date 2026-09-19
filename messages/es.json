@@ -150,6 +150,7 @@
     "saving": "guardando…",
     "saveChanges": "guardar cambios",
     "addColor": "+ añadir color",
+    "noColorYet": "todavía no hay ningún color",
     "removeColor": "eliminar"
   },
   "errors": {
