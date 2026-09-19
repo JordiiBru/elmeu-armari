@@ -311,7 +311,6 @@
     "goToArmari": "anar a l'armari",
     "goToRentar": "anar a rentar",
     "sheetLabel": "Outfit {title}",
-    "axisLabel": "Ordenar per",
     "axes": {
       "SHIRT": "samarretes",
       "PANTS": "pantalons",

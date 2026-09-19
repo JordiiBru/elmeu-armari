@@ -122,17 +122,20 @@ export function WearGrid({
   return (
     <Stack gap={5}>
       {accessories.length > 0 && (
-        <PickGrid>
-          {accessories.map((g) => (
-            <PickTile
-              key={g.id}
-              garment={g}
-              disabled={disabled}
-              selected={selectedExtras.has(g.id)}
-              onClick={() => onToggleExtra(g.id)}
-            />
-          ))}
-        </PickGrid>
+        <Stack gap={3}>
+          <Text variant="caption">{t("accessories")}</Text>
+          <PickGrid>
+            {accessories.map((g) => (
+              <PickTile
+                key={g.id}
+                garment={g}
+                disabled={disabled}
+                selected={selectedExtras.has(g.id)}
+                onClick={() => onToggleExtra(g.id)}
+              />
+            ))}
+          </PickGrid>
+        </Stack>
       )}
       {socks.length > 0 && (
         <Stack gap={3}>

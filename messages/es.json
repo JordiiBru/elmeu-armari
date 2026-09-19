@@ -311,7 +311,6 @@
     "goToArmari": "ir al armario",
     "goToRentar": "ir a lavar",
     "sheetLabel": "Outfit {title}",
-    "axisLabel": "Ordenar por",
     "axes": {
       "SHIRT": "camisetas",
       "PANTS": "pantalones",
