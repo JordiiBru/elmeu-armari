@@ -104,12 +104,15 @@ export function GarmentModal({
       mediaHeight="h-40"
       // The reason this modal replaced a whole screen: matching a piece
       // against Sanzo Wada is the app's centre of gravity, not a footnote
-      // to its swatches. Pinned, primary, and the widest thing here.
-      // "Eliminar" is pinned beside it rather than left at the bottom of
-      // the body — a piece with texture, pattern, several colours,
-      // several seasons and a note pushed it below the fold, and it is
-      // irreversible: the one action here that should never cost a
-      // scroll to reach.
+      // to its swatches. Pinned, full-width, and on its own row: it used
+      // to share a row with "eliminar", which meant a wide primary button
+      // and a short destructive one sat pressed right up against each
+      // other. "Editar" and "eliminar" are quieter, same-weight actions —
+      // they were never a pair to begin with, "editar" stranded at the
+      // bottom of the scrolling body and "eliminar" up here instead. Same
+      // row, same level, above the one action that actually needs the
+      // width. This was the model to reach for from the start, not
+      // something to patch in after the fact.
       footer={
         confirming ? (
           <div className="flex items-center justify-end gap-4">
@@ -133,26 +136,34 @@ export function GarmentModal({
             </TextButton>
           </div>
         ) : (
-          <div className="flex items-center gap-4">
-            <TextButton
-              type="button"
-              tone="danger"
-              onClick={() => setConfirming(true)}
-              className="flex-shrink-0 type-small"
-            >
-              {tCommon("delete")}
-            </TextButton>
+          <Stack gap={4}>
+            <div className="flex items-center justify-between gap-4">
+              <Link
+                href={`/edit/${garment.id}`}
+                className="inline-flex min-h-11 items-center font-serif italic type-small text-text-primary hover:text-text-secondary transition-colors"
+              >
+                {tCommon("edit")}
+              </Link>
+              <TextButton
+                type="button"
+                tone="danger"
+                onClick={() => setConfirming(true)}
+                className="type-small"
+              >
+                {tCommon("delete")}
+              </TextButton>
+            </div>
             {canCombine && (
               <Button
                 type="button"
                 size="lg"
                 onClick={() => runViewTransition(() => setCombineOpen(true))}
-                className="flex-1 justify-center"
+                className="w-full justify-center"
               >
                 {t("combine")}
               </Button>
             )}
-          </div>
+          </Stack>
         )
       }
       header={
@@ -232,15 +243,6 @@ export function GarmentModal({
           </Text>
         </Stack>
       )}
-
-      <div className="pt-4 border-t border-border">
-        <Link
-          href={`/edit/${garment.id}`}
-          className="font-serif italic type-small text-text-primary hover:text-text-secondary transition-colors"
-        >
-          {tCommon("edit")}
-        </Link>
-      </div>
     </Sheet>
   );
 }
