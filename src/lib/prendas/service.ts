@@ -31,7 +31,7 @@ export async function editGarment(id: string, data: GarmentInput) {
 
 /**
  * Ids reach the laundry screens from the client, so the washable filter
- * lives here and not only in the views: shoes, socks and accessories must
+ * lives here and not only in the views: shoes and accessories must
  * never end up with a `dirtySince`, whatever the caller sends.
  */
 async function washableIdsAmong(ids: string[]): Promise<string[]> {

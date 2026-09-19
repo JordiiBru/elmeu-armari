@@ -60,7 +60,7 @@ model WornEvent {
   /// derived from the row id and therefore never changes when replaced.
   updatedAt DateTime @default(now()) @updatedAt
   outfit   Outfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
-  /// Socks / accessories worn that day — what varies regardless of which
+  /// Accessories worn that day — what varies regardless of which
   /// outfit was picked. Shoes are part of the outfit itself now.
   garments WornEventGarment[]
 
@@ -82,7 +82,7 @@ model WornEventGarment {
 
 // A garment can be a normal wardrobe piece (matched against a palette,
 // see the colour engine) or a shoe (matched the same way, but never
-// required — a look can be complete without one). Socks and accessories
+// required — a look can be complete without one). Accessories
 // never appear here: they live on the day (WornEventGarment) instead,
 // since nobody picks a look around them.
 model OutfitGarment {
@@ -121,7 +121,6 @@ enum Category {
   SWEATER
   SHIRT
   PANTS
-  SOCKS
   SHOES
   ACCESSORI
 }

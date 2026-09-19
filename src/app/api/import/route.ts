@@ -14,6 +14,7 @@ import {
   CATEGORIES_WITH_OPTIONAL_COLOR,
 } from "@/lib/prendas/types";
 import { isHex } from "@/lib/prendas/validation";
+import { setAsideRemovedCategories } from "@/lib/prendas/import";
 import type { Category, Texture, Pattern, Season } from "@/lib/prendas/types";
 
 interface GarmentImport extends Record<string, unknown> {
@@ -131,7 +132,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "JSON invàlid" }, { status: 400 });
   }
 
-  const result = validate(body);
+  const { body: current, skipped } = setAsideRemovedCategories(body);
+  const result = validate(current);
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 422 });
 
   const garments = result.payload.garments;
@@ -168,5 +170,5 @@ export async function POST(req: NextRequest) {
   revalidatePath("/stats");
   revalidatePath("/settings");
 
-  return NextResponse.json({ imported });
+  return NextResponse.json({ imported, skipped });
 }

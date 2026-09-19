@@ -37,12 +37,13 @@ export function ImportForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = (await res.json()) as { imported?: number; error?: string };
+      const data = (await res.json()) as { imported?: number; skipped?: number; error?: string };
 
       if (!res.ok) {
         toast.show(data.error ?? t("unknownError"), "danger");
       } else {
         toast.show(t("success", { count: data.imported ?? 0 }), "success");
+        if (data.skipped) toast.show(t("skippedRemoved", { count: data.skipped }), "success");
         if (inputRef.current) inputRef.current.value = "";
         setFileName(null);
         router.refresh();

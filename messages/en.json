@@ -47,7 +47,6 @@
       "SWEATER": "Sweater",
       "SHIRT": "Shirt",
       "PANTS": "Trousers",
-      "SOCKS": "Socks",
       "SHOES": "Shoes",
       "ACCESSORI": "Accessory"
     },
@@ -78,10 +77,6 @@
       "BAGGY": "Baggy",
       "BARREL": "Barrel",
       "WIDE_LEG": "Wide Leg",
-      "CURT": "Short",
-      "TURMELL": "Ankle",
-      "MITJA_CANYA": "Mid-calf",
-      "GENOLLERA": "Knee",
       "LOW_TOP": "Low Top",
       "MID": "Mid",
       "HIGH_TOP": "High Top"
@@ -294,7 +289,6 @@
     "piecesJoin": " and ",
     "accessories": "accessories",
     "suggestedAccessories": "match this outfit",
-    "socks": "socks",
     "noAccessories": "no accessories saved.",
     "goToAdd": "add a garment",
     "wearToday": "I'll wear it",
@@ -421,6 +415,7 @@
       "submit": "import",
       "submitting": "importing…",
       "success": "{count, plural, one {# garment imported successfully.} other {# garments imported successfully.}}",
+      "skippedRemoved": "{count, plural, one {# garment from a category that no longer exists (socks) was skipped.} other {# garments from a category that no longer exists (socks) were skipped.}}",
       "unknownError": "Unknown error",
       "networkError": "Invalid file or network error."
     }

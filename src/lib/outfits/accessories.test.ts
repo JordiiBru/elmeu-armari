@@ -119,8 +119,8 @@ describe("suggestAccessories", () => {
   });
 
   it("only considers accessories, and nothing without a palette", () => {
-    const sock = garment("sock", "SOCKS", [RUST]);
-    expect(suggestAccessories(outfit, palette, [sock])).toEqual([]);
+    const notAnAccessory = garment("shoe", "SHOES", [RUST]);
+    expect(suggestAccessories(outfit, palette, [notAnAccessory])).toEqual([]);
     expect(suggestAccessories(outfit, null, [garment("belt", "ACCESSORI", [RUST])])).toEqual([]);
   });
 });

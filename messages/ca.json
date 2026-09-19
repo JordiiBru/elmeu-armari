@@ -47,7 +47,6 @@
       "SWEATER": "Jersei",
       "SHIRT": "Samarreta",
       "PANTS": "Pantalons",
-      "SOCKS": "Mitjons",
       "SHOES": "Sabates",
       "ACCESSORI": "Accessori"
     },
@@ -78,10 +77,6 @@
       "BAGGY": "Baggy",
       "BARREL": "Barrel",
       "WIDE_LEG": "Wide Leg",
-      "CURT": "Curt",
-      "TURMELL": "Turmell",
-      "MITJA_CANYA": "Mitja canya",
-      "GENOLLERA": "Genollera",
       "LOW_TOP": "Low Top",
       "MID": "Mid",
       "HIGH_TOP": "High Top"
@@ -294,7 +289,6 @@
     "piecesJoin": " i ",
     "accessories": "accessoris",
     "suggestedAccessories": "combinen amb aquest outfit",
-    "socks": "mitjons",
     "noAccessories": "cap accessori desat.",
     "goToAdd": "afegir una peça",
     "wearToday": "Me'l poso",
@@ -421,6 +415,7 @@
       "submit": "importar",
       "submitting": "important…",
       "success": "{count, plural, one {# peça importada correctament.} other {# peces importades correctament.}}",
+      "skippedRemoved": "{count, plural, one {# peça d'una categoria que ja no existeix (mitjons) s'ha ignorat.} other {# peces d'una categoria que ja no existeix (mitjons) s'han ignorat.}}",
       "unknownError": "Error desconegut",
       "networkError": "Fitxer invàlid o error de xarxa."
     }

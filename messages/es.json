@@ -47,7 +47,6 @@
       "SWEATER": "Jersey",
       "SHIRT": "Camiseta",
       "PANTS": "Pantalones",
-      "SOCKS": "Calcetines",
       "SHOES": "Zapatos",
       "ACCESSORI": "Accesorio"
     },
@@ -78,10 +77,6 @@
       "BAGGY": "Baggy",
       "BARREL": "Barrel",
       "WIDE_LEG": "Wide Leg",
-      "CURT": "Corto",
-      "TURMELL": "Tobillo",
-      "MITJA_CANYA": "Media caña",
-      "GENOLLERA": "Rodilla",
       "LOW_TOP": "Low Top",
       "MID": "Mid",
       "HIGH_TOP": "High Top"
@@ -294,7 +289,6 @@
     "piecesJoin": " y ",
     "accessories": "accesorios",
     "suggestedAccessories": "combinan con este outfit",
-    "socks": "calcetines",
     "noAccessories": "ningún accesorio guardado.",
     "goToAdd": "añadir una prenda",
     "wearToday": "Me lo pongo",
@@ -421,6 +415,7 @@
       "submit": "importar",
       "submitting": "importando…",
       "success": "{count, plural, one {# prenda importada correctamente.} other {# prendas importadas correctamente.}}",
+      "skippedRemoved": "{count, plural, one {# prenda de una categoría que ya no existe (calcetines) se ha ignorado.} other {# prendas de una categoría que ya no existe (calcetines) se han ignorado.}}",
       "unknownError": "Error desconocido",
       "networkError": "Fichero inválido o error de red."
     }

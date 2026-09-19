@@ -67,27 +67,7 @@ describe("engine", () => {
       expect(groups).toHaveLength(0);
     });
 
-    it("excludes socks from outfit generation", () => {
-      const shirt = createTestGarment("1", "SHIRT", [RUST]);
-      const sock = createTestGarment("2", "SOCKS", [TEAL]);
-      const pants = createTestGarment("3", "PANTS", [TEAL]);
-      const shoe = createTestGarment("4", "SHOES", [SHOE_FOR_RUST_TEAL]);
-
-      const { groups } = generateOutfitGroups([shirt, sock, pants, shoe], palettes);
-
-      const hasShirtAndPants = groups.some((g) => {
-        const cats = g.garments.map((gar) => gar.category);
-        return cats.includes("SHIRT") && cats.includes("PANTS") && !cats.includes("SOCKS");
-      });
-      expect(hasShirtAndPants).toBe(true);
-
-      const outfitWithSocks = groups.some((g) =>
-        g.garments.some((gar) => gar.category === "SOCKS"),
-      );
-      expect(outfitWithSocks).toBe(false);
-    });
-
-    it("never puts an extra category (socks, accessories) in a group", () => {
+    it("never puts an extra category (accessories) in a group", () => {
       // Every extra category, coloured to match the outfit it sits next
       // to, so the only thing keeping it out is the exclusion itself.
       const extras = [...EXTRA_CATEGORIES].map((c, i) =>
