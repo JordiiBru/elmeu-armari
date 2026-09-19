@@ -108,6 +108,7 @@ Individual gates: `npm run lint`, `npm run typecheck`, `npm run build`. `npm run
 
 - Perceptual distance is computed in **OKLCH** (`src/lib/outfits/color-matching.ts`). Do not switch to sRGB / HSL / hex distance without reading the neutral-handling section first — the OKLCH hue channel collapses near neutrals and a naive implementation makes greys "match" browns.
 - Palette matching thresholds live in the same file as named constants. Tune them together, not one in isolation.
+- **Judge the snap against `src/lib/outfits/anchor-reference.ts`, not by eye.** `anchorFor(hex)` (exported from `engine.ts`) is the anchor a garment colour is displayed as; the reference set pairs about 80 hexes (the real wardrobe plus synthetic khakis, camels, taupes, charcoals, navies, denims and off-whites) with the Sanzo names a person would accept. A case the engine still gets wrong carries `failsToday` with the measured reason and runs as `it.fails`: fixing the engine turns it red until the flag is removed. Add a case there when a real colour snaps somewhere odd, before touching a threshold.
 
 ## Photos
 

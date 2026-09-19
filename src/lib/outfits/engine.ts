@@ -177,6 +177,17 @@ function snapColour(hex: string): Snap | null {
   );
 }
 
+/**
+ * The canonical colour a garment hex is displayed as: the nearest of
+ * its plausible readings, or `null` when the colour is outside the
+ * Sanzo Wada vocabulary. Exported so the reference set in
+ * `anchor-reference.ts` can judge the snap without going through a
+ * whole outfit.
+ */
+export function anchorFor(hex: string): Candidate | null {
+  return snapColour(hex)?.best ?? null;
+}
+
 function intersectSets(sets: Set<number>[]): Set<number> {
   if (sets.length === 0) return new Set();
   let smallestIdx = 0;
