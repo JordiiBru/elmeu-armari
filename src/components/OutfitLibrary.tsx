@@ -36,9 +36,15 @@ const FILTERS: Filter[] = ["ALL", "SWEATER", "SHIRT", "PANTS", "SHOES"];
  * one continuous row of chips. Serif italic against sans-serif caps is
  * the same pairing the rest of the app already uses for a quiet label
  * over a louder value. */
-function FilterLabel({ children }: { children: React.ReactNode }) {
+function FilterLabel({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <Text variant="small" italic tone="secondary" className="font-serif">
+    <Text variant="small" italic tone="secondary" className={`font-serif ${className ?? ""}`}>
       {children}
     </Text>
   );
@@ -207,7 +213,13 @@ export function OutfitLibrary({
           what actually looks right. */}
       <div className="flex flex-wrap items-start sm:items-end justify-between gap-4">
         <Stack gap={1}>
-          <FilterLabel>{t("categoryFilterLabel")}</FilterLabel>
+          {/* Read fine beside a single line of chips; next to five
+              stacked 44px rows on a phone the same small caption looked
+              like a mislabelled afterthought sitting over something much
+              louder than it. "ELS TEUS OUTFITS" right above already
+              frames the section — the category names underneath don't
+              need a second label to say what they are. */}
+          <FilterLabel className="hidden sm:block">{t("categoryFilterLabel")}</FilterLabel>
           <SegmentedControl<Filter>
             value={filter}
             onChange={setFilter}
