@@ -203,30 +203,29 @@ export function OutfitLibrary({
 
   return (
     <Stack gap={6}>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <Stack gap={1} className="min-w-0">
+      {/* Column and horizontal scroll both tried and dropped: a column
+          cost too much height (five rows to read past before the
+          mosaic starts), scrolling hid half the options off-screen at
+          all times. A three-column grid gives two balanced rows
+          instead of either — nothing off-screen, nothing stranded
+          alone on its own line. "descobreix" centres under it on a
+          phone rather than floating to one side of a two-row block;
+          sm: and up it goes back to sitting beside a single line. */}
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <Stack gap={1} className="w-full min-w-0 sm:w-auto">
           <FilterLabel>{t("categoryFilterLabel")}</FilterLabel>
-          {/* A column ("sabates" and friends stacked one per line) tried
-              first and cost too much height for what it solved — five
-              44px rows to read past before the mosaic itself even
-              starts. Horizontal scroll instead, the same move discover's
-              own axis tabs already make: one line, nothing wraps into an
-              edge-to-edge row with an orphan under it, and the options
-              past the fold are one swipe away rather than a scroll down. */}
-          <div className="overflow-x-auto">
-            <SegmentedControl<Filter>
-              value={filter}
-              onChange={setFilter}
-              ariaLabel={t("filtersLabel")}
-              wrap={false}
-              options={FILTERS.map((f) => ({
-                value: f,
-                label: f === "ALL" ? t("filterAll") : t(`axes.${f}`),
-              }))}
-            />
-          </div>
+          <SegmentedControl<Filter>
+            value={filter}
+            onChange={setFilter}
+            ariaLabel={t("filtersLabel")}
+            grid
+            options={FILTERS.map((f) => ({
+              value: f,
+              label: f === "ALL" ? t("filterAll") : t(`axes.${f}`),
+            }))}
+          />
         </Stack>
-        {discoverButton}
+        <div className="self-center sm:self-auto">{discoverButton}</div>
       </div>
 
       <div className="flex flex-wrap items-end gap-x-10 gap-y-4">
