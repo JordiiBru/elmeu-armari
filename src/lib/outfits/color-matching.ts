@@ -19,44 +19,108 @@ export const OKLCH_TIGHT_MATCH_THRESHOLD = 9;
 export const MAX_EXTRA_PALETTES = 4;
 
 /**
- * Un color amb chroma per sota d'aixo es considera neutre (blanc/negre/gris/beige apagat).
- * En OKLCH, la distancia de hue es ponderada per la chroma mitjana:
- *   dH = 2 * avgC * sin(dHue / 2)
- * Amb un dels dos colors neutre, avgC ~ 0 i la hue no penalitza gairebe res —
- * un gris queda a distancia moderada d'un marro o oliva de la mateixa
- * lluminositat, tot i ser visualment molt diferents. Per evitar-ho, exigim
- * que els neutres matchegin nomes amb altres neutres.
+ * Chroma at which a colour stops reading as grey. Greyness is continuous:
+ * 1 at chroma 0, falling linearly to 0 here, so there is no line to
+ * cross. Pickers and photos give tinted greys (a charcoal at C 0.006, a
+ * khaki chino at 0.032), which is why the scale is this small: a piece
+ * at 0.03 already has a hue people name.
  */
-/**
- * Els usuaris trien colors amb un picker: rarament seleccionaran valors
- * super saturats. Un "verd" real pot acabar a chroma 0.05-0.08, un beige
- * viu a 0.04. Un llindar generos de neutralitat evita que aquests colors
- * pateixin el bug de matcher-hue-per-chroma-baixa i que un beige apagat
- * es tracti diferent d'un gris.
- */
-export const NEUTRAL_CHROMA_THRESHOLD = 0.05;
+export const GREY_CHROMA = 0.03;
 
 /**
- * Multiplicador aplicat a la distancia quan un color es neutre i l'altre no.
- * Un gris (C~0) i un marro fosc (C~0.05) de la mateixa lluminositat tenen
- * distancia OKLCH baixa per artefacte matematic (avgC ~ 0 → dH ~ 0). Aplicar
- * aquest multiplicador els empeny per sobre del threshold general.
+ * Multiplier on the distance when one colour is grey and the other is
+ * not, scaled by how different their greyness is. A grey (C~0) and a
+ * dark brown (C~0.05) of the same lightness are close in OKLCH because
+ * the hue term collapses near neutrals; this pushes them apart, and
+ * does it gradually instead of at a chroma line.
  */
-export const NEUTRAL_MISMATCH_PENALTY = 1.6;
+export const NEUTRAL_MISMATCH_PENALTY = 3;
 
-export function isNeutralHex(hex: string): boolean {
-  return hexToOklch(hex).C < NEUTRAL_CHROMA_THRESHOLD;
+/**
+ * The same penalty towards a grey-ramp rung. Milder, because the lightness
+ * slack already keeps a hued piece from riding a rung far.
+ */
+export const RUNG_MISMATCH_PENALTY = 2;
+
+/**
+ * Hue differences between two dull colours are tiny in OKLCH (the hue
+ * term is weighted by chroma), yet a beige and a cyan-grey look nothing
+ * alike. The chroma that weights the hue term never drops below this
+ * floor, and the term is scaled up a little (`HUE_WEIGHT`) because a
+ * wrong hue reads louder than a lightness or chroma error of equal size.
+ */
+export const HUE_CHROMA_FLOOR = 0.06;
+export const HUE_WEIGHT = 1.5;
+
+/**
+ * The hue of a nearly grey colour is noise (one step in a channel swings
+ * it by tens of degrees), so the hue term fades in with the chroma of
+ * the *duller* colour and is fully on from here.
+ */
+export const HUE_CONFIDENCE_CHROMA = 0.02;
+
+/**
+ * Share of a grey-ramp rung's lightness slack that survives however
+ * hued the piece is. Without it a very dark tinted red (`#180808`) is
+ * too far from Black for the slack to reach, and the garment drops out
+ * of the vocabulary altogether.
+ */
+export const RUNG_SLACK_FLOOR = 0.3;
+
+function clamp01(x: number): number {
+  return Math.min(1, Math.max(0, x));
+}
+
+/** 1 for a grey, 0 once the chroma reaches `GREY_CHROMA`. */
+export function greyness(chroma: number): number {
+  return clamp01(1 - chroma / GREY_CHROMA);
 }
 
 /**
- * Distancia perceptual amb penalitzacio si un color es neutre i l'altre no.
- * Usa aixo en lloc de `oklchDistance` per matching peça-paleta.
+ * Perceptual distance between a colour and another one, the single
+ * measure the engine snaps with: OKLab lightness and chroma, a hue term
+ * with a chroma floor that fades out near grey, and a mismatch penalty
+ * that is continuous in chroma. Symmetric, except with `rungSlack`,
+ * where the second colour plays the anchor.
+ *
+ * `rungSlack` says the second colour is a rung of the grey ramp (Black,
+ * White, the Sanzo greys): the first colour may then differ from it in
+ * lightness by up to that much for free, scaled by how grey the first
+ * one is (never below `RUNG_SLACK_FLOOR` of it), and the rung counts as
+ * fully grey for the mismatch penalty. Sanzo Wada
+ * has no dark or mid grey, so without the slack a charcoal shirt has no
+ * anchor at all. Slack is in OKLab L units (0.4 is 40 points).
  */
-export function perceptualDistance(hex1: string, hex2: string): number {
-  const raw = oklchDistance(hex1, hex2);
-  return isNeutralHex(hex1) !== isNeutralHex(hex2)
-    ? raw * NEUTRAL_MISMATCH_PENALTY
-    : raw;
+export function perceptualDistance(hex1: string, hex2: string, rungSlack?: number): number {
+  const c1 = hexToOklch(hex1);
+  const c2 = hexToOklch(hex2);
+
+  const slack =
+    rungSlack === undefined ? 0 : rungSlack * Math.max(RUNG_SLACK_FLOOR, greyness(c1.C));
+  const dL = Math.max(0, Math.abs(c1.L - c2.L) - slack) * 100;
+  const dC = (c1.C - c2.C) * 100;
+
+  let dh = c1.h - c2.h;
+  if (dh > 180) dh -= 360;
+  if (dh < -180) dh += 360;
+  const avgC = (c1.C + c2.C) / 2;
+  const confidence = clamp01(Math.min(c1.C, c2.C) / HUE_CONFIDENCE_CHROMA);
+  const dH =
+    HUE_WEIGHT *
+    2 *
+    Math.max(avgC, HUE_CHROMA_FLOOR) *
+    100 *
+    Math.sin((dh * Math.PI) / 360) *
+    confidence;
+
+  const raw = Math.sqrt(dL * dL + dC * dC + dH * dH);
+  // A rung is a grey by definition, whatever tint the catalogue gave it,
+  // so the mismatch is how hued the piece is.
+  const [penalty, otherGreyness] =
+    rungSlack === undefined
+      ? [NEUTRAL_MISMATCH_PENALTY, greyness(c2.C)]
+      : [RUNG_MISMATCH_PENALTY, 1];
+  return raw * (1 + (penalty - 1) * Math.abs(greyness(c1.C) - otherGreyness));
 }
 
 interface OKLCH {

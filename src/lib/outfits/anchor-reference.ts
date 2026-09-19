@@ -26,6 +26,9 @@ export interface AnchorCase {
 }
 
 // Families, so a list reads as "any of these" instead of repeating names.
+// Sanzo Wada has no taupe: a dull warm grey-brown that far from every
+// canonical is better left outside the vocabulary than pinned to a blue.
+export const OUTSIDE = "(outside the vocabulary)";
 const NAVY = ["Dark Tyrian Blue", "Deep Indigo", "Dull Violet Black"];
 const DARK_BROWN = ["Vandyke Brown", "Mars Brown / Tobacco", "Pale Raw Umber", "Sepia"];
 const BROWN_OLIVE = [
@@ -76,36 +79,24 @@ export const WARDROBE_CASES: AnchorCase[] = [
   wardrobe("#ffffff", "white", ["White"]),
   wardrobe("#0f164d", "midnight navy", NAVY),
   wardrobe("#102b96", "royal blue", ["Violet Blue", "Vandar Poel's Blue"]),
-  wardrobe("#3a2921", "dark brown", DARK_BROWN,
-    "snaps to Deep Slate Olive (a green); Vandyke Brown is closer over the whole catalogue",
-  ),
-  wardrobe("#726052", "khaki chino", BROWN_OLIVE,
-    "snaps to Deep Violet / Plumbeous (a blue-grey): the quasi-neutral branch has no warm canonical",
-  ),
-  wardrobe("#736251", "khaki cargo", BROWN_OLIVE,
-    "snaps to Deep Violet / Plumbeous (a blue-grey): the quasi-neutral branch has no warm canonical",
-  ),
+  wardrobe("#3a2921", "dark brown", DARK_BROWN),
+  wardrobe("#726052", "khaki chino", BROWN_OLIVE),
+  wardrobe("#736251", "khaki cargo", BROWN_OLIVE),
   wardrobe("#7f8183", "mid grey trousers", MID_GREY),
   wardrobe("#d9cab8", "beige trousers", WARM_LIGHT,
-    "snaps to Neutral Gray (a cyan grey): the quasi-neutral branch has no warm canonical",
+    "snaps to Light Pinkish Cinnamon (a peach, chroma 0.09 against 0.03): a near tie with Ivory Buff and Ecru",
   ),
   wardrobe("#1b2c50", "navy", NAVY),
   wardrobe("#1c2f26", "black-green", ["Deep Slate Green", "Deep Slate Olive", "Blackish Olive"]),
-  wardrobe("#524f52", "dark grey", ["Black"],
-    "snaps to Warm Gray, a light green-grey, at distance 31: greys have no threshold",
-  ),
+  wardrobe("#524f52", "dark grey", ["Black"]),
   wardrobe("#546779", "slate blue", SLATE_BLUE),
-  wardrobe("#5d5d5f", "dark grey", ["Black"],
-    "snaps to Warm Gray, a light green-grey, at distance 27: greys have no threshold",
-  ),
+  wardrobe("#5d5d5f", "dark grey", ["Black"]),
   wardrobe("#c2d3c0", "pale sage", [
     ...LIGHT_GREY,
     "Dark Greenish Glaucous",
     "Glaucous Green",
   ]),
-  wardrobe("#d8ccb7", "beige shirt", WARM_LIGHT,
-    "snaps to Neutral Gray (a cyan grey): the quasi-neutral branch has no warm canonical",
-  ),
+  wardrobe("#d8ccb7", "beige shirt", WARM_LIGHT),
   wardrobe("#dad1cb", "light warm grey", ["White", "Seashell Pink", "Neutral Gray"]),
   wardrobe("#f9da82", "butter yellow", ["Ivory Buff", "Naples Yellow", "Cinnamon Buff"]),
   wardrobe("#121b3b", "ink navy", NAVY),
@@ -123,19 +114,13 @@ export const WARDROBE_CASES: AnchorCase[] = [
 // The colours a wardrobe like this one is likely to grow: the
 // neutrals and earth tones the engine has the most trouble with.
 export const SYNTHETIC_CASES: AnchorCase[] = [
-  synthetic("#c3b091", "khaki", ["Ecru", "Ivory Buff"],
-    "snaps to Fawn (a pink) although Ecru is 1 away: Ecru sits just past the 0.05 chroma cliff",
-  ),
+  synthetic("#c3b091", "khaki", ["Ecru", "Ivory Buff"]),
   synthetic("#8a7d55", "olive khaki", [...BROWN_OLIVE, "Dark Citrine"]),
   synthetic("#a89a78", "greige khaki", ["Ecru", "Isabella Color", "Light Grayish Olive", "Maple"]),
   synthetic("#c19a6b", "camel", ["Maple", "Isabella Color", "Ochraceous Salmon"]),
   synthetic("#b48a5a", "dark camel", ["Maple", "Khaki", "Isabella Color"]),
-  synthetic("#8b7d72", "taupe", ["Light Brownish Olive", "Light Grayish Olive", "Warm Gray", "Pale Raw Umber"],
-    "snaps to Deep Violet / Plumbeous (a blue-grey): the quasi-neutral branch has no warm canonical",
-  ),
-  synthetic("#483c32", "dark taupe", DARK_BROWN,
-    "snaps to Slate Color (a blue): the quasi-neutral branch has no warm canonical",
-  ),
+  synthetic("#8b7d72", "taupe", [OUTSIDE, "Light Brownish Olive", "Light Grayish Olive", "Warm Gray", "Pale Raw Umber"]),
+  synthetic("#483c32", "dark taupe", DARK_BROWN),
   synthetic("#b8a99a", "light taupe", ["Ecru", "Warm Gray", "Light Brown Drab"]),
   synthetic("#36454f", "blue charcoal", CHARCOAL_SLATE),
   synthetic("#3b3b3d", "charcoal", ["Black"]),
@@ -145,18 +130,14 @@ export const SYNTHETIC_CASES: AnchorCase[] = [
   synthetic("#1f2a44", "navy", NAVY),
   synthetic("#0b1f3a", "deep navy", NAVY),
   synthetic("#14213d", "night navy", NAVY),
-  synthetic("#4a6fa5", "denim", ["Deep Violet / Plumbeous", "Olympic Blue"],
-    "snaps to Antwarp Blue (a cyan, hue 215 against 258) instead of a blue-grey or Olympic Blue",
-  ),
+  synthetic("#4a6fa5", "denim", ["Deep Violet / Plumbeous", "Olympic Blue"]),
   synthetic("#2e4a6b", "dark denim", [
     "Vandar Poel's Blue",
     "Slate Color",
     "Dark Tyrian Blue",
     "Deep Violet / Plumbeous",
   ]),
-  synthetic("#6b8cae", "washed denim", ["Deep Violet / Plumbeous", "Olympic Blue", "Salvia Blue"],
-    "snaps to Antwarp Blue (a cyan, hue 215 against 250) instead of a blue-grey or Olympic Blue",
-  ),
+  synthetic("#6b8cae", "washed denim", ["Deep Violet / Plumbeous", "Olympic Blue", "Salvia Blue"]),
   synthetic("#6d1f2b", "burgundy", BURGUNDY),
   synthetic("#800020", "bordeaux", BURGUNDY),
   synthetic("#4a0e1a", "dark burgundy", [...BURGUNDY, "Violet Carmine", "Mars Brown / Tobacco"]),
@@ -180,6 +161,7 @@ export const SYNTHETIC_CASES: AnchorCase[] = [
   synthetic("#e8e8e8", "pale grey", ["White", "Neutral Gray"]),
   synthetic("#9a9a9a", "mid grey", LIGHT_GREY),
   synthetic("#6e6e6e", "grey", MID_GREY),
+  synthetic("#180808", "near-black maroon", ["Black", "Mars Brown / Tobacco", "Madder Brown"]),
   synthetic("#1a1a1a", "soft black", ["Black", "Deep Slate Green", "Deep Slate Olive"]),
 ];
 

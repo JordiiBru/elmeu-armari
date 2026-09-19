@@ -1,43 +1,33 @@
 import { describe, it, expect } from "vitest";
 import {
-  isNeutralHex,
+  greyness,
   hexToOklch,
   oklchDistance,
   perceptualDistance,
-  NEUTRAL_CHROMA_THRESHOLD,
+  GREY_CHROMA,
   OKLCH_DISTANCE_THRESHOLD,
-  NEUTRAL_MISMATCH_PENALTY,
 } from "@/lib/outfits/color-matching";
+import { anchorFor } from "@/lib/outfits/engine";
 import { namedColors } from "@/lib/colors";
 
-// ── isNeutralHex ──────────────────────────────────────────────────────────────
+// ── greyness ──────────────────────────────────────────────────────────────────
 
-describe("isNeutralHex", () => {
-  it("black is neutral", () => {
-    expect(isNeutralHex("#000000")).toBe(true);
+describe("greyness", () => {
+  it("black, white and pure grey read as grey", () => {
+    for (const hex of ["#000000", "#ffffff", "#808080"]) {
+      expect(greyness(hexToOklch(hex).C)).toBeGreaterThan(0.95);
+    }
   });
 
-  it("white is neutral", () => {
-    expect(isNeutralHex("#ffffff")).toBe(true);
+  it("vivid colours are not grey at all", () => {
+    for (const hex of ["#ff0000", "#0000ff"]) {
+      expect(greyness(hexToOklch(hex).C)).toBe(0);
+    }
   });
 
-  it("pure grey is neutral", () => {
-    expect(isNeutralHex("#808080")).toBe(true);
-  });
-
-  it("vivid red is not neutral", () => {
-    expect(isNeutralHex("#ff0000")).toBe(false);
-  });
-
-  it("vivid blue is not neutral", () => {
-    expect(isNeutralHex("#0000ff")).toBe(false);
-  });
-
-  it("boundary: chroma exactly at threshold reads as saturated", () => {
-    // Any hex whose OKLCH C is >= NEUTRAL_CHROMA_THRESHOLD is not neutral.
-    // Verify the constant is exported and the function respects it.
-    const c = hexToOklch("#808080").C;
-    expect(c).toBeLessThan(NEUTRAL_CHROMA_THRESHOLD);
+  it("falls to zero exactly at GREY_CHROMA, with no step before it", () => {
+    expect(greyness(GREY_CHROMA)).toBe(0);
+    expect(greyness(GREY_CHROMA - 0.0005)).toBeLessThan(0.05);
   });
 });
 
@@ -99,54 +89,44 @@ describe("oklchDistance", () => {
   });
 });
 
-// ── perceptualDistance (neutral-mismatch penalty) ─────────────────────────────
+// ── perceptualDistance ────────────────────────────────────────────────────────
 
 describe("perceptualDistance", () => {
-  it("neutral vs neutral: no penalty (matches oklchDistance)", () => {
-    const a = "#000000";
-    const b = "#808080";
-    expect(perceptualDistance(a, b)).toBeCloseTo(oklchDistance(a, b), 8);
+  it("is 0 for the same colour", () => {
+    expect(perceptualDistance("#3a7bd5", "#3a7bd5")).toBe(0);
   });
 
-  it("saturated vs saturated: no penalty", () => {
-    const a = "#e74c3c";
-    const b = "#3498db";
-    expect(perceptualDistance(a, b)).toBeCloseTo(oklchDistance(a, b), 8);
+  it("two greys stay close", () => {
+    expect(perceptualDistance("#808080", "#909090")).toBeLessThan(OKLCH_DISTANCE_THRESHOLD);
   });
 
-  it("neutral vs saturated: penalty applied", () => {
-    const neutral = "#808080";
-    const saturated = "#e74c3c";
-    const raw = oklchDistance(neutral, saturated);
-    const penalised = perceptualDistance(neutral, saturated);
-    expect(penalised).toBeCloseTo(raw * NEUTRAL_MISMATCH_PENALTY, 5);
-    expect(penalised).toBeGreaterThan(raw);
-  });
-
-  it("penalty pushes grey+brown past OKLCH_DISTANCE_THRESHOLD", () => {
-    // Without penalty, mathematically similar-lightness neutrals + desaturated
-    // browns could slip under the threshold and match incorrectly.
+  it("grey vs saturated: pushed above the raw OKLCH distance", () => {
     const grey = "#808080";
-    const desaturatedBrown = "#8b7355";
-    const penalised = perceptualDistance(grey, desaturatedBrown);
-    // If the penalty is working, this should be > threshold or at least > raw.
-    expect(penalised).toBeGreaterThan(oklchDistance(grey, desaturatedBrown));
+    const saturated = "#e74c3c";
+    expect(perceptualDistance(grey, saturated)).toBeGreaterThan(oklchDistance(grey, saturated));
+  });
+
+  it("a grey is not the same anchor as a brown of the same lightness", () => {
+    const grey = anchorFor("#808080");
+    const desaturatedBrown = anchorFor("#8b7355");
+    expect(grey?.canonical.name).not.toBe(desaturatedBrown?.canonical.name);
+    const brownish = ["Sepia", "Vandyke Brown", "Pale Raw Umber", "Light Brownish Olive", "Maple"];
+    expect(brownish).not.toContain(grey?.canonical.name);
   });
 });
 
 // ── Sanzo Wada snapping invariants ───────────────────────────────────────────
 
 describe("Sanzo Wada canonical catalogue", () => {
-  it("Plumbeous (#5c7287) is quasi-neutral, not achromatic — protects grey snapping", () => {
-    // Plumbeous is a low-chroma blue-grey (C≈0.042).
-    // The engine comment warns about it: "technically low-chroma but clearly hued."
-    // It's quasi-neutral (0.02 ≤ C < 0.05) so it snaps among neutrals,
-    // but pure achromatic greys (C < 0.02) snap only within GREY_FAMILY_HEXES
-    // which explicitly excludes Plumbeous.
+  it("Plumbeous (#5c7287) is hued, not a rung of the grey ramp — protects grey snapping", () => {
+    // Plumbeous is a low-chroma blue-grey (C≈0.042): technically dull,
+    // clearly hued. A grey piece must not anchor to it, whatever its
+    // lightness, so it reads as fully hued and earns no lightness slack.
     const { C } = hexToOklch("#5c7287");
-    const ACHROMATIC_CHROMA = 0.02;
-    expect(C).toBeGreaterThan(ACHROMATIC_CHROMA);   // not achromatic
-    expect(C).toBeLessThan(NEUTRAL_CHROMA_THRESHOLD); // quasi-neutral
+    expect(greyness(C)).toBe(0);
+    for (const grey of ["#5d5d5f", "#6e6e6e", "#7f8183"]) {
+      expect(anchorFor(grey)?.canonical.name).not.toBe("Deep Violet / Plumbeous");
+    }
   });
 
   it("all named canonical hexes are valid 6-digit hex strings", () => {

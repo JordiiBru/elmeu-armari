@@ -4,35 +4,26 @@ import { namedColors } from "@/lib/colors";
 import type { NamedColor } from "@/lib/colors";
 import {
   perceptualDistance,
-  oklchDistance,
-  isNeutralHex,
-  hexToOklch,
   OKLCH_DISTANCE_THRESHOLD,
   OKLCH_TIGHT_MATCH_THRESHOLD,
   MAX_EXTRA_PALETTES,
 } from "./color-matching";
 
-// Sanzo Wada has no true achromatic grey: only Black and White are
-// C=0. Warm Gray, Neutral Gray, Fawn and Mineral Gray all carry a
-// small green / pink / cyan tint (C between 0.02 and 0.05). This
-// whitelist is the set of canonical hexes that read as "grey" to a
-// human — the set from which we choose an anchor for any garment
-// whose colour is very close to achromatic. Explicitly excludes
-// Plumbeous (#5c7287, blue), Slate Color and the deep slates, which
-// are technically low-chroma but clearly hued.
-const GREY_FAMILY_HEXES = new Set([
-  "#000000", // Black
-  "#ffffff", // White
-  "#9cb29e", // Warm Gray
-  "#b5d1cc", // Neutral Gray
-  "#9fc2b2", // Mineral Gray
-  "#d1b0b3", // Fawn
+// Sanzo Wada has no dark or mid grey: Black, White and three light greys
+// tinted green or cyan (C 0.03 to 0.04) are all there is. These are the
+// rungs of the grey ramp, and the number is how far, in OKLab L, a grey
+// piece may sit from the rung and still read as it. A charcoal shirt is
+// black to anyone dressing, hence 0.4 for Black; the light greys stretch
+// less; White barely, because a light grey has a real grey to go to.
+// Fawn (a pink), Plumbeous (blue) and the deep slates are not rungs:
+// they are hued, and a grey earns no slack towards them.
+const GREY_RUNGS = new Map<string, number>([
+  ["#000000", 0.4], // Black
+  ["#ffffff", 0.05], // White
+  ["#9cb29e", 0.15], // Warm Gray
+  ["#b5d1cc", 0.15], // Neutral Gray
+  ["#9fc2b2", 0.15], // Mineral Gray
 ]);
-
-const ACHROMATIC_CHROMA = 0.02;
-function isAchromatic(hex: string): boolean {
-  return hexToOklch(hex).C < ACHROMATIC_CHROMA;
-}
 
 /**
  * Outfit engine — canonical + intersection.
@@ -45,11 +36,10 @@ function isAchromatic(hex: string): boolean {
  *
  * Matching algorithm:
  *
- *   1. Snap every garment colour to its nearest canonical (OKLCH
- *      perceptual distance, uses the neutral-vs-saturated penalty
- *      from color-matching.ts). A colour beyond
- *      OKLCH_DISTANCE_THRESHOLD from every canonical takes the
- *      garment out of the vocabulary.
+ *   1. Snap every garment colour to its nearest canonical, with the one
+ *      continuous `perceptualDistance` from color-matching.ts. Every
+ *      canonical within OKLCH_DISTANCE_THRESHOLD is a candidate; a
+ *      colour with none takes the garment out of the vocabulary.
  *   2. A garment "lives in" the intersection of the `combinations`
  *      sets of its snapped canonicals — the palettes that contain
  *      every colour of the piece.
@@ -123,58 +113,20 @@ interface Ctx {
   totalDistance: number;
 }
 
-function collectCandidates(
-  hex: string,
-  filter: (c: NamedColor) => boolean,
-  distanceOf: (c: NamedColor) => number,
-  threshold: number,
-): Snap | null {
+function snapColour(hex: string): Snap | null {
+  // One measure for every colour, no branches by chroma: a piece the
+  // engine cannot place is one that sits beyond the threshold from
+  // every canonical, greys included. All the plausible readings are
+  // kept, so the piece belongs to any palette containing any of them;
+  // the nearest stays as the display anchor.
   const found: Candidate[] = [];
-  for (const c of namedColors) {
-    if (!filter(c)) continue;
-    const d = distanceOf(c);
-    if (d < threshold) found.push({ canonical: c, distance: d });
+  for (const canonical of namedColors) {
+    const distance = perceptualDistance(hex, canonical.hex, GREY_RUNGS.get(canonical.hex));
+    if (distance < OKLCH_DISTANCE_THRESHOLD) found.push({ canonical, distance });
   }
   if (found.length === 0) return null;
   found.sort((a, b) => a.distance - b.distance);
   return { best: found[0], candidates: found };
-}
-
-function snapColour(hex: string): Snap | null {
-  // Achromatic pieces snap only within the grey family whitelist, so
-  // a pure grey never routes through Plumbeous (blue) or Deep Slate
-  // (green). No perceptual threshold — the nearest grey-family entry
-  // always wins.
-  if (isAchromatic(hex)) {
-    return collectCandidates(
-      hex,
-      (c) => GREY_FAMILY_HEXES.has(c.hex.toLowerCase()),
-      (c) => oklchDistance(hex, c.hex),
-      Infinity,
-    );
-  }
-
-  // Quasi-neutrals (0.02 ≤ C < 0.05, e.g. tinted greys, dusty
-  // olives) snap among all neutral canonicals with raw OKLCH.
-  if (isNeutralHex(hex)) {
-    return collectCandidates(
-      hex,
-      (c) => isNeutralHex(c.hex),
-      (c) => oklchDistance(hex, c.hex),
-      Infinity,
-    );
-  }
-
-  // Saturated pieces: gather every canonical inside the perceptual
-  // threshold. Multiple plausible readings are all kept — the piece
-  // then belongs to any palette containing any of them. The nearest
-  // stays as the display anchor.
-  return collectCandidates(
-    hex,
-    () => true,
-    (c) => perceptualDistance(hex, c.hex),
-    OKLCH_DISTANCE_THRESHOLD,
-  );
 }
 
 /**
@@ -186,6 +138,15 @@ function snapColour(hex: string): Snap | null {
  */
 export function anchorFor(hex: string): Candidate | null {
   return snapColour(hex)?.best ?? null;
+}
+
+/**
+ * Every canonical a garment hex is willing to live in, nearest first.
+ * These decide palette membership, so a piece that is only willing to be
+ * what it looks like is a property worth testing on its own.
+ */
+export function candidatesFor(hex: string): Candidate[] {
+  return snapColour(hex)?.candidates ?? [];
 }
 
 function intersectSets(sets: Set<number>[]): Set<number> {

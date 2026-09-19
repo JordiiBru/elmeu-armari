@@ -150,18 +150,22 @@ OKLCH perceptual distance of `14` — not just the nearest. Two thousand plausib
 readings beat one arbitrary pick: `#d4c48e` is close to Ecru **and** Ivory Buff, and
 we keep both.
 
-Two special cases keep the snap intuitive:
+There is one distance for every colour and no branch by chroma, so two colours a
+fraction of a ΔE apart never land on unrelated canonicals (`perceptualDistance` in
+[`color-matching.ts`](src/lib/outfits/color-matching.ts)):
 
-- **Pure achromatics** (chroma < 0.02 — pure greys, black, white, warm off-whites)
-  snap only within a hand-picked whitelist of six "grey family" canonicals
-  (Black, White, Warm Gray, Neutral Gray, Mineral Gray, Fawn). Otherwise a mid grey
-  could route through Plumbeous (a blue-grey) and be labelled as a hue.
-- **Quasi-neutrals** (chroma between 0.02 and 0.05) snap among all low-chroma
-  canonicals so tinted greys and dusty olives don't jump into saturated territory.
+- Lightness and chroma are compared in OKLab. The hue term has a chroma floor, so a beige
+  and a cyan-grey stay apart even though both are dull, and it fades out near grey,
+  where the hue of a pixel is noise.
+- A penalty grows with the difference in _greyness_ (continuous in chroma), so a grey
+  does not match a brown of the same lightness.
+- Sanzo Wada has no dark or mid grey. Black, White and the three light greys are the
+  rungs of a grey ramp, and a grey piece may stretch in lightness towards them (a
+  charcoal shirt is Black). Only anchors inside the threshold are candidates: black is
+  not willing to be Fawn, a pink.
 
-Saturated colours use the full 157-colour vocabulary through `perceptualDistance`,
-which applies a `×1.6` penalty when comparing a neutral against a saturated colour
-to prevent hue collapse near the grey axis.
+The result is judged against a reference set of about 75 garment colours in
+[`anchor-reference.ts`](src/lib/outfits/anchor-reference.ts), not by eye.
 
 ### 2 · Compute each garment's palette membership
 
@@ -210,7 +214,7 @@ A common failure mode of a purely per-palette matcher is: Sanzo Wada contains on
 one entirely-neutral palette (Combination 69, warm-gray + black). Every other
 palette carries a saturated accent. Under a strict coverage rule a grey garment
 could never fill a saturated slot, so it never combined with anything. The
-canonical-first model + the grey-family whitelist restore the intuition that
+canonical-first model + the grey ramp restore the intuition that
 neutrals go with neutrals via Combination 69 (and its cousins 198, 221) while
 still routing beige-yellows through Ivory Buff into Combination 190, and so on.
 
