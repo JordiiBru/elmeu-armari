@@ -43,11 +43,46 @@ describe("suggestAccessories", () => {
     expect(ids(suggestAccessories(outfit, palette, [belt]))).toEqual(["belt"]);
   });
 
-  it("never suggests a neutral, whatever it is", () => {
-    const neutrals = ["#000000", "#ffffff", "#808080", "#d6d6d6", "#1c1c1e"].map((hex, i) =>
-      garment(`n${i}`, "ACCESSORI", [hex]),
-    );
-    expect(suggestAccessories(outfit, palette, neutrals)).toEqual([]);
+  it("never suggests a neutral, even in a palette that contains it", () => {
+    // Palette 69 is Warm Gray + Black and palette 55 has White: an
+    // accessory in exactly those colours is within the tight threshold of
+    // the palette, so only the neutral rule keeps it out. (Against the
+    // rust and teal palette this test could not fail.)
+    const warmGrayBlack = palettes.find((p) => p.id === 69)!;
+    expect(warmGrayBlack.colores).toContain("#000000");
+    const withWhite = palettes.find((p) => p.colores.includes("#ffffff"))!;
+    const neutrals = [
+      "#000000",
+      "#1c1c1e",
+      "#9cb29e", // Warm Gray
+      "#9fc2b2", // Mineral Gray
+      "#a3b5a5", // a tinted grey no Sanzo entry names
+      "#808080",
+    ].map((hex, i) => garment(`n${i}`, "ACCESSORI", [hex]));
+    const shirt = garment("s", "SHIRT", [warmGrayBlack.colores[0]]);
+    expect(suggestAccessories([shirt], warmGrayBlack, neutrals)).toEqual([]);
+    const white = garment("w", "ACCESSORI", ["#ffffff"]);
+    expect(suggestAccessories([shirt], withWhite, [white])).toEqual([]);
+  });
+
+  it("does suggest a dull colour that only looks nearly grey (a blush pink, an olive drab)", () => {
+    const blushPalette = palettes.find((p) => p.id === 45)!; // Seashell Pink + a yellow
+    const blush = garment("blush", "ACCESSORI", ["#e8d5d5"]);
+    expect(ids(suggestAccessories([garment("s", "SHIRT", ["#ffcfc4"])], blushPalette, [blush]))).toEqual([
+      "blush",
+    ]);
+  });
+
+  it("counts a palette colour as worn the way the engine assigns it", () => {
+    // Palette 110 has Brown and Vandyke Brown close together. Wearing the
+    // brown does not mean wearing the Vandyke Brown, so an accessory in it
+    // is still the accent.
+    const brownPalette = palettes.find((p) => p.id === 110)!;
+    const brownOutfit = [garment("s", "SHIRT", ["#6c2b11"]), garment("p", "PANTS", ["#6c2b11"])];
+    const vandyke = garment("v", "ACCESSORI", ["#362304"]);
+    const result = suggestAccessories(brownOutfit, brownPalette, [vandyke]);
+    expect(ids(result)).toEqual(["v"]);
+    expect(result[0].accent).toBe(true);
   });
 
   it("ignores an accessory with no colour", () => {

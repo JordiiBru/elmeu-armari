@@ -1,12 +1,7 @@
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette } from "./types";
-import { candidatesFor } from "./engine";
-import {
-  GREY_CHROMA,
-  OKLCH_TIGHT_MATCH_THRESHOLD,
-  hexToOklch,
-  perceptualDistance,
-} from "./color-matching";
+import { candidatesFor, isGreyColour } from "./engine";
+import { OKLCH_TIGHT_MATCH_THRESHOLD, perceptualDistance } from "./color-matching";
 
 export interface AccessorySuggestion {
   garment: GarmentWithColors;
@@ -18,12 +13,16 @@ export interface AccessorySuggestion {
 }
 
 /** Black, white and the greys go with everything, so recommending one is
- * noise. They stay in the normal picker. */
-function isNeutral(hex: string): boolean {
-  return hexToOklch(hex).C < GREY_CHROMA;
-}
+ * noise. They stay in the normal picker. Whether a colour is one is the
+ * engine's snap (a rung of the grey ramp), so a tinted Sanzo grey counts
+ * and a dull pink or olive does not. */
+const isNeutral = isGreyColour;
 
-/** Indices of the palette colours some piece of the outfit already wears. */
+/**
+ * Indices of the palette colours some piece of the outfit already wears,
+ * the way the engine assigns them: each colour takes the nearest of its
+ * readings that is in the palette, not every reading within reach.
+ */
 function wornPaletteIndices(outfit: GarmentWithColors[], palette: SanzoPalette): Set<number> {
   const worn = new Set<number>();
   const paletteHexes = palette.colores.map((h) => h.toLowerCase());
@@ -31,7 +30,10 @@ function wornPaletteIndices(outfit: GarmentWithColors[], palette: SanzoPalette):
     for (const colour of garment.colors) {
       for (const candidate of candidatesFor(colour.hex)) {
         const i = paletteHexes.indexOf(candidate.canonical.hex.toLowerCase());
-        if (i >= 0) worn.add(i);
+        if (i >= 0) {
+          worn.add(i);
+          break;
+        }
       }
     }
   }
