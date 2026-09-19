@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth/api";
 import { findGarmentById, setGarmentImage } from "@/lib/prendas/service";
-import { saveUploadImage, deleteUploadImage, getUploadMaxMb } from "@/lib/uploads";
+import {
+  saveUploadImage,
+  saveGarmentCutout,
+  deleteUploadImage,
+  getUploadMaxMb,
+} from "@/lib/uploads";
 
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
@@ -44,6 +49,9 @@ export async function POST(
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const filename = await saveUploadImage(buffer, id);
+  // After the photo is safely stored: a failure here costs the cut-out,
+  // never the upload.
+  await saveGarmentCutout(buffer, id);
 
   await setGarmentImage(id, filename);
 

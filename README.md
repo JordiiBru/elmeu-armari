@@ -326,6 +326,7 @@ A fresh deployment has no accounts and nothing but the login screen. Create the 
 | `DATABASE_URL` | `file:/data/prod.db` | SQLite file path |
 | `UPLOAD_DIR` | `/data/uploads` | Where garment photos are written |
 | `UPLOAD_MAX_MB` | `10` | Max upload size (pre-resize) |
+| `BG_REMOVAL_URL` | — | Optional. Base URL of the background removal sidecar (`sidecars/rembg`), e.g. `http://elmeu-armari-rembg:7000`. Unset, garment photos simply get no cut-out. |
 | `PORT` | `3000` | HTTP port |
 
 ---
