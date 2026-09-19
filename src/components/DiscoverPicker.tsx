@@ -13,7 +13,7 @@ import { optionLabel } from "@/lib/prendas/labels";
 import { pieceTint } from "./OutfitTile";
 import { OutfitGroupCard } from "./OutfitCard";
 import { PieceThumb } from "./PieceThumb";
-import { Sheet, Stack, Text, TextButton, Icon } from "@/components/ui";
+import { Sheet, Stack, Text, Icon } from "@/components/ui";
 
 // The engine only ever checks three roles (hasTop, hasBottom, hasShoes),
 // and a top is satisfied by either a sweater or a shirt — never both at
@@ -217,6 +217,8 @@ export function DiscoverPicker({
       size="xl"
       fill
       skipEnter={skipEnter}
+      onBack={onBack}
+      backLabel={tOutfits("back")}
       label={t("sheetLabel", { category: tLabel(`category.${garment.category}`) })}
       media={
         <div className="flex h-full w-full">
@@ -227,22 +229,15 @@ export function DiscoverPicker({
       }
       mediaHeight="h-24 sm:h-32"
       header={
-        <div className="flex items-start justify-between gap-3">
-          <Stack gap={1}>
-            <Text variant="caption">{t("eyebrow")}</Text>
-            <h2 className="type-title leading-tight">{tLabel(`category.${garment.category}`)}</h2>
-            <Text variant="small" italic tone="secondary" className="font-serif">
-              {[garment.fit ? optionLabel(tLabel, "fit", garment.fit) : null, pieceTint(garment)]
-                .filter(Boolean)
-                .join(" · ")}
-            </Text>
-          </Stack>
-          {onBack && (
-            <TextButton type="button" tone="secondary" onClick={onBack}>
-              {tOutfits("back")}
-            </TextButton>
-          )}
-        </div>
+        <Stack gap={1}>
+          <Text variant="caption">{t("eyebrow")}</Text>
+          <h2 className="type-title leading-tight">{tLabel(`category.${garment.category}`)}</h2>
+          <Text variant="small" italic tone="secondary" className="font-serif">
+            {[garment.fit ? optionLabel(tLabel, "fit", garment.fit) : null, pieceTint(garment)]
+              .filter(Boolean)
+              .join(" · ")}
+          </Text>
+        </Stack>
       }
     >
       {universe.length === 0 ? (

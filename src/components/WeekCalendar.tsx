@@ -8,7 +8,7 @@ import type { GarmentWithColors } from "@/lib/prendas/types";
 import { DayPhoto } from "./DayPhoto";
 import { OutfitCollage, OutfitTile, outfitSubtitle } from "./OutfitTile";
 import { OutfitSheet } from "./OutfitSheet";
-import { Card, Icon, Sheet, Text, TextButton, EmptyState } from "@/components/ui";
+import { Card, Icon, Sheet, Text, EmptyState } from "@/components/ui";
 
 function parseDay(iso: string): Date {
   return new Date(`${iso}T00:00:00Z`);
@@ -254,20 +254,15 @@ function DayPickerSheet({
       onClose={onClose}
       size="xl"
       fill
+      onBack={onBack}
+      backLabel={t("back")}
       label={`${t("plan")} ${label}`}
       header={
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <Text variant="caption">{t("plan")}</Text>
-            {/* first-letter, not capitalize: "diumenge, 23 d'agost" must
-                not become "D'agost". */}
-            <h2 className="type-title first-letter:uppercase">{label}</h2>
-          </div>
-          {onBack && (
-            <TextButton type="button" tone="secondary" onClick={onBack}>
-              {t("back")}
-            </TextButton>
-          )}
+        <div className="flex flex-col gap-1">
+          <Text variant="caption">{t("plan")}</Text>
+          {/* first-letter, not capitalize: "diumenge, 23 d'agost" must
+              not become "D'agost". */}
+          <h2 className="type-title first-letter:uppercase">{label}</h2>
         </div>
       }
     >

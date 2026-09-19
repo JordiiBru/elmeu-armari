@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useSheetState } from "@/lib/useSheetState";
 import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { IconButton } from "./IconButton";
+import { TextButton } from "./TextButton";
 import { Icon } from "./Icon";
 
 type Size = "md" | "lg" | "xl" | "2xl";
@@ -79,6 +80,21 @@ interface Props {
    * it. Leave it off for a sheet's first open.
    */
   skipEnter?: boolean;
+  /**
+   * One level up, back to the sheet this one stepped in for — as
+   * opposed to `onClose`, which leaves the whole flow. Rendered beside
+   * the close button, not inside `header`: three call sites once built
+   * their own "back" text button into their own header content, each
+   * against a `justify-between` nested one level deeper than the X's
+   * own row, and the two drifted out of alignment with each other.
+   * Structural, not a per-sheet detail — every sheet that has a "back"
+   * gets it at the same place, for free.
+   */
+  onBack?: () => void;
+  /** Required together with `onBack`. Caller-supplied rather than a
+   * fixed translation key: this is a generic UI primitive, not scoped
+   * to any one feature's message namespace. */
+  backLabel?: string;
 }
 
 /**
@@ -99,6 +115,8 @@ export function Sheet({
   fill = false,
   split = false,
   skipEnter = false,
+  onBack,
+  backLabel,
   children,
 }: Props) {
   const tCommon = useTranslations("common");
@@ -186,14 +204,20 @@ export function Sheet({
       {header && (
         <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-3 border-b border-border">
           <div className="flex-1 min-w-0">{header}</div>
-          <IconButton
-            type="button"
-            onClick={close}
-            label={tCommon("close")}
-            className="flex-shrink-0 -mr-2 -mt-2"
-          >
-            <Icon name="close" size={18} />
-          </IconButton>
+          <div className="flex flex-shrink-0 items-center gap-3 -mr-2 -mt-2">
+            {onBack && (
+              <TextButton type="button" tone="secondary" onClick={onBack} className="type-small">
+                {backLabel}
+              </TextButton>
+            )}
+            <IconButton
+              type="button"
+              onClick={close}
+              label={tCommon("close")}
+            >
+              <Icon name="close" size={18} />
+            </IconButton>
+          </div>
         </div>
       )}
 

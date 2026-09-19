@@ -177,6 +177,12 @@ export function OutfitBottomSheet({
       size="xl"
       fill
       skipEnter={skipEnter}
+      // Dismissing means leaving; going back to the piece is its own
+      // control. Without it the close button did both jobs badly: you
+      // pressed it to get out and landed on the piece you had already
+      // left, which reads as the popup reopening on you.
+      onBack={onBack}
+      backLabel={tOutfits("back")}
       label={t("sheetLabel", { category: tLabel(`category.${garment.category}`) })}
       media={
         <div className="flex h-full w-full">
@@ -192,32 +198,21 @@ export function OutfitBottomSheet({
       }
       mediaHeight="h-24 sm:h-32"
       header={
-        // Dismissing means leaving; going back to the piece is its own
-        // control. Without it the close button did both jobs badly: you
-        // pressed it to get out and landed on the piece you had already
-        // left, which reads as the popup reopening on you.
-        <div className="flex items-start justify-between gap-3">
-          <Stack gap={1}>
-            <Text variant="caption">{t("eyebrow")}</Text>
-            <h2 className="type-title leading-tight">
-              {tLabel(`category.${garment.category}`)}
-            </h2>
-            <Text variant="small" italic tone="secondary" className="font-serif">
-              {[
-                garment.fit ? optionLabel(tLabel, "fit", garment.fit) : null,
-                garment.size ? tModal("size", { size: garment.size }) : null,
-                garment.notes,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </Text>
-          </Stack>
-          {onBack && (
-            <TextButton type="button" tone="secondary" onClick={onBack}>
-              {tOutfits("back")}
-            </TextButton>
-          )}
-        </div>
+        <Stack gap={1}>
+          <Text variant="caption">{t("eyebrow")}</Text>
+          <h2 className="type-title leading-tight">
+            {tLabel(`category.${garment.category}`)}
+          </h2>
+          <Text variant="small" italic tone="secondary" className="font-serif">
+            {[
+              garment.fit ? optionLabel(tLabel, "fit", garment.fit) : null,
+              garment.size ? tModal("size", { size: garment.size }) : null,
+              garment.notes,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </Text>
+        </Stack>
       }
       headerBelow={
         availablePieceCounts.length > 1 && (
