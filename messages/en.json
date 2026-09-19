@@ -151,6 +151,7 @@
     "saveChanges": "save changes",
     "addColor": "+ add colour",
     "noColorYet": "no colour yet",
+    "colorsFromPhoto": "colours suggested from the photo: tap one to change it",
     "removeColor": "remove"
   },
   "errors": {

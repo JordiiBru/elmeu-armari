@@ -151,6 +151,7 @@
     "saveChanges": "guardar cambios",
     "addColor": "+ añadir color",
     "noColorYet": "todavía no hay ningún color",
+    "colorsFromPhoto": "colores sugeridos a partir de la foto: toca un color para cambiarlo",
     "removeColor": "eliminar"
   },
   "errors": {

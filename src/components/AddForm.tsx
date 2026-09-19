@@ -8,6 +8,7 @@ import { ColorPickers } from "@/components/ColorPickers";
 import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
 import { createGarmentAction } from "@/app/add/actions";
 import { shrinkForUpload } from "@/lib/image-client";
+import { suggestColours } from "@/lib/colors/from-photo";
 import {
   CATEGORIES,
   FITS_BY_CATEGORY,
@@ -53,6 +54,16 @@ export function AddForm() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadingRef = useRef(false);
+  // The colours currently in the form, and the ones the last photo
+  // suggested. A suggestion only ever replaces an empty list or the
+  // previous suggestion, never a colour the person chose.
+  const [colours, setColours] = useState<string[]>([]);
+  const [suggestion, setSuggestion] = useState<{ key: number; colours: string[] }>({
+    key: 0,
+    colours: [],
+  });
+  const coloursRef = useRef<string[]>([]);
+  const suggestedRef = useRef<string[]>([]);
 
   useEffect(() => {
     if (!state || !("newId" in state) || uploadingRef.current) return;
@@ -90,12 +101,34 @@ export function AddForm() {
   const patterns = category ? PATTERNS_BY_CATEGORY[category] : [];
   const colorsRequired = !category || !CATEGORIES_WITH_OPTIONAL_COLOR.has(category);
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function changeColours(next: string[]) {
+    coloursRef.current = next;
+    setColours(next);
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
     setImageFile(file);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(file ? URL.createObjectURL(file) : null);
+    if (!file) return;
+
+    const found = await suggestColours(file);
+    const current = coloursRef.current;
+    const untouched =
+      current.length === 0 ||
+      (current.length === suggestedRef.current.length &&
+        current.every((c, i) => c === suggestedRef.current[i]));
+    if (found.length === 0 || !untouched) return;
+    suggestedRef.current = found;
+    changeColours(found);
+    setSuggestion((s) => ({ key: s.key + 1, colours: found }));
   }
+
+  const fromPhoto =
+    suggestion.colours.length > 0 &&
+    colours.length === suggestion.colours.length &&
+    colours.every((c, i) => c === suggestion.colours[i]);
 
   return (
     <form action={formAction} className="flex flex-col gap-7">
@@ -191,7 +224,12 @@ export function AddForm() {
       )}
 
       <Field label={t("colors")} required={colorsRequired}>
-        <ColorPickers />
+        <ColorPickers
+          key={suggestion.key}
+          initialColors={suggestion.colours}
+          onChange={changeColours}
+          note={fromPhoto ? t("colorsFromPhoto") : undefined}
+        />
       </Field>
 
       {category && textures.length > 0 && (
