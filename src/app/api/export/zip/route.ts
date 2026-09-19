@@ -16,15 +16,21 @@ async function readImageFile(filename: string): Promise<Buffer | null> {
   }
 }
 
-/** A photo and its thumbnail companion, when the files are still there. */
+/**
+ * A photo and its companions (thumbnail, cut-out), when the files are
+ * still there. A new kind of companion has to be listed here, or a
+ * restore from this zip loses it without a word.
+ */
 async function pushImage(entries: ZipEntry[], filename: string): Promise<void> {
-  const thumbName = filename.replace(/\.webp$/, "-thumb.webp");
-  const [full, thumb] = await Promise.all([
-    readImageFile(filename),
-    readImageFile(thumbName),
-  ]);
-  if (full) entries.push({ name: `images/${filename}`, data: full });
-  if (thumb) entries.push({ name: `images/${thumbName}`, data: thumb });
+  const companions = ["-thumb", "-cutout"].map((suffix) =>
+    filename.replace(/\.webp$/, `${suffix}.webp`),
+  );
+  const names = [filename, ...companions];
+  const files = await Promise.all(names.map(readImageFile));
+  names.forEach((name, i) => {
+    const data = files[i];
+    if (data) entries.push({ name: `images/${name}`, data });
+  });
 }
 
 export async function GET() {

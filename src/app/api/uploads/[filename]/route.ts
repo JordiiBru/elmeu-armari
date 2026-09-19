@@ -4,7 +4,11 @@ import fs from "fs/promises";
 import { requireSession } from "@/lib/auth/api";
 import { getUploadDir } from "@/lib/uploads";
 
-const SAFE_FILENAME = /^[a-z0-9]+(?:-thumb)?\.webp$/;
+// A filename is an id plus at most one companion suffix. The id part has
+// no `-`, `.` or `/`, so a suffix cannot be smuggled in twice and no path
+// can be built out of it. `-cutout` was added with the background removal:
+// same charset, same session guard, same private cache policy as a photo.
+const SAFE_FILENAME = /^[a-z0-9]+(?:-thumb|-cutout)?\.webp$/;
 
 async function readOrNull(filePath: string): Promise<Buffer | null> {
   try {
