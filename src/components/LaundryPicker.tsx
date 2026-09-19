@@ -23,9 +23,7 @@ function GarmentPickCard({
       type="button"
       onClick={onToggle}
       aria-pressed={selected}
-      className={`group relative flex flex-col gap-2 text-left transition-opacity duration-[var(--duration-base)] ease-[var(--ease-standard)] ${
-        selected ? "opacity-100" : "opacity-70 hover:opacity-100"
-      }`}
+      className="group relative flex flex-col gap-2 text-left"
     >
       <div
         className={`relative aspect-[3/4] w-full overflow-hidden border transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)] ${

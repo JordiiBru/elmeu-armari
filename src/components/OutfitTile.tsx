@@ -244,7 +244,7 @@ export function OutfitTile({
         {palette && (
           <div
             aria-hidden
-            className="mt-2 flex h-1 w-full overflow-hidden"
+            className="mt-2 flex h-2 w-full overflow-hidden"
             title={palette.nombre}
           >
             {palette.colores.map((hex, i) => (
