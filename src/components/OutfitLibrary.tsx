@@ -203,33 +203,28 @@ export function OutfitLibrary({
 
   return (
     <Stack gap={6}>
-      {/* items-start on mobile: stacked one-per-line, the category
-          column now reads much taller than the button beside it, and
-          items-end pinned the button to the bottom of that column —
-          level with "sabates", a long reach down from "descobreix"'s
-          own natural place beside the filter. sm: and up the column
-          is a single short line again, where bottom-aligning the
-          button against the chip row (not the caption above it) is
-          what actually looks right. */}
-      <div className="flex flex-wrap items-start sm:items-end justify-between gap-4">
-        <Stack gap={1}>
-          {/* Read fine beside a single line of chips; next to five
-              stacked 44px rows on a phone the same small caption looked
-              like a mislabelled afterthought sitting over something much
-              louder than it. "ELS TEUS OUTFITS" right above already
-              frames the section — the category names underneath don't
-              need a second label to say what they are. */}
-          <FilterLabel className="hidden sm:block">{t("categoryFilterLabel")}</FilterLabel>
-          <SegmentedControl<Filter>
-            value={filter}
-            onChange={setFilter}
-            ariaLabel={t("filtersLabel")}
-            stackOnMobile
-            options={FILTERS.map((f) => ({
-              value: f,
-              label: f === "ALL" ? t("filterAll") : t(`axes.${f}`),
-            }))}
-          />
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <Stack gap={1} className="min-w-0">
+          <FilterLabel>{t("categoryFilterLabel")}</FilterLabel>
+          {/* A column ("sabates" and friends stacked one per line) tried
+              first and cost too much height for what it solved — five
+              44px rows to read past before the mosaic itself even
+              starts. Horizontal scroll instead, the same move discover's
+              own axis tabs already make: one line, nothing wraps into an
+              edge-to-edge row with an orphan under it, and the options
+              past the fold are one swipe away rather than a scroll down. */}
+          <div className="overflow-x-auto">
+            <SegmentedControl<Filter>
+              value={filter}
+              onChange={setFilter}
+              ariaLabel={t("filtersLabel")}
+              wrap={false}
+              options={FILTERS.map((f) => ({
+                value: f,
+                label: f === "ALL" ? t("filterAll") : t(`axes.${f}`),
+              }))}
+            />
+          </div>
         </Stack>
         {discoverButton}
       </div>

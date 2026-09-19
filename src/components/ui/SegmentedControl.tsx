@@ -20,14 +20,6 @@ interface Props<V extends string> {
    * is decided by their order in the stylesheet, not in the class list.
    */
   wrap?: boolean;
-  /**
-   * One option per line below `sm:`, instead of wrapping them into
-   * however many happen to fit a phone's width — for a control with
-   * enough options (and long enough labels) that wrapping there means
-   * one packed, edge-to-edge line and a short orphan stranded under it.
-   * `sm:` and up ignore this and wrap normally.
-   */
-  stackOnMobile?: boolean;
   className?: string;
 }
 
@@ -42,7 +34,6 @@ export function SegmentedControl<V extends string>({
   options,
   ariaLabel,
   wrap = true,
-  stackOnMobile = false,
   className,
 }: Props<V>) {
   return (
@@ -50,8 +41,7 @@ export function SegmentedControl<V extends string>({
       role="radiogroup"
       aria-label={ariaLabel}
       className={[
-        "inline-flex gap-x-6",
-        stackOnMobile ? "flex-col gap-y-4 sm:flex-row sm:gap-y-2" : "gap-y-2",
+        "inline-flex gap-x-6 gap-y-2",
         wrap ? "flex-wrap" : "flex-nowrap",
         className,
       ]
