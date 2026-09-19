@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { generateOutfitGroups } from "./engine";
+import { generateOutfitGroups, generateOutfitGroupsForGarment } from "./engine";
 import { palettes } from "@/lib/colors";
-import type { GarmentWithColors } from "@/lib/prendas/types";
+import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
+import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 
 // Real Sanzo Wada hexes, not invented ones. `buildContext` snaps a
 // garment's colour against the real 157-canonical catalogue and
@@ -26,7 +27,7 @@ const BLACK = "#000000";
 
 function createTestGarment(
   id: string,
-  category: "SHIRT" | "SWEATER" | "PANTS" | "SOCKS" | "SHOES",
+  category: Category,
   hexColors: string[],
   length: string | null = null,
 ): GarmentWithColors {
@@ -84,6 +85,36 @@ describe("engine", () => {
         g.garments.some((gar) => gar.category === "SOCKS"),
       );
       expect(outfitWithSocks).toBe(false);
+    });
+
+    it("never puts an extra category (socks, accessories) in a group", () => {
+      // Every extra category, coloured to match the outfit it sits next
+      // to, so the only thing keeping it out is the exclusion itself.
+      const extras = [...EXTRA_CATEGORIES].map((c, i) =>
+        createTestGarment(`extra-${i}`, c, [RUST]),
+      );
+      const shirt = createTestGarment("shirt", "SHIRT", [RUST]);
+      const pants = createTestGarment("pants", "PANTS", [TEAL]);
+      const shoe = createTestGarment("shoe", "SHOES", [SHOE_FOR_RUST_TEAL]);
+      const wardrobe = [shirt, pants, shoe, ...extras];
+
+      const { groups } = generateOutfitGroups(wardrobe, palettes);
+      expect(groups.length).toBeGreaterThan(0);
+      for (const g of groups) {
+        for (const gar of g.garments) expect(EXTRA_CATEGORIES.has(gar.category)).toBe(false);
+      }
+
+      // Anchoring on the shirt goes through the other entry point.
+      const { groups: forShirt } = generateOutfitGroupsForGarment(shirt, wardrobe, palettes);
+      expect(forShirt.length).toBeGreaterThan(0);
+      for (const g of forShirt) {
+        for (const gar of g.garments) expect(EXTRA_CATEGORIES.has(gar.category)).toBe(false);
+      }
+
+      // And an extra can never be the anchor.
+      for (const extra of extras) {
+        expect(generateOutfitGroupsForGarment(extra, wardrobe, palettes).groups).toHaveLength(0);
+      }
     });
 
     it("enforces no-repeated-category rule", () => {
