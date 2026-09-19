@@ -7,9 +7,17 @@ to be reached only from the app, inside the cluster.
 """
 import threading
 
+import onnxruntime
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from rembg import new_session, remove
 from starlette.responses import Response
+
+# ONNX Runtime reports usage to Microsoft from a container unless told not
+# to (seen on the wire: TLS connections to a Microsoft address at start-up).
+# This service handles private photographs, so it makes no outbound calls at
+# all: switched off here, and the homelab NetworkPolicy allows no egress.
+# Has to happen before the first session is created.
+onnxruntime.disable_telemetry_events()
 
 # The app sends photos already resized to 800 px; anything much bigger than
 # that is a mistake, and a 40 MB body should not be able to fill the memory.
