@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { deleteGarmentAction } from "@/app/armari/actions";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import type { SanzoPalette } from "@/lib/outfits/types";
@@ -53,20 +52,18 @@ export function GarmentModal({
   const handleDelete = () => {
     if (pending) return;
     startTransition(async () => {
-      const fd = new FormData();
-      fd.append("id", garment.id);
-      await deleteGarmentAction(fd);
+      await fetch(`/api/garments/${garment.id}`, { method: "DELETE" });
       /**
-       * A full navigation, not `router.back()` and not a redirect from
-       * the action. Deleting happens from `/armari/[slug]`, and the
-       * moment the piece is gone that route renders a 404 — which the
-       * client router then caches for the segment, so every softer way
-       * out lands on that 404 even once the URL says `/armari`
-       * (reproduced: grid empty, "This page could not be found", no way
-       * back without a reload).
-       *
-       * Deleting a garment is rare and irreversible, so paying for one
-       * clean page load is the right trade for never stranding anyone.
+       * A full navigation, not `router.back()` or a client-side push.
+       * Deleting happens from `/armari/[slug]` (or its intercepted
+       * twin), and the moment the piece is gone that route 404s. A
+       * Server Action here would auto-refresh that same doomed segment
+       * on resolving, racing whatever navigates away next — reliably
+       * lost in a production build, landing back on the dead URL or,
+       * from the intercepted route, on the root not-found boundary.
+       * A plain route handler carries no such refresh, and a hard
+       * navigation sidesteps the parallel/intercepted route tree
+       * entirely rather than asking the client router to reconcile it.
        */
       window.location.assign("/armari");
     });
