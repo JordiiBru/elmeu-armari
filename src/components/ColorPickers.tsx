@@ -3,15 +3,20 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
+// Where the native picker opens. Any pick that differs from it fires a
+// change, so it is a mid grey rather than black or white, the two colours
+// a garment is most often.
+const PICKER_START = "#808080";
+
 interface Props {
   initialColors?: string[];
 }
 
 export function ColorPickers({ initialColors }: Props) {
   const t = useTranslations("form");
-  const [colors, setColors] = useState<string[]>(
-    initialColors && initialColors.length > 0 ? initialColors : ["#000000"],
-  );
+  // Empty means empty: a default swatch would be saved as a colour the
+  // person never chose (a garment silently black).
+  const [colors, setColors] = useState<string[]>(initialColors ?? []);
 
   return (
     <div className="flex flex-col gap-3">
@@ -36,26 +41,31 @@ export function ColorPickers({ initialColors }: Props) {
           <span className="font-mono text-xs text-text-secondary tabular-nums">
             {color.toUpperCase()}
           </span>
-          {colors.length > 1 && (
-            <button
-              type="button"
-              onClick={() =>
-                setColors((prev) => prev.filter((_, j) => j !== i))
-              }
-              className="ml-auto type-caption hover:text-text-primary transition-colors active:scale-95"
-            >
-              {t("removeColor")}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setColors((prev) => prev.filter((_, j) => j !== i))}
+            className="ml-auto type-caption hover:text-text-primary transition-colors active:scale-95"
+          >
+            {t("removeColor")}
+          </button>
         </div>
       ))}
-      <button
-        type="button"
-        onClick={() => setColors((prev) => [...prev, "#000000"])}
-        className="group relative self-start font-serif italic text-sm text-text-secondary hover:text-text-primary transition-colors mt-1 active:scale-[0.98]"
-      >
+      {colors.length === 0 && (
+        <span className="type-caption">{t("noColorYet")}</span>
+      )}
+      {/* The add button is the picker itself: a colour exists only once
+          one has been picked, never as a placeholder to forget about. The
+          value is remounted after each pick so the next one starts fresh. */}
+      <label className="relative self-start font-serif italic text-sm text-text-secondary hover:text-text-primary transition-colors mt-1 cursor-pointer active:scale-[0.98]">
         <span>{t("addColor")}</span>
-      </button>
+        <input
+          key={colors.length}
+          type="color"
+          defaultValue={PICKER_START}
+          onChange={(e) => setColors((prev) => [...prev, e.target.value])}
+          className="absolute inset-0 opacity-0 cursor-pointer"
+        />
+      </label>
     </div>
   );
 }

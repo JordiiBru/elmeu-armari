@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { ColorPickers } from "@/components/ColorPickers";
+import { shrinkForUpload } from "@/lib/image-client";
 import { SeasonCheckboxes } from "@/components/SeasonCheckboxes";
 import { updateGarmentAction } from "@/app/edit/[id]/actions";
 import {
@@ -83,7 +84,7 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
     setPreviewUrl(URL.createObjectURL(file));
     setImageStatus("uploading");
     const fd = new FormData();
-    fd.append("file", file);
+    fd.append("file", await shrinkForUpload(file));
     const r = await fetch(`/api/garments/${garment.id}/image`, {
       method: "POST",
       body: fd,
