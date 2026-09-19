@@ -35,13 +35,17 @@ interface ImportPayload {
   garments: GarmentImport[];
 }
 
-function validate(body: unknown): { ok: true; payload: ImportPayload } | { ok: false; error: string } {
+function validate(
+  body: unknown,
+  originalIndexes: number[],
+): { ok: true; payload: ImportPayload } | { ok: false; error: string } {
   if (typeof body !== "object" || body === null) return { ok: false, error: "Format invàlid" };
   const b = body as Record<string, unknown>;
   if (b.version !== 3) return { ok: false, error: "Versió no suportada (cal versió 3)" };
   if (!Array.isArray(b.garments)) return { ok: false, error: "Camp 'garments' obligatori" };
 
-  for (const [i, g] of (b.garments as unknown[]).entries()) {
+  for (const [position, g] of (b.garments as unknown[]).entries()) {
+    const i = originalIndexes[position] ?? position;
     if (typeof g !== "object" || g === null) return { ok: false, error: `Peça ${i}: format invàlid` };
     const gr = g as Record<string, unknown>;
     const category = gr.category as Category;
@@ -132,11 +136,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "JSON invàlid" }, { status: 400 });
   }
 
-  const { body: current, skipped } = setAsideRemovedCategories(body);
-  const result = validate(current);
+  const { body: current, skipped, originalIndexes } = setAsideRemovedCategories(body);
+  const result = validate(current, originalIndexes);
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 422 });
 
   const garments = result.payload.garments;
+
+  // A file that was nothing but the removed category has nothing to
+  // import; in replace mode it must not be allowed to wipe the wardrobe.
+  if (skipped > 0 && garments.length === 0) {
+    return NextResponse.json(
+      { error: "El fitxer només conté peces d'una categoria que ja no existeix" },
+      { status: 422 },
+    );
+  }
 
   if (mode === "replace") {
     // Delete + insert in one logical operation. Sequential inserts avoid

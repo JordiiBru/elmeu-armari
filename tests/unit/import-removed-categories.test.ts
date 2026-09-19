@@ -16,13 +16,22 @@ describe("setAsideRemovedCategories", () => {
 
   it("leaves an export without socks alone", () => {
     const input = { version: 3, garments: [shirt] };
-    expect(setAsideRemovedCategories(input)).toEqual({ body: input, skipped: 0 });
+    expect(setAsideRemovedCategories(input)).toEqual({ body: input, skipped: 0, originalIndexes: [0] });
   });
 
   it("does not choke on a malformed body: validation reports that", () => {
-    expect(setAsideRemovedCategories(null)).toEqual({ body: null, skipped: 0 });
-    expect(setAsideRemovedCategories({ version: 3 })).toEqual({ body: { version: 3 }, skipped: 0 });
+    expect(setAsideRemovedCategories(null).skipped).toBe(0);
+    expect(setAsideRemovedCategories({ version: 3 }).skipped).toBe(0);
     const withJunk = { version: 3, garments: [null, "x", socks] };
     expect(setAsideRemovedCategories(withJunk).skipped).toBe(1);
+  });
+
+  it("remembers where each kept row sat in the file, for error messages", () => {
+    const invalid = { category: "SHIRT", colors: [] };
+    const { originalIndexes } = setAsideRemovedCategories({
+      version: 3,
+      garments: [socks, socks, invalid],
+    });
+    expect(originalIndexes).toEqual([2]);
   });
 });

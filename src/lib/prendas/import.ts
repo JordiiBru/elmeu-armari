@@ -5,17 +5,28 @@
  */
 const REMOVED_CATEGORIES = new Set(["SOCKS"]);
 
-export function setAsideRemovedCategories(body: unknown): { body: unknown; skipped: number } {
-  if (typeof body !== "object" || body === null) return { body, skipped: 0 };
+export function setAsideRemovedCategories(body: unknown): {
+  body: unknown;
+  skipped: number;
+  /** Where each kept row sat in the file, so an error names the row the
+   * person will find, not its place among the survivors. */
+  originalIndexes: number[];
+} {
+  if (typeof body !== "object" || body === null) return { body, skipped: 0, originalIndexes: [] };
   const b = body as Record<string, unknown>;
-  if (!Array.isArray(b.garments)) return { body, skipped: 0 };
-  const kept = b.garments.filter(
-    (g) =>
-      !(
-        typeof g === "object" &&
-        g !== null &&
-        REMOVED_CATEGORIES.has((g as Record<string, unknown>).category as string)
-      ),
-  );
-  return { body: { ...b, garments: kept }, skipped: b.garments.length - kept.length };
+  if (!Array.isArray(b.garments)) return { body, skipped: 0, originalIndexes: [] };
+  const originalIndexes: number[] = [];
+  const kept = b.garments.filter((g, i) => {
+    const removed =
+      typeof g === "object" &&
+      g !== null &&
+      REMOVED_CATEGORIES.has((g as Record<string, unknown>).category as string);
+    if (!removed) originalIndexes.push(i);
+    return !removed;
+  });
+  return {
+    body: { ...b, garments: kept },
+    skipped: b.garments.length - kept.length,
+    originalIndexes,
+  };
 }

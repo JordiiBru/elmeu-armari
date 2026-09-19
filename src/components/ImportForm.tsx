@@ -43,7 +43,7 @@ export function ImportForm() {
         toast.show(data.error ?? t("unknownError"), "danger");
       } else {
         toast.show(t("success", { count: data.imported ?? 0 }), "success");
-        if (data.skipped) toast.show(t("skippedRemoved", { count: data.skipped }), "success");
+        if (data.skipped) toast.show(t("skippedRemoved", { count: data.skipped }), "neutral");
         if (inputRef.current) inputRef.current.value = "";
         setFileName(null);
         router.refresh();
