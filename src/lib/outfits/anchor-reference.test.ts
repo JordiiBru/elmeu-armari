@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { anchorFor } from "./engine";
 import { namedColors } from "@/lib/colors";
-import { ANCHOR_CASES, type AnchorCase } from "./anchor-reference";
+import { ANCHOR_CASES, OUTSIDE, type AnchorCase } from "./anchor-reference";
 
 function anchorName(hex: string): string {
-  return anchorFor(hex)?.canonical.name ?? "(outside the vocabulary)";
+  return anchorFor(hex)?.canonical.name ?? OUTSIDE;
 }
 
 function isAccepted(c: AnchorCase): boolean {
@@ -13,7 +13,7 @@ function isAccepted(c: AnchorCase): boolean {
 
 describe("anchor reference set", () => {
   it("is well formed: real names, unique hexes, enough of each kind", () => {
-    const known = new Set(namedColors.map((c) => c.name));
+    const known = new Set([...namedColors.map((c) => c.name), OUTSIDE]);
     for (const c of ANCHOR_CASES) {
       for (const name of c.accept) {
         expect(known.has(name), `${c.hex} ${c.label}: unknown Sanzo name "${name}"`).toBe(true);

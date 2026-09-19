@@ -1,96 +1,81 @@
 import { describe, it, expect } from "vitest";
 import {
-  isNeutralHex,
+  greyness,
   hexToOklch,
   oklchDistance,
   perceptualDistance,
-  NEUTRAL_CHROMA_THRESHOLD,
+  GREY_CHROMA,
   OKLCH_DISTANCE_THRESHOLD,
-  NEUTRAL_MISMATCH_PENALTY,
 } from "./color-matching";
 
 describe("color-matching", () => {
-  describe("isNeutralHex", () => {
-    it("returns true for colors below NEUTRAL_CHROMA_THRESHOLD", () => {
-      // Pure greyscale colors should be neutral
-      expect(isNeutralHex("#000000")).toBe(true); // Black
-      expect(isNeutralHex("#ffffff")).toBe(true); // White
-      expect(isNeutralHex("#808080")).toBe(true); // Mid grey
-
-      // Beige / warm grey colors from Sanzo (low chroma)
-      expect(isNeutralHex("#9cb29e")).toBe(true); // Warm Gray (C ≈ 0.015)
-      expect(isNeutralHex("#b5d1cc")).toBe(true); // Neutral Gray (C ≈ 0.025)
-      expect(isNeutralHex("#d1b0b3")).toBe(true); // Fawn (C ≈ 0.035)
+  describe("greyness", () => {
+    it("is 1 for greys and falls to 0 at GREY_CHROMA", () => {
+      expect(greyness(hexToOklch("#000000").C)).toBe(1);
+      expect(greyness(hexToOklch("#808080").C)).toBeGreaterThan(0.95);
+      expect(greyness(GREY_CHROMA)).toBe(0);
+      expect(greyness(GREY_CHROMA * 3)).toBe(0);
+      expect(greyness(hexToOklch("#ff0000").C)).toBe(0);
     });
 
-    it("returns false for saturated colors above NEUTRAL_CHROMA_THRESHOLD", () => {
-      // Vivid greens, reds, blues should be non-neutral
-      expect(isNeutralHex("#ff0000")).toBe(false); // Pure red
-      expect(isNeutralHex("#00ff00")).toBe(false); // Pure green
-      expect(isNeutralHex("#0000ff")).toBe(false); // Pure blue
-
-      // Real Sanzo colors
-      expect(isNeutralHex("#1b4332")).toBe(false); // Olive Green (high C)
-      expect(isNeutralHex("#740001")).toBe(false); // Garnet (high C)
-    });
-
-    it("respects the threshold boundary at NEUTRAL_CHROMA_THRESHOLD", () => {
-      // A color at exactly the threshold boundary should be considered neutral
-      const thresholdHex = "#9fb8a6"; // Carefully chosen to have C ≈ 0.05
-      const oklch = hexToOklch(thresholdHex);
-      const isNeutral = isNeutralHex(thresholdHex);
-
-      // Verify the boundary logic: C < NEUTRAL_CHROMA_THRESHOLD
-      if (oklch.C < NEUTRAL_CHROMA_THRESHOLD) {
-        expect(isNeutral).toBe(true);
-      } else {
-        expect(isNeutral).toBe(false);
+    it("is continuous: no jump anywhere along the chroma axis", () => {
+      let prev = greyness(0);
+      for (let c = 0.0005; c <= 0.06; c += 0.0005) {
+        const g = greyness(c);
+        expect(Math.abs(g - prev)).toBeLessThan(0.05);
+        prev = g;
       }
     });
   });
 
   describe("perceptualDistance", () => {
-    it("applies neutral-mismatch penalty when one color is neutral and the other is not", () => {
-      const greyHex = "#808080"; // Neutral grey
-      const oliveHex = "#556b2f"; // Saturated olive
-
-      const isGreyNeutral = isNeutralHex(greyHex);
-      const isOliveNeutral = isNeutralHex(oliveHex);
-      expect(isGreyNeutral).toBe(true);
-      expect(isOliveNeutral).toBe(false);
-
-      const raw = oklchDistance(greyHex, oliveHex);
-      const perceptual = perceptualDistance(greyHex, oliveHex);
-
-      // Perceptual should be penalized (higher) because one is neutral and one is not
-      expect(perceptual).toBeGreaterThan(raw);
-      expect(perceptual).toBeCloseTo(raw * NEUTRAL_MISMATCH_PENALTY, 1);
+    it("is zero for the same colour and symmetric", () => {
+      expect(perceptualDistance("#736251", "#736251")).toBe(0);
+      const a = "#736251";
+      const b = "#5c7287";
+      expect(perceptualDistance(a, b)).toBeCloseTo(perceptualDistance(b, a), 8);
     });
 
-    it("does not penalize two neutral colors matching", () => {
-      const grey1 = "#808080";
-      const grey2 = "#909090";
-      expect(isNeutralHex(grey1)).toBe(true);
-      expect(isNeutralHex(grey2)).toBe(true);
-
-      const raw = oklchDistance(grey1, grey2);
-      const perceptual = perceptualDistance(grey1, grey2);
-
-      // No penalty when both are neutral
-      expect(perceptual).toBeCloseTo(raw, 2);
+    it("pushes a grey away from a brown of the same lightness", () => {
+      const grey = "#808080";
+      const brown = "#8b7355";
+      const raw = oklchDistance(grey, brown);
+      expect(perceptualDistance(grey, brown)).toBeGreaterThan(raw);
+      // The full mismatch penalty: the grey has no hue, the brown has one.
+      expect(perceptualDistance(grey, brown)).toBeGreaterThan(raw * 1.9);
     });
 
-    it("does not penalize two saturated colors matching", () => {
-      const red1 = "#ff0000";
-      const red2 = "#ff1111";
-      expect(isNeutralHex(red1)).toBe(false);
-      expect(isNeutralHex(red2)).toBe(false);
+    it("keeps hue apart even when both colours are dull", () => {
+      // A khaki and a cyan-grey of the same lightness and chroma: the
+      // plain OKLCH hue term collapses at this chroma and calls them close.
+      const khaki = "#d8ccb7";
+      const cyanGrey = "#b5d1cc";
+      const khakiPeer = "#dccfb0";
+      expect(perceptualDistance(khaki, cyanGrey)).toBeGreaterThan(
+        perceptualDistance(khaki, khakiPeer) * 2,
+      );
+    });
 
-      const raw = oklchDistance(red1, red2);
-      const perceptual = perceptualDistance(red1, red2);
+    it("ignores the hue of a near-grey: it is noise", () => {
+      // A magenta tint and a green tint at chroma 0.003: opposite hues,
+      // a couple of channel steps apart. They are the same grey.
+      const a = "#5c5d5c";
+      const b = "#5d5c5d";
+      expect(perceptualDistance(a, b)).toBeLessThan(2);
+    });
 
-      // No penalty when both are saturated
-      expect(perceptual).toBeCloseTo(raw, 2);
+    it("gives a grey slack in lightness towards a grey-ramp rung, faded by its chroma", () => {
+      const charcoal = "#5d5d5f";
+      const black = "#000000";
+      const plain = perceptualDistance(charcoal, black);
+      const slack = perceptualDistance(charcoal, black, 0.4);
+      expect(slack).toBeLessThan(plain);
+      expect(slack).toBeLessThan(OKLCH_DISTANCE_THRESHOLD);
+      // A brown is not grey, so it gets none of it: the slack is faded
+      // by the chroma of the piece and it stays far from Black.
+      expect(perceptualDistance("#4e2a09", black, 0.4)).toBeGreaterThan(
+        OKLCH_DISTANCE_THRESHOLD * 2,
+      );
     });
   });
 
