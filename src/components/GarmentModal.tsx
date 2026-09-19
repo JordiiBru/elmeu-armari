@@ -44,7 +44,7 @@ export function GarmentModal({
   const [pending, startTransition] = useTransition();
   const runViewTransition = useViewTransition();
 
-  // Socks and accessories do not take part in the colour matching, and a
+  // Accessories do not take part in the colour matching, and a
   // piece with no colour has nothing to match on.
   const canCombine =
     garment.colors.length > 0 && !EXTRA_CATEGORIES.has(garment.category);

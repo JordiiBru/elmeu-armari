@@ -66,9 +66,8 @@ describe("isWashable", () => {
     expect(isWashable(garment("c", "PANTS"))).toBe(true);
   });
 
-  it("shoes, socks and accessories are not", () => {
+  it("shoes and accessories are not", () => {
     expect(isWashable(garment("d", "SHOES"))).toBe(false);
-    expect(isWashable(garment("e", "SOCKS"))).toBe(false);
     expect(isWashable(garment("f", "ACCESSORI"))).toBe(false);
   });
 });
@@ -84,7 +83,7 @@ describe("isDirty", () => {
 
   it("a non-washable garment is never dirty, even carrying a dirtySince", () => {
     expect(isDirty(garment("s", "SHOES", { dirty: true }))).toBe(false);
-    expect(isDirty(garment("k", "SOCKS", { dirty: true }))).toBe(false);
+    expect(isDirty(garment("k", "ACCESSORI", { dirty: true }))).toBe(false);
   });
 });
 

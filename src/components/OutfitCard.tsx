@@ -6,7 +6,7 @@ import type { OutfitGroup, PaletteMatch } from "@/lib/outfits/types";
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 import { PieceThumb } from "./PieceThumb";
 
-const CATEGORY_ORDER: Category[] = ["SHIRT", "SWEATER", "PANTS", "SOCKS", "SHOES"];
+const CATEGORY_ORDER: Category[] = ["SHIRT", "SWEATER", "PANTS", "SHOES"];
 
 function sortedGarments(garments: OutfitGroup["garments"]) {
   return [...garments].sort((a, b) => {

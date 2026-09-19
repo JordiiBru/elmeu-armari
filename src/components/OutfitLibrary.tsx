@@ -24,7 +24,7 @@ import {
 } from "@/components/ui";
 import { TOAST_DURATION_MS } from "@/components/ui/toast";
 
-/** The categories an outfit is made of — socks and accessories still
+/** The categories an outfit is made of — accessories still
  * belong to the day, not to the look, so filtering by them has nothing
  * to group on here. Shoes do belong to the outfit now. */
 type Filter = "ALL" | "SWEATER" | "SHIRT" | "PANTS" | "SHOES";

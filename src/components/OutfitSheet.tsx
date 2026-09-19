@@ -282,7 +282,7 @@ export function OutfitSheet({
           <div className="flex items-center justify-between gap-4">
             {/* Pinned rather than left at the bottom of the scrolling
                 body: on a well-stocked wardrobe's WearGrid, "eliminar"
-                sat a full screen of socks and accessories below the
+                sat a full screen of accessories below the
                 fold. It is destructive and irreversible — the one
                 action here that should never cost a scroll to reach. */}
             {allowDelete ? (

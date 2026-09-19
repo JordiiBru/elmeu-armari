@@ -3,7 +3,7 @@ import { WASHABLE_CATEGORIES } from "@/lib/prendas/types";
 import type { SavedOutfit } from "@/lib/outfits/types";
 import { wornRank } from "@/lib/outfits/worn";
 
-/** Shoes, socks and accessories never go to the basket. */
+/** Shoes and accessories never go to the basket. */
 export function isWashable(garment: GarmentWithColors): boolean {
   return WASHABLE_CATEGORIES.has(garment.category);
 }

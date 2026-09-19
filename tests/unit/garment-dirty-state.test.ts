@@ -5,7 +5,6 @@ const catalog: Record<string, Category> = {
   shirt: "SHIRT",
   pants: "PANTS",
   shoes: "SHOES",
-  socks: "SOCKS",
   ring: "ACCESSORI",
 };
 
@@ -35,7 +34,7 @@ beforeEach(() => {
 
 describe("markGarmentsDirty", () => {
   it("writes nothing when every id is a non-washable category", async () => {
-    const affected = await markGarmentsDirty(["shoes", "socks", "ring"]);
+    const affected = await markGarmentsDirty(["shoes", "ring"]);
     expect(affected).toBe(0);
     expect(setGarmentsDirtyState).not.toHaveBeenCalled();
   });

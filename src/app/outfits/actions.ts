@@ -30,8 +30,8 @@ export async function deleteOutfitAction(id: string) {
 }
 
 /**
- * Committing a day: the outfit (shoes included) plus the socks and
- * accessories you wear it with. Lives here rather than next to a route
+ * Committing a day: the outfit (shoes included) plus the accessories
+ * you wear it with. Lives here rather than next to a route
  * because the three strata of "què em poso?" (the day's plate, the
  * week, the collection) all call it, and so does the piece grid's
  * laundry badge.

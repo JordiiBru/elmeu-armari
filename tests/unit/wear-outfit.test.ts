@@ -74,7 +74,6 @@ vi.mock("@/lib/outfits/repository", () => ({
 const garmentCatalog: Record<string, GarmentWithColors> = {
   shoes1: garment("shoes1", "SHOES"),
   shoes2: garment("shoes2", "SHOES"),
-  socks: garment("socks", "SOCKS"),
   ring: garment("ring", "ACCESSORI"),
   pants: garment("pants", "PANTS"), // not an extra category
 };
@@ -111,14 +110,14 @@ describe("wearOutfit", () => {
   it("drops ids that are not an extra category", async () => {
     findOutfitById.mockResolvedValue(outfitRow("o1", [garment("sh", "SHIRT")]));
 
-    await wearOutfit("o1", new Date("2026-08-20T00:00:00Z"), ["pants", "socks"]);
+    await wearOutfit("o1", new Date("2026-08-20T00:00:00Z"), ["pants", "ring"]);
 
     expect(setWornDay).toHaveBeenCalledWith(
       "o1",
       // Truncated to midnight UTC: the unique constraint on WornEvent.date
       // is what enforces one outfit per day, so the time must never survive.
       new Date("2026-08-20T00:00:00Z"),
-      ["socks"],
+      ["ring"],
     );
   });
 

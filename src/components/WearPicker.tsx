@@ -10,7 +10,6 @@ import { EmptyState, Icon, Stack, Text } from "@/components/ui";
 
 export interface WearGroups {
   accessories: GarmentWithColors[];
-  socks: GarmentWithColors[];
 }
 
 const PICKER_SIZES = "(min-width: 1024px) 12vw, (min-width: 640px) 15vw, 40vw";
@@ -75,13 +74,12 @@ function PickGrid({ children }: { children: React.ReactNode }) {
  * Shoes moved out of this picker and into the outfit itself — the group
  * you save now commits to the shoes it was matched with, the same way
  * it commits to a shirt. What's left here is what still varies day to
- * day regardless of which outfit you picked: accessories, and socks.
+ * day regardless of which outfit you picked: accessories.
  */
 export function useWearGroups(candidates: GarmentWithColors[]): WearGroups {
   return useMemo(
     () => ({
       accessories: candidates.filter((g) => g.category === "ACCESSORI"),
-      socks: candidates.filter((g) => g.category !== "ACCESSORI"),
     }),
     [candidates],
   );
@@ -104,10 +102,10 @@ export function WearGrid({
   suggested?: GarmentWithColors[];
 }) {
   const t = useTranslations("outfits");
-  const { accessories, socks } = groups;
+  const { accessories } = groups;
   const selectedExtras = useMemo(() => new Set(extraIds), [extraIds]);
 
-  if (accessories.length === 0 && socks.length === 0) {
+  if (accessories.length === 0) {
     return (
       <EmptyState
         title={t("noAccessories")}
@@ -147,22 +145,6 @@ export function WearGrid({
           <Text variant="caption">{t("accessories")}</Text>
           <PickGrid>
             {accessories.map((g) => (
-              <PickTile
-                key={g.id}
-                garment={g}
-                disabled={disabled}
-                selected={selectedExtras.has(g.id)}
-                onClick={() => onToggleExtra(g.id)}
-              />
-            ))}
-          </PickGrid>
-        </Stack>
-      )}
-      {socks.length > 0 && (
-        <Stack gap={3}>
-          <Text variant="caption">{t("socks")}</Text>
-          <PickGrid>
-            {socks.map((g) => (
               <PickTile
                 key={g.id}
                 garment={g}

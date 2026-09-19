@@ -197,8 +197,8 @@ export async function settlePastWornEvents(): Promise<number> {
 }
 
 /**
- * Today's committed day: the outfit (shoes included), and the socks and
- * accessories it is being worn with.
+ * Today's committed day: the outfit (shoes included), and the accessories
+ * it is being worn with.
  *
  * Read straight from today rather than off the week plan. The plate used
  * to pick its extras out of the seven days the planner had loaded, which

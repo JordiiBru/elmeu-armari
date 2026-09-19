@@ -47,7 +47,7 @@ const GREY_RUNGS = new Map<string, number>([
  *   3. A set of garments forms a valid outfit when the intersection
  *      of their palette sets is non-empty and the categorical
  *      constraints hold (≥ 1 pants + ≥ 1 top + ≥ 1 shoe, no repeated
- *      category, no socks). A shirt under a sweater is the one
+ *      category). A shirt under a sweater is the one
  *      optional top: hidden, so any colour does, and the engine only
  *      surfaces one when it happens to match. A shoe is never
  *      optional — always visible, so no match means no suggestion,
@@ -60,7 +60,7 @@ const GREY_RUNGS = new Map<string, number>([
  * together."
  */
 
-// The extra categories (socks, accessories) never join an outfit: nobody
+// The extra categories (accessories) never join an outfit: nobody
 // picks a look around them, they are chosen when a day is worn. The set
 // is the one the data model uses, so the two cannot drift apart. Shoes
 // used to be excluded here too — the model has since changed to let the

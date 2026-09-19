@@ -50,7 +50,7 @@ export interface SavedOutfit {
 export interface WornDay {
   id: string;
   date: Date;
-  /** Socks / accessories worn that day. */
+  /** Accessories worn that day. */
   extras: GarmentWithColors[];
 }
 

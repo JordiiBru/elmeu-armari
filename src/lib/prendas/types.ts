@@ -2,7 +2,7 @@ import type { Category, Pattern, Texture, Season } from "@/generated/prisma/enum
 
 export type { Category, Pattern, Texture, Season };
 
-export const CATEGORIES: Category[] = ["SWEATER", "SHIRT", "PANTS", "SOCKS", "SHOES", "ACCESSORI"];
+export const CATEGORIES: Category[] = ["SWEATER", "SHIRT", "PANTS", "SHOES", "ACCESSORI"];
 export const TEXTURES: Texture[] = ["KNIT", "DENIM", "LINEN", "COTTON", "POLYESTER", "LEATHER", "SYNTHETIC"];
 export const PATTERNS: Pattern[] = ["PLAIN", "STRIPES", "CHECKS", "FLORAL", "PRINTED", "GEOMETRIC"];
 export const SEASONS: Season[] = ["SPRING", "SUMMER", "AUTUMN", "WINTER", "ALL_YEAR"];
@@ -11,7 +11,6 @@ export const SUBTYPES_BY_CATEGORY: Record<Category, string[]> = {
   SWEATER:   ["PULLOVER", "ZIP", "HOODIE", "CARDIGAN"],
   SHIRT:     ["TEE", "POLO", "CAMISA"],
   PANTS:     ["VAQUERS", "CHINO", "JOGGER", "CARGO"],
-  SOCKS:     [],
   SHOES:     ["SNEAKER", "BOTA", "LOAFER", "SANDALIA", "OXFORD"],
   ACCESSORI: ["ANELL", "RELLOTGE", "CINTURO", "BOSSA", "BARRET", "BUFANDA", "ULLERES"],
 };
@@ -22,7 +21,6 @@ export const LENGTHS_BY_CATEGORY: Record<Category, string[]> = {
   SWEATER:   [],
   SHIRT:     [],
   PANTS:     ["SHORT", "LONG"],
-  SOCKS:     [],
   SHOES:     [],
   ACCESSORI: [],
 };
@@ -37,7 +35,6 @@ export const FITS_BY_CATEGORY: Record<Category, string[]> = {
   SWEATER:   ["REGULAR", "OVERSIZED", "CROPPED"],
   SHIRT:     ["REGULAR", "SLIM", "OVERSIZED", "CROPPED"],
   PANTS:     ["STRAIGHT", "SLIM", "SKINNY", "BAGGY", "BARREL", "WIDE_LEG"],
-  SOCKS:     ["CURT", "TURMELL", "MITJA_CANYA", "GENOLLERA"],
   SHOES:     ["LOW_TOP", "MID", "HIGH_TOP"],
   ACCESSORI: [],
 };
@@ -48,7 +45,6 @@ export const SIZES_BY_CATEGORY: Record<Category, string[]> = {
   SWEATER:   ["XS", "S", "M", "L", "XL", "XXL"],
   SHIRT:     ["XS", "S", "M", "L", "XL", "XXL"],
   PANTS:     ["28", "29", "30", "31", "32", "33", "34", "36", "38"],
-  SOCKS:     ["36-40", "40-46"],
   SHOES:     ["38", "39", "40", "41", "42", "43", "44", "45", "46"],
   ACCESSORI: [],
 };
@@ -59,7 +55,6 @@ export const TEXTURES_BY_CATEGORY: Record<Category, Texture[]> = {
   SWEATER: TEXTURES,
   SHIRT: TEXTURES,
   PANTS: TEXTURES,
-  SOCKS: TEXTURES,
   SHOES: TEXTURES,
   ACCESSORI: [],
 };
@@ -68,7 +63,6 @@ export const PATTERNS_BY_CATEGORY: Record<Category, Pattern[]> = {
   SWEATER: PATTERNS,
   SHIRT: PATTERNS,
   PANTS: PATTERNS,
-  SOCKS: PATTERNS,
   SHOES: PATTERNS,
   ACCESSORI: [],
 };
@@ -81,15 +75,15 @@ export const CATEGORIES_WITH_OPTIONAL_COLOR = new Set<Category>(["ACCESSORI"]);
 // colour-matching engine and are picked when you commit a day, so they
 // belong to the WornEvent and not to the Outfit. Shoes moved out of this
 // set on purpose — the outfit now commits to the shoes it was matched
-// with, the same way it commits to a shirt. Socks and accessories stay
-// flexible: nobody picks an outfit around its socks.
-export const EXTRA_CATEGORIES = new Set<Category>(["SOCKS", "ACCESSORI"]);
+// with, the same way it commits to a shirt. Accessories stay flexible:
+// nobody picks an outfit around its accessories.
+export const EXTRA_CATEGORIES = new Set<Category>(["ACCESSORI"]);
 
 // The complement: what a saved outfit is made of. Used by the outfit
 // builder and by the server-side validation of a worn day.
 export const OUTFIT_CATEGORIES = CATEGORIES.filter((c) => !EXTRA_CATEGORIES.has(c));
 
-// Categories that can be dirty at all. Shoes, socks and accessories are
+// Categories that can be dirty at all. Shoes and accessories are
 // always available: they never block an outfit and never appear in the
 // laundry lists.
 export const WASHABLE_CATEGORIES = new Set<Category>(["SWEATER", "SHIRT", "PANTS"]);
