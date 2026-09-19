@@ -1,4 +1,5 @@
 import type { GarmentWithColors } from "@/lib/prendas/types";
+import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import type { SanzoPalette, PaletteMatch, OutfitGroup } from "./types";
 import { namedColors } from "@/lib/colors";
 import type { NamedColor } from "@/lib/colors";
@@ -59,11 +60,12 @@ const GREY_RUNGS = new Map<string, number>([
  * together."
  */
 
-// Socks are the one category that never joins an outfit: nobody picks a
-// look around them. Shoes used to be excluded here too — the model has
-// since changed to let the outfit commit to the shoes it was matched
-// with, rather than picking them separately each time it's worn.
-const EXCLUDED_CATEGORIES = new Set(["SOCKS"]);
+// The extra categories (socks, accessories) never join an outfit: nobody
+// picks a look around them, they are chosen when a day is worn. The set
+// is the one the data model uses, so the two cannot drift apart. Shoes
+// used to be excluded here too — the model has since changed to let the
+// outfit commit to the shoes it was matched with, rather than picking
+// them separately each time it's worn.
 const MIN_PIECES = 2;
 
 // A palette is a meaningful anchor for an outfit only if the outfit
@@ -168,7 +170,7 @@ function intersectSets(sets: Set<number>[]): Set<number> {
 }
 
 function buildContext(g: GarmentWithColors): Ctx | null {
-  if (EXCLUDED_CATEGORIES.has(g.category)) return null;
+  if (EXTRA_CATEGORIES.has(g.category)) return null;
   if (g.colors.length === 0) return null;
 
   const snaps: Snap[] = [];
