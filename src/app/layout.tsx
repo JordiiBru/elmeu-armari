@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
 import { ToastProvider } from "@/components/ui";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { PageTitleProvider } from "@/lib/PageTitleContext";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -50,11 +51,13 @@ export default async function RootLayout({
         <NextIntlClientProvider>
           <ThemeProvider>
             <ToastProvider>
-              <SiteHeader
-                username={session?.user?.username ?? null}
-                locked={session?.user?.mustChangePw ?? false}
-              />
-              <main className="flex-1 flex flex-col">{children}</main>
+              <PageTitleProvider>
+                <SiteHeader
+                  username={session?.user?.username ?? null}
+                  locked={session?.user?.mustChangePw ?? false}
+                />
+                <main className="flex-1 flex flex-col">{children}</main>
+              </PageTitleProvider>
             </ToastProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

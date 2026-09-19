@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Heading } from "./Heading";
 import { Text } from "./Text";
 import { Stack } from "./Stack";
+import { PageTitleSentinel } from "@/components/PageTitleSentinel";
 
 type Level = "hero" | "title-xl" | "title";
 
@@ -27,7 +28,9 @@ export function SectionHeader({
   return (
     <Stack as="header" gap={2} className={`pt-2 pb-8 md:pb-10 ${className ?? ""}`}>
       {eyebrow && <Text variant="caption">{eyebrow}</Text>}
-      <Heading level={level}>{title}</Heading>
+      <PageTitleSentinel title={title}>
+        <Heading level={level}>{title}</Heading>
+      </PageTitleSentinel>
       {subtitle && (
         <Text variant="subtitle" tone="secondary" as="p" className="max-w-lg leading-relaxed">
           {subtitle}

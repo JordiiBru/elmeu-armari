@@ -20,6 +20,15 @@ interface Props<V extends string> {
    * is decided by their order in the stylesheet, not in the class list.
    */
   wrap?: boolean;
+  /**
+   * A fixed three-column grid on mobile instead of flowing the options —
+   * for a control with enough of them, and long enough labels, that
+   * wrapping means one packed line and a short orphan under it, and
+   * scrolling means half of them are never on screen at once. Two
+   * balanced rows instead of either. `sm:` and up ignores this and
+   * flows normally per `wrap`.
+   */
+  grid?: boolean;
   className?: string;
 }
 
@@ -34,6 +43,7 @@ export function SegmentedControl<V extends string>({
   options,
   ariaLabel,
   wrap = true,
+  grid = false,
   className,
 }: Props<V>) {
   return (
@@ -41,8 +51,9 @@ export function SegmentedControl<V extends string>({
       role="radiogroup"
       aria-label={ariaLabel}
       className={[
-        "inline-flex gap-x-6 gap-y-2",
-        wrap ? "flex-wrap" : "flex-nowrap",
+        grid
+          ? "grid grid-cols-3 gap-x-6 gap-y-3 justify-items-start sm:inline-flex sm:flex-wrap sm:gap-y-2"
+          : ["inline-flex gap-x-6 gap-y-2", wrap ? "flex-wrap" : "flex-nowrap"].join(" "),
         className,
       ]
         .filter(Boolean)

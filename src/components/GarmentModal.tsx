@@ -10,6 +10,7 @@ import type { SanzoPalette } from "@/lib/outfits/types";
 import { OutfitBottomSheet } from "./OutfitBottomSheet";
 import { optionLabel } from "@/lib/prendas/labels";
 import { PieceThumb } from "./PieceThumb";
+import { useViewTransition } from "@/lib/useViewTransition";
 import { Button, Sheet, Text, TextButton, Stack } from "@/components/ui";
 
 interface Props {
@@ -17,6 +18,8 @@ interface Props {
   allGarments: GarmentWithColors[];
   palettes: SanzoPalette[];
   savedOutfitKeys: string[];
+  sweaterInSeason: boolean;
+  shortsInSeason: boolean;
   onClose: () => void;
 }
 
@@ -25,6 +28,8 @@ export function GarmentModal({
   allGarments,
   palettes,
   savedOutfitKeys,
+  sweaterInSeason,
+  shortsInSeason,
   onClose,
 }: Props) {
   const t = useTranslations("modal");
@@ -38,9 +43,10 @@ export function GarmentModal({
   // outfits you had just saved.
   const [savedHere, setSavedHere] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
+  const runViewTransition = useViewTransition();
 
-  // Shoes, socks and accessories do not take part in the colour matching,
-  // and a piece with no colour has nothing to match on.
+  // Socks and accessories do not take part in the colour matching, and a
+  // piece with no colour has nothing to match on.
   const canCombine =
     garment.colors.length > 0 && !EXTRA_CATEGORIES.has(garment.category);
 
@@ -79,8 +85,11 @@ export function GarmentModal({
         palettes={palettes}
         savedOutfitKeys={[...savedOutfitKeys, ...savedHere]}
         onOutfitSaved={(key) => setSavedHere((prev) => [...prev, key])}
-        onBack={() => setCombineOpen(false)}
+        onBack={() => runViewTransition(() => setCombineOpen(false))}
         onClose={onClose}
+        sweaterInSeason={sweaterInSeason}
+        shortsInSeason={shortsInSeason}
+        skipEnter
       />
     );
   }
@@ -88,24 +97,74 @@ export function GarmentModal({
   return (
     <Sheet
       onClose={onClose}
-      size="md"
+      size="xl"
+      fill
       label={t("sheetLabel", { category: tLabel(`category.${garment.category}`) })}
       media={<PieceThumb garment={garment} priority className="h-full w-full" />}
       mediaHeight="h-40"
       // The reason this modal replaced a whole screen: matching a piece
       // against Sanzo Wada is the app's centre of gravity, not a footnote
-      // to its swatches. Pinned, primary, and the widest thing here.
+      // to its swatches. Pinned, full-width, and on its own row: it used
+      // to share a row with "eliminar", which meant a wide primary button
+      // and a short destructive one sat pressed right up against each
+      // other. "Editar" and "eliminar" are quieter, same-weight actions —
+      // they were never a pair to begin with, "editar" stranded at the
+      // bottom of the scrolling body and "eliminar" up here instead. Same
+      // row, same level, above the one action that actually needs the
+      // width. This was the model to reach for from the start, not
+      // something to patch in after the fact.
       footer={
-        canCombine ? (
-          <Button
-            type="button"
-            size="lg"
-            onClick={() => setCombineOpen(true)}
-            className="w-full justify-center"
-          >
-            {t("combine")}
-          </Button>
-        ) : undefined
+        confirming ? (
+          <div className="flex items-center justify-end gap-4">
+            <TextButton
+              type="button"
+              tone="secondary"
+              onClick={() => setConfirming(false)}
+              disabled={pending}
+              className="type-small"
+            >
+              {tCommon("cancel")}
+            </TextButton>
+            <TextButton
+              type="button"
+              tone="danger"
+              onClick={handleDelete}
+              disabled={pending}
+              className="type-small"
+            >
+              {pending ? tCommon("deleting") : tCommon("deleteConfirm")}
+            </TextButton>
+          </div>
+        ) : (
+          <Stack gap={4}>
+            <div className="flex items-center justify-between gap-4">
+              <Link
+                href={`/edit/${garment.id}`}
+                className="inline-flex min-h-11 items-center font-serif italic type-small text-text-primary hover:text-text-secondary transition-colors"
+              >
+                {tCommon("edit")}
+              </Link>
+              <TextButton
+                type="button"
+                tone="danger"
+                onClick={() => setConfirming(true)}
+                className="type-small"
+              >
+                {tCommon("delete")}
+              </TextButton>
+            </div>
+            {canCombine && (
+              <Button
+                type="button"
+                size="lg"
+                onClick={() => runViewTransition(() => setCombineOpen(true))}
+                className="w-full justify-center"
+              >
+                {t("combine")}
+              </Button>
+            )}
+          </Stack>
+        )
       }
       header={
         <Stack gap={1}>
@@ -184,44 +243,6 @@ export function GarmentModal({
           </Text>
         </Stack>
       )}
-
-      <div className="flex items-center justify-between pt-4 border-t border-border">
-        <Link
-          href={`/edit/${garment.id}`}
-          className="font-serif italic type-small text-text-primary hover:text-text-secondary transition-colors"
-        >
-          {tCommon("edit")}
-        </Link>
-        {confirming ? (
-          <div className="flex items-center gap-4">
-            <TextButton
-              type="button"
-              tone="secondary"
-              onClick={() => setConfirming(false)}
-              disabled={pending}
-            >
-              {tCommon("cancel")}
-            </TextButton>
-            <TextButton
-              type="button"
-              tone="danger"
-              onClick={handleDelete}
-              disabled={pending}
-            >
-              {pending ? tCommon("deleting") : tCommon("deleteConfirm")}
-            </TextButton>
-          </div>
-        ) : (
-          <TextButton
-            type="button"
-            tone="danger"
-            onClick={() => setConfirming(true)}
-          >
-            {tCommon("delete")}
-          </TextButton>
-        )}
-      </div>
-
     </Sheet>
   );
 }

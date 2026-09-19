@@ -55,8 +55,12 @@ function isAchromatic(hex: string): boolean {
  *      every colour of the piece.
  *   3. A set of garments forms a valid outfit when the intersection
  *      of their palette sets is non-empty and the categorical
- *      constraints hold (≥ 1 pants + ≥ 1 top, no repeated category,
- *      no socks or shoes).
+ *      constraints hold (≥ 1 pants + ≥ 1 top + ≥ 1 shoe, no repeated
+ *      category, no socks). A shirt under a sweater is the one
+ *      optional top: hidden, so any colour does, and the engine only
+ *      surfaces one when it happens to match. A shoe is never
+ *      optional — always visible, so no match means no suggestion,
+ *      not an incomplete one.
  *
  * There is no palette-coverage requirement: if a palette contains a
  * colour the outfit doesn't wear, that's fine — you're just not
@@ -65,7 +69,11 @@ function isAchromatic(hex: string): boolean {
  * together."
  */
 
-const EXCLUDED_CATEGORIES = new Set(["SOCKS", "SHOES"]);
+// Socks are the one category that never joins an outfit: nobody picks a
+// look around them. Shoes used to be excluded here too — the model has
+// since changed to let the outfit commit to the shoes it was matched
+// with, rather than picking them separately each time it's worn.
+const EXCLUDED_CATEGORIES = new Set(["SOCKS"]);
 const MIN_PIECES = 2;
 
 // A palette is a meaningful anchor for an outfit only if the outfit
@@ -76,7 +84,15 @@ const MIN_PIECES = 2;
 const MIN_DISTINCT_PALETTE_COLORS = 2;
 
 // Order in which garments should be laid out in a rendered outfit.
-const CATEGORY_LAYOUT_ORDER = ["SHIRT", "SWEATER", "PANTS"] as const;
+const CATEGORY_LAYOUT_ORDER = ["SHIRT", "SWEATER", "PANTS", "SHOES"] as const;
+
+// A well-stocked wardrobe with shoes mandatory and black/white riding
+// in for free clears a thousand valid combinations without trying —
+// mathematically real, but nobody is choosing among a thousand outfits
+// for one shirt. Capped to the best of them (already sorted by piece
+// count then colour distance before this runs) rather than left to
+// pagination to hide the scale of it one page at a time.
+const MAX_GROUPS = 60;
 
 /** A candidate canonical reading of one garment colour. */
 interface Candidate {
@@ -212,6 +228,28 @@ function hasTop(cats: Set<string>): boolean {
 function hasBottom(cats: Set<string>): boolean {
   return cats.has("PANTS");
 }
+// A shirt under a sweater stays optional — it's hidden, so any colour
+// does, and the engine already only surfaces one when it happens to
+// match. Shoes are the opposite: always visible, so a suggestion with
+// none isn't an incomplete outfit, it's a wrong one.
+function hasShoes(cats: Set<string>): boolean {
+  return cats.has("SHOES");
+}
+
+// Pure black and pure white are the one deliberate exception to "these
+// two garments are on the same page of the book": real styling doesn't
+// wait for the Sanzo Wada catalogue to agree that a black shoe goes
+// with a saturated outfit — it just does. Without this, making shoes
+// mandatory would have meant some outfits stop being suggested at all
+// the moment their real colour has no genuine match in the wardrobe,
+// which is a worse outcome than a "wrong" match that's actually safe.
+const SAFE_NEUTRAL_SHOE_HEXES = new Set(["#000000", "#ffffff"]);
+function isSafeNeutralShoe(g: GarmentWithColors): boolean {
+  return (
+    g.category === "SHOES" &&
+    g.colors.some((c) => SAFE_NEUTRAL_SHOE_HEXES.has(c.hex.toLowerCase()))
+  );
+}
 
 /**
  * Build a PaletteMatch (the shape the UI expects) from a set of
@@ -279,7 +317,7 @@ function enumerateOutfits(
       const common = intersectSets(commonSets);
       if (common.size > 0) {
         const cats = new Set([target.garment.category, ...current.map((c) => c.garment.category)]);
-        if (hasBottom(cats) && hasTop(cats)) {
+        if (hasBottom(cats) && hasTop(cats) && hasShoes(cats)) {
           onOutfit([target, ...current], common);
         }
       }
@@ -290,9 +328,22 @@ function enumerateOutfits(
       // No two garments of the same category in an outfit.
       if (current.some((c) => c.garment.category === cand.garment.category)) continue;
       if (cand.garment.category === target.garment.category) continue;
-      const nextSets = commonSets.concat(cand.paletteIds);
-      const nextIntersection = intersectSets(nextSets);
-      if (nextIntersection.size === 0) continue;
+
+      const withCandSets = commonSets.concat(cand.paletteIds);
+      const withCandIntersection = intersectSets(withCandSets);
+
+      let nextSets: Set<number>[];
+      if (withCandIntersection.size > 0) {
+        nextSets = withCandSets;
+      } else if (isSafeNeutralShoe(cand.garment)) {
+        // Real match failed, but black/white never needed one — ride
+        // along without narrowing the palette any further, rather than
+        // costing the outfit its only possible shoe.
+        nextSets = commonSets;
+      } else {
+        continue;
+      }
+
       current.push(cand);
       pick(i + 1, current, nextSets);
       current.pop();
@@ -307,6 +358,43 @@ function sortOutfitGarments(garments: GarmentWithColors[]): GarmentWithColors[] 
     return i === -1 ? 99 : i;
   };
   return [...garments].sort((a, b) => rank(a.category) - rank(b.category));
+}
+
+/**
+ * Push sweater-anchored groups to the very end when the sweater is out of
+ * season — never dropped, only deprioritised, per the product rule. A
+ * pure post-sort: it never touches which groups exist, only their order,
+ * so it composes with whatever the caller already sorted by.
+ */
+function sortBySweaterSeason(groups: OutfitGroup[], sweaterInSeason: boolean): OutfitGroup[] {
+  if (sweaterInSeason) return groups;
+  const inSeason: OutfitGroup[] = [];
+  const outOfSeason: OutfitGroup[] = [];
+  for (const g of groups) {
+    (g.garments.some((garment) => garment.category === "SWEATER") ? outOfSeason : inSeason).push(g);
+  }
+  return [...inSeason, ...outOfSeason];
+}
+
+/**
+ * Same idea as `sortBySweaterSeason`, for the one category with exactly
+ * one season: a group built around shorts only sinks — it's still the
+ * most literal answer to "what goes with this", just not the one worth
+ * leading with in November. Independent of the sweater sink: summer
+ * (shorts out) and sweater-season (autumn/winter/spring) never overlap,
+ * so the two sinks never fight over the same group.
+ */
+function sortByShortsSeason(groups: OutfitGroup[], shortsInSeason: boolean): OutfitGroup[] {
+  if (shortsInSeason) return groups;
+  const inSeason: OutfitGroup[] = [];
+  const outOfSeason: OutfitGroup[] = [];
+  for (const g of groups) {
+    const hasShorts = g.garments.some(
+      (garment) => garment.category === "PANTS" && garment.length === "SHORT",
+    );
+    (hasShorts ? outOfSeason : inSeason).push(g);
+  }
+  return [...inSeason, ...outOfSeason];
 }
 
 function refinePalettes(
@@ -336,6 +424,12 @@ export function generateOutfitGroupsForGarment(
   palettes: SanzoPalette[],
   limit: number = 10,
   offset: number = 0,
+  /** Whether sweater-anchored groups should rank normally (true, the
+   * default — jersey season, or the user forced it on) or sink to the end
+   * (false — out of season, or forced off). Never excludes them. */
+  sweaterInSeason: boolean = true,
+  /** Same, for groups built around shorts. */
+  shortsInSeason: boolean = true,
 ): { groups: OutfitGroup[]; hasMore: boolean } {
   const targetCtx = buildContext(targetGarment);
   if (!targetCtx) return { groups: [], hasMore: false };
@@ -346,10 +440,12 @@ export function generateOutfitGroupsForGarment(
     if (g.category === targetGarment.category) continue;
     const ctx = buildContext(g);
     if (!ctx) continue;
-    // Prune: if target + candidate share no palette, we can drop
-    // early because deeper sets can only shrink.
+    // Prune: if target + candidate share no palette, we can drop early
+    // because deeper sets can only shrink — except a safe black/white
+    // shoe, which `enumerateOutfits` lets ride along regardless of a
+    // real match, so it needs the chance to be tried at all.
     const shared = intersectSets([targetCtx.paletteIds, ctx.paletteIds]);
-    if (shared.size === 0) continue;
+    if (shared.size === 0 && !isSafeNeutralShoe(g)) continue;
     candidates.push(ctx);
   }
 
@@ -374,9 +470,11 @@ export function generateOutfitGroupsForGarment(
     }
     return a.bestDistance - b.bestDistance;
   });
+  const ranked = sortByShortsSeason(sortBySweaterSeason(groups, sweaterInSeason), shortsInSeason)
+    .slice(0, MAX_GROUPS);
 
-  const paginated = groups.slice(offset, offset + limit);
-  return { groups: paginated, hasMore: groups.length > offset + limit };
+  const paginated = ranked.slice(offset, offset + limit);
+  return { groups: paginated, hasMore: ranked.length > offset + limit };
 }
 
 export function generateOutfitGroups(
@@ -384,6 +482,8 @@ export function generateOutfitGroups(
   palettes: SanzoPalette[],
   limit: number = 10,
   offset: number = 0,
+  sweaterInSeason: boolean = true,
+  shortsInSeason: boolean = true,
 ): { groups: OutfitGroup[]; hasMore: boolean } {
   const groupsByKey = new Map<string, OutfitGroup>();
   const contexts: Ctx[] = [];
@@ -421,6 +521,8 @@ export function generateOutfitGroups(
     }
     return a.bestDistance - b.bestDistance;
   });
+  const ranked = sortByShortsSeason(sortBySweaterSeason(all, sweaterInSeason), shortsInSeason)
+    .slice(0, MAX_GROUPS);
 
-  return { groups: all.slice(offset, offset + limit), hasMore: all.length > offset + limit };
+  return { groups: ranked.slice(offset, offset + limit), hasMore: ranked.length > offset + limit };
 }

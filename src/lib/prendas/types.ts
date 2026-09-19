@@ -79,8 +79,11 @@ export const CATEGORIES_WITH_OPTIONAL_COLOR = new Set<Category>(["ACCESSORI"]);
 
 // Categories that are never part of a saved outfit: they sit outside the
 // colour-matching engine and are picked when you commit a day, so they
-// belong to the WornEvent and not to the Outfit.
-export const EXTRA_CATEGORIES = new Set<Category>(["SHOES", "SOCKS", "ACCESSORI"]);
+// belong to the WornEvent and not to the Outfit. Shoes moved out of this
+// set on purpose — the outfit now commits to the shoes it was matched
+// with, the same way it commits to a shirt. Socks and accessories stay
+// flexible: nobody picks an outfit around its socks.
+export const EXTRA_CATEGORIES = new Set<Category>(["SOCKS", "ACCESSORI"]);
 
 // The complement: what a saved outfit is made of. Used by the outfit
 // builder and by the server-side validation of a worn day.

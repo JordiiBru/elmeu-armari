@@ -50,3 +50,4 @@ export function groupOutfitsBy(
     (piece) => byPiece.get(piece.id)!,
   );
 }
+

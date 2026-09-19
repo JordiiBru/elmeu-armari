@@ -6,16 +6,21 @@ import { useTranslations } from "next-intl";
 import { useSheetState } from "@/lib/useSheetState";
 import { useSwipeToClose } from "@/lib/useSwipeToClose";
 import { IconButton } from "./IconButton";
+import { TextButton } from "./TextButton";
 import { Icon } from "./Icon";
 
 type Size = "md" | "lg" | "xl" | "2xl";
 
+// A second, wider step at `xl:` (1280px) rather than `lg:` (1024px):
+// growing it on a mid-size laptop window left it crowding the browser
+// chrome, and the complaint was specifically about a genuinely large
+// screen reading as "a little square in the middle" of it.
 const PANEL_MAX: Record<Size, string> = {
-  md: "sm:max-w-md",
-  lg: "sm:max-w-lg",
-  xl: "sm:max-w-2xl",
+  md: "sm:max-w-md xl:max-w-lg",
+  lg: "sm:max-w-lg xl:max-w-xl",
+  xl: "sm:max-w-2xl xl:max-w-3xl",
   // Only for `split`: two columns need the width of two columns.
-  "2xl": "sm:max-w-4xl",
+  "2xl": "sm:max-w-4xl xl:max-w-5xl",
 };
 
 interface Props {
@@ -66,6 +71,30 @@ interface Props {
    * there.
    */
   split?: boolean;
+  /**
+   * For a sheet that is replacing a sibling sheet — piece detail into
+   * "què hi combina", discover's rail into a piece's combinations —
+   * rather than opening fresh. Starts already open instead of sliding
+   * up from the bottom, so pairing this with `useViewTransition` morphs
+   * one panel into the other instead of a slide-up cutting in on top of
+   * it. Leave it off for a sheet's first open.
+   */
+  skipEnter?: boolean;
+  /**
+   * One level up, back to the sheet this one stepped in for — as
+   * opposed to `onClose`, which leaves the whole flow. Rendered beside
+   * the close button, not inside `header`: three call sites once built
+   * their own "back" text button into their own header content, each
+   * against a `justify-between` nested one level deeper than the X's
+   * own row, and the two drifted out of alignment with each other.
+   * Structural, not a per-sheet detail — every sheet that has a "back"
+   * gets it at the same place, for free.
+   */
+  onBack?: () => void;
+  /** Required together with `onBack`. Caller-supplied rather than a
+   * fixed translation key: this is a generic UI primitive, not scoped
+   * to any one feature's message namespace. */
+  backLabel?: string;
 }
 
 /**
@@ -85,10 +114,13 @@ export function Sheet({
   footer,
   fill = false,
   split = false,
+  skipEnter = false,
+  onBack,
+  backLabel,
   children,
 }: Props) {
   const tCommon = useTranslations("common");
-  const { open, close } = useSheetState(onClose, 420);
+  const { open, close } = useSheetState(onClose, 420, skipEnter);
   const swipe = useSwipeToClose(close);
   const panel = useRef<HTMLDivElement>(null);
 
@@ -149,7 +181,7 @@ export function Sheet({
   // dvh, not vh: on a phone the address bar counts towards vh, so a
   // 92vh bottom sheet parks its own footer under it.
   const heightClass = fill
-    ? "h-[92dvh] sm:h-[min(48rem,92dvh)]"
+    ? "h-[92dvh] sm:h-[min(48rem,92dvh)] xl:h-[min(56rem,92dvh)]"
     : "max-h-[92dvh]";
 
   const mediaBox = media && (
@@ -172,14 +204,20 @@ export function Sheet({
       {header && (
         <div className="px-6 pt-5 pb-4 flex items-start justify-between gap-3 border-b border-border">
           <div className="flex-1 min-w-0">{header}</div>
-          <IconButton
-            type="button"
-            onClick={close}
-            label={tCommon("close")}
-            className="flex-shrink-0 -mr-2 -mt-2"
-          >
-            <Icon name="close" size={18} />
-          </IconButton>
+          <div className="flex flex-shrink-0 items-center gap-3 -mr-2 -mt-2">
+            {onBack && (
+              <TextButton type="button" tone="secondary" onClick={onBack} className="type-small">
+                {backLabel}
+              </TextButton>
+            )}
+            <IconButton
+              type="button"
+              onClick={close}
+              label={tCommon("close")}
+            >
+              <Icon name="close" size={18} />
+            </IconButton>
+          </div>
         </div>
       )}
 
@@ -219,7 +257,12 @@ export function Sheet({
         // trapped inside it, and a browser's default ring around a whole
         // sheet is not a focus indicator anybody asked for. The controls
         // inside keep theirs.
-        className={`relative bg-elevated w-full ${PANEL_MAX[size]} ${heightClass} flex flex-col overflow-hidden outline-none shadow-[var(--shadow-3)]`}
+        // vt-sheet-panel: inert unless a `useViewTransition` update is
+        // actually in flight — only then does the browser look at
+        // `view-transition-name` at all. Safe to leave on every sheet:
+        // the app's own rule that only one is ever open means the name
+        // is never claimed twice at once.
+        className={`vt-sheet-panel relative bg-elevated w-full ${PANEL_MAX[size]} ${heightClass} flex flex-col overflow-hidden outline-none shadow-[var(--shadow-3)]`}
         style={{
           transform: open
             ? `translate3d(0, ${swipe.dragY}px, 0)`

@@ -3,7 +3,12 @@ import { groupOutfitsBy } from "@/lib/outfits/grouping";
 import type { SavedOutfit } from "@/lib/outfits/types";
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 
-function garment(id: string, category: Category, createdAt = new Date(0)): GarmentWithColors {
+function garment(
+  id: string,
+  category: Category,
+  createdAt = new Date(0),
+  hex?: string,
+): GarmentWithColors {
   return {
     id,
     category,
@@ -18,13 +23,13 @@ function garment(id: string, category: Category, createdAt = new Date(0)): Garme
     dirtySince: null,
     createdAt,
     updatedAt: new Date(),
-    colors: [],
+    colors: hex ? [{ id: `${id}-color`, hex }] : [],
     seasons: [],
   } as unknown as GarmentWithColors;
 }
 
 function outfit(id: string, garments: GarmentWithColors[]): SavedOutfit {
-  return { id, name: id, paletteId: 1, createdAt: new Date(), garments, wornEvents: [] };
+  return { id, name: id, paletteId: 1, favorite: true, createdAt: new Date(), garments, wornEvents: [] };
 }
 
 const shirtA = garment("shirt-a", "SHIRT", new Date(1));

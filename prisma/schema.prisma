@@ -60,9 +60,8 @@ model WornEvent {
   /// derived from the row id and therefore never changes when replaced.
   updatedAt DateTime @default(now()) @updatedAt
   outfit   Outfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
-  /// Shoes / socks / accessories worn that day. The outfit itself is
-  /// clothes only — what you put on your feet is a property of the day,
-  /// not of the look.
+  /// Socks / accessories worn that day — what varies regardless of which
+  /// outfit was picked. Shoes are part of the outfit itself now.
   garments WornEventGarment[]
 
   @@unique([date])
@@ -81,8 +80,11 @@ model WornEventGarment {
   @@index([garmentId])
 }
 
-// Every row is part of the palette-matched core: shoes, socks and
-// accessories live on the day (WornEventGarment), never on the outfit.
+// A garment can be a normal wardrobe piece (matched against a palette,
+// see the colour engine) or a shoe (matched the same way, but never
+// required — a look can be complete without one). Socks and accessories
+// never appear here: they live on the day (WornEventGarment) instead,
+// since nobody picks a look around them.
 model OutfitGarment {
   id        String  @id @default(cuid())
   outfitId  String

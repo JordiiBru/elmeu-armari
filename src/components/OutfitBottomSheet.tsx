@@ -11,7 +11,12 @@ import { outfitKey } from "@/lib/outfits/key";
 import { OutfitGroupCard } from "./OutfitCard";
 import { Sheet, TextButton, Text, Stack, Icon } from "@/components/ui";
 
-const PAGE_SIZE = 6;
+// A real wardrobe with shoes mandatory easily clears 50 combinations,
+// and a page of 6 meant clicking "mostrar més" close to ten times to
+// see all of it. Paired with the two-column layout below, this cuts
+// that by roughly four times over rather than trying to solve it with
+// page size alone.
+const PAGE_SIZE = 10;
 
 interface Props {
   garment: GarmentWithColors;
@@ -31,12 +36,22 @@ interface Props {
   onBack?: () => void;
   /** Out of the whole thing, back to the wardrobe. */
   onClose: () => void;
+  /** Whether a sweater-anchored group should rank normally or sink to the
+   * end, per the current season. */
+  sweaterInSeason: boolean;
+  /** Same, for groups anchored around shorts. */
+  shortsInSeason: boolean;
+  /** True when this sheet is stepping in for a sibling sheet rather than
+   * opening fresh — see `Sheet`'s own doc on the prop it forwards to. */
+  skipEnter?: boolean;
 }
 
 function computeInitial(
   garment: GarmentWithColors,
   allGarments: GarmentWithColors[],
   palettes: SanzoPalette[],
+  sweaterInSeason: boolean,
+  shortsInSeason: boolean,
 ) {
   return generateOutfitGroupsForGarment(
     garment,
@@ -44,6 +59,8 @@ function computeInitial(
     palettes,
     PAGE_SIZE,
     0,
+    sweaterInSeason,
+    shortsInSeason,
   );
 }
 
@@ -55,13 +72,16 @@ export function OutfitBottomSheet({
   onOutfitSaved,
   onBack,
   onClose,
+  sweaterInSeason,
+  shortsInSeason,
+  skipEnter,
 }: Props) {
   const t = useTranslations("combine");
   const tLabel = useTranslations("labels");
   const tModal = useTranslations("modal");
   const tOutfits = useTranslations("outfits");
   const [initial] = useState(() =>
-    computeInitial(garment, allGarments, palettes),
+    computeInitial(garment, allGarments, palettes, sweaterInSeason, shortsInSeason),
   );
   const [groups, setGroups] = useState<OutfitGroup[]>(initial.groups);
   const [hasMore, setHasMore] = useState(initial.hasMore);
@@ -105,6 +125,12 @@ export function OutfitBottomSheet({
       ? ordered
       : ordered.filter((g) => g.garments.length === pieceFilter);
 
+  // The first page is a peek (PAGE_SIZE), but "mostrar més" loads
+  // everything left rather than the next page-sized chunk. With shoes
+  // mandatory and black/white riding in for free, a well-stocked
+  // wardrobe clears 100 combinations easily — paging through that ten
+  // clicks at a time was the exact complaint this replaces. Computing
+  // the rest is cheap; clicking through it by hand wasn't.
   const loadMore = (offset: number) => {
     setLoading(true);
     setTimeout(() => {
@@ -112,8 +138,10 @@ export function OutfitBottomSheet({
         garment,
         allGarments,
         palettes,
-        PAGE_SIZE,
+        Number.MAX_SAFE_INTEGER,
         offset,
+        sweaterInSeason,
+        shortsInSeason,
       );
       setGroups((prev) => [...prev, ...g]);
       setHasMore(hm);
@@ -146,7 +174,15 @@ export function OutfitBottomSheet({
   return (
     <Sheet
       onClose={onClose}
-      size="lg"
+      size="xl"
+      fill
+      skipEnter={skipEnter}
+      // Dismissing means leaving; going back to the piece is its own
+      // control. Without it the close button did both jobs badly: you
+      // pressed it to get out and landed on the piece you had already
+      // left, which reads as the popup reopening on you.
+      onBack={onBack}
+      backLabel={tOutfits("back")}
       label={t("sheetLabel", { category: tLabel(`category.${garment.category}`) })}
       media={
         <div className="flex h-full w-full">
@@ -162,32 +198,21 @@ export function OutfitBottomSheet({
       }
       mediaHeight="h-24 sm:h-32"
       header={
-        // Dismissing means leaving; going back to the piece is its own
-        // control. Without it the close button did both jobs badly: you
-        // pressed it to get out and landed on the piece you had already
-        // left, which reads as the popup reopening on you.
-        <div className="flex items-start justify-between gap-3">
-          <Stack gap={1}>
-            <Text variant="caption">{t("eyebrow")}</Text>
-            <h2 className="type-title leading-tight">
-              {tLabel(`category.${garment.category}`)}
-            </h2>
-            <Text variant="small" italic tone="secondary" className="font-serif">
-              {[
-                garment.fit ? optionLabel(tLabel, "fit", garment.fit) : null,
-                garment.size ? tModal("size", { size: garment.size }) : null,
-                garment.notes,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </Text>
-          </Stack>
-          {onBack && (
-            <TextButton type="button" tone="secondary" onClick={onBack}>
-              {tOutfits("back")}
-            </TextButton>
-          )}
-        </div>
+        <Stack gap={1}>
+          <Text variant="caption">{t("eyebrow")}</Text>
+          <h2 className="type-title leading-tight">
+            {tLabel(`category.${garment.category}`)}
+          </h2>
+          <Text variant="small" italic tone="secondary" className="font-serif">
+            {[
+              garment.fit ? optionLabel(tLabel, "fit", garment.fit) : null,
+              garment.size ? tModal("size", { size: garment.size }) : null,
+              garment.notes,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </Text>
+        </Stack>
       }
       headerBelow={
         availablePieceCounts.length > 1 && (
@@ -236,7 +261,7 @@ export function OutfitBottomSheet({
             {t("count", { count: visibleGroups.length })}
             {pieceFilter !== null && ` · ${t("pieces", { count: pieceFilter })}`}
           </Text>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:grid sm:grid-cols-2 sm:gap-x-8 gap-y-4">
             {visibleGroups.map((group, i) => (
               <OutfitGroupCard
                 key={

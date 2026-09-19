@@ -2,13 +2,13 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import {
   findAllOutfits,
+  findSavedOutfitKeys,
   findTodayWorn,
   findWeekPlan,
-  findSavedOutfitKeys,
   toSavedOutfit,
 } from "@/lib/outfits/service";
 import { findAllGarments } from "@/lib/prendas/service";
-import { getCurrentSeason } from "@/lib/prendas/season";
+import { getCurrentSeason, isShortsInSeason, isSweaterInSeason } from "@/lib/prendas/season";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { isWearable, rankOutfitsForToday } from "@/lib/bugaderia/laundry";
 import { startOfWeek, addDays, dayToISO, isoToDay, today } from "@/lib/outfits/week";
@@ -136,20 +136,31 @@ export default async function AvuiPage({
 
   // Ranked once, on the server, and shared by both the plate and the
   // grid: the proposal at the top of the page and the first tile of the
-  // collection must never disagree about what comes first.
-  const ranked = rankOutfitsForToday(outfits.map(toSavedOutfit), season);
+  // collection must never disagree about what comes first. Favourites
+  // only — an outfit saved from the wardrobe's discovery sheet is a
+  // candidate; favouriting it is what promotes it into daily rotation.
+  const allSaved = outfits.map(toSavedOutfit);
+  const favorites = allSaved.filter((o) => o.favorite);
+  const ranked = rankOutfitsForToday(favorites, season);
+  // The unfiltered ranking too, so "descobreix" can show every outfit
+  // already saved with a piece — favourited or not — and so a catalogue
+  // number stays the same one outfit whether it turns up favourited in
+  // Desats or unfavourited in a discover row.
+  const allRanked = rankOutfitsForToday(allSaved, season);
   const committed = ranked.find((o) => o.id === todayOutfitId) ?? null;
 
-  // Every stratum has its own empty state, and with nothing saved yet all
-  // three fired at once — three ways of saying the same thing stacked
-  // down an empty page. Say it once.
-  if (ranked.length === 0) {
+  // The only real dead end is an empty wardrobe: with nothing to wear
+  // there is nothing this page can offer beyond a way to add clothes.
+  // Zero favourites is not that — "descobreix" turns straight into a
+  // wardrobe browser the moment nothing is saved yet, so the week and
+  // the collection still render around it.
+  if (garments.length === 0) {
     return (
       <PageContainer width="wide">
         <SectionHeader title={t("screenTitle")} level="title-xl" />
         <EmptyState
-          title={t("emptyNoOutfitsBrowse")}
-          hint={t("emptyNoOutfitsHint")}
+          title={t("emptyWardrobe")}
+          hint={t("emptyWardrobeHint")}
           action={
             <Link
               href="/armari"
@@ -199,12 +210,16 @@ export default async function AvuiPage({
         <Stratum id="tots-els-outfits" title={t("sections.all")}>
           <OutfitLibrary
             outfits={ranked}
+            allOutfits={allRanked}
             allGarments={garments}
             palettes={palettes}
             extraCandidates={extraCandidates}
             savedOutfitKeys={savedOutfitKeys}
             todayISO={todayISO}
             todayOutfitId={todayOutfitId}
+            season={season}
+            sweaterInSeason={isSweaterInSeason()}
+            shortsInSeason={isShortsInSeason()}
           />
         </Stratum>
       </Stack>

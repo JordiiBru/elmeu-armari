@@ -37,6 +37,7 @@ export interface SavedOutfit {
   id: string;
   name: string | null;
   paletteId: number;
+  favorite: boolean;
   createdAt: Date;
   /** Clothes only, no role wrapper — an outfit has nothing else in it. */
   garments: GarmentWithColors[];
@@ -49,7 +50,7 @@ export interface SavedOutfit {
 export interface WornDay {
   id: string;
   date: Date;
-  /** Shoes / socks / accessories worn that day. */
+  /** Socks / accessories worn that day. */
   extras: GarmentWithColors[];
 }
 
