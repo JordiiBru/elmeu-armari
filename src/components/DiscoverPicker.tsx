@@ -5,6 +5,16 @@ import { useTranslations } from "next-intl";
 import type { GarmentWithColors, Season } from "@/lib/prendas/types";
 import type { OutfitGroup, SanzoPalette } from "@/lib/outfits/types";
 import { generateOutfitGroupsForGarment } from "@/lib/outfits/engine";
+import {
+  type Picks,
+  type Role,
+  ROLE_ORDER,
+  roleOf,
+  narrowUniverse,
+  nextRole as nextRoleFor,
+  optionsForRole,
+  reopenFrom,
+} from "@/lib/outfits/discoverPicker";
 import { filterGarments } from "@/lib/prendas/filtering";
 import { isDirty } from "@/lib/bugaderia/laundry";
 import { outfitKey } from "@/lib/outfits/key";
@@ -14,20 +24,6 @@ import { pieceTint } from "./OutfitTile";
 import { OutfitGroupCard } from "./OutfitCard";
 import { PieceThumb } from "./PieceThumb";
 import { Sheet, Stack, Text, Icon } from "@/components/ui";
-
-// The engine only ever checks three roles (hasTop, hasBottom, hasShoes),
-// and a top is satisfied by either a sweater or a shirt — never both at
-// once in the picker, even though the engine can still produce a rare
-// sweater+shirt layered group. Modelling by role rather than by the four
-// categories is what gives "start from pantalons, next is jersei OR
-// samarreta" for free: it's one row, not a branch.
-type Role = "TOP" | "PANTS" | "SHOES";
-const ROLE_ORDER: Role[] = ["TOP", "PANTS", "SHOES"];
-function roleOf(category: string): Role {
-  if (category === "PANTS") return "PANTS";
-  if (category === "SHOES") return "SHOES";
-  return "TOP";
-}
 
 // Plenty above the engine's own MAX_GROUPS=60 cap — this just needs to
 // come back with "everything the engine is willing to rank for this
@@ -107,32 +103,15 @@ export function DiscoverPicker({
   });
 
   const anchorRole = roleOf(garment.category);
-  const [picks, setPicks] = useState<Partial<Record<Role, GarmentWithColors>>>({
-    [anchorRole]: garment,
-  });
+  const [picks, setPicks] = useState<Picks>({ [anchorRole]: garment });
   const [savedHere, setSavedHere] = useState<string[]>([]);
 
-  const remaining = useMemo(
-    () =>
-      universe.filter((g) =>
-        (Object.values(picks) as (GarmentWithColors | undefined)[]).every(
-          (picked) => !picked || g.garments.some((gg) => gg.id === picked.id),
-        ),
-      ),
-    [universe, picks],
-  );
-
-  const nextRole = ROLE_ORDER.find((r) => !picks[r]) ?? null;
+  const remaining = useMemo(() => narrowUniverse(universe, picks), [universe, picks]);
+  const activeRole = nextRoleFor(picks);
 
   const nextOptions = useMemo(() => {
-    if (!nextRole) return [];
-    const byId = new Map<string, GarmentWithColors>();
-    for (const g of remaining) {
-      for (const piece of g.garments) {
-        if (roleOf(piece.category) === nextRole) byId.set(piece.id, piece);
-      }
-    }
-    const options = Array.from(byId.values());
+    if (!activeRole) return [];
+    const options = optionsForRole(remaining, activeRole);
     // Season sinks (never hides) via the same helper the rail uses.
     // Clean is sorted, not filtered, here specifically: this row's own
     // invariant is that every option is reachable, and a hard clean
@@ -151,36 +130,16 @@ export function DiscoverPicker({
     const clean = seasoned.filter((g) => !isDirty(g));
     const dirty = seasoned.filter((g) => isDirty(g));
     return [...clean, ...dirty];
-  }, [remaining, nextRole, seasonOnly, season, cleanOnly]);
+  }, [remaining, activeRole, seasonOnly, season, cleanOnly]);
 
-  const finishedGroup = nextRole === null ? (remaining[0] ?? null) : null;
+  const finishedGroup = activeRole === null ? (remaining[0] ?? null) : null;
 
   const pickFor = (role: Role, piece: GarmentWithColors) => {
     setPicks((prev) => ({ ...prev, [role]: piece }));
   };
 
-  // Reopening a step clears it and every step after it in ROLE_ORDER —
-  // changing pantalons after sabates is already picked has to drop the
-  // sabates pick too, since the new pantalons might not even combine
-  // with it. Simplest correct rule: redoing at most two taps is cheap.
-  //
-  // The anchor is never in that sweep, whatever position it sits at in
-  // ROLE_ORDER: it was chosen first, not in this flow's own top-to-
-  // bottom order, so a role that only comes after it in ROLE_ORDER —
-  // starting from pantalons, that's every other role — can still be
-  // chronologically *before* it. Reopening "jersei o samarreta" after
-  // starting from pantalons must not also clear the pantalons that
-  // started the whole picker.
   const reopen = (role: Role) => {
-    setPicks((prev) => {
-      const next = { ...prev };
-      let clearing = false;
-      for (const r of ROLE_ORDER) {
-        if (r === role) clearing = true;
-        if (clearing && r !== anchorRole) delete next[r];
-      }
-      return next;
-    });
+    setPicks((prev) => reopenFrom(prev, role, anchorRole));
   };
 
   const handleSave = (paletteId: number) => {
@@ -259,7 +218,7 @@ export function DiscoverPicker({
                 />
               );
             }
-            if (role !== nextRole) return null;
+            if (role !== activeRole) return null;
             return (
               <div key={role} className="panel-enter">
                 <OptionRow
