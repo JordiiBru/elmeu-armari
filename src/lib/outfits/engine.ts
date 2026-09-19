@@ -143,6 +143,16 @@ export function anchorFor(hex: string): Candidate | null {
 }
 
 /**
+ * True when a colour reads as a grey to the engine: it snaps to a rung of
+ * the grey ramp (Black, White, a Sanzo grey). This is the snap deciding,
+ * not a chroma line, so a tinted grey is neutral and a dull pink is not.
+ */
+export function isGreyColour(hex: string): boolean {
+  const anchor = anchorFor(hex);
+  return anchor !== null && GREY_RUNGS.has(anchor.canonical.hex.toLowerCase());
+}
+
+/**
  * Every canonical a garment hex is willing to live in, nearest first.
  * These decide palette membership, so a piece that is only willing to be
  * what it looks like is a property worth testing on its own.

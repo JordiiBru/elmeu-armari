@@ -92,11 +92,16 @@ export function WearGrid({
   extraIds,
   onToggleExtra,
   disabled,
+  suggested = [],
 }: {
   groups: WearGroups;
   extraIds: string[];
   onToggleExtra: (id: string) => void;
   disabled?: boolean;
+  /** Accessories that match the outfit's palette. Listed above the picker
+   * and toggled through the same handler, so picking one here is exactly
+   * picking it below. */
+  suggested?: GarmentWithColors[];
 }) {
   const t = useTranslations("outfits");
   const { accessories, socks } = groups;
@@ -121,6 +126,22 @@ export function WearGrid({
 
   return (
     <Stack gap={5}>
+      {suggested.length > 0 && (
+        <Stack gap={3}>
+          <Text variant="caption">{t("suggestedAccessories")}</Text>
+          <PickGrid>
+            {suggested.map((g) => (
+              <PickTile
+                key={g.id}
+                garment={g}
+                disabled={disabled}
+                selected={selectedExtras.has(g.id)}
+                onClick={() => onToggleExtra(g.id)}
+              />
+            ))}
+          </PickGrid>
+        </Stack>
+      )}
       {accessories.length > 0 && (
         <Stack gap={3}>
           <Text variant="caption">{t("accessories")}</Text>

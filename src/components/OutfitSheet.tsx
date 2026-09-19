@@ -15,6 +15,7 @@ import { DayPieces } from "./DayPieces";
 import { DayPhotoInput } from "./DayPhotoInput";
 import { OutfitCollage, outfitSubtitle, paletteName, pieceLabel } from "./OutfitTile";
 import { WearGrid, useWearGroups } from "./WearPicker";
+import { suggestAccessories } from "@/lib/outfits/accessories";
 import {
   Button,
   Sheet,
@@ -111,6 +112,10 @@ export function OutfitSheet({
 
   const [extraIds, setExtraIds] = useState<string[]>(() => preselected.map((g) => g.id));
   const groups = useWearGroups(extraCandidates);
+  const suggested = useMemo(
+    () => suggestAccessories(outfit.garments, palette, groups.accessories).map((s) => s.garment),
+    [outfit, palette, groups.accessories],
+  );
 
   const title = outfitSubtitle(tLabel, outfit) || outfit.name || "";
   const blockedBy = dirtyGarmentsOf(outfit);
@@ -367,6 +372,7 @@ export function OutfitSheet({
           extraIds={extraIds}
           onToggleExtra={toggleExtra}
           disabled={pending}
+          suggested={suggested}
         />
       ) : (
         <DayPieces garments={[...outfit.garments, ...(dayExtras ?? [])]} />
