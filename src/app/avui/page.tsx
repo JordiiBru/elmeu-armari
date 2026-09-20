@@ -45,7 +45,7 @@ function Stratum({
 }) {
   return (
     <Stack as="section" id={id} gap={5} className="scroll-mt-6">
-      <div className="flex items-baseline justify-between gap-4 border-b border-border pb-3">
+      <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
         <Text variant="caption" as="h2">
           {title}
         </Text>
@@ -212,7 +212,12 @@ export default async function AvuiPage({
           id="tots-els-outfits"
           title={t("sections.all")}
           aside={
-            <InfoHint label={tHelp("hintLabel")} href="/ajuda#numbers" moreLabel={tHelp("more")}>
+            <InfoHint
+              label={tHelp("hintLabel")}
+              href="/ajuda#numbers"
+              moreLabel={tHelp("more")}
+              inline={false}
+            >
               {tHelp("hints.outfitNumbers")}
             </InfoHint>
           }

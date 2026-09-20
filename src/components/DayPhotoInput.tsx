@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { shrinkForUpload } from "@/lib/image-client";
+import { postWithProgress, shrinkForUpload } from "@/lib/image-client";
 import { Icon, Stack, Text } from "@/components/ui";
 
 interface Props {
@@ -39,18 +39,41 @@ export function DayPhotoInput({ eventId, hasPhoto, withRemove = false, disabled 
   const t = useTranslations("dayPhoto");
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
-  const [status, setStatus] = useState<"idle" | "busy" | "error">("idle");
-  const busy = status === "busy" || disabled;
+  // Where the work is, so the wait says what it is waiting for: the photo
+  // is shrunk on the device (a 12 MP iPhone picture takes a moment), then
+  // sent (the part that depends on the connection), then processed by the
+  // server, which is the part nobody can see.
+  const [status, setStatus] = useState<
+    "idle" | "preparing" | "sending" | "saving" | "removing" | "error"
+  >("idle");
+  const [percent, setPercent] = useState(0);
+  // The picture that was just chosen, shown in the box straight away: the
+  // first proof that the tap did something.
+  const [preview, setPreview] = useState<string | null>(null);
+  const busy = status !== "idle" && status !== "error" ? true : Boolean(disabled);
+
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
 
   async function upload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setStatus("busy");
+    setPercent(0);
+    setPreview(URL.createObjectURL(file));
+    setStatus("preparing");
     const body = new FormData();
     body.append("file", await shrinkForUpload(file));
-    const r = await fetch(`/api/worn/${eventId}/image`, { method: "POST", body });
+    setStatus("sending");
+    const ok = await postWithProgress(`/api/worn/${eventId}/image`, body, {
+      onProgress: (fraction) => setPercent(Math.round(fraction * 100)),
+      onSent: () => setStatus("saving"),
+    });
     if (input.current) input.current.value = "";
-    if (!r.ok) {
+    setPreview(null);
+    if (!ok) {
       setStatus("error");
       return;
     }
@@ -59,11 +82,22 @@ export function DayPhotoInput({ eventId, hasPhoto, withRemove = false, disabled 
   }
 
   async function remove() {
-    setStatus("busy");
+    setStatus("removing");
     const r = await fetch(`/api/worn/${eventId}/image`, { method: "DELETE" });
     setStatus(r.ok ? "idle" : "error");
     if (r.ok) router.refresh();
   }
+
+  const stateLabel =
+    status === "preparing"
+      ? t("preparing")
+      : status === "sending"
+        ? t("sending", { percent })
+        : status === "saving"
+          ? t("saving")
+          : status === "removing"
+            ? t("removing")
+            : null;
 
   return (
     <Stack gap={2}>
@@ -72,14 +106,30 @@ export function DayPhotoInput({ eventId, hasPhoto, withRemove = false, disabled 
           type="button"
           onClick={() => input.current?.click()}
           disabled={busy}
-          className={`${BOX} flex-1 hover:border-text-primary hover:text-text-primary ${
+          className={`${BOX} relative flex-1 hover:border-text-primary hover:text-text-primary ${
             hasPhoto ? "border-border" : "border-dashed border-border"
           }`}
         >
-          <Icon name="camera" size={20} />
+          {preview ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={preview} alt="" className="h-9 w-9 object-cover opacity-70" />
+          ) : (
+            <Icon name="camera" size={20} />
+          )}
           <span className="font-serif italic type-small lowercase">
-            {status === "busy" ? t("uploading") : hasPhoto ? t("change") : t("add")}
+            {stateLabel ?? (hasPhoto ? t("change") : t("add"))}
           </span>
+          {/* A hairline that fills as the bytes leave the phone, then pulses
+              while the server works on them. Flat, like everything else. */}
+          {(status === "sending" || status === "saving" || status === "preparing") && (
+            <span
+              aria-hidden
+              className={`absolute inset-x-0 bottom-0 h-px bg-text-primary transition-[width] duration-[var(--duration-base)] ease-[var(--ease-standard)] ${
+                status === "sending" ? "" : "animate-pulse"
+              }`}
+              style={{ width: status === "sending" ? `${percent}%` : "100%" }}
+            />
+          )}
         </button>
         {hasPhoto && withRemove && (
           <button
@@ -94,6 +144,11 @@ export function DayPhotoInput({ eventId, hasPhoto, withRemove = false, disabled 
           </button>
         )}
       </div>
+      {/* Said aloud too: the label inside the button changes, but a screen
+          reader is only told when it lives in a live region. */}
+      <span role="status" aria-live="polite" className="sr-only">
+        {stateLabel}
+      </span>
       {status === "error" && (
         <Text variant="small" italic tone="secondary" className="font-serif">
           {t("failed")}

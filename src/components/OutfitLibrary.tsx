@@ -107,8 +107,13 @@ export function OutfitLibrary({
   const t = useTranslations("outfits");
   const tHelp = useTranslations("help");
   // One place to build a hint, so each control only says what it means.
-  const hint = (text: string, section: string) => (
-    <InfoHint label={tHelp("hintLabel")} href={`/ajuda#${section}`} moreLabel={tHelp("more")}>
+  const hint = (text: string, section: string, inline = true) => (
+    <InfoHint
+      label={tHelp("hintLabel")}
+      href={`/ajuda#${section}`}
+      moreLabel={tHelp("more")}
+      inline={inline}
+    >
       {text}
     </InfoHint>
   );
@@ -240,8 +245,13 @@ export function OutfitLibrary({
           />
         </Stack>
         <div className="flex items-center gap-3 self-center sm:self-auto">
+          {/* Mirrors the hint's width on the other side so the button stays
+              centred under the filter on a phone: without it the hint pushed
+              the button off to the left of centre. Not needed once the
+              button sits at the end of the row (sm and up). */}
+          <span aria-hidden className="w-6 sm:hidden" />
           {discoverButton}
-          {hint(tHelp("hints.discover"), "flow")}
+          {hint(tHelp("hints.discover"), "flow", false)}
         </div>
       </div>
 

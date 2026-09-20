@@ -65,6 +65,9 @@ export function GarmentModal({
        * navigation sidesteps the parallel/intercepted route tree
        * entirely rather than asking the client router to reconcile it.
        */
+      // Deliberate, and the reason is the comment above: the lint rule that
+      // prefers the router is right in general, not for a route that just 404ed.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.assign("/armari");
     });
   };
