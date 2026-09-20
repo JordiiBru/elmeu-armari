@@ -337,8 +337,11 @@
     "add": "foto",
     "change": "canviar",
     "remove": "treure foto",
-    "uploading": "pujant…",
-    "failed": "no s'ha pogut pujar. torna-ho a provar."
+    "failed": "no s'ha pogut pujar. torna-ho a provar.",
+    "preparing": "preparant la foto…",
+    "sending": "pujant… {percent}%",
+    "saving": "desant…",
+    "removing": "traient…"
   },
   "week": {
     "previous": "Setmana anterior",

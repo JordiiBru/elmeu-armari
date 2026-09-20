@@ -337,8 +337,11 @@
     "add": "foto",
     "change": "cambiar",
     "remove": "quitar foto",
-    "uploading": "subiendo…",
-    "failed": "no se ha podido subir. inténtalo de nuevo."
+    "failed": "no se ha podido subir. inténtalo de nuevo.",
+    "preparing": "preparando la foto…",
+    "sending": "subiendo… {percent}%",
+    "saving": "guardando…",
+    "removing": "quitando…"
   },
   "week": {
     "previous": "Semana anterior",

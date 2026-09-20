@@ -51,3 +51,35 @@ export async function shrinkForUpload(file: File): Promise<File> {
     return file;
   }
 }
+
+export interface UploadProgress {
+  /** 0 to 1, of the bytes that have left the device. */
+  onProgress?: (fraction: number) => void;
+  /** All the bytes are with the server: it is now processing the photo. */
+  onSent?: () => void;
+}
+
+/**
+ * POSTs a form and says how far along it is. `fetch` cannot report upload
+ * progress, and on a phone over a home connection the upload is the long
+ * part, so a screen that only says "uploading" for several seconds looks
+ * stuck. Resolves to whether the server answered with a success status.
+ */
+export function postWithProgress(
+  url: string,
+  body: FormData,
+  { onProgress, onSent }: UploadProgress = {},
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && e.total > 0) onProgress?.(e.loaded / e.total);
+    };
+    xhr.upload.onload = () => onSent?.();
+    xhr.onload = () => resolve(xhr.status >= 200 && xhr.status < 300);
+    xhr.onerror = () => resolve(false);
+    xhr.ontimeout = () => resolve(false);
+    xhr.send(body);
+  });
+}

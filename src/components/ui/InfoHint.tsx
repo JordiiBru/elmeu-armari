@@ -12,6 +12,16 @@ interface Props {
   /** Where "more details" goes, e.g. `/ajuda#colours`. */
   href?: string;
   moreLabel?: string;
+  /**
+   * True (the default) when the hint sits in a line of text, after a label or
+   * a subtitle: the icon is then nudged up a hair so its centre meets the
+   * middle of the letters, not the line box's, which leaves it a couple of
+   * pixels low. False when the parent is a flex row that already centres it
+   * (beside a button, in a header), where the nudge would push it off.
+   */
+  inline?: boolean;
+  /** Extra classes for the wrapper, e.g. `self-center` in a baseline row. */
+  className?: string;
 }
 
 /** Keeps the bubble this far from the edge of the screen. */
@@ -27,7 +37,7 @@ const EDGE = 16;
  * back to the button. The bubble is nudged left when it would run off the
  * right edge of a phone.
  */
-export function InfoHint({ label, children, href, moreLabel }: Props) {
+export function InfoHint({ label, children, href, moreLabel, inline = true, className }: Props) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLSpanElement>(null);
   const button = useRef<HTMLButtonElement>(null);
@@ -73,7 +83,10 @@ export function InfoHint({ label, children, href, moreLabel }: Props) {
   }, [open]);
 
   return (
-    <span ref={root} className="relative inline-flex align-middle">
+    <span
+      ref={root}
+      className={`relative inline-flex align-middle ${inline ? "top-[-0.12em]" : ""} ${className ?? ""}`}
+    >
       <button
         ref={button}
         type="button"
