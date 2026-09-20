@@ -97,25 +97,31 @@ describe("the jwt callback", () => {
     expect(token.pwv).toBe("abc123");
   });
 
-  it("refreshes the flag and the fingerprint from the row on an update, not from the caller", () => {
+  it("never re-stamps the fingerprint on an update: a stale token cannot revive itself", () => {
+    // The account's password changed after this token was issued.
     changePassword("$argon2id$hash-B", 0);
-    const token = jwt({
-      token: { id: "u1", mustChangePw: true, pwv: credentialsVersion("$argon2id$hash-A") },
+    const stale = { id: "u1", mustChangePw: true, pwv: credentialsVersion("$argon2id$hash-A") };
+
+    // What POST /api/auth/session does for anyone holding the cookie.
+    const afterUpdate = jwt({
+      token: { ...stale },
       trigger: "update",
-      session: { user: { mustChangePw: true, pwv: "forged" } },
+      session: { user: { mustChangePw: false, pwv: credentialsVersion("$argon2id$hash-B") } },
     });
-    expect(token.mustChangePw).toBe(false);
-    expect(token.pwv).toBe(credentialsVersion("$argon2id$hash-B"));
+
+    expect(afterUpdate.pwv).toBe(stale.pwv);
+    expect(afterUpdate.mustChangePw).toBe(true);
+    expect(isSessionCurrent("u1", afterUpdate.pwv as string)).toBe(false);
   });
 
-  it("does not let a browser clear the temporary-password flag", () => {
-    // The row still says the password is temporary.
+  it("does not let a browser clear the temporary-password flag or write a fingerprint", () => {
     const token = jwt({
       token: { id: "u1", mustChangePw: true, pwv: credentialsVersion("$argon2id$hash-A") },
       trigger: "update",
-      session: { user: { mustChangePw: false } },
+      session: { user: { mustChangePw: false, pwv: "forged" } },
     });
     expect(token.mustChangePw).toBe(true);
+    expect(token.pwv).toBe(credentialsVersion("$argon2id$hash-A"));
   });
 
   it("leaves the token alone when there is no update", () => {

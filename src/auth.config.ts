@@ -1,5 +1,4 @@
 import type { NextAuthConfig } from "next-auth";
-import { currentCredentials } from "@/lib/auth/credentials-version";
 
 const SEVEN_DAYS = 7 * 24 * 60 * 60;
 
@@ -38,25 +37,21 @@ export const authConfig = {
      * session was issued under, compared with the account on every
      * request (see `credentials-version.ts`).
      *
-     * `trigger === "update"` is how the change-password action clears
-     * the temporary-password flag without a new login. What the caller
-     * passes is ignored on purpose: the client-side `update()` reaches this
-     * too, and a browser must not be able to write its own flag or
-     * fingerprint into its token. The token is refreshed from the row.
+     * There is deliberately no `trigger === "update"` branch, and nothing
+     * here may ever re-stamp `pwv` from the database. `POST /api/auth/session`
+     * reaches this callback for anyone holding a cookie (a CSRF token is one
+     * GET away), so a stale token allowed to refresh itself would revive
+     * itself the moment it is refused: exactly the session a password
+     * change is meant to end. The only way to get a token with the current
+     * `pwv` is to prove the current password, which is a sign-in (the
+     * change-password action signs in again with the new one).
      */
-    jwt({ token, user, trigger }) {
+    jwt({ token, user }) {
       if (user) {
         token.id = user.id ?? token.sub ?? "";
         token.username = user.username ?? "";
         token.mustChangePw = user.mustChangePw ?? false;
         token.pwv = user.pwv ?? "";
-      }
-      if (trigger === "update" && token.id) {
-        const current = currentCredentials(token.id);
-        if (current) {
-          token.pwv = current.version;
-          token.mustChangePw = current.mustChangePw;
-        }
       }
       return token;
     },

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+import { requireSession } from "@/lib/auth/api";
 import { addGarment, findAllGarments, deleteGarment } from "@/lib/prendas/service";
 import {
   CATEGORIES,
@@ -100,8 +100,9 @@ function validate(
  * token path rather than falling open.
  */
 async function checkAuth(req: NextRequest): Promise<NextResponse | null> {
-  const session = await auth();
-  if (session?.user && !session.user.mustChangePw) return null;
+  // The same check every other route handler makes, including that the
+  // session was issued under the account's current password.
+  if ((await requireSession()) === null) return null;
 
   const importSecret = process.env.IMPORT_SECRET;
 

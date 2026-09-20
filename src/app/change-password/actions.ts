@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { auth, signOut, unstable_update } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 import { changePassword } from "@/lib/auth/service";
 
 export type ChangePasswordState = {
@@ -32,12 +32,17 @@ export async function changePasswordAction(
   if (!result.ok) return { error: result.error };
 
   try {
-    // The flag the proxy gates on, and the password fingerprint the session
-    // is checked against, live in the session cookie, so the row being
-    // updated is not enough: without this the user would be sent straight
-    // back to this screen, or signed out by their own password change. The
-    // token is refreshed from the row; nothing is passed in.
-    await unstable_update({});
+    // The session cookie carries the temporary-password flag and the
+    // fingerprint of the password it was issued under, and the old one
+    // holds the old password's: it is refused from this moment, by design,
+    // and a token can never be updated into a valid one (see the jwt
+    // callback). So the change ends with a sign-in under the new password,
+    // which is the one thing that proves it, and which replaces the cookie.
+    await signIn("credentials", {
+      username: session.user.username,
+      password: next,
+      redirect: false,
+    });
   } catch {
     // Rather than loop on a stale cookie, ask for the new password once.
     await signOut({ redirectTo: "/login" });
