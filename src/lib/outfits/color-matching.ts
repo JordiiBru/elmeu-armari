@@ -7,6 +7,19 @@
 export const OKLCH_DISTANCE_THRESHOLD = 14;
 
 /**
+ * A garment colour is willing to live in the palettes of every canonical
+ * within this distance, plus its nearest one whatever the distance. Stricter
+ * than the vocabulary threshold above on purpose: at 14 (about 7 just
+ * noticeable differences) the median canonical has 15 others inside it, so
+ * "these two pieces share a palette" almost never said no. 9 is the tight
+ * match already used for a palette's extra options; on the dev wardrobe it
+ * takes the share of top, bottom and shoe pairs that share a palette from
+ * 79 % to 52 %, and the outfits it can build from 1,446 to 352 (see the
+ * PR that introduced it for the whole sweep).
+ */
+export const MEMBERSHIP_THRESHOLD = 9;
+
+/**
  * Threshold estricte per paletes "addicionals" mostrades sota la principal.
  * Cada assignacio peça-color ha de complir aquest per garantir que la paleta
  * conte visualment els colors de l'outfit, no aproximacions llunyanes.

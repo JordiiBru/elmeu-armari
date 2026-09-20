@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { generateOutfitGroups, generateOutfitGroupsForGarment } from "./engine";
+import { generateOutfitGroups, generateOutfitGroupsForGarment, candidatesFor } from "./engine";
+import { MEMBERSHIP_THRESHOLD, OKLCH_DISTANCE_THRESHOLD } from "./color-matching";
+import { ANCHOR_CASES } from "./anchor-reference";
 import { palettes } from "@/lib/colors";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
@@ -281,4 +283,71 @@ describe("engine", () => {
       expect(firstShorts).toBeGreaterThan(lastNonShorts);
     });
   });
+
+  describe("palette membership", () => {
+    it("is stricter than the vocabulary threshold", () => {
+      expect(MEMBERSHIP_THRESHOLD).toBeLessThan(OKLCH_DISTANCE_THRESHOLD);
+    });
+
+    it("keeps the nearest reading and only readings within the threshold besides it", () => {
+      for (const c of ANCHOR_CASES) {
+        const candidates = candidatesFor(c.hex);
+        candidates.forEach((cand, i) => {
+          if (i > 0) expect(cand.distance, `${c.hex} ${cand.canonical.name}`).toBeLessThan(MEMBERSHIP_THRESHOLD);
+        });
+      }
+    });
+
+    // A pink that is 8 from Hermosa Pink and 12.5 from Light Brown Drab: at
+    // the strict threshold it only lives in Hermosa Pink's palettes, which
+    // share none with the Light Brown Drab trousers and shoes.
+    const PINK = "#dda1d1";
+    const DRAB = "#b08699";
+    // A shirt that goes with the trousers and shoes at the strict threshold:
+    // the other colour of a palette that has the Light Brown Drab.
+    const drabPalette = palettes.find((p) => p.colores.includes(DRAB) && p.colores.length >= 2)!;
+    const PARTNER = drabPalette.colores.find((h) => h !== DRAB)!;
+
+    it("tops a small wardrobe up from the vocabulary threshold instead of emptying it", () => {
+      const wardrobe = [
+        createTestGarment("shirt", "SHIRT", [PINK]),
+        createTestGarment("pants", "PANTS", [DRAB]),
+        createTestGarment("shoes", "SHOES", [DRAB]),
+      ];
+      const { groups } = generateOutfitGroups(wardrobe, palettes);
+      expect(groups).toHaveLength(1);
+      const { groups: forShirt } = generateOutfitGroupsForGarment(wardrobe[0], wardrobe, palettes);
+      expect(forShirt).toHaveLength(1);
+    });
+
+    it("ranks the strict groups ahead of the ones the top-up adds", () => {
+      const wardrobe = [
+        createTestGarment("exact", "SHIRT", [PARTNER]),
+        createTestGarment("loose", "SHIRT", [PINK]),
+        createTestGarment("pants", "PANTS", [DRAB]),
+        createTestGarment("shoes", "SHOES", [DRAB]),
+      ];
+      const { groups } = generateOutfitGroups(wardrobe, palettes);
+      const shirtOf = (i: number) => groups[i].garments.find((g) => g.category === "SHIRT")?.id;
+      expect(groups).toHaveLength(2);
+      expect(shirtOf(0)).toBe("exact");
+      expect(shirtOf(1)).toBe("loose");
+    });
+
+    it("does not top up a wardrobe that already has enough strict groups", () => {
+      // Five shirts that match the trousers and shoes exactly fill the
+      // strict tier, so the pink, which only fits loosely, stays out.
+      const shirts = Array.from({ length: 5 }, (_, i) => createTestGarment(`exact${i}`, "SHIRT", [PARTNER]));
+      const wardrobe = [
+        ...shirts,
+        createTestGarment("loose", "SHIRT", [PINK]),
+        createTestGarment("pants", "PANTS", [DRAB]),
+        createTestGarment("shoes", "SHOES", [DRAB]),
+      ];
+      const { groups } = generateOutfitGroups(wardrobe, palettes, 100);
+      expect(groups).toHaveLength(5);
+      expect(groups.some((g) => g.garments.some((x) => x.id === "loose"))).toBe(false);
+    });
+  });
 });
+
