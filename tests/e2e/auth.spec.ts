@@ -23,7 +23,7 @@ test("a wrong password says nothing useful", async ({ page }) => {
   await page.getByRole("button", { name: "entrar" }).click();
 
   // Not `getByRole("alert")`: Next's own route announcer is one too.
-  await expect(page.getByText(/incorrectes/i)).toBeVisible();
+  await expect(page.getByText(/no obren l'armari/i)).toBeVisible();
   await expect(page).toHaveURL(/\/login/);
 });
 

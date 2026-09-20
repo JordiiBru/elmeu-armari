@@ -13,10 +13,10 @@
       "submit": "entrar",
       "submitting": "entrant…",
       "errors": {
-        "missingFields": "Omple els dos camps.",
-        "invalidCredentials": "Usuari o contrasenya incorrectes.",
-        "lockedOut": "Massa intents. Torna-ho a provar d'aquí {seconds, plural, one {# segon} other {# segons}}.",
-        "unexpected": "No s'ha pogut completar l'entrada."
+        "missingFields": "Per entrar calen els dos: usuari i contrasenya.",
+        "invalidCredentials": "Aquest usuari i aquesta contrasenya no obren l'armari.",
+        "lockedOut": "Massa intents seguits. L'armari es queda tancat {seconds, plural, one {# segon} other {# segons}} més.",
+        "unexpected": "No s'ha pogut obrir l'armari ara mateix. Torna-ho a provar en un moment."
       }
     },
     "changePassword": {
@@ -29,12 +29,12 @@
       "submit": "desa",
       "submitting": "guardant…",
       "errors": {
-        "missingFields": "Omple tots els camps.",
-        "mismatch": "Les dues no coincideixen.",
-        "wrongPassword": "La contrasenya actual no és correcta.",
-        "samePassword": "Ha de ser diferent de l'actual.",
-        "tooShort": "Massa curta.",
-        "tooLong": "Massa llarga."
+        "missingFields": "Encara falta algun camp.",
+        "mismatch": "Les dues han de ser iguals, lletra per lletra.",
+        "wrongPassword": "Aquesta no és la contrasenya actual. Torna-ho a provar.",
+        "samePassword": "Tria'n una de nova: aquesta ja és l'actual.",
+        "tooShort": "Es queda curta: allarga-la una mica.",
+        "tooLong": "Es passa de llarga: escurça-la una mica."
       }
     },
     "menu": {
@@ -157,6 +157,24 @@
     "minOneColor": "Selecciona almenys un color",
     "invalidColor": "Color no vàlid"
   },
+  "errorPages": {
+    "notFound": {
+      "title": "aquesta pàgina no hi és",
+      "note": "L'adreça no porta enlloc. Potser té una errada, o la pàgina ja no existeix.",
+      "home": "tornar a l'inici"
+    },
+    "garmentGone": {
+      "title": "aquesta peça ja no hi és",
+      "note": "L'has eliminada, o l'enllaç ja no serveix. La resta de l'armari continua al seu lloc.",
+      "back": "tornar a l'armari"
+    },
+    "error": {
+      "title": "alguna cosa s'ha encallat",
+      "note": "Torna-ho a provar; si es repeteix, dóna-li uns minuts.",
+      "retry": "tornar-ho a provar",
+      "home": "tornar a l'inici"
+    }
+  },
   "photo": {
     "label": "Foto (opcional)",
     "add": "afegir foto",
@@ -183,7 +201,7 @@
   },
   "armari": {
     "title": "el meu armari",
-    "empty": "encara no hi ha res desat.",
+    "empty": "l'armari és buit, per ara: comença per la peça que et poses més sovint.",
     "count": "{count, plural, one {# peça registrada.} other {# peces registrades.}}",
     "filters": "filtres",
     "searchPlaceholder": "cerca per talla o nota",
@@ -302,11 +320,12 @@
     "deleteCostMany": "s'esborraran també els dies del calendari on el portaves.",
     "changeOutfit": "canviar d'outfit",
     "removeFromDay": "treure del dia",
-    "emptyNoOutfitsBrowse": "encara no hi ha res desat.",
-    "emptyNoOutfitsHint": "obre una peça de l'armari i mira què hi combina per desar el primer.",
+    "emptyNoOutfitsBrowse": "el primer outfit encara és per fer.",
+    "emptyWeek": "la setmana, en blanc.",
+    "emptyWeekHint": "quan desis un outfit, aquí el podràs posar a cada dia.",
     "emptyNoOutfitsHintDiscover": "descobreix combinacions amb la teva roba i desa la primera.",
-    "emptyWardrobe": "encara no tens cap peça a l'armari.",
-    "emptyWardrobeHint": "afegeix-ne alguna per començar a triar outfits.",
+    "emptyWardrobe": "res per triar, encara.",
+    "emptyWardrobeHint": "afegeix les primeres peces i aquí començaran a sortir combinacions.",
     "emptyNoneReady": "toca fer bugada",
     "goToArmari": "anar a l'armari",
     "goToRentar": "anar a rentar",
@@ -387,7 +406,9 @@
   "stats": {
     "eyebrow": "arxiu",
     "title": "estadístiques",
-    "empty": "encara no hi ha peces a l'armari.",
+    "empty": "res a comptar, encara.",
+    "emptyHint": "les xifres arriben amb la primera peça.",
+    "addGarment": "afegir una peça",
     "total": "peces en total",
     "sections": {
       "category": "categoria",
@@ -422,8 +443,9 @@
       "submitting": "important…",
       "success": "{count, plural, one {# peça importada correctament.} other {# peces importades correctament.}}",
       "skippedRemoved": "{count, plural, one {# peça d'una categoria que ja no existeix (mitjons) s'ha ignorat.} other {# peces d'una categoria que ja no existeix (mitjons) s'han ignorat.}}",
-      "unknownError": "Error desconegut",
-      "networkError": "Fitxer invàlid o error de xarxa."
+      "unknownError": "La importació no ha funcionat i no hi ha cap detall de per què. Torna-ho a provar.",
+      "invalidFile": "Aquest fitxer no és una exportació de l'armari: no s'ha pogut llegir.",
+      "networkError": "El servidor no ha respost bé. Comprova la connexió i torna-ho a provar."
     }
   },
   "help": {

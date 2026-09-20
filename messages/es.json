@@ -13,10 +13,10 @@
       "submit": "entrar",
       "submitting": "entrando…",
       "errors": {
-        "missingFields": "Rellena los dos campos.",
-        "invalidCredentials": "Usuario o contraseña incorrectos.",
-        "lockedOut": "Demasiados intentos. Vuelve a probar dentro de {seconds, plural, one {# segundo} other {# segundos}}.",
-        "unexpected": "No se ha podido completar la entrada."
+        "missingFields": "Para entrar hacen falta los dos: usuario y contraseña.",
+        "invalidCredentials": "Ese usuario y esa contraseña no abren el armario.",
+        "lockedOut": "Demasiados intentos seguidos. El armario se queda cerrado {seconds, plural, one {# segundo} other {# segundos}} más.",
+        "unexpected": "No se ha podido abrir el armario ahora mismo. Vuelve a probar en un momento."
       }
     },
     "changePassword": {
@@ -29,12 +29,12 @@
       "submit": "guardar",
       "submitting": "guardando…",
       "errors": {
-        "missingFields": "Rellena todos los campos.",
-        "mismatch": "Las dos no coinciden.",
-        "wrongPassword": "La contraseña actual no es correcta.",
-        "samePassword": "Tiene que ser distinta de la actual.",
-        "tooShort": "Demasiado corta.",
-        "tooLong": "Demasiado larga."
+        "missingFields": "Todavía falta algún campo.",
+        "mismatch": "Las dos tienen que ser iguales, letra por letra.",
+        "wrongPassword": "Esa no es la contraseña actual. Vuelve a probar.",
+        "samePassword": "Elige una nueva: esa ya es la actual.",
+        "tooShort": "Se queda corta: alárgala un poco.",
+        "tooLong": "Se pasa de larga: acórtala un poco."
       }
     },
     "menu": {
@@ -157,6 +157,24 @@
     "minOneColor": "Selecciona al menos un color",
     "invalidColor": "Color no válido"
   },
+  "errorPages": {
+    "notFound": {
+      "title": "esta página no está",
+      "note": "La dirección no lleva a ninguna parte. Puede que tenga una errata, o que la página ya no exista.",
+      "home": "volver al inicio"
+    },
+    "garmentGone": {
+      "title": "esta prenda ya no está",
+      "note": "La has eliminado, o el enlace ya no sirve. El resto del armario sigue en su sitio.",
+      "back": "volver al armario"
+    },
+    "error": {
+      "title": "algo se ha atascado",
+      "note": "Vuelve a probar; si se repite, dale unos minutos.",
+      "retry": "volver a probar",
+      "home": "volver al inicio"
+    }
+  },
   "photo": {
     "label": "Foto (opcional)",
     "add": "añadir foto",
@@ -183,7 +201,7 @@
   },
   "armari": {
     "title": "mi armario",
-    "empty": "todavía no hay nada guardado.",
+    "empty": "el armario está vacío, por ahora: empieza por la prenda que más te pones.",
     "count": "{count, plural, one {# prenda registrada.} other {# prendas registradas.}}",
     "filters": "filtros",
     "searchPlaceholder": "busca por talla o nota",
@@ -302,11 +320,12 @@
     "deleteCostMany": "se borrarán también los días del calendario en que lo llevabas.",
     "changeOutfit": "cambiar de outfit",
     "removeFromDay": "quitar del día",
-    "emptyNoOutfitsBrowse": "todavía no hay nada guardado.",
-    "emptyNoOutfitsHint": "abre una prenda del armario y mira con qué combina para guardar el primero.",
+    "emptyNoOutfitsBrowse": "el primer outfit está por hacer.",
+    "emptyWeek": "la semana, en blanco.",
+    "emptyWeekHint": "cuando guardes un outfit, aquí podrás ponerlo cada día.",
     "emptyNoOutfitsHintDiscover": "descubre combinaciones con tu ropa y guarda la primera.",
-    "emptyWardrobe": "todavía no tienes ninguna prenda en el armario.",
-    "emptyWardrobeHint": "añade alguna para empezar a elegir outfits.",
+    "emptyWardrobe": "nada que elegir, todavía.",
+    "emptyWardrobeHint": "añade las primeras prendas y aquí empezarán a salir combinaciones.",
     "emptyNoneReady": "toca hacer la colada",
     "goToArmari": "ir al armario",
     "goToRentar": "ir a lavar",
@@ -387,7 +406,9 @@
   "stats": {
     "eyebrow": "archivo",
     "title": "estadísticas",
-    "empty": "todavía no hay prendas en el armario.",
+    "empty": "nada que contar, todavía.",
+    "emptyHint": "las cifras llegan con la primera prenda.",
+    "addGarment": "añadir una prenda",
     "total": "prendas en total",
     "sections": {
       "category": "categoría",
@@ -422,8 +443,9 @@
       "submitting": "importando…",
       "success": "{count, plural, one {# prenda importada correctamente.} other {# prendas importadas correctamente.}}",
       "skippedRemoved": "{count, plural, one {# prenda de una categoría que ya no existe (calcetines) se ha ignorado.} other {# prendas de una categoría que ya no existe (calcetines) se han ignorado.}}",
-      "unknownError": "Error desconocido",
-      "networkError": "Fichero inválido o error de red."
+      "unknownError": "La importación no ha funcionado y no hay detalle de por qué. Vuelve a probar.",
+      "invalidFile": "Ese fichero no es una exportación del armario: no se ha podido leer.",
+      "networkError": "El servidor no ha respondido bien. Comprueba la conexión y vuelve a probar."
     }
   },
   "help": {

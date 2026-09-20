@@ -8,6 +8,7 @@ export { SectionHeader } from "./SectionHeader";
 export { Button } from "./Button";
 export { IconButton } from "./IconButton";
 export { TextButton } from "./TextButton";
+export { TextLink, TEXT_LINK_CLASS } from "./TextLink";
 export { Field } from "./Field";
 export { Input } from "./Input";
 export { Select } from "./Select";

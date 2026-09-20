@@ -29,9 +29,16 @@ export function ImportForm() {
 
     setLoading(true);
 
+    let body: unknown;
     try {
-      const text = await file.text();
-      const body = JSON.parse(text);
+      body = JSON.parse(await file.text());
+    } catch {
+      toast.show(t("invalidFile"), "danger");
+      setLoading(false);
+      return;
+    }
+
+    try {
       const res = await fetch(`/api/import?mode=${mode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
