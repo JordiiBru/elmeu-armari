@@ -298,7 +298,7 @@ Detalles que el usuario descubre con el uso:
 
 - Los botones anticipan el click con un ligerísimo cambio de opacidad al hover.
 - Las cards tienen peso — al hover flotan `1–2px`, al soltar caen.
-- Las imágenes aparecen con transición de opacidad (crossfade) al cargar, nunca "pop".
+- Las imágenes fuera del primer viewport aparecen con transición de opacidad (crossfade) al cargar, nunca "pop". Las del primer viewport (`loading="eager"` o `priority`) se pintan tal como llegan: hacer su visibilidad dependiente de la hidratación retrasaba el LCP unos 2 s en un móvil lento.
 - Los contadores cambian con `tabular-nums` y transición suave (no re-render brusco).
 - Las tabs deslizan el indicador con `spring-editorial`.
 - Las paletas se expanden como papel — origen coherente, no aparición desde `display:none`.

@@ -9,12 +9,17 @@ import { Button, TextButton, IconButton, Icon, EmptyState } from "@/components/u
 
 export type Mode = "soil" | "wash";
 
+/** Tiles in the first rows load without waiting for the page to hydrate. */
+const EAGER_TILES = 9;
+
 function GarmentPickCard({
   garment,
+  index,
   selected,
   onToggle,
 }: {
   garment: GarmentWithColors;
+  index: number;
   selected: boolean;
   onToggle: () => void;
 }) {
@@ -30,7 +35,12 @@ function GarmentPickCard({
           selected ? "border-text-primary border-2" : "border-border"
         }`}
       >
-        <PieceThumb garment={garment} thumb className="h-full w-full" />
+        <PieceThumb
+          garment={garment}
+          thumb
+          loading={index < EAGER_TILES ? "eager" : "lazy"}
+          className="h-full w-full"
+        />
         {selected && (
           <span className="absolute top-1.5 right-1.5 inline-flex bg-text-primary p-1 text-text-inverse">
             <Icon name="check" size={12} />
@@ -92,10 +102,11 @@ export function LaundryPicker({
           the columns keep coming rather than the pieces getting bigger,
           so a full basket stays one screenful. */}
       <div className="panel-enter grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-3">
-        {garments.map((garment) => (
+        {garments.map((garment, index) => (
           <GarmentPickCard
             key={garment.id}
             garment={garment}
+            index={index}
             selected={selected.has(garment.id)}
             onToggle={() => toggle(garment.id)}
           />
