@@ -8,32 +8,53 @@
     "docker:pinDigests"
   ],
   "timezone": "Europe/Madrid",
-  "schedule": ["after 2am and before 6am"],
+  "schedule": [
+    "after 2am and before 6am"
+  ],
   "prConcurrentLimit": 5,
   "prHourlyLimit": 2,
-  "enabledManagers": ["npm", "dockerfile", "docker-compose", "github-actions"],
-  "labels": ["dependencies"],
+  "enabledManagers": [
+    "npm",
+    "dockerfile",
+    "docker-compose",
+    "github-actions"
+  ],
+  "labels": [
+    "dependencies"
+  ],
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
   "separateMajorMinor": true,
-  "separateMultipleMajor": true,
+  "separateMultipleMajor": false,
   "automerge": true,
   "automergeType": "pr",
   "platformAutomerge": false,
   "vulnerabilityAlerts": {
-    "labels": ["dependencies", "security"],
-    "schedule": ["at any time"]
+    "labels": [
+      "dependencies",
+      "security"
+    ],
+    "schedule": [
+      "at any time"
+    ]
   },
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": ["before 6am on the first day of the month"]
+    "schedule": [
+      "before 6am on the first day of the month"
+    ]
   },
   "packageRules": [
     {
       "description": "Majors open their own PR and wait for a human",
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "automerge": false,
-      "labels": ["dependencies", "major"],
+      "labels": [
+        "dependencies",
+        "major"
+      ],
       "commitMessagePrefix": "chore(deps)!:",
       "prBodyNotes": [
         ":warning: **Major version bump.** Read the release notes before merging."
@@ -61,17 +82,41 @@
       "groupName": "Prisma"
     },
     {
+      "description": "better-sqlite3 and its types move together (the driver is not the Prisma adapter)",
+      "matchPackageNames": [
+        "better-sqlite3",
+        "@types/better-sqlite3"
+      ],
+      "groupName": "better-sqlite3"
+    },
+    {
       "description": "Tailwind CSS and its PostCSS plugin move together",
-      "matchPackageNames": ["tailwindcss", "@tailwindcss/postcss"],
+      "matchPackageNames": [
+        "tailwindcss",
+        "@tailwindcss/postcss"
+      ],
       "groupName": "Tailwind CSS"
     },
     {
       "description": "The Node runtime is a decision, not a routine bump: the image, CI and @types/node change together",
-      "matchDepNames": ["node", "@types/node"],
+      "matchDepNames": [
+        "node",
+        "@types/node"
+      ],
       "automerge": false,
       "prBodyNotes": [
         "Changing Node means changing the Dockerfile base images, `node-version` in `.github/workflows/ci.yml` and `@types/node` in one PR."
       ]
+    },
+    {
+      "description": "`overrides` in package.json are security floors for transitive dependencies, pinned to the major the parent needs: patch and minor keep them fresh, a new major would break the parent",
+      "matchDepTypes": [
+        "overrides"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
     }
   ]
 }
