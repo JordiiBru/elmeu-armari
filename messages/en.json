@@ -16,6 +16,7 @@
         "missingFields": "Both are needed to come in: a username and a password.",
         "invalidCredentials": "That username and password do not open the wardrobe.",
         "lockedOut": "Too many attempts in a row. The wardrobe stays shut for {seconds, plural, one {# more second} other {# more seconds}}.",
+        "busy": "Too many attempts at once. Wait a moment and try again.",
         "unexpected": "The wardrobe would not open just now. Try again in a moment."
       }
     },

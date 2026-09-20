@@ -61,6 +61,10 @@ describe("decideAccess, signed out", () => {
       type: "allow",
     });
   });
+
+  it("leaves robots.txt open so a crawler is told to stay out", () => {
+    expect(decideAccess({ pathname: "/robots.txt", ...anonymous })).toEqual({ type: "allow" });
+  });
 });
 
 describe("decideAccess, signed in", () => {

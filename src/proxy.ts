@@ -4,6 +4,7 @@ import { authConfig } from "@/auth.config";
 import { decideAccess } from "@/lib/auth/access";
 import { isSessionCurrent } from "@/lib/auth/credentials-version";
 import { buildContentSecurityPolicy, newNonce } from "@/lib/security/csp";
+import { isAllowedHost } from "@/lib/security/host";
 
 /**
  * `proxy.ts`, not `middleware.ts`: Next 16 renamed the convention and
@@ -20,6 +21,17 @@ import { buildContentSecurityPolicy, newNonce } from "@/lib/security/csp";
 const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
+  // The tunnel that publishes the app never touches Traefik, so nothing in
+  // front of the pod filters by name: refuse any Host that is not ours. 404
+  // and not 401, so the answer does not confirm anything is here. Dev is
+  // exempt: `next dev` is reached by LAN names and phones.
+  if (
+    process.env.NODE_ENV === "production" &&
+    !isAllowedHost(req.headers.get("host"), process.env.AUTH_URL)
+  ) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   const user = req.auth?.user;
   // A token issued under an older password is no session at all: the
   // cookie may be perfectly signed and unexpired, and still refused.

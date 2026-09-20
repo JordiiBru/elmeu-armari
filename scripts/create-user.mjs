@@ -90,7 +90,7 @@ async function main() {
   }
 
   const password = args.stdin ? await readStdin() : generatePassword();
-  if (password.length < 12) fail("Password must be at least 12 characters.");
+  if (password.length < 12 || password.length > 128) fail("Password must be 12 to 128 characters.");
 
   const db = new Database(databaseFile());
   const existing = db.prepare("SELECT id FROM User WHERE username = ?").get(username);

@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { hashPassword } from "@/lib/auth/password";
 import { FAILURES_BEFORE_LOCK } from "@/lib/auth/lockout";
-import { UNKNOWN_IP } from "@/lib/auth/request";
 
 const PASSWORD = "correct horse battery";
 
@@ -16,7 +15,6 @@ const users = new Map<string, Row>();
 const touchLastLogin = vi.fn(async () => undefined);
 const setPasswordRow = vi.fn(async () => undefined);
 const attemptsByUsername = vi.fn(async () => [] as { success: boolean; createdAt: Date }[]);
-const attemptsByIp = vi.fn(async () => [] as { success: boolean; createdAt: Date }[]);
 
 // Same reason as the wardrobe's service tests: the repository is the
 // only module that touches Prisma, so mocking it leaves a unit test of
@@ -30,12 +28,12 @@ vi.mock("@/lib/auth/repository", () => ({
   setPassword: setPasswordRow,
   recordAttempt: vi.fn(async () => undefined),
   recentAttemptsByUsername: (...args: unknown[]) => attemptsByUsername(...(args as [])),
-  recentAttemptsByIp: (...args: unknown[]) => attemptsByIp(...(args as [])),
   deleteAttemptsBefore: vi.fn(async () => undefined),
 }));
 
-const { verifyCredentials, changePassword, lockoutSeconds, normalizeUsername } =
+const { verifyCredentials, changePassword, lockoutSeconds, normalizeUsername, gateLogin, deviceTokenFor } =
   await import("@/lib/auth/service");
+const { loginPressure, PRESSURE_MAX_ATTEMPTS } = await import("@/lib/auth/pressure");
 
 beforeEach(async () => {
   users.clear();
@@ -48,9 +46,7 @@ beforeEach(async () => {
   touchLastLogin.mockClear();
   setPasswordRow.mockClear();
   attemptsByUsername.mockClear();
-  attemptsByIp.mockClear();
   attemptsByUsername.mockResolvedValue([]);
-  attemptsByIp.mockResolvedValue([]);
 });
 
 describe("verifyCredentials", () => {
@@ -88,28 +84,96 @@ describe("lockoutSeconds", () => {
 
   it("is null while the account is under the threshold", async () => {
     attemptsByUsername.mockResolvedValue(failures(FAILURES_BEFORE_LOCK - 1));
-    expect(await lockoutSeconds("jordi", "10.0.0.1")).toBeNull();
+    expect(await lockoutSeconds("jordi")).toBeNull();
   });
 
   it("locks the account after the threshold", async () => {
     attemptsByUsername.mockResolvedValue(failures(FAILURES_BEFORE_LOCK));
-    const seconds = await lockoutSeconds("jordi", "10.0.0.1");
+    const seconds = await lockoutSeconds("jordi");
     expect(seconds).toBeGreaterThan(0);
     expect(seconds).toBeLessThanOrEqual(60);
   });
+});
 
-  it("tolerates four times as many failures from one address", async () => {
-    attemptsByIp.mockResolvedValue(failures(FAILURES_BEFORE_LOCK * 4 - 1));
-    expect(await lockoutSeconds("jordi", "10.0.0.1")).toBeNull();
+describe("gateLogin", () => {
+  const failures = (count: number) =>
+    Array(count)
+      .fill(null)
+      .map(() => ({ success: false, createdAt: new Date() }));
 
-    attemptsByIp.mockResolvedValue(failures(FAILURES_BEFORE_LOCK * 4));
-    expect(await lockoutSeconds("jordi", "10.0.0.1")).toBeGreaterThan(0);
+  beforeEach(() => {
+    process.env.AUTH_SECRET = "test-secret";
+    // Drain whatever a previous test spent from the process-wide budget.
+    while (loginPressure.isBusy()) loginPressure.admit();
   });
 
-  it("never throttles an unattributable address, which would lock everyone out", async () => {
-    attemptsByIp.mockResolvedValue(failures(100));
-    expect(await lockoutSeconds("jordi", UNKNOWN_IP)).toBeNull();
-    expect(attemptsByIp).not.toHaveBeenCalled();
+  it("lets an unknown browser through while the account is open", async () => {
+    expect(await gateLogin("jordi", undefined, { spend: false })).toEqual({
+      ok: true,
+      trusted: false,
+    });
+  });
+
+  it("closes the account to an unknown browser after the threshold", async () => {
+    attemptsByUsername.mockResolvedValue(failures(FAILURES_BEFORE_LOCK));
+    const gate = await gateLogin("jordi", undefined, { spend: false });
+    expect(gate).toMatchObject({ ok: false, reason: "locked" });
+  });
+
+  it("lets a browser that already proved the password through a lockout", async () => {
+    const token = await deviceTokenFor("jordi");
+    attemptsByUsername.mockResolvedValue(failures(FAILURES_BEFORE_LOCK * 3));
+    expect(await gateLogin("jordi", token ?? undefined, { spend: false })).toEqual({
+      ok: true,
+      trusted: true,
+    });
+  });
+
+  it("stops trusting a browser once the password has changed", async () => {
+    const token = await deviceTokenFor("jordi");
+    users.get("jordi")!.passwordHash = await hashPassword("a completely new password");
+    attemptsByUsername.mockResolvedValue(failures(FAILURES_BEFORE_LOCK));
+    expect(await gateLogin("jordi", token ?? undefined, { spend: false })).toMatchObject({
+      ok: false,
+      reason: "locked",
+    });
+  });
+
+  it("does not trust a device token for another account", async () => {
+    users.set("ana", {
+      id: "user-2",
+      username: "ana",
+      passwordHash: await hashPassword(PASSWORD),
+      mustChangePw: false,
+    });
+    const anas = await deviceTokenFor("ana");
+    attemptsByUsername.mockResolvedValue(failures(FAILURES_BEFORE_LOCK));
+    expect(await gateLogin("jordi", anas ?? undefined, { spend: false })).toMatchObject({
+      ok: false,
+      reason: "locked",
+    });
+  });
+
+  it("refuses unknown browsers once the global budget is spent, and known ones never spend it", async () => {
+    const token = await deviceTokenFor("jordi");
+    for (let i = 0; i < PRESSURE_MAX_ATTEMPTS; i++) {
+      await gateLogin("jordi", undefined, { spend: true });
+    }
+    expect(await gateLogin("jordi", undefined, { spend: true })).toEqual({
+      ok: false,
+      reason: "busy",
+    });
+    expect(await gateLogin("jordi", token ?? undefined, { spend: true })).toEqual({
+      ok: true,
+      trusted: true,
+    });
+  });
+
+  it("does not spend the budget when it only looks", async () => {
+    for (let i = 0; i < PRESSURE_MAX_ATTEMPTS * 2; i++) {
+      await gateLogin("jordi", undefined, { spend: false });
+    }
+    expect(loginPressure.isBusy()).toBe(false);
   });
 });
 

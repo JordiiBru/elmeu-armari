@@ -22,6 +22,7 @@ const PUBLIC_EXACT = [
   "/manifest.webmanifest",
   "/favicon.ico",
   "/icon.svg",
+  "/robots.txt",
 ];
 
 export type AccessDecision =

@@ -5,32 +5,22 @@ import {
   secondsUntil,
 } from "./lockout";
 import { credentialsVersion } from "./credentials-version";
+import { signDeviceToken, verifyDeviceToken } from "./device";
 import { hashPassword, verifyAgainstDummy, verifyPassword } from "./password";
+import { loginPressure } from "./pressure";
 import { passwordPolicyError, type PasswordPolicyError } from "./policy";
-import { UNKNOWN_IP } from "./request";
 import {
   deleteAttemptsBefore,
   findUserById,
   findUserByUsername,
-  recentAttemptsByIp,
   recentAttemptsByUsername,
   recordAttempt,
   setPassword,
   touchLastLogin,
 } from "./repository";
 
-/**
- * An IP is a coarser identity than an account: a household, an office or
- * a tunnel exit share one. It still gets a ceiling, four times the
- * account's, so that spraying many usernames from one place is not free.
- */
-const IP_FAILURES_BEFORE_LOCK = FAILURES_BEFORE_LOCK * 4;
-
 /** Enough rows to see the streak; the window prunes the rest. */
 const ATTEMPT_PAGE = 64;
-
-/** Attempts older than this stop being evidence of anything. */
-const ATTEMPT_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 
 export interface AuthenticatedUser {
   id: string;
@@ -45,32 +35,78 @@ export function normalizeUsername(raw: string): string {
 }
 
 /**
- * How long the caller must wait, or `null` if they may try now. Checked
- * before the password is looked at: an account under lockout must not
- * leak, through response time, whether the guess was right.
+ * How long this account is closed for, or `null` if it may be tried now.
+ * Checked before the password is looked at: an account under lockout must
+ * not leak, through response time, whether the guess was right.
+ *
+ * Per account only. There is no per-address ceiling any more: behind the
+ * tunnel every visitor shares one address, so it could not tell a stranger
+ * from the owner and twenty failures from anyone would have locked both.
  */
-export async function lockoutSeconds(
-  username: string,
-  ip: string,
-): Promise<number | null> {
+export async function lockoutSeconds(username: string): Promise<number | null> {
   const since = new Date(Date.now() - ATTEMPT_WINDOW_MS);
+  const attempts = await recentAttemptsByUsername(username, since, ATTEMPT_PAGE);
 
-  const [byUsername, byIp] = await Promise.all([
-    recentAttemptsByUsername(username, since, ATTEMPT_PAGE),
-    ip === UNKNOWN_IP
-      ? Promise.resolve([])
-      : recentAttemptsByIp(ip, since, ATTEMPT_PAGE),
-  ]);
-
-  const untilUsername = lockedUntil(byUsername, FAILURES_BEFORE_LOCK);
-  const untilIp = lockedUntil(byIp, IP_FAILURES_BEFORE_LOCK);
-  const until = [untilUsername, untilIp]
-    .filter((value): value is Date => value !== null)
-    .sort((a, b) => b.getTime() - a.getTime())[0];
-
+  const until = lockedUntil(attempts, FAILURES_BEFORE_LOCK);
   if (!until) return null;
+
   const now = new Date();
   return until > now ? secondsUntil(until, now) : null;
+}
+
+/** The cookie value that marks this browser as having proved `username`'s
+ * current password, or `null` if there is no such account or no secret to
+ * sign with. Call it right after a successful sign-in. */
+export async function deviceTokenFor(username: string): Promise<string | null> {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) return null;
+  const user = await findUserByUsername(normalizeUsername(username));
+  if (!user) return null;
+  return signDeviceToken(user.id, credentialsVersion(user.passwordHash), secret);
+}
+
+async function isTrustedDevice(username: string, token: string | undefined): Promise<boolean> {
+  if (!token) return false;
+  const user = await findUserByUsername(username);
+  if (!user) return false;
+  return verifyDeviceToken(
+    token,
+    user.id,
+    credentialsVersion(user.passwordHash),
+    process.env.AUTH_SECRET,
+  );
+}
+
+export type LoginGate =
+  | { ok: true; trusted: boolean }
+  | { ok: false; reason: "locked"; seconds: number }
+  | { ok: false; reason: "busy" };
+
+/**
+ * Whether an attempt may reach the password check at all.
+ *
+ * A browser this account has signed in from before skips both limits: the
+ * lockout, so a stranger's failures cannot close the door on the owner, and
+ * the global budget, so someone hammering the form cannot either. Anyone
+ * else is held to the account's lockout and to the budget. `spend` is
+ * `true` from `authorize()`, the one path every door leads through; the
+ * login action only looks (`false`), to say "busy" or "try again in 40
+ * seconds" without spending a second attempt on the same click.
+ */
+export async function gateLogin(
+  username: string,
+  deviceToken: string | undefined,
+  { spend }: { spend: boolean },
+): Promise<LoginGate> {
+  if (await isTrustedDevice(username, deviceToken)) return { ok: true, trusted: true };
+
+  const seconds = await lockoutSeconds(username);
+  if (seconds !== null) return { ok: false, reason: "locked", seconds };
+
+  const admitted = spend ? loginPressure.admit() : !loginPressure.isBusy();
+  if (!admitted) return { ok: false, reason: "busy" };
+
+  return { ok: true, trusted: false };
 }
 
 export async function logAttempt(
@@ -79,11 +115,11 @@ export async function logAttempt(
   success: boolean,
 ): Promise<void> {
   await recordAttempt({ username, ip, success });
-  if (success) {
-    // A successful login is the quiet moment to take the bin out: the
-    // table is only ever read over the last day.
-    await deleteAttemptsBefore(new Date(Date.now() - ATTEMPT_RETENTION_MS));
-  }
+  // Every attempt takes the bin out, not only a successful one: the form is
+  // open to the internet, and a bot that never succeeds would otherwise
+  // grow the table for as long as the owner never signs in. The table is
+  // only ever read over `ATTEMPT_WINDOW_MS`, so nothing older is evidence.
+  await deleteAttemptsBefore(new Date(Date.now() - ATTEMPT_WINDOW_MS));
 }
 
 /**

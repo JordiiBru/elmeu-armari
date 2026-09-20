@@ -3,6 +3,8 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // `x-powered-by: Next.js` tells a scanner what to try.
+  poweredByHeader: false,
   // Dev only: `next dev` refuses a cross-origin request it does not
   // recognise, and a refused origin never finishes hydrating — the page
   // paints but nothing is clickable. Testing on a phone means the LAN
@@ -41,6 +43,8 @@ const nextConfig: NextConfig = {
           // includeSubDomains: other services live under the same domain.
           { key: "Strict-Transport-Security", value: "max-age=15552000" },
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          // A private app: nothing here belongs in a search index.
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), payment=()",
