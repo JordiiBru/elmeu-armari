@@ -15,13 +15,18 @@ interface Props {
   onChange?: (colors: string[]) => void;
   /** Shown under the list, e.g. where the colours came from. */
   note?: string;
+  /** Colours worth a look but not put in the list: the other colours found
+   * in a photo. One tap adds one; none is ever added on its own, because
+   * every colour a piece has narrows the palettes it can combine in. */
+  offered?: string[];
 }
 
-export function ColorPickers({ initialColors, onChange, note }: Props) {
+export function ColorPickers({ initialColors, onChange, note, offered }: Props) {
   const t = useTranslations("form");
   // Empty means empty: a default swatch would be saved as a colour the
   // person never chose (a garment silently black).
   const [colors, setColorsState] = useState<string[]>(initialColors ?? []);
+  const [stillOffered, setStillOffered] = useState<string[]>(offered ?? []);
   function setColors(update: (prev: string[]) => string[]) {
     const next = update(colors);
     setColorsState(next);
@@ -64,6 +69,30 @@ export function ColorPickers({ initialColors, onChange, note }: Props) {
         </div>
       ))}
       {note && colors.length > 0 && <span className="type-caption">{note}</span>}
+      {stillOffered.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span className="type-caption">{t("alsoMaybe")}</span>
+          {stillOffered.map((hex) => (
+            <button
+              key={hex}
+              type="button"
+              aria-label={t("addOffered", { name: anchorFor(hex)?.canonical.name ?? hex.toUpperCase() })}
+              title={anchorFor(hex)?.canonical.name ?? hex.toUpperCase()}
+              onClick={() => {
+                setColors((prev) => (prev.includes(hex) ? prev : [...prev, hex]));
+                setStillOffered((prev) => prev.filter((h) => h !== hex));
+              }}
+              // 44 px to tap, the swatch itself smaller inside it.
+              className="group inline-flex h-11 w-11 items-center justify-center outline-none focus-visible:ring-1 focus-visible:ring-focus-ring"
+            >
+              <span
+                className="block h-6 w-6 border border-border transition-colors group-hover:border-text-primary"
+                style={{ backgroundColor: hex }}
+              />
+            </button>
+          ))}
+        </div>
+      )}
       {colors.length === 0 && (
         <span className="type-caption">{t("noColorYet")}</span>
       )}

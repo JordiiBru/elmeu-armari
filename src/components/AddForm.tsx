@@ -58,9 +58,14 @@ export function AddForm() {
   // suggested. A suggestion only ever replaces an empty list or the
   // previous suggestion, never a colour the person chose.
   const [colours, setColours] = useState<string[]>([]);
-  const [suggestion, setSuggestion] = useState<{ key: number; colours: string[] }>({
+  const [suggestion, setSuggestion] = useState<{
+    key: number;
+    colours: string[];
+    offered: string[];
+  }>({
     key: 0,
     colours: [],
+    offered: [],
   });
   const coloursRef = useRef<string[]>([]);
   const suggestedRef = useRef<string[]>([]);
@@ -120,9 +125,14 @@ export function AddForm() {
       (current.length === suggestedRef.current.length &&
         current.every((c, i) => c === suggestedRef.current[i]));
     if (found.length === 0 || !untouched) return;
-    suggestedRef.current = found;
-    changeColours(found);
-    setSuggestion((s) => ({ key: s.key + 1, colours: found }));
+    // Only the dominant colour goes in. The others are offered, one tap
+    // each: a photo finds a shadow, a trim or a bit of the background as
+    // easily as a second colour, and every colour a piece has narrows the
+    // palettes it can combine in, so a wrong one costs matches silently.
+    const [dominant, ...others] = found;
+    suggestedRef.current = [dominant];
+    changeColours([dominant]);
+    setSuggestion((s) => ({ key: s.key + 1, colours: [dominant], offered: others }));
   }
 
   const fromPhoto =
@@ -227,6 +237,7 @@ export function AddForm() {
         <ColorPickers
           key={suggestion.key}
           initialColors={suggestion.colours}
+          offered={suggestion.offered}
           onChange={changeColours}
           note={fromPhoto ? t("colorsFromPhoto") : undefined}
         />
