@@ -87,7 +87,12 @@
       "COTTON": "Cotó",
       "POLYESTER": "Poliester",
       "LEATHER": "Cuir",
-      "SYNTHETIC": "Sintètic"
+      "SYNTHETIC": "Sintètic",
+      "WOOL": "Llana",
+      "CORDUROY": "Pana",
+      "SUEDE": "Camussa",
+      "CANVAS": "Lona",
+      "NYLON": "Niló"
     },
     "pattern": {
       "PLAIN": "Llis",
@@ -95,7 +100,9 @@
       "CHECKS": "Quadres",
       "FLORAL": "Flors",
       "PRINTED": "Estampat",
-      "GEOMETRIC": "Geomètric"
+      "GEOMETRIC": "Geomètric",
+      "DOTS": "Llunars",
+      "CAMO": "Camuflatge"
     },
     "fit": {
       "REGULAR": "Regular",
@@ -109,7 +116,9 @@
       "WIDE_LEG": "Wide Leg",
       "LOW_TOP": "Low Top",
       "MID": "Mid",
-      "HIGH_TOP": "High Top"
+      "HIGH_TOP": "High Top",
+      "TAPERED": "Cònic",
+      "RELAXED": "Relaxat"
     },
     "subtype": {
       "PULLOVER": "Pullover",
@@ -134,11 +143,30 @@
       "BOSSA": "Bossa",
       "BARRET": "Barret",
       "BUFANDA": "Bufanda",
-      "ULLERES": "Ulleres"
+      "ULLERES": "Ulleres",
+      "SWEATSHIRT": "Dessuadora",
+      "TURTLENECK": "Coll alt",
+      "VEST": "Armilla",
+      "TANK": "Tirants",
+      "HENLEY": "Henley",
+      "OVERSHIRT": "Sobrecamisa",
+      "TROUSERS": "Pantaló de vestir",
+      "CHELSEA": "Chelsea",
+      "ESPADRILLE": "Espardenya",
+      "FLIP_FLOP": "Xancletes",
+      "RUNNING": "Running",
+      "NECKLACE": "Collaret",
+      "BRACELET": "Polsera",
+      "EARRINGS": "Arracades",
+      "CAP": "Gorra",
+      "TIE": "Corbata",
+      "GLOVES": "Guants"
     },
     "length": {
       "SHORT": "Curts",
-      "LONG": "Llargs"
+      "LONG": "Llargs",
+      "SHORT_SLEEVE": "Màniga curta",
+      "LONG_SLEEVE": "Màniga llarga"
     },
     "season": {
       "SPRING": "Primavera",
@@ -161,7 +189,7 @@
   "form": {
     "category": "Categoria",
     "colors": "Colors",
-    "texture": "Textura",
+    "texture": "Teixit",
     "pattern": "Dibuix",
     "seasons": "Temporada",
     "size": "Talla",
@@ -179,7 +207,9 @@
     "colorsFromPhoto": "color suggerit a partir de la foto: toca'l per canviar-lo",
     "removeColor": "eliminar",
     "alsoMaybe": "potser també:",
-    "addOffered": "Afegir {name}"
+    "addOffered": "Afegir {name}",
+    "sleeve": "Màniga",
+    "unspecified": "sense especificar"
   },
   "errors": {
     "requiredFields": "Omple tots els camps marcats amb *",
@@ -222,7 +252,7 @@
     "sheetLabel": "Peça {category}",
     "eyebrow": "peça",
     "combine": "Què hi combina",
-    "texture": "Textura",
+    "texture": "Teixit",
     "pattern": "Dibuix",
     "colors": "Colors",
     "seasons": "Temporada",
@@ -240,7 +270,7 @@
       "category": "categoria",
       "season": "temporada",
       "fit": "fit",
-      "texture": "textura",
+      "texture": "teixit",
       "length": "llargada",
       "state": "estat",
       "color": "color"
@@ -444,7 +474,7 @@
       "category": "categoria",
       "season": "temporada",
       "fit": "fit",
-      "texture": "textura",
+      "texture": "teixit",
       "topColors": "colors dominants"
     }
   },

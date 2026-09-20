@@ -145,6 +145,11 @@ enum Texture {
   POLYESTER
   LEATHER
   SYNTHETIC
+  WOOL
+  CORDUROY
+  SUEDE
+  CANVAS
+  NYLON
 }
 
 enum Pattern {
@@ -154,6 +159,8 @@ enum Pattern {
   FLORAL
   PRINTED
   GEOMETRIC
+  DOTS
+  CAMO
 }
 
 enum Season {

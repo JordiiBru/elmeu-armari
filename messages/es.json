@@ -87,7 +87,12 @@
       "COTTON": "Algodón",
       "POLYESTER": "Poliéster",
       "LEATHER": "Cuero",
-      "SYNTHETIC": "Sintético"
+      "SYNTHETIC": "Sintético",
+      "WOOL": "Lana",
+      "CORDUROY": "Pana",
+      "SUEDE": "Ante",
+      "CANVAS": "Lona",
+      "NYLON": "Nailon"
     },
     "pattern": {
       "PLAIN": "Liso",
@@ -95,7 +100,9 @@
       "CHECKS": "Cuadros",
       "FLORAL": "Flores",
       "PRINTED": "Estampado",
-      "GEOMETRIC": "Geométrico"
+      "GEOMETRIC": "Geométrico",
+      "DOTS": "Lunares",
+      "CAMO": "Camuflaje"
     },
     "fit": {
       "REGULAR": "Regular",
@@ -109,7 +116,9 @@
       "WIDE_LEG": "Wide Leg",
       "LOW_TOP": "Low Top",
       "MID": "Mid",
-      "HIGH_TOP": "High Top"
+      "HIGH_TOP": "High Top",
+      "TAPERED": "Cónico",
+      "RELAXED": "Relajado"
     },
     "subtype": {
       "PULLOVER": "Pullover",
@@ -134,11 +143,30 @@
       "BOSSA": "Bolso",
       "BARRET": "Sombrero",
       "BUFANDA": "Bufanda",
-      "ULLERES": "Gafas"
+      "ULLERES": "Gafas",
+      "SWEATSHIRT": "Sudadera",
+      "TURTLENECK": "Cuello alto",
+      "VEST": "Chaleco",
+      "TANK": "Tirantes",
+      "HENLEY": "Henley",
+      "OVERSHIRT": "Sobrecamisa",
+      "TROUSERS": "Pantalón de vestir",
+      "CHELSEA": "Chelsea",
+      "ESPADRILLE": "Alpargata",
+      "FLIP_FLOP": "Chanclas",
+      "RUNNING": "Running",
+      "NECKLACE": "Collar",
+      "BRACELET": "Pulsera",
+      "EARRINGS": "Pendientes",
+      "CAP": "Gorra",
+      "TIE": "Corbata",
+      "GLOVES": "Guantes"
     },
     "length": {
       "SHORT": "Cortos",
-      "LONG": "Largos"
+      "LONG": "Largos",
+      "SHORT_SLEEVE": "Manga corta",
+      "LONG_SLEEVE": "Manga larga"
     },
     "season": {
       "SPRING": "Primavera",
@@ -161,7 +189,7 @@
   "form": {
     "category": "Categoría",
     "colors": "Colores",
-    "texture": "Textura",
+    "texture": "Tejido",
     "pattern": "Dibujo",
     "seasons": "Temporada",
     "size": "Talla",
@@ -179,7 +207,9 @@
     "colorsFromPhoto": "color sugerido a partir de la foto: tócalo para cambiarlo",
     "removeColor": "eliminar",
     "alsoMaybe": "quizá también:",
-    "addOffered": "Añadir {name}"
+    "addOffered": "Añadir {name}",
+    "sleeve": "Manga",
+    "unspecified": "sin especificar"
   },
   "errors": {
     "requiredFields": "Rellena todos los campos marcados con *",
@@ -222,7 +252,7 @@
     "sheetLabel": "Prenda {category}",
     "eyebrow": "prenda",
     "combine": "Con qué combina",
-    "texture": "Textura",
+    "texture": "Tejido",
     "pattern": "Dibujo",
     "colors": "Colores",
     "seasons": "Temporada",
@@ -240,7 +270,7 @@
       "category": "categoría",
       "season": "temporada",
       "fit": "corte",
-      "texture": "textura",
+      "texture": "tejido",
       "length": "largo",
       "state": "estado",
       "color": "color"
@@ -444,7 +474,7 @@
       "category": "categoría",
       "season": "temporada",
       "fit": "corte",
-      "texture": "textura",
+      "texture": "tejido",
       "topColors": "colores dominantes"
     }
   },

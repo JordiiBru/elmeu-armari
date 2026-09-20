@@ -54,17 +54,17 @@ function validate(
 
     const validTextures = TEXTURES_BY_CATEGORY[category];
     const texture = gr.texture as string | null | undefined;
-    if (texture ? !validTextures.includes(texture as Texture) : validTextures.length > 0)
+    if (texture && !validTextures.includes(texture as Texture))
       return { ok: false, error: `Peça ${i}: texture invàlida per categoria ${category}` };
 
     const validPatterns = PATTERNS_BY_CATEGORY[category];
     const pattern = gr.pattern as string | null | undefined;
-    if (pattern ? !validPatterns.includes(pattern as Pattern) : validPatterns.length > 0)
+    if (pattern && !validPatterns.includes(pattern as Pattern))
       return { ok: false, error: `Peça ${i}: pattern invàlid per categoria ${category}` };
 
     const validFits = FITS_BY_CATEGORY[category];
     const fit = gr.fit as string | null | undefined;
-    if (fit ? !validFits.includes(fit) : validFits.length > 0)
+    if (fit && !validFits.includes(fit))
       return { ok: false, error: `Peça ${i}: fit invàlid per categoria ${category}` };
 
     if (!Array.isArray(gr.seasons) || gr.seasons.some((s) => !SEASONS.includes(s as Season)))

@@ -87,7 +87,12 @@
       "COTTON": "Cotton",
       "POLYESTER": "Polyester",
       "LEATHER": "Leather",
-      "SYNTHETIC": "Synthetic"
+      "SYNTHETIC": "Synthetic",
+      "WOOL": "Wool",
+      "CORDUROY": "Corduroy",
+      "SUEDE": "Suede",
+      "CANVAS": "Canvas",
+      "NYLON": "Nylon"
     },
     "pattern": {
       "PLAIN": "Plain",
@@ -95,7 +100,9 @@
       "CHECKS": "Checks",
       "FLORAL": "Floral",
       "PRINTED": "Printed",
-      "GEOMETRIC": "Geometric"
+      "GEOMETRIC": "Geometric",
+      "DOTS": "Polka dots",
+      "CAMO": "Camo"
     },
     "fit": {
       "REGULAR": "Regular",
@@ -109,7 +116,9 @@
       "WIDE_LEG": "Wide Leg",
       "LOW_TOP": "Low Top",
       "MID": "Mid",
-      "HIGH_TOP": "High Top"
+      "HIGH_TOP": "High Top",
+      "TAPERED": "Tapered",
+      "RELAXED": "Relaxed"
     },
     "subtype": {
       "PULLOVER": "Pullover",
@@ -134,11 +143,30 @@
       "BOSSA": "Bag",
       "BARRET": "Hat",
       "BUFANDA": "Scarf",
-      "ULLERES": "Glasses"
+      "ULLERES": "Glasses",
+      "SWEATSHIRT": "Sweatshirt",
+      "TURTLENECK": "Turtleneck",
+      "VEST": "Vest",
+      "TANK": "Tank",
+      "HENLEY": "Henley",
+      "OVERSHIRT": "Overshirt",
+      "TROUSERS": "Trousers",
+      "CHELSEA": "Chelsea",
+      "ESPADRILLE": "Espadrille",
+      "FLIP_FLOP": "Flip-flops",
+      "RUNNING": "Running shoe",
+      "NECKLACE": "Necklace",
+      "BRACELET": "Bracelet",
+      "EARRINGS": "Earrings",
+      "CAP": "Cap",
+      "TIE": "Tie",
+      "GLOVES": "Gloves"
     },
     "length": {
       "SHORT": "Short",
-      "LONG": "Long"
+      "LONG": "Long",
+      "SHORT_SLEEVE": "Short sleeve",
+      "LONG_SLEEVE": "Long sleeve"
     },
     "season": {
       "SPRING": "Spring",
@@ -161,7 +189,7 @@
   "form": {
     "category": "Category",
     "colors": "Colours",
-    "texture": "Texture",
+    "texture": "Fabric",
     "pattern": "Pattern",
     "seasons": "Season",
     "size": "Size",
@@ -179,7 +207,9 @@
     "colorsFromPhoto": "colour suggested from the photo: tap it to change it",
     "removeColor": "remove",
     "alsoMaybe": "maybe also:",
-    "addOffered": "Add {name}"
+    "addOffered": "Add {name}",
+    "sleeve": "Sleeve",
+    "unspecified": "not specified"
   },
   "errors": {
     "requiredFields": "Fill in every field marked with *",
@@ -222,7 +252,7 @@
     "sheetLabel": "{category} garment",
     "eyebrow": "garment",
     "combine": "What goes with it",
-    "texture": "Texture",
+    "texture": "Fabric",
     "pattern": "Pattern",
     "colors": "Colours",
     "seasons": "Season",
@@ -240,7 +270,7 @@
       "category": "category",
       "season": "season",
       "fit": "fit",
-      "texture": "texture",
+      "texture": "fabric",
       "length": "length",
       "state": "state",
       "color": "colour"
@@ -444,7 +474,7 @@
       "category": "category",
       "season": "season",
       "fit": "fit",
-      "texture": "texture",
+      "texture": "fabric",
       "topColors": "dominant colours"
     }
   },

@@ -6,7 +6,7 @@ The UI speaks Catalan, Spanish and English (header menu, Catalan by default). Co
 
 ## What it does
 
-- **Wardrobe** (`/armari`): one grid with category and season filters. A piece holds its colours, seasons, texture, pattern, fit and size, an optional photo, and the action **què hi combina**: the palettes and pieces that go with it.
+- **Wardrobe** (`/armari`): one grid with category and season filters. A piece holds its colours, seasons, subtype and size, optionally its fabric, pattern, fit and sleeve or trouser length, an optional photo, and the action **què hi combina**: the palettes and pieces that go with it.
 - **Què em poso?** (`/avui`): today's outfit, the week, and your saved outfits filed under the piece each is built on. A day holds one outfit; shoes and accessories attach to the day, and a day can carry a photo of you wearing it.
 - **Laundry** (`/bugaderia`): clean and dirty state for sweaters, shirts and trousers. An outfit with a piece in the basket cannot be worn.
 - **Palettes** (`/paleta`): the 348 historical Sanzo Wada palettes, browsable by colour name.
