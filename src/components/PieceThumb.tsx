@@ -25,7 +25,8 @@ interface Props {
  * stripes when there is no photo. The wrapper is `relative` so the caller
  * only has to size it (`h-16 w-16`, `aspect-[3/4]`, etc.).
  *
- * Photos crossfade in on load via `opacity` — never a hard pop.
+ * Photos below the fold crossfade in on load via `opacity`; the ones above it
+ * are simply there, because gating them on JavaScript delays the page.
  */
 export function PieceThumb({
   garment,
@@ -37,7 +38,12 @@ export function PieceThumb({
   className,
 }: Props) {
   const src = thumb ? garmentThumbSrc(garment) : garmentImageSrc(garment);
-  const [loaded, setLoaded] = useState(false);
+  // A photo above the fold starts visible. The crossfade waits for React to
+  // hydrate and for `onLoad` to fire, so a photo that arrives first stays
+  // invisible until then and the largest paint of the page is delayed by
+  // the whole hydration (measured: about 3 s on a slow phone against under
+  // 1 s). Only what loads lazily, below the fold, fades in.
+  const [loaded, setLoaded] = useState(priority === true || loading === "eager");
   /**
    * Which src failed, rather than a boolean: the flag has to clear
    * itself when this tile is handed a different garment, and a list that
