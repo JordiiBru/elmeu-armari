@@ -70,7 +70,7 @@ function synthetic(
 
 // Every distinct colour in the dev wardrobe (accessories included), so
 // a regression on a piece the owner actually wears shows up by name.
-export const WARDROBE_CASES: AnchorCase[] = [
+const WARDROBE_CASES: AnchorCase[] = [
   wardrobe("#000000", "black", ["Black"]),
   wardrobe("#153f0a", "dark green", DARK_GREEN),
   wardrobe("#af82d9", "lavender", ["Lilac", "Grayish Lavender - B"]),
@@ -113,7 +113,7 @@ export const WARDROBE_CASES: AnchorCase[] = [
 
 // The colours a wardrobe like this one is likely to grow: the
 // neutrals and earth tones the engine has the most trouble with.
-export const SYNTHETIC_CASES: AnchorCase[] = [
+const SYNTHETIC_CASES: AnchorCase[] = [
   synthetic("#c3b091", "khaki", ["Ecru", "Ivory Buff"]),
   synthetic("#8a7d55", "olive khaki", [...BROWN_OLIVE, "Dark Citrine"]),
   synthetic("#a89a78", "greige khaki", ["Ecru", "Isabella Color", "Light Grayish Olive", "Maple"]),

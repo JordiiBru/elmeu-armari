@@ -21,15 +21,10 @@ export function isClean(garment: GarmentWithColors): boolean {
   return !isDirty(garment);
 }
 
-/** An outfit is clothes only, so this is all of it. */
-export function garmentsOf(outfit: SavedOutfit): GarmentWithColors[] {
-  return outfit.garments;
-}
-
 /** An outfit is blocked only by its own clothes — the shoes and
  * accessories you wear it with belong to the day, not to the outfit. */
 export function dirtyGarmentsOf(outfit: SavedOutfit): GarmentWithColors[] {
-  return garmentsOf(outfit).filter(isDirty);
+  return outfit.garments.filter(isDirty);
 }
 
 /**

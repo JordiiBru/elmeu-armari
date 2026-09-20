@@ -10,7 +10,7 @@ export function getUploadMaxMb(): number {
   return Number(process.env.UPLOAD_MAX_MB ?? "10");
 }
 
-export async function ensureUploadDir(): Promise<void> {
+async function ensureUploadDir(): Promise<void> {
   await fs.mkdir(getUploadDir(), { recursive: true });
 }
 

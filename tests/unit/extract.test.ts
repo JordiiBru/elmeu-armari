@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { extractColours, snapNeutralExtremes, type Pixels } from "./extract";
+import { extractColours, snapNeutralExtremes, type Pixels } from "@/lib/colors/extract";
 import { hexToOklch, oklchDistance } from "@/lib/outfits/color-matching";
 import { anchorFor } from "@/lib/outfits/engine";
 import { ANCHOR_CASES } from "@/lib/outfits/anchor-reference";

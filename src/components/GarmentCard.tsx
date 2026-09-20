@@ -76,34 +76,6 @@ export function GarmentCard({
   );
 }
 
-/**
- * Same visual card, but a click callback instead of navigation — used by
- * the outfit builder ("combinar" tab) to pick a garment and open the
- * palette-matching sheet, which is unrelated to the `/armari/[slug]` detail
- * modal. Kept client-only since it needs a real event handler.
- */
-export function SelectableGarmentCard({
-  garment,
-  index,
-  onClick,
-}: {
-  garment: GarmentWithColors;
-  index: number;
-  onClick: (g: GarmentWithColors) => void;
-}) {
-  return (
-    <Card
-      as="button"
-      type="button"
-      interactive="clickable"
-      data-testid="garment-card"
-      onClick={() => onClick(garment)}
-    >
-      <GarmentCardContent garment={garment} index={index} />
-    </Card>
-  );
-}
-
 /** CTA visual: afegir peça al mateix ratio 3:4. */
 export function AddGarmentCard({ href = "/add" }: { href?: string }) {
   const t = useTranslations("armari");

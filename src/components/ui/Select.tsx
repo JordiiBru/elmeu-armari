@@ -10,7 +10,7 @@ import {
 } from "react";
 import { Icon } from "./Icon";
 
-export interface SelectOption {
+interface SelectOption {
   value: string;
   label: string;
 }

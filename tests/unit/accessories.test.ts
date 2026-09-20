@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { suggestAccessories } from "./accessories";
+import { suggestAccessories } from "@/lib/outfits/accessories";
 import { palettes } from "@/lib/colors";
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 

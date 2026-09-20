@@ -6,20 +6,13 @@ export interface SanzoPalette {
   colores: string[];
 }
 
-export interface GarmentMatch {
-  garment: GarmentWithColors;
-  paletteColorIndex: number;
-  paletteColorHex: string;
-  distance: number;
-}
-
 export interface PaletteMatch {
   palette: SanzoPalette;
   colorAssignments: { garmentId: string; paletteColorIndex: number; distance: number }[];
   unmatchedColors: number[];
   totalDistance: number;
   /** How many piece colours found no anchor in this palette (the black or
-   * white shoe that rode in for free); each one added a fixed penalty to
+   * white piece that rode in for free); each one added a fixed penalty to
    * `totalDistance`. */
   unanchored: number;
 }
@@ -28,13 +21,6 @@ export interface OutfitGroup {
   garments: GarmentWithColors[];
   palettes: PaletteMatch[];
   bestDistance: number;
-}
-
-export interface OutfitResult {
-  palette: SanzoPalette;
-  matches: GarmentMatch[];
-  totalDistance: number;
-  unmatchedColors: number[];
 }
 
 export interface SavedOutfit {

@@ -82,7 +82,7 @@ export async function findSavedOutfitKeys(): Promise<string[]> {
   );
 }
 
-export async function findSavedOutfitById(id: string): Promise<SavedOutfit | null> {
+async function findSavedOutfitById(id: string): Promise<SavedOutfit | null> {
   const outfit = await findOutfitById(id);
   return outfit ? toSavedOutfit(outfit) : null;
 }

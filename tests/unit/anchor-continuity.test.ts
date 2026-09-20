@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { anchorFor, candidatesFor } from "./engine";
-import { hexToOklch, OKLCH_DISTANCE_THRESHOLD } from "./color-matching";
+import { anchorFor, candidatesFor } from "@/lib/outfits/engine";
+import { hexToOklch, OKLCH_DISTANCE_THRESHOLD } from "@/lib/outfits/color-matching";
 
 // The old engine switched strategy at chroma 0.02 and 0.05, so two
 // colours a fraction of a ΔE apart on either side of one of those lines

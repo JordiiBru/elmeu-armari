@@ -14,7 +14,7 @@ export function garmentSlug(garment: Pick<GarmentWithColors, "id" | "category" |
   return `${word.toLowerCase()}-${idSuffix(garment.id)}`;
 }
 
-export function idSuffix(id: string): string {
+function idSuffix(id: string): string {
   return id.slice(-ID_SUFFIX_LENGTH);
 }
 
