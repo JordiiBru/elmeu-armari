@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { requireSession } from "@/lib/auth/api";
+import { requireUser } from "@/lib/auth/api";
 import { requireSameOrigin } from "@/lib/auth/same-origin";
-import { deleteGarment } from "@/lib/prendas/service";
+import { deleteGarment, findGarmentById } from "@/lib/prendas/service";
 import { deleteUploadImage } from "@/lib/uploads";
 
 /**
@@ -24,12 +24,19 @@ export async function DELETE(
   const crossOrigin = requireSameOrigin(request);
   if (crossOrigin) return crossOrigin;
 
-  const denied = await requireSession();
-  if (denied) return denied;
+  const auth = await requireUser();
+  if ("response" in auth) return auth.response;
+  const { userId } = auth;
 
   const { id } = await params;
 
-  await deleteGarment(id);
+  // Ownership first: the photo on disk is named after the garment, so it
+  // must not be unlinked for an id that is not in this wardrobe.
+  if (!(await findGarmentById(userId, id))) {
+    return NextResponse.json({ error: "Garment not found" }, { status: 404 });
+  }
+
+  await deleteGarment(userId, id);
   await deleteUploadImage(id);
 
   revalidatePath("/armari");

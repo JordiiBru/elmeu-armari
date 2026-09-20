@@ -5,6 +5,7 @@ import { sortByWardrobeOrder } from "@/lib/prendas/filtering";
 import { getTranslations } from "next-intl/server";
 import { LaundryBoard } from "@/components/LaundryBoard";
 import { PageContainer, SectionHeader } from "@/components/ui";
+import { requireUserId } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function BugaderiaPage() {
   const t = await getTranslations("bugaderia");
-  const washable = (await findAllGarments()).filter(isWashable);
+  const washable = (await findAllGarments(await requireUserId())).filter(isWashable);
 
   return (
     // Wide, not narrow. This is a wall of photographs you scan standing in

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { requireSession } from "@/lib/auth/api";
+import { requireUser } from "@/lib/auth/api";
 import { requireSameOrigin } from "@/lib/auth/same-origin";
 import { findDayById, setDayPhoto } from "@/lib/outfits/service";
 import { saveUploadImage, deleteUploadImage } from "@/lib/uploads";
@@ -19,12 +19,13 @@ export async function POST(
   const crossOrigin = requireSameOrigin(request);
   if (crossOrigin) return crossOrigin;
 
-  const denied = await requireSession();
-  if (denied) return denied;
+  const auth = await requireUser();
+  if ("response" in auth) return auth.response;
+  const { userId } = auth;
 
   const { id } = await params;
 
-  const day = await findDayById(id);
+  const day = await findDayById(userId, id);
   if (!day) {
     return NextResponse.json({ error: "Day not found" }, { status: 404 });
   }
@@ -39,7 +40,7 @@ export async function POST(
     return notAnImage();
   }
 
-  await setDayPhoto(id, filename);
+  await setDayPhoto(userId, id, filename);
 
   revalidatePath("/avui");
 
@@ -53,18 +54,19 @@ export async function DELETE(
   const crossOrigin = requireSameOrigin(_request);
   if (crossOrigin) return crossOrigin;
 
-  const denied = await requireSession();
-  if (denied) return denied;
+  const auth = await requireUser();
+  if ("response" in auth) return auth.response;
+  const { userId } = auth;
 
   const { id } = await params;
 
-  const day = await findDayById(id);
+  const day = await findDayById(userId, id);
   if (!day) {
     return NextResponse.json({ error: "Day not found" }, { status: 404 });
   }
 
   await deleteUploadImage(id);
-  await setDayPhoto(id, null);
+  await setDayPhoto(userId, id, null);
 
   revalidatePath("/avui");
 

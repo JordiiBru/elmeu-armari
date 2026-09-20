@@ -17,6 +17,7 @@ import { TodayLine } from "@/components/TodayLine";
 import { WeekCalendar } from "@/components/WeekCalendar";
 import { OutfitLibrary } from "@/components/OutfitLibrary";
 import { PageContainer, SectionHeader, Stack, Text, Icon, EmptyState, InfoHint } from "@/components/ui";
+import { requireUserId } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -122,12 +123,13 @@ export default async function AvuiPage({
   const weekStart = startOfWeek(startParam ? isoToDay(startParam) : currentDay);
   const weekEnd = addDays(weekStart, 6);
 
+  const userId = await requireUserId();
   const [outfits, garments, todayWorn, days, savedOutfitKeys] = await Promise.all([
-    findAllOutfits(),
-    findAllGarments(),
-    findTodayWorn(),
-    findWeekPlan(weekStart),
-    findSavedOutfitKeys(),
+    findAllOutfits(userId),
+    findAllGarments(userId),
+    findTodayWorn(userId),
+    findWeekPlan(userId, weekStart),
+    findSavedOutfitKeys(userId),
   ]);
   const todayOutfitId = todayWorn?.outfitId ?? null;
 

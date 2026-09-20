@@ -56,7 +56,7 @@ The whole app is private. There is **no public sign-up**: accounts come from `np
 - **`mustChangePw` is carried in the session cookie**, so changing the password updates the row *and* calls `unstable_update` — the row alone would leave the proxy bouncing the user back to the change screen forever.
 - **Never log a password or a hash**, `LoginAttempt` included: it stores username, IP and outcome, nothing else. The IP is recorded and never acted on: behind the tunnel it is the WAF's address for every visitor, so a per-IP limit would lock the owner out along with everyone else. The defences are the per-username lockout, the global attempt budget (`pressure.ts`) and the `armari_device` cookie (`device.ts`) that lets a browser which already proved the password past both. Do not reintroduce a per-IP throttle, and do not count a known browser's own failures against the account.
 - **The proxy also decides which `Host` is ours.** `isAllowedHost` (`src/lib/security/host.ts`) is an allowlist built from `AUTH_URL`, `localhost` and IP addresses, applied in production only; anything else is a 404. Keep IP addresses allowed: the kubelet probes `/login` with the pod IP as `Host`, and refusing it restarts the pod forever.
-- The route handlers call `requireSession()` (`src/lib/auth/api.ts`) as a second lock. Keep it that way: it is what makes a mistake in the proxy a bug instead of a breach.
+- The route handlers call `requireUser()` (`src/lib/auth/api.ts`) as a second lock, and pages, layouts and Server Actions call `requireUserId()` (`src/lib/auth/session.ts`). Keep it that way: it is what makes a mistake in the proxy a bug instead of a breach, and it is where the account id comes from (see *Data model*).
 
 ## Days and time
 
@@ -64,6 +64,7 @@ The wardrobe is in Barcelona, the container runs on UTC. **`today()` in `src/lib
 
 ## Data model
 
+- **A wardrobe belongs to one account.** `Garment`, `Outfit` and `WornEvent` carry a `userId` (`onDelete: Cascade`); `Color`, `GarmentSeason`, `OutfitGarment` and `WornEventGarment` belong through their parent. Every repository function takes the owner's id first and puts it in the `where`, and there is deliberately no lookup by a bare id: an id that arrives from the client (a form, a slug, a request body, a photo filename) only resolves inside the caller's own wardrobe. A service that takes ids from the client and joins them into something new (`saveOutfit`, `wearOutfit`) checks they are all the caller's. A day is unique per `(userId, date)`. Photos are named after their garment or day, so `/api/uploads/[filename]` serves one only if `ownsPhoto` says the account owns it. `tests/unit/wardrobe-isolation.test.ts` runs two accounts against a real SQLite built from the migrations; a new query that forgets the owner belongs in it. The migration that introduced this gave every existing row to the oldest account.
 - Colours are a **1:N relation** from `Garment` to `Color`, stored as hex strings. Never as an array on `Garment`.
 - Seasons are a **1:N relation** to `GarmentSeason` (enum: `SPRING | SUMMER | AUTUMN | WINTER | ALL_YEAR`).
 - `Outfit.paletteId` is a **foreign key into the Sanzo Wada JSON**, not into a DB table. There is no `Palette` model; palettes live in `src/lib/colors/sanzo-wada.json`.

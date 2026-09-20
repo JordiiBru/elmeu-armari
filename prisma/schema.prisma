@@ -9,6 +9,10 @@ datasource db {
 
 model Garment {
   id        String           @id @default(cuid())
+  /// Whose wardrobe this piece is in. Every query for garments, outfits and
+  /// days is scoped by it: there is one wardrobe per account.
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   category  Category
   colors    Color[]
   seasons   GarmentSeason[]
@@ -26,10 +30,14 @@ model Garment {
   wornWith  WornEventGarment[]
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
+
+  @@index([userId])
 }
 
 model Outfit {
   id         String          @id @default(cuid())
+  userId     String
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   name       String?
   paletteId  Int
   favorite   Boolean         @default(false)
@@ -37,13 +45,17 @@ model Outfit {
   wornEvents WornEvent[]
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
+
+  @@index([userId])
 }
 
-// One row per calendar day: `date` is a day (time truncated to midnight),
-// not a click timestamp — the unique constraint is what enforces
-// "at most one outfit per day" for the weekly planner.
+// One row per calendar day and account: `date` is a day (time truncated to
+// midnight), not a click timestamp — the unique constraint is what enforces
+// "at most one outfit per day" for the weekly planner, for each wardrobe.
 model WornEvent {
   id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   outfitId String
   date     DateTime @default(now())
   /// null = not settled yet. Wearing an outfit only assigns the day;
@@ -64,7 +76,7 @@ model WornEvent {
   /// outfit was picked. Shoes are part of the outfit itself now.
   garments WornEventGarment[]
 
-  @@unique([date])
+  @@unique([userId, date])
   @@index([outfitId])
 }
 
@@ -161,6 +173,9 @@ model User {
   mustChangePw Boolean   @default(true)
   createdAt    DateTime  @default(now())
   lastLoginAt  DateTime?
+  garments     Garment[]
+  outfits      Outfit[]
+  wornEvents   WornEvent[]
 }
 
 /// One row per login attempt, successful or not. It is what the lockout

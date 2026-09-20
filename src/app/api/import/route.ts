@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { requireSession } from "@/lib/auth/api";
+import { requireUser } from "@/lib/auth/api";
 import { requireSameOrigin } from "@/lib/auth/same-origin";
 import { addGarment, findAllGarments, deleteGarment } from "@/lib/prendas/service";
 import {
@@ -100,8 +100,9 @@ export async function POST(req: NextRequest) {
   const crossOrigin = requireSameOrigin(req);
   if (crossOrigin) return crossOrigin;
 
-  const denied = await requireSession();
-  if (denied) return denied;
+  const auth = await requireUser();
+  if ("response" in auth) return auth.response;
+  const { userId } = auth;
 
   if (Number(req.headers.get("content-length")) > MAX_IMPORT_BYTES) {
     return NextResponse.json({ error: "El fitxer és massa gran" }, { status: 413 });
@@ -134,15 +135,15 @@ export async function POST(req: NextRequest) {
   if (mode === "replace") {
     // Delete + insert in one logical operation. Sequential inserts avoid
     // lock contention on the single-writer SQLite adapter.
-    const existing = await findAllGarments();
+    const existing = await findAllGarments(userId);
     for (const g of existing) {
-      await deleteGarment(g.id);
+      await deleteGarment(userId, g.id);
     }
   }
 
   let imported = 0;
   for (const g of garments) {
-    await addGarment({
+    await addGarment(userId, {
       category: g.category,
       texture: g.texture,
       pattern: g.pattern,

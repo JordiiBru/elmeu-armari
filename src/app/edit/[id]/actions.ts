@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { editGarment } from "@/lib/prendas/service";
 import { validateGarmentForm } from "@/lib/prendas/validation";
 import type { ValidationError } from "@/lib/prendas/validation";
+import { requireUserId } from "@/lib/auth/session";
 
 export type ActionState = { error: ValidationError } | null;
 
@@ -13,10 +14,11 @@ export async function updateGarmentAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const userId = await requireUserId();
   const result = validateGarmentForm(formData);
   if (!result.ok) return { error: result.error };
 
-  await editGarment(id, result.data);
+  await editGarment(userId, id, result.data);
 
   revalidatePath("/armari");
   revalidatePath("/stats");

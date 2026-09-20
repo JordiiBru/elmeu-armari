@@ -24,7 +24,10 @@ function outfitInclude() {
   } as const;
 }
 
+// Same rule as the garment repository: the owner's id is in every `where`,
+// and there is no lookup by a bare id. A day is unique per account and date.
 export async function findOutfitByGarmentsAndPalette(
+  userId: string,
   garmentIds: string[],
   paletteId: number
 ) {
@@ -34,6 +37,7 @@ export async function findOutfitByGarmentsAndPalette(
     // target garments; exact set-equality stays in JS below because
     // relational filters can't express it.
     where: {
+      userId,
       paletteId,
       garments: { some: { garmentId: { in: sorted } } },
     },
@@ -45,17 +49,18 @@ export async function findOutfitByGarmentsAndPalette(
   }) ?? null;
 }
 
-export async function findOutfitById(id: string) {
-  return prisma.outfit.findUnique({ where: { id }, include: outfitInclude() });
+export async function findOutfitById(userId: string, id: string) {
+  return prisma.outfit.findFirst({ where: { id, userId }, include: outfitInclude() });
 }
 
-export async function createOutfit(data: {
+export async function createOutfit(userId: string, data: {
   name?: string;
   paletteId: number;
   garmentIds: string[];
 }) {
   return prisma.outfit.create({
     data: {
+      userId,
       name: data.name ?? null,
       paletteId: data.paletteId,
       // Saving an outfit is already the deliberate keep action (the
@@ -70,12 +75,13 @@ export async function createOutfit(data: {
   });
 }
 
-export async function setOutfitFavorite(id: string, favorite: boolean) {
-  return prisma.outfit.update({ where: { id }, data: { favorite } });
+export async function setOutfitFavorite(userId: string, id: string, favorite: boolean) {
+  return prisma.outfit.updateMany({ where: { id, userId }, data: { favorite } });
 }
 
-export async function findAllOutfits() {
+export async function findAllOutfits(userId: string) {
   return prisma.outfit.findMany({
+    where: { userId },
     include: outfitInclude(),
     // Newest first. Every surface re-ranks for the day on top of this,
     // so this only decides ties.
@@ -88,12 +94,17 @@ export async function findAllOutfits() {
 // upsert here both assigns an empty day and reassigns an occupied one.
 // The garments are replaced rather than merged, so re-deciding a day
 // (different outfit, different shoes) is idempotent.
-export async function setWornDay(outfitId: string, day: Date, garmentIds: string[]) {
+export async function setWornDay(
+  userId: string,
+  outfitId: string,
+  day: Date,
+  garmentIds: string[],
+) {
   return prisma.$transaction(async (tx) => {
     const event = await tx.wornEvent.upsert({
-      where: { date: day },
+      where: { userId_date: { userId, date: day } },
       update: { outfitId },
-      create: { outfitId, date: day },
+      create: { userId, outfitId, date: day },
     });
     await tx.wornEventGarment.deleteMany({ where: { wornEventId: event.id } });
     if (garmentIds.length > 0) {
@@ -105,58 +116,61 @@ export async function setWornDay(outfitId: string, day: Date, garmentIds: string
   });
 }
 
-export async function clearWornDay(day: Date) {
-  await prisma.wornEvent.deleteMany({ where: { date: day } });
+export async function clearWornDay(userId: string, day: Date) {
+  await prisma.wornEvent.deleteMany({ where: { userId, date: day } });
 }
 
-export async function findWornEventById(id: string) {
-  return prisma.wornEvent.findUnique({ where: { id } });
+export async function findWornEventById(userId: string, id: string) {
+  return prisma.wornEvent.findFirst({ where: { id, userId } });
 }
 
-export async function setWornEventImage(id: string, image: string | null) {
-  return prisma.wornEvent.update({ where: { id }, data: { image } });
+export async function setWornEventImage(userId: string, id: string, image: string | null) {
+  return prisma.wornEvent.updateMany({ where: { id, userId }, data: { image } });
 }
 
 /** Every day that carries a photo. The export walks it, and so does
  * whatever is about to delete rows that own files on disk. */
-export async function findWornEventImages(where: { outfitId?: string; date?: Date } = {}) {
+export async function findWornEventImages(
+  userId: string,
+  where: { outfitId?: string; date?: Date } = {},
+) {
   const rows = await prisma.wornEvent.findMany({
-    where: { ...where, image: { not: null } },
+    where: { ...where, userId, image: { not: null } },
     select: { id: true, image: true },
   });
   return rows as { id: string; image: string }[];
 }
 
-export async function findUnsettledPastWornEvents(beforeDay: Date) {
+export async function findUnsettledPastWornEvents(userId: string, beforeDay: Date) {
   return prisma.wornEvent.findMany({
-    where: { date: { lt: beforeDay }, settledAt: null },
+    where: { userId, date: { lt: beforeDay }, settledAt: null },
     include: { outfit: { include: GARMENTS_INCLUDE } },
   });
 }
 
-export async function markWornEventSettled(id: string) {
-  return prisma.wornEvent.update({ where: { id }, data: { settledAt: new Date() } });
+export async function markWornEventSettled(userId: string, id: string) {
+  return prisma.wornEvent.updateMany({ where: { id, userId }, data: { settledAt: new Date() } });
 }
 
-export async function findWornEventForDay(day: Date) {
+export async function findWornEventForDay(userId: string, day: Date) {
   return prisma.wornEvent.findUnique({
-    where: { date: day },
+    where: { userId_date: { userId, date: day } },
     include: { outfit: { include: outfitInclude() }, ...GARMENTS_INCLUDE },
   });
 }
 
-export async function findWornEventsInRange(start: Date, end: Date) {
+export async function findWornEventsInRange(userId: string, start: Date, end: Date) {
   return prisma.wornEvent.findMany({
-    where: { date: { gte: start, lte: end } },
+    where: { userId, date: { gte: start, lte: end } },
     orderBy: { date: "asc" },
     include: { outfit: { include: outfitInclude() }, ...GARMENTS_INCLUDE },
   });
 }
 
-export async function deleteOutfit(id: string) {
-  return prisma.outfit.delete({ where: { id } });
+export async function deleteOutfit(userId: string, id: string) {
+  return prisma.outfit.delete({ where: { id, userId } });
 }
 
-export async function countOutfits(): Promise<number> {
-  return prisma.outfit.count();
+export async function countOutfits(userId: string): Promise<number> {
+  return prisma.outfit.count({ where: { userId } });
 }

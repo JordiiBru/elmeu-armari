@@ -5,10 +5,11 @@ import { colourCounts } from "@/lib/prendas/stats";
 import { ColourStrip } from "@/components/ColourStrip";
 import { PageRow } from "@/components/PageRow";
 import { PageContainer, SectionHeader, Stack, Text, Icon } from "@/components/ui";
+import { requireUserId } from "@/lib/auth/session";
 
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
-  const garments = await findAllGarments();
+  const garments = await findAllGarments(await requireUserId());
 
   return (
     <PageContainer width="wide">

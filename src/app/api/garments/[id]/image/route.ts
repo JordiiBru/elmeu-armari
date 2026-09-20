@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { requireSession } from "@/lib/auth/api";
+import { requireUser } from "@/lib/auth/api";
 import { requireSameOrigin } from "@/lib/auth/same-origin";
 import { findGarmentById, setGarmentImage } from "@/lib/prendas/service";
 import { saveUploadImage, deleteUploadImage } from "@/lib/uploads";
@@ -13,12 +13,13 @@ export async function POST(
   const crossOrigin = requireSameOrigin(request);
   if (crossOrigin) return crossOrigin;
 
-  const denied = await requireSession();
-  if (denied) return denied;
+  const auth = await requireUser();
+  if ("response" in auth) return auth.response;
+  const { userId } = auth;
 
   const { id } = await params;
 
-  const garment = await findGarmentById(id);
+  const garment = await findGarmentById(userId, id);
   if (!garment) {
     return NextResponse.json({ error: "Garment not found" }, { status: 404 });
   }
@@ -33,7 +34,7 @@ export async function POST(
     return notAnImage();
   }
 
-  await setGarmentImage(id, filename);
+  await setGarmentImage(userId, id, filename);
 
   revalidatePath("/armari");
 
@@ -47,18 +48,19 @@ export async function DELETE(
   const crossOrigin = requireSameOrigin(_request);
   if (crossOrigin) return crossOrigin;
 
-  const denied = await requireSession();
-  if (denied) return denied;
+  const auth = await requireUser();
+  if ("response" in auth) return auth.response;
+  const { userId } = auth;
 
   const { id } = await params;
 
-  const garment = await findGarmentById(id);
+  const garment = await findGarmentById(userId, id);
   if (!garment) {
     return NextResponse.json({ error: "Garment not found" }, { status: 404 });
   }
 
   await deleteUploadImage(id);
-  await setGarmentImage(id, null);
+  await setGarmentImage(userId, id, null);
 
   revalidatePath("/armari");
 

@@ -8,6 +8,7 @@ import {
   setOutfitFavorite,
 } from "@/lib/outfits/service";
 import { revalidatePath } from "next/cache";
+import { requireUserId } from "@/lib/auth/session";
 
 /**
  * Deliberately revalidates nothing. It used to revalidate /avui, which
@@ -20,12 +21,12 @@ import { revalidatePath } from "next/cache";
  * client-side navigation).
  */
 export async function saveOutfitAction(paletteId: number, garmentIds: string[]) {
-  const outfit = await saveOutfit({ paletteId, garmentIds });
+  const outfit = await saveOutfit(await requireUserId(), { paletteId, garmentIds });
   return { id: outfit.id, name: outfit.name };
 }
 
 export async function deleteOutfitAction(id: string) {
-  await deleteOutfit(id);
+  await deleteOutfit(await requireUserId(), id);
   revalidatePath("/avui");
 }
 
@@ -46,7 +47,7 @@ export async function wearOutfitAction(
   dayISO: string,
   extraIds: string[],
 ): Promise<void> {
-  await wearOutfit(outfitId, new Date(dayISO), extraIds);
+  await wearOutfit(await requireUserId(), outfitId, new Date(dayISO), extraIds);
 
   revalidatePath("/bugaderia");
   revalidatePath("/avui");
@@ -54,11 +55,11 @@ export async function wearOutfitAction(
 }
 
 export async function unassignDayAction(dayISO: string) {
-  await unassignDay(new Date(dayISO));
+  await unassignDay(await requireUserId(), new Date(dayISO));
   revalidatePath("/avui");
 }
 
 export async function setOutfitFavoriteAction(id: string, favorite: boolean) {
-  await setOutfitFavorite(id, favorite);
+  await setOutfitFavorite(await requireUserId(), id, favorite);
   revalidatePath("/avui");
 }

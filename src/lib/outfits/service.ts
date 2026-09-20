@@ -75,15 +75,15 @@ function toDayEvent(event: { id: string; image: string | null; updatedAt: Date }
 
 /** Every combination already in the wardrobe, for the combiner to grey
  * out and sink to the bottom of its list. */
-export async function findSavedOutfitKeys(): Promise<string[]> {
-  const outfits = await findAllOutfits();
+export async function findSavedOutfitKeys(userId: string): Promise<string[]> {
+  const outfits = await findAllOutfits(userId);
   return outfits.map((o) =>
     outfitKey(o.garments.map((og) => og.garment.id), o.paletteId),
   );
 }
 
-async function findSavedOutfitById(id: string): Promise<SavedOutfit | null> {
-  const outfit = await findOutfitById(id);
+async function findSavedOutfitById(userId: string, id: string): Promise<SavedOutfit | null> {
+  const outfit = await findOutfitById(userId, id);
   return outfit ? toSavedOutfit(outfit) : null;
 }
 
@@ -97,11 +97,12 @@ async function findSavedOutfitById(id: string): Promise<SavedOutfit | null> {
  * client, so the rules have to hold whatever the caller sends.
  */
 export async function wearOutfit(
+  userId: string,
   outfitId: string,
   date: Date,
   extraIds: string[],
 ): Promise<void> {
-  const outfit = await findSavedOutfitById(outfitId);
+  const outfit = await findSavedOutfitById(userId, outfitId);
   if (!outfit) throw new Error(`Outfit not found: ${outfitId}`);
 
   const day = dayKey(date);
@@ -115,7 +116,7 @@ export async function wearOutfit(
   }
 
   const categories = new Map(
-    (await findGarmentCategories(extraIds)).map((g) => [g.id, g.category]),
+    (await findGarmentCategories(userId, extraIds)).map((g) => [g.id, g.category]),
   );
   const garmentIds: string[] = [];
   const seen = new Set<string>();
@@ -126,7 +127,7 @@ export async function wearOutfit(
     garmentIds.push(id);
   }
 
-  await setWornDay(outfitId, day, garmentIds);
+  await setWornDay(userId, outfitId, day, garmentIds);
 }
 
 /**
@@ -134,20 +135,24 @@ export async function wearOutfit(
  * pointed at its photograph — so the file goes with the row. Same for
  * deleting an outfit, which cascades to every day it was worn on.
  */
-export async function unassignDay(date: Date) {
+export async function unassignDay(userId: string, date: Date) {
   const day = dayKey(date);
-  const photos = await findWornEventImages({ date: day });
-  await clearWornDay(day);
+  const photos = await findWornEventImages(userId, { date: day });
+  await clearWornDay(userId, day);
   await Promise.all(photos.map((p) => deleteUploadImage(p.id)));
 }
 
-export async function setOutfitFavorite(id: string, favorite: boolean): Promise<void> {
-  await setOutfitFavoriteRow(id, favorite);
+export async function setOutfitFavorite(
+  userId: string,
+  id: string,
+  favorite: boolean,
+): Promise<void> {
+  await setOutfitFavoriteRow(userId, id, favorite);
 }
 
-export async function deleteOutfit(id: string) {
-  const photos = await findWornEventImages({ outfitId: id });
-  const outfit = await deleteOutfitRow(id);
+export async function deleteOutfit(userId: string, id: string) {
+  const photos = await findWornEventImages(userId, { outfitId: id });
+  const outfit = await deleteOutfitRow(userId, id);
   await Promise.all(photos.map((p) => deleteUploadImage(p.id)));
   return outfit;
 }
@@ -157,18 +162,22 @@ export async function deleteOutfit(id: string) {
  * to the outfit, so it is keyed by the worn event: wearing the same look
  * again is a different morning and gets its own picture.
  */
-export async function setDayPhoto(eventId: string, filename: string | null): Promise<void> {
-  await setWornEventImage(eventId, filename);
+export async function setDayPhoto(
+  userId: string,
+  eventId: string,
+  filename: string | null,
+): Promise<void> {
+  await setWornEventImage(userId, eventId, filename);
 }
 
-export async function findDayById(id: string): Promise<DayEvent | null> {
-  const event = await findWornEventById(id);
+export async function findDayById(userId: string, id: string): Promise<DayEvent | null> {
+  const event = await findWornEventById(userId, id);
   return event ? toDayEvent(event) : null;
 }
 
 /** Filenames of every day photo, for the export to carry. */
-export async function findDayPhotoFilenames(): Promise<string[]> {
-  const rows = await findWornEventImages();
+export async function findDayPhotoFilenames(userId: string): Promise<string[]> {
+  const rows = await findWornEventImages(userId);
   return rows.map((r) => r.image);
 }
 
@@ -179,8 +188,8 @@ export async function findDayPhotoFilenames(): Promise<string[]> {
  * actually left the house) never soils A's pieces, since a day is only
  * ever settled once, strictly after it ends.
  */
-export async function settlePastWornEvents(): Promise<number> {
-  const events = await findUnsettledPastWornEvents(today());
+export async function settlePastWornEvents(userId: string): Promise<number> {
+  const events = await findUnsettledPastWornEvents(userId, today());
   for (const event of events) {
     // Only what one wear actually soils. Trousers are washable but are
     // not dirtied by having been worn — that stays a manual decision.
@@ -189,9 +198,9 @@ export async function settlePastWornEvents(): Promise<number> {
       .filter((g) => AUTO_SOIL_CATEGORIES.has(g.category))
       .map((g) => g.id);
     if (washableIds.length > 0) {
-      await markGarmentsDirty(washableIds);
+      await markGarmentsDirty(userId, washableIds);
     }
-    await markWornEventSettled(event.id);
+    await markWornEventSettled(userId, event.id);
   }
   return events.length;
 }
@@ -205,12 +214,12 @@ export async function settlePastWornEvents(): Promise<number> {
  * works right up until you page back a week — then the plan no longer
  * contains today and the plate silently lost everything it was worn with.
  */
-export async function findTodayWorn(): Promise<{
+export async function findTodayWorn(userId: string): Promise<{
   outfitId: string;
   extras: GarmentWithColors[];
   event: DayEvent;
 } | null> {
-  const event = await findWornEventForDay(today());
+  const event = await findWornEventForDay(userId, today());
   if (!event) return null;
   return {
     outfitId: event.outfitId,
@@ -221,10 +230,10 @@ export async function findTodayWorn(): Promise<{
 
 /** Always returns exactly 7 entries, Monday first, one per day of the
  * week that `weekStart` falls in — empty days included as `outfit: null`. */
-export async function findWeekPlan(weekStart: Date): Promise<WeekDayPlan[]> {
+export async function findWeekPlan(userId: string, weekStart: Date): Promise<WeekDayPlan[]> {
   const start = dayKey(weekStart);
   const end = addDays(start, 6);
-  const events = await findWornEventsInRange(start, end);
+  const events = await findWornEventsInRange(userId, start, end);
   const byDay = new Map(events.map((e) => [dayToISO(e.date), e]));
 
   return Array.from({ length: 7 }, (_, i) => {
@@ -243,18 +252,28 @@ export async function findWeekPlan(weekStart: Date): Promise<WeekDayPlan[]> {
 // table), so writes must validate it here or orphan palettes slip in.
 const VALID_PALETTE_IDS = new Set(palettes.map((p) => p.id));
 
-export async function saveOutfit(data: {
-  paletteId: number;
-  garmentIds: string[];
-}) {
+export async function saveOutfit(
+  userId: string,
+  data: {
+    paletteId: number;
+    garmentIds: string[];
+  },
+) {
   if (!VALID_PALETTE_IDS.has(data.paletteId)) {
     throw new Error(`Unknown paletteId: ${data.paletteId}`);
   }
 
-  const existing = await findOutfitByGarmentsAndPalette(data.garmentIds, data.paletteId);
+  // Ids come from the client: every piece has to be in this account's own
+  // wardrobe, or an outfit could be built out of someone else's clothes.
+  const owned = await findGarmentCategories(userId, data.garmentIds);
+  if (owned.length !== new Set(data.garmentIds).size) {
+    throw new Error("Outfit references garments outside this wardrobe");
+  }
+
+  const existing = await findOutfitByGarmentsAndPalette(userId, data.garmentIds, data.paletteId);
   if (existing) return existing;
 
-  const count = await countOutfits();
+  const count = await countOutfits(userId);
   const name = `Outfit #${count + 1}`;
-  return createOutfit({ ...data, name });
+  return createOutfit(userId, { ...data, name });
 }
