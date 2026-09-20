@@ -349,5 +349,48 @@ describe("engine", () => {
       expect(groups.some((g) => g.garments.some((x) => x.id === "loose"))).toBe(false);
     });
   });
+
+  describe("anchoring every colour of a piece", () => {
+    it("gives a two-colour piece one anchor per colour and scores them all", () => {
+      // Combination 1 is rust + teal: a shirt in both colours has an anchor
+      // for each, and used to be scored on the first alone.
+      const shirt = createTestGarment("shirt", "SHIRT", [RUST, TEAL]);
+      const pants = createTestGarment("pants", "PANTS", [TEAL]);
+      const shoes = createTestGarment("shoes", "SHOES", [SHOE_FOR_RUST_TEAL]);
+
+      const { groups } = generateOutfitGroups([shirt, pants, shoes], palettes);
+      const primary = groups[0].palettes[0];
+      const shirtAnchors = primary.colorAssignments.filter((a) => a.garmentId === "shirt");
+      expect(shirtAnchors).toHaveLength(2);
+      expect(new Set(shirtAnchors.map((a) => a.paletteColorIndex)).size).toBe(2);
+      expect(primary.unanchored).toBe(0);
+      const summed = primary.colorAssignments.reduce((sum, a) => sum + a.distance, 0);
+      expect(primary.totalDistance).toBeCloseTo(summed, 8);
+    });
+
+    it("charges a fixed penalty for a colour with no anchor, and counts it", () => {
+      // The black shoe rides in for free in rust + teal, which has no black.
+      const shirt = createTestGarment("shirt", "SHIRT", [RUST]);
+      const pants = createTestGarment("pants", "PANTS", [TEAL]);
+      const blackShoe = createTestGarment("shoes", "SHOES", [BLACK]);
+
+      const { groups } = generateOutfitGroups([shirt, pants, blackShoe], palettes);
+      const primary = groups[0].palettes[0];
+      expect(primary.unanchored).toBe(1);
+      expect(primary.totalDistance).toBeGreaterThanOrEqual(OKLCH_DISTANCE_THRESHOLD);
+    });
+
+    it("never lets an unanchored piece score better than an anchored one", () => {
+      const shirt = createTestGarment("shirt", "SHIRT", [RUST]);
+      const pants = createTestGarment("pants", "PANTS", [TEAL]);
+      const rustShoe = createTestGarment("shoes", "SHOES", [SHOE_FOR_RUST_TEAL]);
+      const blackShoe = createTestGarment("shoes", "SHOES", [BLACK]);
+
+      const anchored = generateOutfitGroups([shirt, pants, rustShoe], palettes).groups[0];
+      const free = generateOutfitGroups([shirt, pants, blackShoe], palettes).groups[0];
+      expect(anchored.palettes[0].unanchored).toBe(0);
+      expect(anchored.bestDistance).toBeLessThan(free.bestDistance);
+    });
+  });
 });
 
