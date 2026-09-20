@@ -7,6 +7,7 @@ import {
   perceptualDistance,
   OKLCH_DISTANCE_THRESHOLD,
   OKLCH_TIGHT_MATCH_THRESHOLD,
+  MEMBERSHIP_THRESHOLD,
   MAX_EXTRA_PALETTES,
 } from "./color-matching";
 
@@ -86,6 +87,11 @@ const CATEGORY_LAYOUT_ORDER = ["SHIRT", "SWEATER", "PANTS", "SHOES"] as const;
 // pagination to hide the scale of it one page at a time.
 const MAX_GROUPS = 60;
 
+// Below this many groups at the strict membership threshold the result is
+// topped up from the vocabulary threshold, so a small wardrobe still gets
+// suggestions instead of an empty screen.
+const LOOSE_FALLBACK_BELOW = 5;
+
 /** A candidate canonical reading of one garment colour. */
 interface Candidate {
   canonical: NamedColor;
@@ -115,7 +121,7 @@ interface Ctx {
   totalDistance: number;
 }
 
-function snapColour(hex: string): Snap | null {
+function snapColour(hex: string, membership: number = MEMBERSHIP_THRESHOLD): Snap | null {
   // One measure for every colour, no branches by chroma: a piece the
   // engine cannot place is one that sits beyond the threshold from
   // every canonical, greys included. All the plausible readings are
@@ -128,7 +134,10 @@ function snapColour(hex: string): Snap | null {
   }
   if (found.length === 0) return null;
   found.sort((a, b) => a.distance - b.distance);
-  return { best: found[0], candidates: found };
+  // The nearest reading always stays (it is the display anchor and keeps
+  // a piece that only fits loosely inside the vocabulary); the others must
+  // be within the membership threshold to widen the palettes it lives in.
+  return { best: found[0], candidates: found.filter((c, i) => i === 0 || c.distance < membership) };
 }
 
 /**
@@ -179,13 +188,13 @@ function intersectSets(sets: Set<number>[]): Set<number> {
   return out;
 }
 
-function buildContext(g: GarmentWithColors): Ctx | null {
+function buildContext(g: GarmentWithColors, membership: number = MEMBERSHIP_THRESHOLD): Ctx | null {
   if (EXTRA_CATEGORIES.has(g.category)) return null;
   if (g.colors.length === 0) return null;
 
   const snaps: Snap[] = [];
   for (const c of g.colors) {
-    const s = snapColour(c.hex);
+    const s = snapColour(c.hex, membership);
     if (!s) return null;
     snaps.push(s);
   }
@@ -402,6 +411,75 @@ function refinePalettes(
   return [primary, ...tightExtras];
 }
 
+function groupKey(g: OutfitGroup): string {
+  return g.garments
+    .map((x) => x.id)
+    .sort()
+    .join(",");
+}
+
+/** Fewest pieces first, then closest to the catalogue; out-of-season
+ * sweaters and shorts sink to the end without leaving. */
+function rankGroups(
+  groups: OutfitGroup[],
+  sweaterInSeason: boolean,
+  shortsInSeason: boolean,
+): OutfitGroup[] {
+  const sorted = [...groups].sort((a, b) => {
+    if (a.garments.length !== b.garments.length) {
+      return a.garments.length - b.garments.length;
+    }
+    return a.bestDistance - b.bestDistance;
+  });
+  return sortByShortsSeason(sortBySweaterSeason(sorted, sweaterInSeason), shortsInSeason);
+}
+
+/**
+ * Runs a generation at the strict membership threshold and, only when that
+ * leaves fewer than `LOOSE_FALLBACK_BELOW` groups (a small wardrobe, where
+ * being strict would empty the screen), tops it up with what the vocabulary
+ * threshold allows. Strict groups always rank first; the loose ones follow,
+ * ranked the same way. A well-stocked wardrobe never sees the second tier.
+ */
+function generateTiered(
+  collect: (membership: number) => OutfitGroup[],
+  sweaterInSeason: boolean,
+  shortsInSeason: boolean,
+): OutfitGroup[] {
+  const strict = rankGroups(collect(MEMBERSHIP_THRESHOLD), sweaterInSeason, shortsInSeason);
+  if (strict.length >= LOOSE_FALLBACK_BELOW) return strict.slice(0, MAX_GROUPS);
+  const seen = new Set(strict.map(groupKey));
+  const loose = rankGroups(
+    collect(OKLCH_DISTANCE_THRESHOLD).filter((g) => !seen.has(groupKey(g))),
+    sweaterInSeason,
+    shortsInSeason,
+  );
+  return [...strict, ...loose].slice(0, MAX_GROUPS);
+}
+
+function collectGroups(
+  targets: Ctx[],
+  candidatesOf: (target: Ctx) => Ctx[],
+  palettes: SanzoPalette[],
+): OutfitGroup[] {
+  const groupsByKey = new Map<string, OutfitGroup>();
+  for (const target of targets) {
+    enumerateOutfits(target, candidatesOf(target), (ctxs, commonPalettes) => {
+      const ids = ctxs.map((c) => c.garment.id).sort();
+      const key = ids.join(",");
+      if (groupsByKey.has(key)) return;
+      const paletteMatches = refinePalettes([...commonPalettes], ctxs, palettes);
+      if (paletteMatches.length === 0) return;
+      groupsByKey.set(key, {
+        garments: sortOutfitGarments(ctxs.map((c) => c.garment)),
+        palettes: paletteMatches,
+        bestDistance: paletteMatches[0].totalDistance,
+      });
+    });
+  }
+  return Array.from(groupsByKey.values());
+}
+
 export function generateOutfitGroupsForGarment(
   targetGarment: GarmentWithColors,
   allGarments: GarmentWithColors[],
@@ -415,50 +493,29 @@ export function generateOutfitGroupsForGarment(
   /** Same, for groups built around shorts. */
   shortsInSeason: boolean = true,
 ): { groups: OutfitGroup[]; hasMore: boolean } {
-  const targetCtx = buildContext(targetGarment);
-  if (!targetCtx) return { groups: [], hasMore: false };
+  const collect = (membership: number): OutfitGroup[] => {
+    const targetCtx = buildContext(targetGarment, membership);
+    if (!targetCtx) return [];
 
-  const candidates: Ctx[] = [];
-  for (const g of allGarments) {
-    if (g.id === targetGarment.id) continue;
-    if (g.category === targetGarment.category) continue;
-    const ctx = buildContext(g);
-    if (!ctx) continue;
-    // Prune: if target + candidate share no palette, we can drop early
-    // because deeper sets can only shrink — except a safe black/white
-    // shoe, which `enumerateOutfits` lets ride along regardless of a
-    // real match, so it needs the chance to be tried at all.
-    const shared = intersectSets([targetCtx.paletteIds, ctx.paletteIds]);
-    if (shared.size === 0 && !isSafeNeutralShoe(g)) continue;
-    candidates.push(ctx);
-  }
-
-  const groupsByKey = new Map<string, OutfitGroup>();
-  enumerateOutfits(targetCtx, candidates, (ctxs, commonPalettes) => {
-    const ids = ctxs.map((c) => c.garment.id).sort();
-    const key = ids.join(",");
-    if (groupsByKey.has(key)) return;
-    const paletteMatches = refinePalettes([...commonPalettes], ctxs, palettes);
-    if (paletteMatches.length === 0) return;
-    groupsByKey.set(key, {
-      garments: sortOutfitGarments(ctxs.map((c) => c.garment)),
-      palettes: paletteMatches,
-      bestDistance: paletteMatches[0].totalDistance,
-    });
-  });
-
-  const groups = Array.from(groupsByKey.values());
-  groups.sort((a, b) => {
-    if (a.garments.length !== b.garments.length) {
-      return a.garments.length - b.garments.length;
+    const candidates: Ctx[] = [];
+    for (const g of allGarments) {
+      if (g.id === targetGarment.id) continue;
+      if (g.category === targetGarment.category) continue;
+      const ctx = buildContext(g, membership);
+      if (!ctx) continue;
+      // Prune: if target + candidate share no palette, we can drop early
+      // because deeper sets can only shrink — except a safe black/white
+      // shoe, which `enumerateOutfits` lets ride along regardless of a
+      // real match, so it needs the chance to be tried at all.
+      const shared = intersectSets([targetCtx.paletteIds, ctx.paletteIds]);
+      if (shared.size === 0 && !isSafeNeutralShoe(g)) continue;
+      candidates.push(ctx);
     }
-    return a.bestDistance - b.bestDistance;
-  });
-  const ranked = sortByShortsSeason(sortBySweaterSeason(groups, sweaterInSeason), shortsInSeason)
-    .slice(0, MAX_GROUPS);
+    return collectGroups([targetCtx], () => candidates, palettes);
+  };
 
-  const paginated = ranked.slice(offset, offset + limit);
-  return { groups: paginated, hasMore: ranked.length > offset + limit };
+  const ranked = generateTiered(collect, sweaterInSeason, shortsInSeason);
+  return { groups: ranked.slice(offset, offset + limit), hasMore: ranked.length > offset + limit };
 }
 
 export function generateOutfitGroups(
@@ -469,44 +526,25 @@ export function generateOutfitGroups(
   sweaterInSeason: boolean = true,
   shortsInSeason: boolean = true,
 ): { groups: OutfitGroup[]; hasMore: boolean } {
-  const groupsByKey = new Map<string, OutfitGroup>();
-  const contexts: Ctx[] = [];
-  for (const g of garments) {
-    const ctx = buildContext(g);
-    if (ctx) contexts.push(ctx);
-  }
-
-  // Use each garment as an anchor in turn — same enumeration as the
-  // targeted variant, deduped by garment set.
-  for (const target of contexts) {
-    const candidates = contexts.filter(
-      (c) =>
-        c.garment.id !== target.garment.id &&
-        c.garment.category !== target.garment.category,
-    );
-    enumerateOutfits(target, candidates, (ctxs, commonPalettes) => {
-      const ids = ctxs.map((c) => c.garment.id).sort();
-      const key = ids.join(",");
-      if (groupsByKey.has(key)) return;
-      const paletteMatches = refinePalettes([...commonPalettes], ctxs, palettes);
-      if (paletteMatches.length === 0) return;
-      groupsByKey.set(key, {
-        garments: sortOutfitGarments(ctxs.map((c) => c.garment)),
-        palettes: paletteMatches,
-        bestDistance: paletteMatches[0].totalDistance,
-      });
-    });
-  }
-
-  const all = Array.from(groupsByKey.values());
-  all.sort((a, b) => {
-    if (a.garments.length !== b.garments.length) {
-      return a.garments.length - b.garments.length;
+  const collect = (membership: number): OutfitGroup[] => {
+    const contexts: Ctx[] = [];
+    for (const g of garments) {
+      const ctx = buildContext(g, membership);
+      if (ctx) contexts.push(ctx);
     }
-    return a.bestDistance - b.bestDistance;
-  });
-  const ranked = sortByShortsSeason(sortBySweaterSeason(all, sweaterInSeason), shortsInSeason)
-    .slice(0, MAX_GROUPS);
+    // Use each garment as an anchor in turn — same enumeration as the
+    // targeted variant, deduped by garment set.
+    return collectGroups(
+      contexts,
+      (target) =>
+        contexts.filter(
+          (c) =>
+            c.garment.id !== target.garment.id && c.garment.category !== target.garment.category,
+        ),
+      palettes,
+    );
+  };
 
+  const ranked = generateTiered(collect, sweaterInSeason, shortsInSeason);
   return { groups: ranked.slice(offset, offset + limit), hasMore: ranked.length > offset + limit };
 }
