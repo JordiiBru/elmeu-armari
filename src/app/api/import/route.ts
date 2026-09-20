@@ -91,42 +91,17 @@ function validate(
   return { ok: true, payload: b as unknown as ImportPayload };
 }
 
-/**
- * Two ways in. A signed-in session is the app's own /settings screen
- * importing a file the owner just picked; `IMPORT_SECRET` is for a
- * script with no browser, restoring a backup over curl. Before there
- * were accounts the secret was the only lock on a destructive endpoint,
- * which is why an unconfigured production deploy still refuses the
- * token path rather than falling open.
- */
-async function checkAuth(req: NextRequest): Promise<NextResponse | null> {
-  // The same check every other route handler makes, including that the
-  // session was issued under the account's current password.
-  if ((await requireSession()) === null) return null;
-
-  const importSecret = process.env.IMPORT_SECRET;
-
-  if (!importSecret) {
-    if (process.env.NODE_ENV === "production") {
-      return NextResponse.json(
-        { error: "IMPORT_SECRET env var not set. Configure it to enable import." },
-        { status: 503 }
-      );
-    }
-    return null; // dev: open
-  }
-
-  const header = req.headers.get("Authorization");
-  const token = header?.startsWith("Bearer ") ? header.slice(7) : null;
-  if (token !== importSecret) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  return null;
-}
+/** A wardrobe of a few hundred garments is tens of KB; this only stops a runaway body. */
+const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
-  const authError = await checkAuth(req);
-  if (authError) return authError;
+  // A session and nothing else: `mode=replace` deletes the whole wardrobe.
+  const denied = await requireSession();
+  if (denied) return denied;
+
+  if (Number(req.headers.get("content-length")) > MAX_IMPORT_BYTES) {
+    return NextResponse.json({ error: "El fitxer és massa gran" }, { status: 413 });
+  }
 
   const mode = req.nextUrl.searchParams.get("mode") ?? "merge";
 

@@ -23,6 +23,21 @@ Two deliberate trade-offs, so they are not reported as findings: `style-src` kee
 
 Sessions are signed, encrypted cookies valid for seven days, tied to the password they were issued under: changing the password, or resetting it with `create-user --reset`, ends every other session at once, because the proxy compares a fingerprint of the password hash carried in the token with the account on every request. There is no "sign out everywhere" button and no session list; changing the password is the way.
 
+## Checked and accepted
+
+Reviewed in #155; each line says why it is not a finding.
+
+- **`npm audit --omit=dev` lists 4 high advisories, all `mysql2` through the Prisma CLI.** The image ships the CLI to run `prisma migrate deploy` on boot; it never opens a MySQL connection (the database is SQLite), so the vulnerable protocol code is not reachable. `npm audit fix` would downgrade Prisma to 6, so Renovate moves it with the rest of Prisma instead.
+- **Cross-site requests.** The session cookie is `HttpOnly`, `Secure` and `SameSite=Lax` (`__Secure-` prefix over https, `__Host-` for the CSRF token), so a cross-site POST or DELETE arrives without it. The only GET route handlers (`/api/uploads`, `/api/export`, `/api/export/zip`) read; nothing that changes state answers a GET.
+- **`pwv` reaches the browser** through `/api/auth/session`: 16 hex characters of a SHA-256 of an Argon2 hash, which cannot forge a token or recover a password.
+- **Forwarded headers are not trusted for anything that matters.** `clientIp()` reads `cf-connecting-ip`, then `x-forwarded-for`; a client that reaches the pod directly can set either. Only the secondary per-IP throttle uses it (see above).
+- **Lockout and passwords**: 5 failures lock an account (an unattributable request is never locked by IP), and a password is 12 to 128 characters. Sensible for a single-owner login; revisit if accounts multiply.
+- **Uploads**: the declared type is a first filter, `sharp` decoding is the real one (a file that is not an image answers 422), the body is refused from `Content-Length` before it is buffered, and a canvas over 50 megapixels is refused. Filenames served or zipped come from the database or the `[a-z0-9]+(?:-thumb)?\.webp` allowlist, never from the request. The zip export has no matching restore path, so entry names are never extracted.
+- **`/api/import`** takes a session and nothing else (the old `IMPORT_SECRET` bearer path was unreachable behind the proxy and is gone) and refuses bodies over 5 MB.
+- **Headers**: CSP built in the proxy, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy: same-origin` and HSTS (`max-age` six months, no `includeSubDomains`: the domain hosts other services; Cloudflare does not add it).
+- **Committed secrets**: a scan of the whole git history for tokens, private keys and `AUTH_SECRET` values found none.
+- **`docker-compose.yml`** uses `:latest` and a non-secret `DATABASE_URL` build argument; it is the local convenience file, the cluster pins a tag.
+
 ## Response
 
 This is a hobby project maintained in spare time — there is no SLA, but reports are read and taken seriously.

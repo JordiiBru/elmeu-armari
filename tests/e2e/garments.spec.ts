@@ -169,12 +169,9 @@ test.describe("export / import round-trip", () => {
       return;
     }
 
-    // Import (merge mode — safe to call in any order). H7 requires this
-    // Bearer token in production; matches playwright.config.ts webServer.env.
-    const importRes = await request.post("/api/import", {
-      data: payload,
-      headers: { Authorization: "Bearer e2e-test-secret" },
-    });
+    // Import (merge mode — safe to call in any order). Authenticated by the
+    // storage state's session cookie, like every other route.
+    const importRes = await request.post("/api/import", { data: payload });
     expect(importRes.ok()).toBeTruthy();
     const result = await importRes.json();
     expect(result.imported).toBeGreaterThan(0);

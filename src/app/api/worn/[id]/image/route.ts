@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth/api";
 import { findDayById, setDayPhoto } from "@/lib/outfits/service";
-import { saveUploadImage, deleteUploadImage, getUploadMaxMb } from "@/lib/uploads";
-
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+import { saveUploadImage, deleteUploadImage } from "@/lib/uploads";
+import { readImageUpload, notAnImage } from "@/lib/upload-request";
 
 /**
  * The photo of you wearing the day, mirrored from
@@ -21,35 +20,20 @@ export async function POST(
 
   const { id } = await params;
 
-  const formData = await request.formData();
-  const file = formData.get("file");
-
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: "No file provided" }, { status: 400 });
-  }
-
-  if (!ALLOWED_TYPES.has(file.type)) {
-    return NextResponse.json(
-      { error: "Only JPEG, PNG and WebP are accepted" },
-      { status: 415 }
-    );
-  }
-
-  const maxBytes = getUploadMaxMb() * 1024 * 1024;
-  if (file.size > maxBytes) {
-    return NextResponse.json(
-      { error: `File exceeds ${getUploadMaxMb()} MB limit` },
-      { status: 413 }
-    );
-  }
-
   const day = await findDayById(id);
   if (!day) {
     return NextResponse.json({ error: "Day not found" }, { status: 404 });
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const filename = await saveUploadImage(buffer, id);
+  const upload = await readImageUpload(request);
+  if ("response" in upload) return upload.response;
+
+  let filename: string;
+  try {
+    filename = await saveUploadImage(upload.buffer, id);
+  } catch {
+    return notAnImage();
+  }
 
   await setDayPhoto(id, filename);
 
