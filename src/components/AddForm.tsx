@@ -17,9 +17,11 @@ import {
   LENGTHS_BY_CATEGORY,
   TEXTURES_BY_CATEGORY,
   PATTERNS_BY_CATEGORY,
+  lengthRequired,
   CATEGORIES_WITH_OPTIONAL_COLOR,
 } from "@/lib/prendas/types";
 import type { Category } from "@/lib/prendas/types";
+import { optionalUnless, withUnspecified } from "@/lib/prendas/options";
 import { optionLabel } from "@/lib/prendas/labels";
 import {
   Button,
@@ -219,16 +221,17 @@ export function AddForm() {
       )}
 
       {category && lengths.length > 0 && (
-        <Field label={t("length")} required>
+        <Field label={category === "SHIRT" ? t("sleeve") : t("length")} required={lengthRequired(category)}>
           <Select
             name="length"
-            required
+            required={lengthRequired(category)}
             value={length}
             onChange={setLength}
-            options={lengths.map((l) => ({
-              value: l,
-              label: optionLabel(tLabel, "length", l),
-            }))}
+            options={optionalUnless(
+              lengthRequired(category),
+              t("unspecified"),
+              lengths.map((l) => ({ value: l, label: optionLabel(tLabel, "length", l) })),
+            )}
           />
         </Field>
       )}
@@ -244,31 +247,29 @@ export function AddForm() {
       </Field>
 
       {category && textures.length > 0 && (
-        <Field label={t("texture")} required>
+        <Field label={t("texture")}>
           <Select
             name="texture"
-            required
             value={texture}
             onChange={setTexture}
-            options={textures.map((t) => ({
+            options={withUnspecified(t("unspecified"), textures.map((t) => ({
               value: t,
               label: tLabel(`texture.${t}`),
-            }))}
+            })))}
           />
         </Field>
       )}
 
       {category && patterns.length > 0 && (
-        <Field label={t("pattern")} required>
+        <Field label={t("pattern")}>
           <Select
             name="pattern"
-            required
             value={pattern}
             onChange={setPattern}
-            options={patterns.map((p) => ({
+            options={withUnspecified(t("unspecified"), patterns.map((p) => ({
               value: p,
               label: tLabel(`pattern.${p}`),
-            }))}
+            })))}
           />
         </Field>
       )}
@@ -290,13 +291,12 @@ export function AddForm() {
       )}
 
       {category && fits.length > 0 && (
-        <Field label={t("fit")} required>
+        <Field label={t("fit")}>
           <Select
             name="fit"
-            required
             value={fit}
             onChange={setFit}
-            options={fits.map((f) => ({ value: f, label: optionLabel(tLabel, "fit", f) }))}
+            options={withUnspecified(t("unspecified"), fits.map((f) => ({ value: f, label: optionLabel(tLabel, "fit", f) })))}
           />
         </Field>
       )}

@@ -9,6 +9,7 @@ import {
   TEXTURES_BY_CATEGORY,
   PATTERNS_BY_CATEGORY,
   CATEGORIES_WITH_OPTIONAL_COLOR,
+  lengthRequired,
 } from "./types";
 
 /**
@@ -37,17 +38,20 @@ type PickResult<T extends string> =
 
 // A field is "not applicable" for a category when its valid-values list is
 // empty (e.g. fit for ACCESSORI): it must then be absent from the form.
-// Otherwise the submitted value must be one of the listed options.
+// Otherwise the submitted value must be one of the listed options, or, for
+// a field that is allowed to stay empty (`optional`), no answer at all.
 function pickOptional<T extends string>(
   value: string | null,
   validValues: readonly T[],
   field: keyof GarmentInput,
+  { optional = false }: { optional?: boolean } = {},
 ): PickResult<T> {
   if (validValues.length === 0) {
     return value === null
       ? { ok: true, value: null }
       : { ok: false, error: "requiredFields", field };
   }
+  if (value === null && optional) return { ok: true, value: null };
   return validValues.includes(value as T)
     ? { ok: true, value: value as T }
     : { ok: false, error: "requiredFields", field };
@@ -67,13 +71,17 @@ export function validateGarmentForm(formData: FormData): ValidationResult {
 
   if (!CATEGORIES.includes(category)) return { ok: false, error: "requiredFields", field: "category" };
 
-  const textureResult = pickOptional<Texture>(texture, TEXTURES_BY_CATEGORY[category], "texture");
+  const textureResult = pickOptional<Texture>(texture, TEXTURES_BY_CATEGORY[category], "texture", {
+    optional: true,
+  });
   if (!textureResult.ok) return textureResult;
 
-  const patternResult = pickOptional<Pattern>(pattern, PATTERNS_BY_CATEGORY[category], "pattern");
+  const patternResult = pickOptional<Pattern>(pattern, PATTERNS_BY_CATEGORY[category], "pattern", {
+    optional: true,
+  });
   if (!patternResult.ok) return patternResult;
 
-  const fitResult = pickOptional(fit, FITS_BY_CATEGORY[category], "fit");
+  const fitResult = pickOptional(fit, FITS_BY_CATEGORY[category], "fit", { optional: true });
   if (!fitResult.ok) return fitResult;
 
   const sizeResult = pickOptional(size, SIZES_BY_CATEGORY[category], "size");
@@ -82,7 +90,9 @@ export function validateGarmentForm(formData: FormData): ValidationResult {
   const subtypeResult = pickOptional(subtype, SUBTYPES_BY_CATEGORY[category], "subtype");
   if (!subtypeResult.ok) return subtypeResult;
 
-  const lengthResult = pickOptional(length, LENGTHS_BY_CATEGORY[category], "length");
+  const lengthResult = pickOptional(length, LENGTHS_BY_CATEGORY[category], "length", {
+    optional: !lengthRequired(category),
+  });
   if (!lengthResult.ok) return lengthResult;
 
   if (seasons.length === 0) return { ok: false, error: "minOneSeason", field: "seasons" };

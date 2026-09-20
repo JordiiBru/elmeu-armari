@@ -3,23 +3,34 @@ import type { Category, Pattern, Texture, Season } from "@/generated/prisma/enum
 export type { Category, Pattern, Texture, Season };
 
 export const CATEGORIES: Category[] = ["SWEATER", "SHIRT", "PANTS", "SHOES", "ACCESSORI"];
-export const TEXTURES: Texture[] = ["KNIT", "DENIM", "LINEN", "COTTON", "POLYESTER", "LEATHER", "SYNTHETIC"];
-const PATTERNS: Pattern[] = ["PLAIN", "STRIPES", "CHECKS", "FLORAL", "PRINTED", "GEOMETRIC"];
+// "Texture" in the data, "fabric" on screen: knit, denim and corduroy are how
+// a cloth is made, cotton and wool what it is made of, and a wardrobe mixes
+// both. KNIT and SYNTHETIC stay for the pieces already filed under them.
+export const TEXTURES: Texture[] = [
+  "COTTON", "LINEN", "WOOL", "DENIM", "CORDUROY", "KNIT",
+  "LEATHER", "SUEDE", "CANVAS", "POLYESTER", "NYLON", "SYNTHETIC",
+];
+const PATTERNS: Pattern[] = ["PLAIN", "STRIPES", "CHECKS", "DOTS", "FLORAL", "PRINTED", "GEOMETRIC", "CAMO"];
 export const SEASONS: Season[] = ["SPRING", "SUMMER", "AUTUMN", "WINTER", "ALL_YEAR"];
 
+// New entries go at the end and use English keys; the older ones are Catalan or
+// Spanish and stay as they are, because the key is what an export carries.
+// The order is also the order of the rail (`sortByWardrobeOrder`).
 export const SUBTYPES_BY_CATEGORY: Record<Category, string[]> = {
-  SWEATER:   ["PULLOVER", "ZIP", "HOODIE", "CARDIGAN"],
-  SHIRT:     ["TEE", "POLO", "CAMISA"],
-  PANTS:     ["VAQUERS", "CHINO", "JOGGER", "CARGO"],
-  SHOES:     ["SNEAKER", "BOTA", "LOAFER", "SANDALIA", "OXFORD"],
-  ACCESSORI: ["ANELL", "RELLOTGE", "CINTURO", "BOSSA", "BARRET", "BUFANDA", "ULLERES"],
+  SWEATER:   ["PULLOVER", "ZIP", "HOODIE", "CARDIGAN", "SWEATSHIRT", "TURTLENECK", "VEST"],
+  SHIRT:     ["TEE", "POLO", "CAMISA", "TANK", "HENLEY", "OVERSHIRT"],
+  PANTS:     ["VAQUERS", "CHINO", "JOGGER", "CARGO", "TROUSERS"],
+  SHOES:     ["SNEAKER", "BOTA", "LOAFER", "SANDALIA", "OXFORD", "CHELSEA", "ESPADRILLE", "FLIP_FLOP", "RUNNING"],
+  ACCESSORI: ["ANELL", "RELLOTGE", "CINTURO", "BOSSA", "BARRET", "BUFANDA", "ULLERES", "NECKLACE", "BRACELET", "EARRINGS", "CAP", "TIE", "GLOVES"],
 };
 
-// Length is orthogonal to subtype: a chino can be SHORT or LONG.
-// Only defined for categories where it changes seasonal fit.
+// Length is orthogonal to subtype: a chino can be SHORT or LONG, a tee can
+// have a short or a long sleeve. Only defined for categories where it changes
+// seasonal fit. Sleeve values have their own keys so a filter chip never says
+// "short" without saying of what.
 export const LENGTHS_BY_CATEGORY: Record<Category, string[]> = {
   SWEATER:   [],
-  SHIRT:     [],
+  SHIRT:     ["SHORT_SLEEVE", "LONG_SLEEVE"],
   PANTS:     ["SHORT", "LONG"],
   SHOES:     [],
   ACCESSORI: [],
@@ -34,7 +45,7 @@ export const ALL_LENGTHS: string[] = [
 export const FITS_BY_CATEGORY: Record<Category, string[]> = {
   SWEATER:   ["REGULAR", "OVERSIZED", "CROPPED"],
   SHIRT:     ["REGULAR", "SLIM", "OVERSIZED", "CROPPED"],
-  PANTS:     ["STRAIGHT", "SLIM", "SKINNY", "BAGGY", "BARREL", "WIDE_LEG"],
+  PANTS:     ["STRAIGHT", "SLIM", "SKINNY", "TAPERED", "RELAXED", "BAGGY", "BARREL", "WIDE_LEG"],
   SHOES:     ["LOW_TOP", "MID", "HIGH_TOP"],
   ACCESSORI: [],
 };
@@ -42,10 +53,10 @@ export const FITS_BY_CATEGORY: Record<Category, string[]> = {
 // Not applicable to ACCESSORI: sizing varies too much across rings, belts,
 // hats etc. to fit one dropdown, so the field is hidden for this category.
 export const SIZES_BY_CATEGORY: Record<Category, string[]> = {
-  SWEATER:   ["XS", "S", "M", "L", "XL", "XXL"],
-  SHIRT:     ["XS", "S", "M", "L", "XL", "XXL"],
-  PANTS:     ["28", "29", "30", "31", "32", "33", "34", "36", "38"],
-  SHOES:     ["38", "39", "40", "41", "42", "43", "44", "45", "46"],
+  SWEATER:   ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
+  SHIRT:     ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
+  PANTS:     ["28", "29", "30", "31", "32", "33", "34", "35", "36", "38"],
+  SHOES:     ["37", "38", "39", "39.5", "40", "40.5", "41", "41.5", "42", "42.5", "43", "43.5", "44", "44.5", "45", "46", "47"],
   ACCESSORI: [],
 };
 
@@ -93,6 +104,13 @@ export const WASHABLE_CATEGORIES = new Set<Category>(["SWEATER", "SHIRT", "PANTS
 // basket lie. They go to the basket when you say so, from the clean pile
 // of /bugaderia.
 export const AUTO_SOIL_CATEGORIES = new Set<Category>(["SWEATER", "SHIRT"]);
+
+/** Trousers say short or long and that decides the season (see the shorts
+ * rule in the outfit engine); for everything else the length is a detail the
+ * person may not know or care about. */
+export function lengthRequired(category: Category): boolean {
+  return category === "PANTS";
+}
 
 export const ALL_FITS: string[] = [
   ...new Set(Object.values(FITS_BY_CATEGORY).flat()),
