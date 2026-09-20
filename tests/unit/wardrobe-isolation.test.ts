@@ -24,6 +24,7 @@ function input(overrides: Partial<GarmentInput> = {}): GarmentInput {
     texture: "COTTON",
     pattern: "PLAIN",
     fit: "REGULAR",
+    cropped: false,
     subtype: "TEE",
     length: null,
     size: "M",

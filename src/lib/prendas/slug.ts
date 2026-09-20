@@ -10,7 +10,7 @@ const ID_SUFFIX_LENGTH = 6;
  * is the whole slug — no transliteration table needed.
  */
 export function garmentSlug(garment: Pick<GarmentWithColors, "id" | "category" | "subtype">): string {
-  const word = garment.category === "ACCESSORI" && garment.subtype ? garment.subtype : garment.category;
+  const word = (garment.category === "ACCESSORI" || garment.category === "OUTERWEAR") && garment.subtype ? garment.subtype : garment.category;
   return `${word.toLowerCase()}-${idSuffix(garment.id)}`;
 }
 

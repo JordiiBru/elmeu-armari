@@ -16,6 +16,7 @@ function garment(
     subtype: null,
     size: null,
     length: null,
+    cropped: false,
     notes: null,
     image: null,
     dirtySince: opts.dirty ? new Date("2026-08-01T09:00:00Z") : null,
@@ -75,6 +76,7 @@ const garmentCatalog: Record<string, GarmentWithColors> = {
   shoes1: garment("shoes1", "SHOES"),
   shoes2: garment("shoes2", "SHOES"),
   ring: garment("ring", "ACCESSORI"),
+  coat: garment("coat", "OUTERWEAR"),
   pants: garment("pants", "PANTS"), // not an extra category
 };
 
@@ -107,6 +109,14 @@ afterEach(() => {
 });
 
 describe("wearOutfit", () => {
+  it("keeps outerwear as a day extra alongside the accessories", async () => {
+    findOutfitById.mockResolvedValue(outfitRow("o1", [garment("sh", "SHIRT")]));
+
+    await wearOutfit("u1", "o1", new Date("2026-08-20T00:00:00Z"), ["coat", "ring"]);
+
+    expect(setWornDay).toHaveBeenCalledWith("u1", "o1", new Date("2026-08-20T00:00:00Z"), ["coat", "ring"]);
+  });
+
   it("drops ids that are not an extra category", async () => {
     findOutfitById.mockResolvedValue(outfitRow("o1", [garment("sh", "SHIRT")]));
 

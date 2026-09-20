@@ -78,7 +78,8 @@
       "SHIRT": "Samarreta",
       "PANTS": "Pantalons",
       "SHOES": "Sabates",
-      "ACCESSORI": "Accessori"
+      "ACCESSORI": "Accessori",
+      "OUTERWEAR": "Abric"
     },
     "texture": {
       "KNIT": "Punt",
@@ -160,7 +161,16 @@
       "EARRINGS": "Arracades",
       "CAP": "Gorra",
       "TIE": "Corbata",
-      "GLOVES": "Guants"
+      "GLOVES": "Guants",
+      "JACKET": "Jaqueta",
+      "BLAZER": "Americana",
+      "BOMBER": "Bomber",
+      "DENIM_JACKET": "Texana",
+      "COAT": "Abric llarg",
+      "TRENCH": "Gavardina",
+      "PARKA": "Parca",
+      "PUFFER": "Plumífer",
+      "WINDBREAKER": "Xubasquero"
     },
     "length": {
       "SHORT": "Curts",
@@ -174,7 +184,8 @@
       "AUTUMN": "Tardor",
       "WINTER": "Hivern",
       "ALL_YEAR": "Tot l'any"
-    }
+    },
+    "cropped": "Curt"
   },
   "common": {
     "back": "Enrere",
@@ -209,7 +220,8 @@
     "alsoMaybe": "potser també:",
     "addOffered": "Afegir {name}",
     "sleeve": "Màniga",
-    "unspecified": "sense especificar"
+    "unspecified": "sense especificar",
+    "cropped": "Curt"
   },
   "errors": {
     "requiredFields": "Omple tots els camps marcats amb *",
@@ -370,7 +382,7 @@
     "piecesJoin": " i ",
     "accessories": "accessoris",
     "suggestedAccessories": "combinen amb aquest outfit",
-    "noAccessories": "cap accessori desat.",
+    "noAccessories": "cap accessori ni abric desat.",
     "goToAdd": "afegir una peça",
     "wearToday": "Me'l poso",
     "wearOnDay": "Desar per {day}",
@@ -410,7 +422,8 @@
       "never": "mai portat",
       "today": "portat avui",
       "ago": "{days, plural, one {portat fa # dia} other {portat fa # dies}}"
-    }
+    },
+    "outerwear": "abric"
   },
   "dayPhoto": {
     "add": "foto",
@@ -546,10 +559,10 @@
       "rules": {
         "title": "les regles que no es veuen",
         "r1": "Posar-te un outfit no el fa brut: només passa quan el dia ja ha passat.",
-        "r2": "Només les samarretes i els jerseis s'embruten sols. Els pantalons els envies tu al cistell; les sabates i els accessoris no van mai a rentar.",
+        "r2": "Només les samarretes i els jerseis s'embruten sols. Els pantalons els envies tu al cistell; les sabates, els abrics i els accessoris no van mai a rentar.",
         "r3": "Tot outfit porta sabates: sense sabates no es proposa.",
         "r4": "El negre i el blanc combinen sempre amb tot, no només les sabates.",
-        "r5": "Els accessoris es trien en posar-te l'outfit; no formen part de l'outfit desat."
+        "r5": "Els abrics i els accessoris es trien en posar-te l'outfit; no formen part de l'outfit desat."
       }
     },
     "hints": {

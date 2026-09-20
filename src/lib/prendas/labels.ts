@@ -17,6 +17,21 @@ type LabelKey = Parameters<LabelsTranslator>[0];
  * Category, texture, pattern and season are real unions and index the
  * namespace directly: `t(`category.${garment.category}`)`.
  */
+/**
+ * How a piece is cut, as the words that go on a line: its fit and, when it
+ * is cropped, that. They are two things (a boxy crop is oversized *and*
+ * cropped), so they are two words, not one fit.
+ */
+export function cutParts(
+  t: LabelsTranslator,
+  garment: { fit: string | null; cropped: boolean },
+): string[] {
+  const parts: string[] = [];
+  if (garment.fit) parts.push(optionLabel(t, "fit", garment.fit));
+  if (garment.cropped) parts.push(t("cropped"));
+  return parts;
+}
+
 export function optionLabel(
   t: LabelsTranslator,
   group: "fit" | "subtype" | "length",

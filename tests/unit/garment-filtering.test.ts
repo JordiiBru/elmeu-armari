@@ -17,6 +17,7 @@ function garment(
     subtype: null,
     length: opts.length ?? null,
     fit: null,
+    cropped: false,
     notes: null,
     image: null,
     dirtySince: null,

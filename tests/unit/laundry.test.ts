@@ -24,6 +24,7 @@ function garment(
     subtype: null,
     size: null,
     length: null,
+    cropped: false,
     notes: null,
     image: null,
     dirtySince: opts.dirty ? new Date("2026-08-01T09:00:00Z") : null,

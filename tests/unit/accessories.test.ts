@@ -19,6 +19,7 @@ function garment(id: string, category: Category, hexes: string[]): GarmentWithCo
     subtype: null,
     length: null,
     fit: null,
+    cropped: false,
     notes: null,
     image: null,
     dirtySince: null,

@@ -47,6 +47,7 @@ export async function GET() {
     subtype: g.subtype,
     length: g.length,
     fit: g.fit,
+    cropped: g.cropped,
     notes: g.notes,
     colors: g.colors.map((c) => c.hex),
     image: g.image,

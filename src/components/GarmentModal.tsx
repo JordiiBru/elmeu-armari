@@ -7,7 +7,7 @@ import type { GarmentWithColors } from "@/lib/prendas/types";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import type { SanzoPalette } from "@/lib/outfits/types";
 import { OutfitBottomSheet } from "./OutfitBottomSheet";
-import { optionLabel } from "@/lib/prendas/labels";
+import { cutParts, optionLabel } from "@/lib/prendas/labels";
 import { PieceThumb } from "./PieceThumb";
 import { useViewTransition } from "@/lib/useViewTransition";
 import { Button, Sheet, Text, TextButton, Stack } from "@/components/ui";
@@ -182,11 +182,14 @@ export function GarmentModal({
               </Text>
             )}
           </h2>
-          {(garment.fit || garment.size) && (
+          {(garment.fit || garment.cropped || garment.size) && (
             <Text variant="small" italic tone="secondary" className="font-serif">
-              {garment.fit && optionLabel(tLabel, "fit", garment.fit)}
-              {garment.fit && garment.size && " · "}
-              {garment.size && t("size", { size: garment.size })}
+              {[
+                ...cutParts(tLabel, garment),
+                garment.size ? t("size", { size: garment.size }) : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
             </Text>
           )}
         </Stack>

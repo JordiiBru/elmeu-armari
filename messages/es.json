@@ -78,7 +78,8 @@
       "SHIRT": "Camiseta",
       "PANTS": "Pantalones",
       "SHOES": "Zapatos",
-      "ACCESSORI": "Accesorio"
+      "ACCESSORI": "Accesorio",
+      "OUTERWEAR": "Abrigo"
     },
     "texture": {
       "KNIT": "Punto",
@@ -160,7 +161,16 @@
       "EARRINGS": "Pendientes",
       "CAP": "Gorra",
       "TIE": "Corbata",
-      "GLOVES": "Guantes"
+      "GLOVES": "Guantes",
+      "JACKET": "Chaqueta",
+      "BLAZER": "Americana",
+      "BOMBER": "Bomber",
+      "DENIM_JACKET": "Chaqueta vaquera",
+      "COAT": "Abrigo largo",
+      "TRENCH": "Gabardina",
+      "PARKA": "Parka",
+      "PUFFER": "Plumífero",
+      "WINDBREAKER": "Cortavientos"
     },
     "length": {
       "SHORT": "Cortos",
@@ -174,7 +184,8 @@
       "AUTUMN": "Otoño",
       "WINTER": "Invierno",
       "ALL_YEAR": "Todo el año"
-    }
+    },
+    "cropped": "Corto"
   },
   "common": {
     "back": "Atrás",
@@ -209,7 +220,8 @@
     "alsoMaybe": "quizá también:",
     "addOffered": "Añadir {name}",
     "sleeve": "Manga",
-    "unspecified": "sin especificar"
+    "unspecified": "sin especificar",
+    "cropped": "Corto"
   },
   "errors": {
     "requiredFields": "Rellena todos los campos marcados con *",
@@ -370,7 +382,7 @@
     "piecesJoin": " y ",
     "accessories": "accesorios",
     "suggestedAccessories": "combinan con este outfit",
-    "noAccessories": "ningún accesorio guardado.",
+    "noAccessories": "ningún accesorio ni abrigo guardado.",
     "goToAdd": "añadir una prenda",
     "wearToday": "Me lo pongo",
     "wearOnDay": "Guardar para el {day}",
@@ -410,7 +422,8 @@
       "never": "nunca llevado",
       "today": "llevado hoy",
       "ago": "{days, plural, one {llevado hace # día} other {llevado hace # días}}"
-    }
+    },
+    "outerwear": "abrigo"
   },
   "dayPhoto": {
     "add": "foto",
@@ -546,10 +559,10 @@
       "rules": {
         "title": "las reglas que no se ven",
         "r1": "Ponerte un outfit no lo ensucia: solo ocurre cuando el día ya ha pasado.",
-        "r2": "Solo las camisetas y los jerséis se ensucian solos. Los pantalones los mandas tú al cesto; los zapatos y los accesorios no van nunca a lavar.",
+        "r2": "Solo las camisetas y los jerséis se ensucian solos. Los pantalones los mandas tú al cesto; los zapatos, los abrigos y los accesorios no van nunca a lavar.",
         "r3": "Todo outfit lleva zapatos: sin zapatos no se propone.",
         "r4": "El negro y el blanco combinan siempre con todo, no solo los zapatos.",
-        "r5": "Los accesorios se eligen al ponerte el outfit; no forman parte del outfit guardado."
+        "r5": "Los abrigos y los accesorios se eligen al ponerte el outfit; no forman parte del outfit guardado."
       }
     },
     "hints": {

@@ -30,3 +30,23 @@ export function setAsideRemovedCategories(body: unknown): {
     originalIndexes,
   };
 }
+
+/**
+ * `CROPPED` used to be a fit. An export made before it became a flag of its
+ * own carries `fit: "CROPPED"`; read back as it is, it would fail the fit
+ * check, so it is turned into what the migration turned the stored rows into:
+ * cropped, with no fit.
+ */
+export function upgradeLegacyCropped(body: unknown): unknown {
+  if (typeof body !== "object" || body === null) return body;
+  const b = body as Record<string, unknown>;
+  if (!Array.isArray(b.garments)) return body;
+  return {
+    ...b,
+    garments: b.garments.map((g) => {
+      if (typeof g !== "object" || g === null) return g;
+      const row = g as Record<string, unknown>;
+      return row.fit === "CROPPED" ? { ...row, fit: null, cropped: true } : row;
+    }),
+  };
+}

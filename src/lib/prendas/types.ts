@@ -2,7 +2,8 @@ import type { Category, Pattern, Texture, Season } from "@/generated/prisma/enum
 
 export type { Category, Pattern, Texture, Season };
 
-export const CATEGORIES: Category[] = ["SWEATER", "SHIRT", "PANTS", "SHOES", "ACCESSORI"];
+// Outer layer first: it is the order of the rail, and a coat goes over the sweater.
+export const CATEGORIES: Category[] = ["OUTERWEAR", "SWEATER", "SHIRT", "PANTS", "SHOES", "ACCESSORI"];
 // "Texture" in the data, "fabric" on screen: knit, denim and corduroy are how
 // a cloth is made, cotton and wool what it is made of, and a wardrobe mixes
 // both. KNIT and SYNTHETIC stay for the pieces already filed under them.
@@ -17,6 +18,7 @@ export const SEASONS: Season[] = ["SPRING", "SUMMER", "AUTUMN", "WINTER", "ALL_Y
 // Spanish and stay as they are, because the key is what an export carries.
 // The order is also the order of the rail (`sortByWardrobeOrder`).
 export const SUBTYPES_BY_CATEGORY: Record<Category, string[]> = {
+  OUTERWEAR: ["JACKET", "BLAZER", "BOMBER", "DENIM_JACKET", "COAT", "TRENCH", "PARKA", "PUFFER", "WINDBREAKER"],
   SWEATER:   ["PULLOVER", "ZIP", "HOODIE", "CARDIGAN", "SWEATSHIRT", "TURTLENECK", "VEST"],
   SHIRT:     ["TEE", "POLO", "CAMISA", "TANK", "HENLEY", "OVERSHIRT"],
   PANTS:     ["VAQUERS", "CHINO", "JOGGER", "CARGO", "TROUSERS"],
@@ -29,6 +31,7 @@ export const SUBTYPES_BY_CATEGORY: Record<Category, string[]> = {
 // seasonal fit. Sleeve values have their own keys so a filter chip never says
 // "short" without saying of what.
 export const LENGTHS_BY_CATEGORY: Record<Category, string[]> = {
+  OUTERWEAR: [],
   SWEATER:   [],
   SHIRT:     ["SHORT_SLEEVE", "LONG_SLEEVE"],
   PANTS:     ["SHORT", "LONG"],
@@ -42,9 +45,12 @@ export const ALL_LENGTHS: string[] = [
 
 // Not applicable to ACCESSORI (a ring has no "fit"): empty list means the
 // field is hidden and must stay unset, same convention as subtype/length.
+// CROPPED is not here: it is a body length, kept apart from the fit so that a
+// boxy crop can be oversized and cropped (see `canBeCropped`).
 export const FITS_BY_CATEGORY: Record<Category, string[]> = {
-  SWEATER:   ["REGULAR", "OVERSIZED", "CROPPED"],
-  SHIRT:     ["REGULAR", "SLIM", "OVERSIZED", "CROPPED"],
+  OUTERWEAR: ["REGULAR", "SLIM", "OVERSIZED"],
+  SWEATER:   ["REGULAR", "SLIM", "OVERSIZED"],
+  SHIRT:     ["REGULAR", "SLIM", "OVERSIZED"],
   PANTS:     ["STRAIGHT", "SLIM", "SKINNY", "TAPERED", "RELAXED", "BAGGY", "BARREL", "WIDE_LEG"],
   SHOES:     ["LOW_TOP", "MID", "HIGH_TOP"],
   ACCESSORI: [],
@@ -53,6 +59,7 @@ export const FITS_BY_CATEGORY: Record<Category, string[]> = {
 // Not applicable to ACCESSORI: sizing varies too much across rings, belts,
 // hats etc. to fit one dropdown, so the field is hidden for this category.
 export const SIZES_BY_CATEGORY: Record<Category, string[]> = {
+  OUTERWEAR: ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
   SWEATER:   ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
   SHIRT:     ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
   PANTS:     ["28", "29", "30", "31", "32", "33", "34", "35", "36", "38"],
@@ -63,6 +70,7 @@ export const SIZES_BY_CATEGORY: Record<Category, string[]> = {
 // Texture/pattern don't apply to ACCESSORI either — same empty-list
 // convention as fit/size/subtype/length.
 export const TEXTURES_BY_CATEGORY: Record<Category, Texture[]> = {
+  OUTERWEAR: TEXTURES,
   SWEATER: TEXTURES,
   SHIRT: TEXTURES,
   PANTS: TEXTURES,
@@ -71,6 +79,7 @@ export const TEXTURES_BY_CATEGORY: Record<Category, Texture[]> = {
 };
 
 export const PATTERNS_BY_CATEGORY: Record<Category, Pattern[]> = {
+  OUTERWEAR: PATTERNS,
   SWEATER: PATTERNS,
   SHIRT: PATTERNS,
   PANTS: PATTERNS,
@@ -87,8 +96,18 @@ export const CATEGORIES_WITH_OPTIONAL_COLOR = new Set<Category>(["ACCESSORI"]);
 // belong to the WornEvent and not to the Outfit. Shoes moved out of this
 // set on purpose — the outfit now commits to the shoes it was matched
 // with, the same way it commits to a shirt. Accessories stay flexible:
-// nobody picks an outfit around its accessories.
-export const EXTRA_CATEGORIES = new Set<Category>(["ACCESSORI"]);
+// nobody picks an outfit around its accessories. Outerwear is the same
+// kind of choice: you pick the jacket for the weather once the look is
+// decided, and a coat that had to share a palette with the rest would
+// narrow every outfit for a layer that is on and off in a day.
+export const EXTRA_CATEGORIES = new Set<Category>(["OUTERWEAR", "ACCESSORI"]);
+
+// Body length is a flag of its own, apart from the fit. Only tops and the
+// outer layer have one that means anything; everywhere else it stays false.
+const CROPPABLE_CATEGORIES = new Set<Category>(["OUTERWEAR", "SWEATER", "SHIRT"]);
+export function canBeCropped(category: Category): boolean {
+  return CROPPABLE_CATEGORIES.has(category);
+}
 
 // The complement: what a saved outfit is made of. Used by the outfit
 // builder and by the server-side validation of a worn day.
@@ -121,6 +140,7 @@ export interface GarmentInput {
   texture: Texture | null;
   pattern: Pattern | null;
   fit: string | null;
+  cropped: boolean;
   subtype: string | null;
   length: string | null;
   size: string | null;
@@ -138,6 +158,7 @@ export interface GarmentWithColors {
   subtype: string | null;
   length: string | null;
   fit: string | null;
+  cropped: boolean;
   notes: string | null;
   image: string | null;
   /** null = clean. Set to the moment the garment was marked dirty. */

@@ -9,6 +9,7 @@ import { pieceLabel } from "./OutfitTile";
 import { EmptyState, Icon, Stack, Text } from "@/components/ui";
 
 export interface WearGroups {
+  outerwear: GarmentWithColors[];
   accessories: GarmentWithColors[];
 }
 
@@ -74,11 +75,13 @@ function PickGrid({ children }: { children: React.ReactNode }) {
  * Shoes moved out of this picker and into the outfit itself — the group
  * you save now commits to the shoes it was matched with, the same way
  * it commits to a shirt. What's left here is what still varies day to
- * day regardless of which outfit you picked: accessories.
+ * day regardless of which outfit you picked: the jacket for the weather
+ * and the accessories.
  */
 export function useWearGroups(candidates: GarmentWithColors[]): WearGroups {
   return useMemo(
     () => ({
+      outerwear: candidates.filter((g) => g.category === "OUTERWEAR"),
       accessories: candidates.filter((g) => g.category === "ACCESSORI"),
     }),
     [candidates],
@@ -102,10 +105,10 @@ export function WearGrid({
   suggested?: GarmentWithColors[];
 }) {
   const t = useTranslations("outfits");
-  const { accessories } = groups;
+  const { outerwear, accessories } = groups;
   const selectedExtras = useMemo(() => new Set(extraIds), [extraIds]);
 
-  if (accessories.length === 0) {
+  if (outerwear.length === 0 && accessories.length === 0) {
     return (
       <EmptyState
         title={t("noAccessories")}
@@ -129,6 +132,22 @@ export function WearGrid({
           <Text variant="caption">{t("suggestedAccessories")}</Text>
           <PickGrid>
             {suggested.map((g) => (
+              <PickTile
+                key={g.id}
+                garment={g}
+                disabled={disabled}
+                selected={selectedExtras.has(g.id)}
+                onClick={() => onToggleExtra(g.id)}
+              />
+            ))}
+          </PickGrid>
+        </Stack>
+      )}
+      {outerwear.length > 0 && (
+        <Stack gap={3}>
+          <Text variant="caption">{t("outerwear")}</Text>
+          <PickGrid>
+            {outerwear.map((g) => (
               <PickTile
                 key={g.id}
                 garment={g}

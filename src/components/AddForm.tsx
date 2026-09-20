@@ -18,12 +18,14 @@ import {
   TEXTURES_BY_CATEGORY,
   PATTERNS_BY_CATEGORY,
   lengthRequired,
+  canBeCropped,
   CATEGORIES_WITH_OPTIONAL_COLOR,
 } from "@/lib/prendas/types";
 import type { Category } from "@/lib/prendas/types";
 import { optionalUnless, withUnspecified } from "@/lib/prendas/options";
 import { optionLabel } from "@/lib/prendas/labels";
 import {
+  Checkbox,
   Button,
   TextButton,
   Field,
@@ -299,6 +301,10 @@ export function AddForm() {
             options={withUnspecified(t("unspecified"), fits.map((f) => ({ value: f, label: optionLabel(tLabel, "fit", f) })))}
           />
         </Field>
+      )}
+
+      {category && canBeCropped(category) && (
+        <Checkbox name="cropped" label={t("cropped")} />
       )}
 
       <Field label={t("notes")} htmlFor="notes">

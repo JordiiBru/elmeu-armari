@@ -22,6 +22,9 @@ model Garment {
   subtype   String?
   length    String?
   fit       String?
+  /// Body length, independent of fit: a boxy crop is `OVERSIZED` and cropped.
+  /// Only meaningful for tops and outerwear; false everywhere else.
+  cropped   Boolean          @default(false)
   notes     String?
   image     String?
   /// null = clean. Set to the moment the garment was marked dirty.
@@ -130,6 +133,7 @@ model GarmentSeason {
 }
 
 enum Category {
+  OUTERWEAR
   SWEATER
   SHIRT
   PANTS

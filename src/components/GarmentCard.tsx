@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { GarmentWithColors } from "@/lib/prendas/types";
-import { optionLabel } from "@/lib/prendas/labels";
+import { cutParts } from "@/lib/prendas/labels";
 import { garmentSlug } from "@/lib/prendas/slug";
 import { isDirty } from "@/lib/bugaderia/laundry";
 import { PieceThumb } from "./PieceThumb";
@@ -34,11 +34,9 @@ function GarmentCardContent({ garment, index }: { garment: GarmentWithColors; in
           n{String(index + 1).padStart(3, "0")}
         </Text>
       </div>
-      {(garment.fit || garment.size) && (
+      {(garment.fit || garment.cropped || garment.size) && (
         <Text variant="small" italic tone="secondary" className="font-serif mt-0.5">
-          {[garment.fit ? optionLabel(t, "fit", garment.fit) : null, garment.size]
-            .filter(Boolean)
-            .join(" · ")}
+          {[...cutParts(t, garment), garment.size].filter(Boolean).join(" · ")}
         </Text>
       )}
       {garment.notes && (
