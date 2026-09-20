@@ -16,6 +16,7 @@
         "missingFields": "Per entrar calen els dos: usuari i contrasenya.",
         "invalidCredentials": "Aquest usuari i aquesta contrasenya no obren l'armari.",
         "lockedOut": "Massa intents seguits. L'armari es queda tancat {seconds, plural, one {# segon} other {# segons}} més.",
+        "busy": "Massa intents alhora. Espera un moment i torna-ho a provar.",
         "unexpected": "No s'ha pogut obrir l'armari ara mateix. Torna-ho a provar en un moment."
       }
     },

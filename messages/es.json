@@ -16,6 +16,7 @@
         "missingFields": "Para entrar hacen falta los dos: usuario y contraseña.",
         "invalidCredentials": "Ese usuario y esa contraseña no abren el armario.",
         "lockedOut": "Demasiados intentos seguidos. El armario se queda cerrado {seconds, plural, one {# segundo} other {# segundos}} más.",
+        "busy": "Demasiados intentos a la vez. Espera un momento y vuelve a probar.",
         "unexpected": "No se ha podido abrir el armario ahora mismo. Vuelve a probar en un momento."
       }
     },

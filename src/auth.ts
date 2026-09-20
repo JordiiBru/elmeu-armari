@@ -2,17 +2,19 @@ import { headers } from "next/headers";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "@/auth.config";
+import { readDeviceCookie } from "@/lib/auth/device-cookie";
+import { withinCredentialLimits } from "@/lib/auth/policy";
 import { UNKNOWN_IP, clientIp } from "@/lib/auth/request";
 import {
-  lockoutSeconds,
+  gateLogin,
   logAttempt,
   normalizeUsername,
   verifyCredentials,
 } from "@/lib/auth/service";
 
 /** Auth.js runs `authorize` inside the request it was called from, but
- * it is not contractually a request scope; an address we cannot read is
- * one we do not throttle on. */
+ * it is not contractually a request scope. The address is only recorded,
+ * never throttled on: behind the tunnel it is the same for every visitor. */
 async function requestIp(): Promise<string> {
   try {
     return clientIp(await headers());
@@ -48,15 +50,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const username = normalizeUsername(rawUsername);
-        const ip = await requestIp();
+        // Nothing this long can be a real account or password, so it is
+        // neither hashed nor written down: the name is attacker-controlled
+        // and lands in `LoginAttempt`.
+        if (!withinCredentialLimits(username, password)) return null;
 
-        // A locked-out attempt is not recorded: the backoff is already
-        // as long as it is going to get, and counting refusals would
-        // let an attacker hold the real owner out indefinitely.
-        if ((await lockoutSeconds(username, ip)) !== null) return null;
+        // A locked-out or over-budget attempt is not recorded: the backoff
+        // is already as long as it is going to get, and counting refusals
+        // would let an attacker hold the real owner out indefinitely.
+        const gate = await gateLogin(username, await readDeviceCookie(), { spend: true });
+        if (!gate.ok) return null;
 
         const user = await verifyCredentials(username, password);
-        await logAttempt(username, ip, Boolean(user));
+        // A known browser mistyping its own password is not evidence
+        // against the account, so it does not count towards the lockout
+        // that protects the account from everyone else.
+        if (user || !gate.trusted) await logAttempt(username, await requestIp(), Boolean(user));
         if (!user) return null;
 
         return {

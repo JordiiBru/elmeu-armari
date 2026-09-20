@@ -41,15 +41,6 @@ export async function recentAttemptsByUsername(
   });
 }
 
-export async function recentAttemptsByIp(ip: string, since: Date, take: number) {
-  return prisma.loginAttempt.findMany({
-    where: { ip, createdAt: { gte: since } },
-    orderBy: { createdAt: "desc" },
-    take,
-    select: { success: true, createdAt: true },
-  });
-}
-
 export async function deleteAttemptsBefore(cutoff: Date) {
   return prisma.loginAttempt.deleteMany({ where: { createdAt: { lt: cutoff } } });
 }

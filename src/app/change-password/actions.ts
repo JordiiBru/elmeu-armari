@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { auth, signIn, signOut } from "@/auth";
+import { rememberDevice } from "@/lib/auth/device-cookie";
 import { changePassword } from "@/lib/auth/service";
 
 export type ChangePasswordState = {
@@ -43,6 +44,9 @@ export async function changePasswordAction(
       password: next,
       redirect: false,
     });
+    // The new password has a new fingerprint, so the old device cookie no
+    // longer matches; this browser just proved it, so it is re-marked.
+    await rememberDevice(session.user.username);
   } catch {
     // Rather than loop on a stale cookie, ask for the new password once.
     await signOut({ redirectTo: "/login" });

@@ -22,3 +22,15 @@ export function passwordPolicyError(password: string): PasswordPolicyError | nul
   if (password.length > MAX_PASSWORD_LENGTH) return "tooLong";
   return null;
 }
+
+/** What `create-user` accepts, and therefore the longest name that can
+ * exist. Anything longer is refused before it is looked up, hashed or
+ * stored: the login form is open to the internet and the name is written
+ * to `LoginAttempt`. */
+export const MAX_USERNAME_LENGTH = 32;
+
+/** Whether a login attempt could possibly be a real one. A password longer
+ * than the policy allows cannot be anyone's, so it is never hashed. */
+export function withinCredentialLimits(username: string, password: string): boolean {
+  return username.length <= MAX_USERNAME_LENGTH && password.length <= MAX_PASSWORD_LENGTH;
+}
