@@ -61,6 +61,7 @@ export function AppMenu({
   // theme, the language and the way out, and drops the rest.
   const links = username && !locked
     ? [
+        { href: "/ajuda", label: t("help") },
         { href: "/stats", label: t("stats") },
         { href: "/settings", label: t("settings") },
         { href: "/change-password", label: tAuth("changePassword") },

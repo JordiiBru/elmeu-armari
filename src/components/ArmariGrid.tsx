@@ -9,7 +9,7 @@ import type { GarmentState } from "@/lib/prendas/filtering";
 import type { GarmentWithColors, Category, Texture, Season } from "@/lib/prendas/types";
 import { CATEGORIES, SEASONS, ALL_FITS, TEXTURES, ALL_LENGTHS } from "@/lib/prendas/types";
 import { optionLabel } from "@/lib/prendas/labels";
-import { Input, Icon, EmptyState, TextButton } from "@/components/ui";
+import { Input, Icon, EmptyState, TextButton, InfoHint } from "@/components/ui";
 
 interface Props {
   garments: GarmentWithColors[];
@@ -51,15 +51,19 @@ function FilterTag({
 
 function FilterRow({
   label,
+  hint,
   children,
 }: {
   label: string;
+  /** An `InfoHint` for a row whose label alone does not say what it filters. */
+  hint?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className="grid grid-cols-[100px_1fr] gap-6 items-baseline">
       <span className="type-caption pt-0.5">
         {label}
+        {hint && <span className="ml-2">{hint}</span>}
       </span>
       <div className="flex flex-wrap gap-x-5 gap-y-2">{children}</div>
     </div>
@@ -70,6 +74,12 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
   const t = useTranslations("armari");
   const tLabel = useTranslations("labels");
   const tLaundry = useTranslations("bugaderia.grid");
+  const tHelp = useTranslations("help");
+  const hint = (text: string, section: string) => (
+    <InfoHint label={tHelp("hintLabel")} href={`/ajuda#${section}`} moreLabel={tHelp("more")}>
+      {text}
+    </InfoHint>
+  );
   const initialParams = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -218,6 +228,7 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
             {isAutoSeason && (
               <span className="font-serif italic text-xs text-text-secondary">
                 {t("autoSeason")}
+                <span className="ml-2">{hint(tHelp("hints.armariSeason"), "flow")}</span>
               </span>
             )}
             <span className="type-caption tabular-nums">
@@ -263,7 +274,7 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
                 ))}
               </FilterRow>
 
-              <FilterRow label={t("rows.fit")}>
+              <FilterRow label={t("rows.fit")} hint={hint(tHelp("hints.armariFit"), "flow")}>
                 {ALL_FITS.map((f) => (
                   <FilterTag
                     key={f}
@@ -299,7 +310,7 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
                 ))}
               </FilterRow>
 
-              <FilterRow label={t("rows.state")}>
+              <FilterRow label={t("rows.state")} hint={hint(tHelp("hints.armariState"), "flow")}>
                 {(["clean", "dirty"] as const).map((s) => (
                   <FilterTag
                     key={s}

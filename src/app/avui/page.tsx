@@ -16,7 +16,7 @@ import { palettes } from "@/lib/colors";
 import { TodayLine } from "@/components/TodayLine";
 import { WeekCalendar } from "@/components/WeekCalendar";
 import { OutfitLibrary } from "@/components/OutfitLibrary";
-import { PageContainer, SectionHeader, Stack, Text, Icon, EmptyState } from "@/components/ui";
+import { PageContainer, SectionHeader, Stack, Text, Icon, EmptyState, InfoHint } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -112,9 +112,10 @@ export default async function AvuiPage({
   searchParams: Promise<{ start?: string }>;
 }) {
   const { start: startParam } = await searchParams;
-  const [t, tWeek, locale] = await Promise.all([
+  const [t, tWeek, tHelp, locale] = await Promise.all([
     getTranslations("outfits"),
     getTranslations("week"),
+    getTranslations("help"),
     getLocale(),
   ]);
   const currentDay = today();
@@ -207,7 +208,15 @@ export default async function AvuiPage({
           />
         </Stratum>
 
-        <Stratum id="tots-els-outfits" title={t("sections.all")}>
+        <Stratum
+          id="tots-els-outfits"
+          title={t("sections.all")}
+          aside={
+            <InfoHint label={tHelp("hintLabel")} href="/ajuda#numbers" moreLabel={tHelp("more")}>
+              {tHelp("hints.outfitNumbers")}
+            </InfoHint>
+          }
+        >
           <OutfitLibrary
             outfits={ranked}
             allOutfits={allRanked}
