@@ -4,6 +4,7 @@ import {
   lockedUntil,
   secondsUntil,
 } from "./lockout";
+import { credentialsVersion } from "./credentials-version";
 import { hashPassword, verifyAgainstDummy, verifyPassword } from "./password";
 import { passwordPolicyError, type PasswordPolicyError } from "./policy";
 import { UNKNOWN_IP } from "./request";
@@ -35,6 +36,8 @@ export interface AuthenticatedUser {
   id: string;
   username: string;
   mustChangePw: boolean;
+  /** Fingerprint of the password just verified; the session carries it. */
+  pwv: string;
 }
 
 export function normalizeUsername(raw: string): string {
@@ -108,7 +111,12 @@ export async function verifyCredentials(
   if (!(await verifyPassword(user.passwordHash, password))) return null;
 
   await touchLastLogin(user.id);
-  return { id: user.id, username: user.username, mustChangePw: user.mustChangePw };
+  return {
+    id: user.id,
+    username: user.username,
+    mustChangePw: user.mustChangePw,
+    pwv: credentialsVersion(user.passwordHash),
+  };
 }
 
 /**

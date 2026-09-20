@@ -64,6 +64,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
           name: user.username,
           username: user.username,
           mustChangePw: user.mustChangePw,
+          pwv: user.pwv,
         };
       },
     }),

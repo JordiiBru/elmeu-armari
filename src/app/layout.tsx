@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Fraunces, Inter_Tight, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -39,7 +40,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [locale, session] = await Promise.all([getLocale(), auth()]);
+  const [locale, session, requestHeaders] = await Promise.all([getLocale(), auth(), headers()]);
+  const nonce = requestHeaders.get("x-nonce") ?? undefined;
 
   return (
     <html
@@ -49,7 +51,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-text-primary">
         <NextIntlClientProvider>
-          <ThemeProvider>
+          <ThemeProvider nonce={nonce}>
             <ToastProvider>
               <PageTitleProvider>
                 <SiteHeader

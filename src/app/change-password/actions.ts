@@ -32,10 +32,12 @@ export async function changePasswordAction(
   if (!result.ok) return { error: result.error };
 
   try {
-    // The flag the proxy gates on lives in the session cookie, so the
-    // row being updated is not enough: without this the user would be
-    // sent straight back to this screen.
-    await unstable_update({ user: { mustChangePw: false } });
+    // The flag the proxy gates on, and the password fingerprint the session
+    // is checked against, live in the session cookie, so the row being
+    // updated is not enough: without this the user would be sent straight
+    // back to this screen, or signed out by their own password change. The
+    // token is refreshed from the row; nothing is passed in.
+    await unstable_update({});
   } catch {
     // Rather than loop on a stale cookie, ask for the new password once.
     await signOut({ redirectTo: "/login" });

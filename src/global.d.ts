@@ -17,6 +17,8 @@ declare module "next-auth" {
     /** A password the admin handed out is a one-use key: the session it
      * opens may do nothing but replace it. */
     mustChangePw?: boolean;
+    /** Fingerprint of the password hash the session is issued under. */
+    pwv?: string;
   }
 
   interface Session {
@@ -24,6 +26,8 @@ declare module "next-auth" {
       id: string;
       username: string;
       mustChangePw: boolean;
+      /** Read by the proxy and `requireSession` against the account. */
+      pwv: string;
     } & DefaultSession["user"];
   }
 }
@@ -35,5 +39,6 @@ declare module "@auth/core/jwt" {
     id: string;
     username: string;
     mustChangePw: boolean;
+    pwv: string;
   }
 }
