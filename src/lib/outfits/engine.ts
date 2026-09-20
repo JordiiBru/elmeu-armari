@@ -76,6 +76,12 @@ const MIN_PIECES = 2;
 // misleading because the accent is not worn.
 const MIN_DISTINCT_PALETTE_COLORS = 2;
 
+// What a colour with no anchor inside a palette adds to that palette's
+// score. An anchored colour is always closer than the vocabulary threshold
+// (that is what makes it a candidate), so this can never be undercut: an
+// unanchored piece never scores better than an anchored one.
+const UNANCHORED_PENALTY = OKLCH_DISTANCE_THRESHOLD;
+
 // Order in which garments should be laid out in a rendered outfit.
 const CATEGORY_LAYOUT_ORDER = ["SHIRT", "SWEATER", "PANTS", "SHOES"] as const;
 
@@ -261,26 +267,41 @@ function paletteMatchFor(
   const colorAssignments: PaletteMatch["colorAssignments"] = [];
   let totalDistance = 0;
 
+  let unanchored = 0;
+
+  // Every colour of every piece gets its own anchor inside this palette,
+  // not just the first colour of each: membership already required all of
+  // them, so scoring only one let a two-colour shirt look as good as its
+  // better-matching half.
   for (const c of ctxs) {
-    // Pick the candidate canonical that actually belongs to this
-    // palette (closest first). That's the anchor for this garment
-    // inside this palette.
-    const primary = c.snaps[0];
-    let anchor: Candidate | null = null;
-    for (const cand of primary.candidates) {
-      const i = paletteHexLower.indexOf(cand.canonical.hex.toLowerCase());
-      if (i >= 0) {
-        anchor = cand;
-        matchedIndices.add(i);
-        colorAssignments.push({
-          garmentId: c.garment.id,
-          paletteColorIndex: i,
-          distance: cand.distance,
-        });
-        break;
+    for (const snap of c.snaps) {
+      // The candidate canonical that actually belongs to this palette,
+      // closest first, is this colour's anchor inside it.
+      let anchor: Candidate | null = null;
+      for (const cand of snap.candidates) {
+        const i = paletteHexLower.indexOf(cand.canonical.hex.toLowerCase());
+        if (i >= 0) {
+          anchor = cand;
+          matchedIndices.add(i);
+          colorAssignments.push({
+            garmentId: c.garment.id,
+            paletteColorIndex: i,
+            distance: cand.distance,
+          });
+          break;
+        }
+      }
+      if (anchor) {
+        totalDistance += anchor.distance;
+      } else {
+        // Reachable through the black-or-white shoe exception, which rides
+        // along in a palette that has no black or white. It used to add
+        // nothing, so an incomplete match scored better than a complete
+        // one; it now pays a fixed price no anchored colour can undercut.
+        totalDistance += UNANCHORED_PENALTY;
+        unanchored++;
       }
     }
-    if (anchor) totalDistance += anchor.distance;
   }
 
   if (matchedIndices.size < MIN_DISTINCT_PALETTE_COLORS) return null;
@@ -290,7 +311,7 @@ function paletteMatchFor(
     if (!matchedIndices.has(i)) unmatchedColors.push(i);
   }
 
-  return { palette, colorAssignments, unmatchedColors, totalDistance };
+  return { palette, colorAssignments, unmatchedColors, totalDistance, unanchored };
 }
 
 /**

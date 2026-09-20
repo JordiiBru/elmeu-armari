@@ -18,6 +18,10 @@ export interface PaletteMatch {
   colorAssignments: { garmentId: string; paletteColorIndex: number; distance: number }[];
   unmatchedColors: number[];
   totalDistance: number;
+  /** How many piece colours found no anchor in this palette (the black or
+   * white shoe that rode in for free); each one added a fixed penalty to
+   * `totalDistance`. */
+  unanchored: number;
 }
 
 export interface OutfitGroup {
