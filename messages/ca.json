@@ -439,7 +439,13 @@
         "p1": "Afegeix les teves peces amb foto, color, temporada i talla. Si poses una foto, l'app et proposa els colors.",
         "p2": "Obre una peça i mira què hi combina: veuràs outfits complets (part de dalt, pantalons i sabates) i en pots desar els que t'agradin.",
         "p3": "A «Què em poso?» tries un outfit desat per a avui o per a un altre dia de la setmana. «Me'l poso» l'assigna a avui; per a un altre dia el botó el desa en aquell dia.",
-        "p4": "A la bugaderia veus què tens net i què és al cistell. Marca el que va a rentar i, quan has fet la bugada, marca-ho com a rentat."
+        "p4": "A la bugaderia veus què tens net i què és al cistell. Marca el que va a rentar i, quan has fet la bugada, marca-ho com a rentat.",
+        "steps": {
+          "s1": "afegir",
+          "s2": "combinar",
+          "s3": "triar",
+          "s4": "rentar"
+        }
       },
       "colours": {
         "title": "com arriba un color a una paleta",
@@ -472,6 +478,7 @@
       "armariSeason": "Mostra només el que va bé per a l'època de l'any en què ets.",
       "laundry": "Netes són les que et pots posar; al cistell, les que esperen bugada. Quan la fas, marca-les com a rentades.",
       "paleta": "Cada color surt a diverses combinacions del llibre. Les teves peces s'hi assignen pel color més proper, i d'aquí surten els outfits."
-    }
+    },
+    "paletteExample": "Una combinació del diccionari, la n{id}: tres colors que el llibre dóna per bons junts."
   }
 }

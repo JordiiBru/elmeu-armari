@@ -439,7 +439,13 @@
         "p1": "Add your pieces with a photo, colour, season and size. If you add a photo, the app suggests the colours.",
         "p2": "Open a piece and see what goes with it: you get complete outfits (top, trousers and shoes) and can save the ones you like.",
         "p3": "In \"What do I wear?\" you pick a saved outfit for today or for another day of the week. \"Wear it\" assigns it to today; for another day the button saves it on that day.",
-        "p4": "In the laundry you see what is clean and what is in the basket. Mark what goes to be washed and, once you have done the laundry, mark it as washed."
+        "p4": "In the laundry you see what is clean and what is in the basket. Mark what goes to be washed and, once you have done the laundry, mark it as washed.",
+        "steps": {
+          "s1": "add",
+          "s2": "combine",
+          "s3": "choose",
+          "s4": "wash"
+        }
       },
       "colours": {
         "title": "how a colour reaches a palette",
@@ -472,6 +478,7 @@
       "armariSeason": "Shows only what suits the time of year you are in.",
       "laundry": "Clean are the ones you can wear; in the basket, the ones waiting for a wash. When you do the laundry, mark them as washed.",
       "paleta": "Each colour appears in several combinations of the book. Your pieces are assigned by the nearest colour, and the outfits come from that."
-    }
+    },
+    "paletteExample": "One combination from the dictionary, n{id}: three colours the book pairs as good together."
   }
 }
