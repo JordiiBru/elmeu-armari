@@ -18,7 +18,8 @@
         "lockedOut": "Massa intents seguits. L'armari es queda tancat {seconds, plural, one {# segon} other {# segons}} més.",
         "busy": "Massa intents alhora. Espera un moment i torna-ho a provar.",
         "unexpected": "No s'ha pogut obrir l'armari ara mateix. Torna-ho a provar en un moment."
-      }
+      },
+      "forgot": "has oblidat la contrasenya?"
     },
     "changePassword": {
       "title": "nova contrasenya",
@@ -36,11 +37,39 @@
         "samePassword": "Tria'n una de nova: aquesta ja és l'actual.",
         "tooShort": "Es queda curta: allarga-la una mica.",
         "tooLong": "Es passa de llarga: escurça-la una mica."
-      }
+      },
+      "continue": "ja el tinc"
     },
     "menu": {
       "changePassword": "contrasenya",
       "signOut": "sortir"
+    },
+    "forgot": {
+      "title": "recupera l'accés",
+      "note": "amb el codi de recuperació que et van mostrar en triar la contrasenya.",
+      "username": "usuari",
+      "code": "codi de recuperació",
+      "next": "nova contrasenya",
+      "confirmation": "repeteix",
+      "hint": "mínim {count} caràcters",
+      "submit": "recupera",
+      "submitting": "recuperant…",
+      "noCode": "Sense codi? Demana a qui administra l'armari que restableixi la contrasenya.",
+      "back": "torna a entrar",
+      "done": "Contrasenya canviada.",
+      "signIn": "entra",
+      "errors": {
+        "missingFields": "Falta algun camp.",
+        "mismatch": "Les dues han de coincidir, lletra per lletra.",
+        "invalid": "Aquest usuari i aquest codi no coincideixen.",
+        "busy": "Massa intents alhora. Espera un moment i torna-ho a provar.",
+        "tooShort": "Una mica curta: fes-la més llarga.",
+        "tooLong": "Una mica llarga: escurça-la."
+      }
+    },
+    "recoveryCode": {
+      "body": "Apunta aquest codi ara: només es mostra aquesta vegada. Amb ell pots posar una contrasenya nova si oblides aquesta.",
+      "codeLabel": "codi de recuperació"
     }
   },
   "labels": {

@@ -62,6 +62,10 @@ describe("decideAccess, signed out", () => {
     });
   });
 
+  it("leaves the recovery screen open: it is for someone who cannot sign in", () => {
+    expect(decideAccess({ pathname: "/forgot-password", ...anonymous })).toEqual({ type: "allow" });
+  });
+
   it("leaves robots.txt open so a crawler is told to stay out", () => {
     expect(decideAccess({ pathname: "/robots.txt", ...anonymous })).toEqual({ type: "allow" });
   });

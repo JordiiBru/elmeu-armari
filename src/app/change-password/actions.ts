@@ -5,15 +5,18 @@ import { auth, signIn, signOut } from "@/auth";
 import { rememberDevice } from "@/lib/auth/device-cookie";
 import { changePassword } from "@/lib/auth/service";
 
-export type ChangePasswordState = {
-  error:
-    | "missingFields"
-    | "mismatch"
-    | "wrongPassword"
-    | "samePassword"
-    | "tooShort"
-    | "tooLong";
-} | null;
+export type ChangePasswordState =
+  | {
+      error:
+        | "missingFields"
+        | "mismatch"
+        | "wrongPassword"
+        | "samePassword"
+        | "tooShort"
+        | "tooLong";
+    }
+  | { recoveryCode: string }
+  | null;
 
 export async function changePasswordAction(
   _prev: ChangePasswordState,
@@ -52,5 +55,7 @@ export async function changePasswordAction(
     await signOut({ redirectTo: "/login" });
   }
 
-  redirect("/");
+  // Not a redirect: the recovery code that goes with this password is shown
+  // once, here, and leaving the page is the person's decision.
+  return { recoveryCode: result.recoveryCode };
 }

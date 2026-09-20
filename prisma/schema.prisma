@@ -171,6 +171,11 @@ model User {
   username     String    @unique
   passwordHash String
   mustChangePw Boolean   @default(true)
+  /// Argon2id hash of the recovery code, shown once when the owner chooses a
+  /// password. null = none (a temporary password from `create-user` has no
+  /// code: there is nothing to recover yet). Lets someone who forgot the
+  /// password set a new one without the operator.
+  recoveryHash String?
   createdAt    DateTime  @default(now())
   lastLoginAt  DateTime?
   garments     Garment[]

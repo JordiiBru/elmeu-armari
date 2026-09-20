@@ -18,7 +18,8 @@
         "lockedOut": "Too many attempts in a row. The wardrobe stays shut for {seconds, plural, one {# more second} other {# more seconds}}.",
         "busy": "Too many attempts at once. Wait a moment and try again.",
         "unexpected": "The wardrobe would not open just now. Try again in a moment."
-      }
+      },
+      "forgot": "forgot the password?"
     },
     "changePassword": {
       "title": "new password",
@@ -36,11 +37,39 @@
         "samePassword": "Pick a new one: that is already the current one.",
         "tooShort": "A little short: make it longer.",
         "tooLong": "A little long: shorten it."
-      }
+      },
+      "continue": "I have it"
     },
     "menu": {
       "changePassword": "password",
       "signOut": "sign out"
+    },
+    "forgot": {
+      "title": "get back in",
+      "note": "with the recovery code you were shown when you chose the password.",
+      "username": "username",
+      "code": "recovery code",
+      "next": "new password",
+      "confirmation": "repeat",
+      "hint": "at least {count} characters",
+      "submit": "recover",
+      "submitting": "recovering…",
+      "noCode": "No code? Ask whoever runs the wardrobe to reset the password.",
+      "back": "back to sign in",
+      "done": "Password changed.",
+      "signIn": "sign in",
+      "errors": {
+        "missingFields": "A field is still missing.",
+        "mismatch": "The two have to match, letter for letter.",
+        "invalid": "That username and that code do not match.",
+        "busy": "Too many attempts at once. Wait a moment and try again.",
+        "tooShort": "A little short: make it longer.",
+        "tooLong": "A little long: shorten it."
+      }
+    },
+    "recoveryCode": {
+      "body": "Write this code down now: it is shown only this once. With it you can set a new password if you forget this one.",
+      "codeLabel": "recovery code"
     }
   },
   "labels": {

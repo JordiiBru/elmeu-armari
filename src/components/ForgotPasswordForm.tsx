@@ -3,36 +3,59 @@
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import {
-  changePasswordAction,
-  type ChangePasswordState,
-} from "@/app/change-password/actions";
+  forgotPasswordAction,
+  type ForgotPasswordState,
+} from "@/app/forgot-password/actions";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/policy";
 import { RecoveryCodeNotice } from "@/components/RecoveryCodeNotice";
-import { Button, Field, Input, Stack, Text } from "@/components/ui";
+import { Button, Field, Input, Stack, Text, TextLink } from "@/components/ui";
 
-export function ChangePasswordForm() {
-  const t = useTranslations("auth.changePassword");
-  const [state, formAction, isPending] = useActionState<
-    ChangePasswordState,
-    FormData
-  >(changePasswordAction, null);
+export function ForgotPasswordForm() {
+  const t = useTranslations("auth.forgot");
+  const [state, formAction, isPending] = useActionState<ForgotPasswordState, FormData>(
+    forgotPasswordAction,
+    null,
+  );
 
   if (state && "recoveryCode" in state) {
-    return <RecoveryCodeNotice code={state.recoveryCode} href="/" label={t("continue")} />;
+    return (
+      <Stack gap={5}>
+        <Text variant="small" tone="secondary" italic as="p" className="font-serif text-center">
+          {t("done")}
+        </Text>
+        <RecoveryCodeNotice code={state.recoveryCode} href="/login" label={t("signIn")} />
+      </Stack>
+    );
   }
 
   const error = state?.error;
 
   return (
     <form action={formAction} className="flex flex-col gap-6">
-      <Field label={t("current")} htmlFor="current">
+      <Field label={t("username")} htmlFor="username">
         <Input
-          id="current"
-          name="current"
-          type="password"
-          autoComplete="current-password"
+          id="username"
+          name="username"
+          defaultValue={state?.username}
+          autoComplete="username"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           required
-          invalid={error === "wrongPassword"}
+          invalid={error === "invalid"}
+        />
+      </Field>
+
+      <Field label={t("code")} htmlFor="code">
+        <Input
+          id="code"
+          name="code"
+          autoComplete="off"
+          autoCapitalize="characters"
+          autoCorrect="off"
+          spellCheck={false}
+          required
+          invalid={error === "invalid"}
         />
       </Field>
 
@@ -85,6 +108,12 @@ export function ChangePasswordForm() {
         >
           {t("submit")}
         </Button>
+        <Text variant="small" tone="secondary" italic as="p" className="font-serif text-center">
+          {t("noCode")}
+        </Text>
+        <TextLink href="/login" className="self-center">
+          {t("back")}
+        </TextLink>
       </Stack>
     </form>
   );
