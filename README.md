@@ -75,7 +75,20 @@ Or the prebuilt image: `docker run -d -p 3000:3000 -v elmeu-armari-data:/data gh
 | `UPLOAD_MAX_MB` | `10` | Largest accepted upload. |
 | `PORT` | `3000` | HTTP port. |
 
-Photos are re-encoded by sharp to WebP (800 px, quality 80, EXIF dropped) under `UPLOAD_DIR`; back up the whole `/data` volume (database and photos) as one unit.
+Photos are re-encoded by sharp to WebP (800 px, quality 80, EXIF dropped) under `UPLOAD_DIR`.
+
+### Backups and restore
+
+The database and the photos are one unit: a database restored without its photos points at images that are gone. The homelab CronJob writes both every day at 03:00 UTC into `/data/backups` (`prod-<timestamp>.db`, a consistent copy taken with SQLite's online backup, and `uploads-<timestamp>.tgz`), 14 of each. They sit on the same volume as the data, so they cover a bad migration or a bug, not the loss of the node; the JSON/ZIP export in `/settings` is the copy you can keep elsewhere.
+
+To restore, stop the app, then from the volume (`/data`):
+
+```bash
+cp backups/prod-<timestamp>.db prod.db          # replaces the database
+tar xzf backups/uploads-<timestamp>.tgz -C .    # puts uploads/ back
+```
+
+Start the app again: the entrypoint runs `prisma migrate deploy`. Sessions survive only if `AUTH_SECRET` is the same. Checked against a real backup: the database copy passes `PRAGMA integrity_check` and the tarball holds every photo the database names; replacing the live files was not rehearsed.
 
 ## CI and releases
 
