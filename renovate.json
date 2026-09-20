@@ -2,87 +2,76 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
-    "security:openssf-scorecard",
     ":dependencyDashboard",
     ":semanticCommits",
-    ":separatePatchReleases"
+    "helpers:pinGitHubActionDigests",
+    "docker:pinDigests"
   ],
   "timezone": "Europe/Madrid",
-  "schedule": ["before 7am on Monday"],
-  "prHourlyLimit": 5,
-  "prConcurrentLimit": 10,
-  "automerge": false,
+  "schedule": ["after 2am and before 6am"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "enabledManagers": ["npm", "dockerfile", "docker-compose", "github-actions"],
+  "labels": ["dependencies"],
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
+  "separateMajorMinor": true,
+  "separateMultipleMajor": true,
+  "automerge": true,
+  "automergeType": "pr",
+  "platformAutomerge": false,
   "vulnerabilityAlerts": {
-    "labels": ["security"],
-    "automerge": true,
+    "labels": ["dependencies", "security"],
     "schedule": ["at any time"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"]
   },
   "packageRules": [
     {
-      "description": "Automerge non-major devDependencies",
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["patch", "minor"],
-      "automerge": true
+      "description": "Majors open their own PR and wait for a human",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies", "major"],
+      "commitMessagePrefix": "chore(deps)!:",
+      "prBodyNotes": [
+        ":warning: **Major version bump.** Read the release notes before merging."
+      ]
     },
     {
-      "description": "Group Next.js + React ecosystem",
+      "description": "Next.js, React and their types move together",
       "matchPackageNames": [
         "next",
+        "eslint-config-next",
         "react",
         "react-dom",
         "@types/react",
-        "@types/react-dom",
-        "eslint-config-next"
+        "@types/react-dom"
       ],
-      "groupName": "Next.js ecosystem",
-      "automerge": false
+      "groupName": "Next.js and React"
     },
     {
-      "description": "Group Prisma",
+      "description": "Prisma CLI, client and adapter move together",
       "matchPackageNames": [
         "prisma",
         "@prisma/client",
-        "@prisma/adapter-better-sqlite3",
-        "better-sqlite3",
-        "@types/better-sqlite3"
+        "@prisma/adapter-better-sqlite3"
       ],
-      "groupName": "Prisma",
-      "automerge": false
+      "groupName": "Prisma"
     },
     {
-      "description": "Group Tailwind CSS",
-      "matchPackageNames": [
-        "tailwindcss",
-        "@tailwindcss/postcss",
-        "postcss"
-      ],
-      "groupName": "Tailwind CSS",
-      "matchUpdateTypes": ["patch", "minor"],
-      "automerge": true
+      "description": "Tailwind CSS and its PostCSS plugin move together",
+      "matchPackageNames": ["tailwindcss", "@tailwindcss/postcss"],
+      "groupName": "Tailwind CSS"
     },
     {
-      "description": "Pin Docker base image digests",
-      "matchManagers": ["dockerfile"],
-      "pinDigests": true
-    },
-    {
-      "description": "Automerge patch Docker base images",
-      "matchManagers": ["dockerfile"],
-      "matchUpdateTypes": ["patch"],
-      "automerge": true
-    },
-    {
-      "description": "Group GitHub Actions",
-      "matchManagers": ["github-actions"],
-      "groupName": "GitHub Actions",
-      "automerge": true
-    },
-    {
-      "description": "Major updates need manual review",
-      "matchUpdateTypes": ["major"],
+      "description": "The Node runtime is a decision, not a routine bump: the image, CI and @types/node change together",
+      "matchDepNames": ["node", "@types/node"],
       "automerge": false,
-      "labels": ["major-update"]
+      "prBodyNotes": [
+        "Changing Node means changing the Dockerfile base images, `node-version` in `.github/workflows/ci.yml` and `@types/node` in one PR."
+      ]
     }
-  ],
-  "ignoreDeps": []
+  ]
 }

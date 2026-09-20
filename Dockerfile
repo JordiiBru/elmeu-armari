@@ -19,9 +19,17 @@ RUN DATABASE_URL=file:/tmp/build.db npx prisma migrate deploy && \
 # running it in a dir that already has the full app manifest replaced the
 # standalone-tracer-trimmed node_modules/next (small) with the complete
 # `next` package (189MB) plus devDependencies-adjacent transitive weight.
+#
+# The versions are read from package-lock.json, so the migration CLI is the
+# exact version the client was generated with and Renovate only has to bump
+# the app's manifest (a literal inside a `RUN` is invisible to it).
 FROM node:20-alpine AS prisma-cli
 WORKDIR /prisma-cli
-RUN echo '{}' > package.json && npm install prisma@7.8.0 dotenv@^17.4.2 --omit=dev
+COPY package-lock.json /tmp/package-lock.json
+RUN echo '{}' > package.json && \
+    npm install --omit=dev \
+      "prisma@$(node -p "require('/tmp/package-lock.json').packages['node_modules/prisma'].version")" \
+      "dotenv@$(node -p "require('/tmp/package-lock.json').packages['node_modules/dotenv'].version")"
 
 # Production image
 FROM node:20-alpine AS runner

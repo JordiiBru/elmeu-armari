@@ -110,6 +110,10 @@ tight-match threshold.
 
 The CI workflow (PRs only) runs lint + typecheck + `npm run test:unit` + build. All must be green before merge. **Do not merge on red.** Docker build/push happens separately on `release.yml` after merge to `main`; e2e (Playwright) and Lighthouse are not run in CI — run them locally.
 
+### Dependency updates
+
+Renovate (`renovate.json`, same style as the homelab repo) opens PRs at night (Europe/Madrid) and keeps a Dependency Dashboard issue. Patch and minor updates, Next.js and Prisma included, merge by themselves once CI is green; security updates run at any hour. Majors, and anything that changes the Node runtime, open a PR with a warning and wait for a human: Node moves in the Dockerfile base images, `node-version` in `ci.yml` and `@types/node` in a single PR. The Dockerfile reads the `prisma` and `dotenv` versions from `package-lock.json`, so bump them in `package.json`, never in the Dockerfile. A merge to `main` publishes an image but does not deploy it: that is still the bump PR in the homelab repo.
+
 ---
 
 ## 4. Testing
