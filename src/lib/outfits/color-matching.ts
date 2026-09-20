@@ -20,15 +20,13 @@ export const OKLCH_DISTANCE_THRESHOLD = 14;
 export const MEMBERSHIP_THRESHOLD = 9;
 
 /**
- * Threshold estricte per paletes "addicionals" mostrades sota la principal.
- * Cada assignacio peça-color ha de complir aquest per garantir que la paleta
- * conte visualment els colors de l'outfit, no aproximacions llunyanes.
+ * Strict threshold for the "additional" palettes shown under the main one.
+ * Every piece-to-colour assignment must meet it, so the palette visibly
+ * contains the outfit's colours and not distant approximations.
  */
 export const OKLCH_TIGHT_MATCH_THRESHOLD = 9;
 
-/**
- * Nombre maxim de paletes addicionals mostrades per outfit.
- */
+/** Most additional palettes shown per outfit. */
 export const MAX_EXTRA_PALETTES = 4;
 
 /**

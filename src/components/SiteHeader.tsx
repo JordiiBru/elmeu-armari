@@ -7,11 +7,11 @@ import { AppMenu } from "@/components/AppMenu";
 import { usePageTitleContext } from "@/lib/PageTitleContext";
 
 /**
- * Jerarquia de pantalles. "Enrere" puja un nivell, i cada pantalla te un
- * unic pare: es el que fa que el boto sigui previsible vinguis d'on
- * vinguis. Les pantalles de primer nivell pengen de la portada, encara
- * que una altra pantalla hi enllaci de costat (la bugaderia enllaca a
- * "Què em poso?", que es germana seva, no filla).
+ * Screen hierarchy. "Back" goes up one level and every screen has a single
+ * parent, which is what keeps the button predictable wherever you came
+ * from. First-level screens hang from the home page even when another
+ * screen links to them sideways (the laundry links to "What do I wear?",
+ * which is its sibling, not its child).
  */
 const PARENT: { prefix: string; parent: string }[] = [
   { prefix: "/add", parent: "/armari" },

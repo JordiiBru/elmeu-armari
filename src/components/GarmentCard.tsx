@@ -51,7 +51,7 @@ function GarmentCardContent({ garment, index }: { garment: GarmentWithColors; in
 }
 
 /**
- * Ratio 3:4 amb tira de swatches. Card editorial reusable.
+ * 3:4 ratio with a strip of swatches. Reusable editorial card.
  * Server Component: a plain `Link` to `/armari/[slug]`. The garment modal
  * opens via that route (intercepted from `/armari`, see `@modal`) rather
  * than local client state, so this card doesn't need "use client".
@@ -76,7 +76,7 @@ export function GarmentCard({
   );
 }
 
-/** CTA visual: afegir peça al mateix ratio 3:4. */
+/** Visual call to action: add a garment, at the same 3:4 ratio. */
 export function AddGarmentCard({ href = "/add" }: { href?: string }) {
   const t = useTranslations("armari");
   return (

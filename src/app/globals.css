@@ -22,7 +22,7 @@
   --_graphite-500: #6f6a63;
   --_graphite-400: #8a857c;
 
-  /* Tintes editorials — usats amb comptagotes. */
+  /* Editorial tints, used sparingly as accents. */
   --_ink-terracotta: #8a3e2a;
   --_ink-moss: #55603a;
   --_ink-ochre: #9c7a2d;
@@ -126,8 +126,8 @@
    Es la mateixa temperatura del cream, pero baixada.
    ========================================================================== */
 
-/* No-JS fallback: segueix el sistema si encara no hi ha triat explicit.
-   Amb JS, el toggle sempre fixa [data-theme] i aquest bloc queda inert. */
+/* No-JS fallback: follows the system until an explicit choice is made.
+   With JS the toggle always sets [data-theme] and this block is inert. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --color-background: #1a1917;
@@ -376,10 +376,10 @@ button, a, input, textarea, select {
   height: auto;
 }
 
-/* Un panell que substitueix un altre al mateix lloc (les pestanyes del
-   selector de sabates/accessoris): sense entrada, el canvi es un salt sec.
-   Fade + 4px, prou per llegir-se com un moviment i no com un efecte.
-   `prefers-reduced-motion` ja el neutralitza a dalt. */
+/* A panel that replaces another in the same place (the tabs of the
+   shoe/accessory picker): with no entrance the change is an abrupt jump.
+   Fade + 4px, enough to read as movement and not as an effect.
+   `prefers-reduced-motion` already neutralises it above. */
 @keyframes panel-enter {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: none; }

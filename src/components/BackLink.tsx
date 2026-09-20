@@ -3,13 +3,13 @@ import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui";
 
 /**
- * "Enrere" puja un nivell de la jerarquia de pantalles, sempre el mateix
- * per a una pantalla donada. No usa `router.back()`: el mateix boto ha de
- * portar al mateix lloc tant si hi has arribat navegant com si has obert
- * l'enllac directament (etiqueta NFC), i l'historial pot contenir rutes
- * que ja no son destins valids (/add despres d'un submit).
+ * "Back" goes up one level of the screen hierarchy, always the same one for
+ * a given screen. It does not use `router.back()`: the same button has to
+ * lead to the same place whether you got here by navigating or opened the
+ * link directly (an NFC tag), and the history may hold routes that are no
+ * longer valid destinations (/add after a submit).
  *
- * La jerarquia viu a `SiteHeader`.
+ * The hierarchy lives in `SiteHeader`.
  */
 export default function BackLink({ href }: { href: string }) {
   const t = useTranslations("common");
