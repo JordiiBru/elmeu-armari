@@ -1,6 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { ImportForm } from "@/components/ImportForm";
 import { findAllGarments } from "@/lib/prendas/service";
+import { colourCounts } from "@/lib/prendas/stats";
+import { ColourStrip } from "@/components/ColourStrip";
+import { PageRow } from "@/components/PageRow";
 import { PageContainer, SectionHeader, Stack, Text, Icon } from "@/components/ui";
 
 export default async function SettingsPage() {
@@ -8,18 +11,23 @@ export default async function SettingsPage() {
   const garments = await findAllGarments();
 
   return (
-    <PageContainer width="form">
+    <PageContainer width="wide">
       <SectionHeader eyebrow={t("eyebrow")} title={t("title")} level="title-xl" />
 
-      <div className="flex flex-col divide-y divide-border">
-        <Stack as="section" gap={4} className="py-10">
-          <Text variant="caption" as="h2">{t("export.title")}</Text>
+      <div>
+        <PageRow number="01" title={t("export.title")}>
           <Text variant="subtitle" tone="secondary" as="p" className="max-w-md">
             {t("export.description")}
           </Text>
-          <Text variant="caption" tabular>
-            {t("export.count", { count: garments.length })}
-          </Text>
+          <Stack gap={3}>
+            <Text variant="caption" tabular>
+              {t("export.count", { count: garments.length })}
+            </Text>
+            {/* What is being taken along, as the colours it holds. */}
+            {garments.length > 0 && (
+              <ColourStrip colours={colourCounts(garments)} className="h-8" />
+            )}
+          </Stack>
           <div className="flex flex-col gap-3">
             <a
               href="/api/export"
@@ -46,15 +54,14 @@ export default async function SettingsPage() {
               />
             </a>
           </div>
-        </Stack>
+        </PageRow>
 
-        <Stack as="section" gap={4} className="py-10">
-          <Text variant="caption" as="h2">{t("import.title")}</Text>
+        <PageRow number="02" title={t("import.title")}>
           <Text variant="subtitle" tone="secondary" as="p" className="max-w-md">
             {t("import.description")}
           </Text>
           <ImportForm />
-        </Stack>
+        </PageRow>
       </div>
     </PageContainer>
   );

@@ -406,10 +406,6 @@
   "stats": {
     "eyebrow": "archivo",
     "title": "estadísticas",
-    "summary": {
-      "colour": "El armario tiene un color favorito: {colour}, en {count, plural, one {# prenda} other {# prendas}}.",
-      "category": "La categoría más grande es «{category}», con {count} de las {total} prendas."
-    },
     "empty": "nada que contar, todavía.",
     "emptyHint": "las cifras llegan con la primera prenda.",
     "addGarment": "añadir una prenda",

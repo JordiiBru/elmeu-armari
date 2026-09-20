@@ -1,48 +1,28 @@
 import { describe, it, expect } from "vitest";
-import { dominantColour, leadingCategory } from "@/lib/prendas/stats";
+import { colourCounts } from "@/lib/prendas/stats";
 
 const garment = (...hexes: string[]) => ({ colors: hexes.map((hex) => ({ hex })) });
 
-describe("dominantColour", () => {
-  it("is null for an empty wardrobe", () => {
-    expect(dominantColour([])).toBeNull();
+describe("colourCounts", () => {
+  it("is empty for an empty wardrobe", () => {
+    expect(colourCounts([])).toEqual([]);
   });
 
-  it("counts two shades that read as the same name together", () => {
-    const result = dominantColour([
-      garment("#000000"),
-      garment("#0a0a0a"),
-      garment("#ffffff"),
+  it("orders colours by how many garments carry them", () => {
+    const result = colourCounts([garment("#000000"), garment("#ffffff"), garment("#000000")]);
+    expect(result).toEqual([
+      { hex: "#000000", count: 2 },
+      { hex: "#ffffff", count: 1 },
     ]);
-    expect(result).toEqual({ name: "Black", count: 2 });
   });
 
-  it("counts a garment once even when two of its colours read the same", () => {
-    const result = dominantColour([garment("#000000", "#0a0a0a"), garment("#ffffff")]);
-    expect(result?.count).toBe(1);
+  it("counts a garment once per colour, whatever the case of the hex", () => {
+    const result = colourCounts([garment("#AA0000", "#aa0000")]);
+    expect(result).toEqual([{ hex: "#aa0000", count: 1 }]);
   });
 
-  it("gives no vote to a colour outside the vocabulary", () => {
-    // A taupe has no honest Sanzo reading (see names.test.ts).
-    expect(dominantColour([garment("#8b7d72"), garment("#8b7d72")])).toBeNull();
-  });
-});
-
-describe("leadingCategory", () => {
-  const order = ["SHIRT", "PANTS", "SHOES"] as const;
-
-  it("is the category with the most garments", () => {
-    expect(leadingCategory({ SHIRT: 1, PANTS: 4, SHOES: 2 }, order)).toEqual({
-      category: "PANTS",
-      count: 4,
-    });
-  });
-
-  it("is null when nothing leads with two", () => {
-    expect(leadingCategory({ SHIRT: 1, PANTS: 1, SHOES: 0 }, order)).toBeNull();
-  });
-
-  it("breaks a tie in favour of the earlier category", () => {
-    expect(leadingCategory({ SHIRT: 3, PANTS: 3, SHOES: 0 }, order)?.category).toBe("SHIRT");
+  it("breaks a tie by hex so the order is stable", () => {
+    const result = colourCounts([garment("#bb0000"), garment("#aa0000")]);
+    expect(result.map((c) => c.hex)).toEqual(["#aa0000", "#bb0000"]);
   });
 });

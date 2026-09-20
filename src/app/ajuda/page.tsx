@@ -3,47 +3,12 @@ export const dynamic = "force-dynamic";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { palettes, paletteColors } from "@/lib/colors";
+import { PageRow } from "@/components/PageRow";
 import { PageContainer, SectionHeader, Text } from "@/components/ui";
 
 /** The combination shown in "how a colour reaches a palette": three colours,
  * so the strip reads as a palette rather than a pair. */
 const EXAMPLE_PALETTE_ID = 122;
-
-/**
- * One row of the page: a big numeral and the title on the left, the text on
- * the right, a hairline above. On a phone it stacks; on a desktop it uses the
- * width the way a printed page would, instead of a single narrow column. The
- * id is the anchor the hints link to (`/ajuda#colours`).
- */
-function Row({
-  id,
-  number,
-  title,
-  children,
-}: {
-  id: string;
-  number: string;
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <section
-      id={id}
-      className="scroll-mt-20 grid gap-x-12 gap-y-6 border-t border-border-strong pt-8 pb-14 md:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] md:pt-10 md:pb-20"
-    >
-      <header className="flex items-baseline gap-5 md:flex-col md:items-start md:gap-3">
-        <span
-          aria-hidden
-          className="font-serif text-5xl font-light leading-none tracking-tight text-text-secondary md:text-7xl"
-        >
-          {number}
-        </span>
-        <h2 className="type-title">{title}</h2>
-      </header>
-      <div className="flex max-w-[64ch] flex-col gap-5">{children}</div>
-    </section>
-  );
-}
 
 function P({ children }: { children: ReactNode }) {
   return <Text as="p" className="font-serif leading-relaxed">{children}</Text>;
@@ -78,15 +43,15 @@ export default async function HelpPage() {
     <PageContainer width="wide">
       <SectionHeader title={t("title")} subtitle={t("subtitle")} />
 
-      <Row id="what" number="01" title={t("sections.what.title")}>
+      <PageRow id="what" number="01" title={t("sections.what.title")}>
         {/* The one idea of the whole app, said large and once. */}
         <Text variant="subtitle" as="p" className="text-2xl leading-snug md:text-3xl">
           {t("sections.what.p1")}
         </Text>
         <P>{t("sections.what.p2")}</P>
-      </Row>
+      </PageRow>
 
-      <Row id="flow" number="02" title={t("sections.flow.title")}>
+      <PageRow id="flow" number="02" title={t("sections.flow.title")}>
         <ol className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
           {steps.map((step, i) => (
             <li key={step.label} className="flex flex-col gap-2 border-t border-border pt-3">
@@ -97,9 +62,9 @@ export default async function HelpPage() {
             </li>
           ))}
         </ol>
-      </Row>
+      </PageRow>
 
-      <Row id="colours" number="03" title={t("sections.colours.title")}>
+      <PageRow id="colours" number="03" title={t("sections.colours.title")}>
         <P>{t("sections.colours.p1")}</P>
         {example && (
           <figure className="flex flex-col gap-3">
@@ -122,14 +87,14 @@ export default async function HelpPage() {
         )}
         <P>{t("sections.colours.p2")}</P>
         <P>{t("sections.colours.p3")}</P>
-      </Row>
+      </PageRow>
 
-      <Row id="numbers" number="04" title={t("sections.numbers.title")}>
+      <PageRow id="numbers" number="04" title={t("sections.numbers.title")}>
         <P>{t("sections.numbers.p1")}</P>
         <P>{t("sections.numbers.p2")}</P>
-      </Row>
+      </PageRow>
 
-      <Row id="rules" number="05" title={t("sections.rules.title")}>
+      <PageRow id="rules" number="05" title={t("sections.rules.title")}>
         <ol className="flex flex-col">
           {rules.map((rule, i) => (
             <li
@@ -143,7 +108,7 @@ export default async function HelpPage() {
             </li>
           ))}
         </ol>
-      </Row>
+      </PageRow>
     </PageContainer>
   );
 }

@@ -406,10 +406,6 @@
   "stats": {
     "eyebrow": "archive",
     "title": "statistics",
-    "summary": {
-      "colour": "The wardrobe has a favourite colour: {colour}, in {count, plural, one {# piece} other {# pieces}}.",
-      "category": "The biggest category is “{category}”, with {count} of the {total} pieces."
-    },
     "empty": "nothing to count, yet.",
     "emptyHint": "the numbers arrive with the first piece.",
     "addGarment": "add a piece",

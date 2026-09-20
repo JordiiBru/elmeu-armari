@@ -406,10 +406,6 @@
   "stats": {
     "eyebrow": "arxiu",
     "title": "estadístiques",
-    "summary": {
-      "colour": "L'armari té un color favorit: {colour}, a {count, plural, one {# peça} other {# peces}}.",
-      "category": "La categoria més gran és «{category}», amb {count} de les {total} peces."
-    },
     "empty": "res a comptar, encara.",
     "emptyHint": "les xifres arriben amb la primera peça.",
     "addGarment": "afegir una peça",
