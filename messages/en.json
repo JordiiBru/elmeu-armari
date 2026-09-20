@@ -13,10 +13,10 @@
       "submit": "continue",
       "submitting": "signing in…",
       "errors": {
-        "missingFields": "Fill in both fields.",
-        "invalidCredentials": "Wrong username or password.",
-        "lockedOut": "Too many attempts. Try again in {seconds, plural, one {# second} other {# seconds}}.",
-        "unexpected": "Could not sign you in."
+        "missingFields": "Both are needed to come in: a username and a password.",
+        "invalidCredentials": "That username and password do not open the wardrobe.",
+        "lockedOut": "Too many attempts in a row. The wardrobe stays shut for {seconds, plural, one {# more second} other {# more seconds}}.",
+        "unexpected": "The wardrobe would not open just now. Try again in a moment."
       }
     },
     "changePassword": {
@@ -29,12 +29,12 @@
       "submit": "save",
       "submitting": "saving…",
       "errors": {
-        "missingFields": "Fill in every field.",
-        "mismatch": "The two do not match.",
-        "wrongPassword": "That is not your current password.",
-        "samePassword": "It has to differ from the current one.",
-        "tooShort": "Too short.",
-        "tooLong": "Too long."
+        "missingFields": "A field is still missing.",
+        "mismatch": "The two have to match, letter for letter.",
+        "wrongPassword": "That is not your current password. Try again.",
+        "samePassword": "Pick a new one: that is already the current one.",
+        "tooShort": "A little short: make it longer.",
+        "tooLong": "A little long: shorten it."
       }
     },
     "menu": {
@@ -157,6 +157,24 @@
     "minOneColor": "Pick at least one colour",
     "invalidColor": "Invalid colour"
   },
+  "errorPages": {
+    "notFound": {
+      "title": "there is nothing here",
+      "note": "This address leads nowhere. It may have a typo, or the page may be gone.",
+      "home": "back to the start"
+    },
+    "garmentGone": {
+      "title": "that piece is gone",
+      "note": "You deleted it, or the link no longer works. The rest of the wardrobe is where you left it.",
+      "back": "back to the wardrobe"
+    },
+    "error": {
+      "title": "something got stuck",
+      "note": "Try again; if it keeps happening, give it a few minutes.",
+      "retry": "try again",
+      "home": "back to the start"
+    }
+  },
   "photo": {
     "label": "Photo (optional)",
     "add": "add photo",
@@ -183,7 +201,7 @@
   },
   "armari": {
     "title": "my wardrobe",
-    "empty": "nothing saved yet.",
+    "empty": "the wardrobe is empty, for now: start with the piece you wear most.",
     "count": "{count, plural, one {# garment on record.} other {# garments on record.}}",
     "filters": "filters",
     "searchPlaceholder": "search by size or note",
@@ -302,11 +320,12 @@
     "deleteCostMany": "the calendar days you wore it on will be cleared too.",
     "changeOutfit": "change outfit",
     "removeFromDay": "clear the day",
-    "emptyNoOutfitsBrowse": "nothing saved yet.",
-    "emptyNoOutfitsHint": "open a garment from the wardrobe and see what goes with it to save your first one.",
+    "emptyNoOutfitsBrowse": "the first outfit is yet to be made.",
+    "emptyWeek": "the week, blank.",
+    "emptyWeekHint": "once you save an outfit, you can put it on any day here.",
     "emptyNoOutfitsHintDiscover": "discover combinations with your clothes and save the first one.",
-    "emptyWardrobe": "there's nothing in your wardrobe yet.",
-    "emptyWardrobeHint": "add a piece to start picking outfits.",
+    "emptyWardrobe": "nothing to choose from, yet.",
+    "emptyWardrobeHint": "add your first pieces and combinations will start to appear here.",
     "emptyNoneReady": "time to do the laundry",
     "goToArmari": "go to the wardrobe",
     "goToRentar": "go and wash",
@@ -387,7 +406,13 @@
   "stats": {
     "eyebrow": "archive",
     "title": "statistics",
-    "empty": "no garments in the wardrobe yet.",
+    "summary": {
+      "colour": "The wardrobe has a favourite colour: {colour}, in {count, plural, one {# piece} other {# pieces}}.",
+      "category": "The biggest category is “{category}”, with {count} of the {total} pieces."
+    },
+    "empty": "nothing to count, yet.",
+    "emptyHint": "the numbers arrive with the first piece.",
+    "addGarment": "add a piece",
     "total": "garments in total",
     "sections": {
       "category": "category",
@@ -422,8 +447,9 @@
       "submitting": "importing…",
       "success": "{count, plural, one {# garment imported successfully.} other {# garments imported successfully.}}",
       "skippedRemoved": "{count, plural, one {# garment from a category that no longer exists (socks) was skipped.} other {# garments from a category that no longer exists (socks) were skipped.}}",
-      "unknownError": "Unknown error",
-      "networkError": "Invalid file or network error."
+      "unknownError": "The import did not work and there is no detail on why. Try again.",
+      "invalidFile": "That file is not a wardrobe export: it could not be read.",
+      "networkError": "The server did not answer properly. Check your connection and try again."
     }
   },
   "help": {

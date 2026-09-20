@@ -360,7 +360,10 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
         </div>
       </div>
 
-      {filtered.length === 0 && !hasFilters ? (
+      {/* An empty wardrobe is not a search with no results: the season
+          filter is on by default, so without the length check a new account
+          was told to "remove a filter" when it had nothing to filter. */}
+      {filtered.length === 0 && (!hasFilters || garments.length === 0) ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-16">
           <AddGarmentCard />
         </div>

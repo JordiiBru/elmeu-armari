@@ -4,12 +4,15 @@ import { getTranslations } from "next-intl/server";
 import { findAllGarments } from "@/lib/prendas/service";
 import { optionLabel } from "@/lib/prendas/labels";
 import { CATEGORIES, SEASONS, ALL_FITS, TEXTURES } from "@/lib/prendas/types";
+import { dominantColour, leadingCategory } from "@/lib/prendas/stats";
 import {
   PageContainer,
   SectionHeader,
   Stack,
   Cluster,
   Text,
+  EmptyState,
+  TextLink,
 } from "@/components/ui";
 
 function pct(n: number, total: number) {
@@ -74,9 +77,11 @@ export default async function StatsPage() {
     return (
       <PageContainer width="form">
         <SectionHeader eyebrow={t("eyebrow")} title={t("title")} level="title-xl" />
-        <Text variant="subtitle" tone="secondary" italic as="p">
-          {t("empty")}
-        </Text>
+        <EmptyState
+          title={t("empty")}
+          hint={t("emptyHint")}
+          action={<TextLink href="/add">{t("addGarment")}</TextLink>}
+        />
       </PageContainer>
     );
   }
@@ -105,9 +110,37 @@ export default async function StatsPage() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 16);
 
+  // Both come from the garments already loaded above: no query of their own.
+  const colour = dominantColour(raw);
+  const category = leadingCategory(perCategory, CATEGORIES);
+  const summary = [
+    colour && t("summary.colour", { colour: colour.name, count: colour.count }),
+    category &&
+      t("summary.category", {
+        category: tLabel(`category.${category.category}`),
+        count: category.count,
+        total,
+      }),
+  ].filter((sentence): sentence is string => Boolean(sentence));
+
   return (
     <PageContainer width="form">
-      <SectionHeader eyebrow={t("eyebrow")} title={t("title")} level="title-xl" />
+      <SectionHeader
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        level="title-xl"
+        subtitle={
+          summary.length > 0 && (
+            <>
+              {summary.map((sentence) => (
+                <span key={sentence} className="block text-pretty">
+                  {sentence}
+                </span>
+              ))}
+            </>
+          )
+        }
+      />
 
       <Cluster align="baseline" gap={3} className="pb-10 border-b border-border">
         <span className="type-display tabular-nums leading-none">{total}</span>

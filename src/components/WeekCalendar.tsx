@@ -80,8 +80,8 @@ export function WeekCalendar({
   if (savedOutfits.length === 0) {
     return (
       <EmptyState
-        title={t("emptyNoOutfitsBrowse")}
-        hint={t("emptyNoOutfitsHint")}
+        title={t("emptyWeek")}
+        hint={t("emptyWeekHint")}
       />
     );
   }
