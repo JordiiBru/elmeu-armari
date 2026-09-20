@@ -26,7 +26,7 @@ declare module "next-auth" {
       id: string;
       username: string;
       mustChangePw: boolean;
-      /** Read by the proxy and `requireSession` against the account. */
+      /** Read by the proxy and `requireUser` against the account. */
       pwv: string;
     } & DefaultSession["user"];
   }

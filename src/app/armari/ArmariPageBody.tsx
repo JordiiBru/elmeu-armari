@@ -4,6 +4,7 @@ import { findAllGarments } from "@/lib/prendas/service";
 import { getCurrentSeason } from "@/lib/prendas/season";
 import { ArmariGrid } from "@/components/ArmariGrid";
 import { PageContainer, SectionHeader, GridSkeleton } from "@/components/ui";
+import { requireUserId } from "@/lib/auth/session";
 
 /**
  * Shared body of `/armari`. Rendered both by the plain list route and by
@@ -17,7 +18,7 @@ import { PageContainer, SectionHeader, GridSkeleton } from "@/components/ui";
  */
 export async function ArmariPageBody() {
   const t = await getTranslations("armari");
-  const garments = await findAllGarments();
+  const garments = await findAllGarments(await requireUserId());
 
   return (
     <PageContainer width="wide">

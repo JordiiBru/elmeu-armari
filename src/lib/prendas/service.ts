@@ -21,12 +21,12 @@ export {
   setGarmentImage,
 };
 
-export async function addGarment(data: GarmentInput) {
-  return createGarment(data);
+export async function addGarment(userId: string, data: GarmentInput) {
+  return createGarment(userId, data);
 }
 
-export async function editGarment(id: string, data: GarmentInput) {
-  return updateGarment(id, data);
+export async function editGarment(userId: string, id: string, data: GarmentInput) {
+  return updateGarment(userId, id, data);
 }
 
 /**
@@ -34,23 +34,23 @@ export async function editGarment(id: string, data: GarmentInput) {
  * lives here and not only in the views: shoes and accessories must
  * never end up with a `dirtySince`, whatever the caller sends.
  */
-async function washableIdsAmong(ids: string[]): Promise<string[]> {
+async function washableIdsAmong(userId: string, ids: string[]): Promise<string[]> {
   if (ids.length === 0) return [];
-  const rows = await findGarmentCategories(ids);
+  const rows = await findGarmentCategories(userId, ids);
   return rows.filter((g) => WASHABLE_CATEGORIES.has(g.category)).map((g) => g.id);
 }
 
 /** Returns how many garments actually moved into the basket. */
-export async function markGarmentsDirty(ids: string[]): Promise<number> {
-  const washable = await washableIdsAmong(ids);
+export async function markGarmentsDirty(userId: string, ids: string[]): Promise<number> {
+  const washable = await washableIdsAmong(userId, ids);
   if (washable.length === 0) return 0;
-  const { count } = await setGarmentsDirtyState(washable, true);
+  const { count } = await setGarmentsDirtyState(userId, washable, true);
   return count;
 }
 
-export async function markGarmentsClean(ids: string[]): Promise<number> {
-  const washable = await washableIdsAmong(ids);
+export async function markGarmentsClean(userId: string, ids: string[]): Promise<number> {
+  const washable = await washableIdsAmong(userId, ids);
   if (washable.length === 0) return 0;
-  const { count } = await setGarmentsDirtyState(washable, false);
+  const { count } = await setGarmentsDirtyState(userId, washable, false);
   return count;
 }

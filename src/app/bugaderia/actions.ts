@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { markGarmentsDirty, markGarmentsClean } from "@/lib/prendas/service";
+import { requireUserId } from "@/lib/auth/session";
 
 /**
  * "layout", not the default page scope: the picker stays open after
@@ -17,13 +18,13 @@ function revalidateLaundry() {
 }
 
 export async function markDirtyAction(garmentIds: string[]): Promise<{ affected: number }> {
-  const affected = await markGarmentsDirty(garmentIds);
+  const affected = await markGarmentsDirty(await requireUserId(), garmentIds);
   revalidateLaundry();
   return { affected };
 }
 
 export async function markCleanAction(garmentIds: string[]): Promise<{ affected: number }> {
-  const affected = await markGarmentsClean(garmentIds);
+  const affected = await markGarmentsClean(await requireUserId(), garmentIds);
   revalidateLaundry();
   return { affected };
 }

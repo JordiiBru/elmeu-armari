@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { settlePastWornEvents } from "@/lib/outfits/service";
+import { requireUserId } from "@/lib/auth/session";
 
 /**
  * Same reason as `bugaderia/layout.tsx`: this screen reads clean/dirty
@@ -8,6 +9,6 @@ import { settlePastWornEvents } from "@/lib/outfits/service";
  * these two layouts are the only places that trigger it.
  */
 export default async function AvuiLayout({ children }: { children: ReactNode }) {
-  await settlePastWornEvents();
+  await settlePastWornEvents(await requireUserId());
   return <>{children}</>;
 }

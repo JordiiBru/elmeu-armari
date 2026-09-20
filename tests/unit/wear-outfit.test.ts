@@ -78,7 +78,7 @@ const garmentCatalog: Record<string, GarmentWithColors> = {
   pants: garment("pants", "PANTS"), // not an extra category
 };
 
-const findGarmentCategories = vi.fn(async (ids: string[]) =>
+const findGarmentCategories = vi.fn(async (_userId: string, ids: string[]) =>
   ids
     .map((id) => garmentCatalog[id])
     .filter((g): g is GarmentWithColors => g !== undefined)
@@ -110,9 +110,10 @@ describe("wearOutfit", () => {
   it("drops ids that are not an extra category", async () => {
     findOutfitById.mockResolvedValue(outfitRow("o1", [garment("sh", "SHIRT")]));
 
-    await wearOutfit("o1", new Date("2026-08-20T00:00:00Z"), ["pants", "ring"]);
+    await wearOutfit("u1", "o1", new Date("2026-08-20T00:00:00Z"), ["pants", "ring"]);
 
     expect(setWornDay).toHaveBeenCalledWith(
+      "u1",
       "o1",
       // Truncated to midnight UTC: the unique constraint on WornEvent.date
       // is what enforces one outfit per day, so the time must never survive.
@@ -124,9 +125,10 @@ describe("wearOutfit", () => {
   it("drops shoes from the extras — they're part of the outfit now, not the day", async () => {
     findOutfitById.mockResolvedValue(outfitRow("o1", [garment("sh", "SHIRT")]));
 
-    await wearOutfit("o1", new Date("2026-08-20T00:00:00Z"), ["shoes1", "shoes2", "ring"]);
+    await wearOutfit("u1", "o1", new Date("2026-08-20T00:00:00Z"), ["shoes1", "shoes2", "ring"]);
 
     expect(setWornDay).toHaveBeenCalledWith(
+      "u1",
       "o1",
       expect.any(Date),
       ["ring"],
@@ -139,7 +141,7 @@ describe("wearOutfit", () => {
     );
 
     await expect(
-      wearOutfit("o1", new Date("2026-08-15T00:00:00Z"), []),
+      wearOutfit("u1", "o1", new Date("2026-08-15T00:00:00Z"), []),
     ).rejects.toThrow();
     expect(setWornDay).not.toHaveBeenCalled();
   });
@@ -150,7 +152,7 @@ describe("wearOutfit", () => {
     );
 
     await expect(
-      wearOutfit("o1", new Date("2026-08-10T00:00:00Z"), []),
+      wearOutfit("u1", "o1", new Date("2026-08-10T00:00:00Z"), []),
     ).rejects.toThrow();
     expect(setWornDay).not.toHaveBeenCalled();
   });
@@ -158,9 +160,10 @@ describe("wearOutfit", () => {
   it("wears today when every piece is clean", async () => {
     findOutfitById.mockResolvedValue(outfitRow("o1", [garment("sh", "SHIRT")]));
 
-    await wearOutfit("o1", new Date("2026-08-15T18:30:00Z"), ["ring"]);
+    await wearOutfit("u1", "o1", new Date("2026-08-15T18:30:00Z"), ["ring"]);
 
     expect(setWornDay).toHaveBeenCalledWith(
+      "u1",
       "o1",
       new Date("2026-08-15T00:00:00Z"),
       ["ring"],
@@ -172,16 +175,16 @@ describe("wearOutfit", () => {
       outfitRow("o1", [garment("sh", "SHIRT", { dirty: true })]),
     );
 
-    await wearOutfit("o1", new Date("2026-08-20T00:00:00Z"), []);
+    await wearOutfit("u1", "o1", new Date("2026-08-20T00:00:00Z"), []);
 
-    expect(setWornDay).toHaveBeenCalledWith("o1", expect.any(Date), []);
+    expect(setWornDay).toHaveBeenCalledWith("u1", "o1", expect.any(Date), []);
   });
 
   it("throws for an unknown outfit id", async () => {
     findOutfitById.mockResolvedValue(null);
 
     await expect(
-      wearOutfit("ghost", new Date("2026-08-20T00:00:00Z"), []),
+      wearOutfit("u1", "ghost", new Date("2026-08-20T00:00:00Z"), []),
     ).rejects.toThrow();
     expect(setWornDay).not.toHaveBeenCalled();
   });

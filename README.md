@@ -12,7 +12,7 @@ The UI speaks Catalan, Spanish and English (header menu, Catalan by default). Co
 - **Palettes** (`/paleta`): the 348 historical Sanzo Wada palettes, browsable by colour name.
 - **Colours from a photo**: adding a piece from a photo suggests its dominant colour, in the browser; nothing is sent anywhere.
 - **Statistics, import and export** (`/stats`, `/settings`): export as JSON or as a ZIP with photos, import a JSON back.
-- **Accounts**: the whole app is behind a login and there is no public sign-up; see [Accounts](#accounts).
+- **Accounts**: the whole app is behind a login and there is no public sign-up; see [Accounts](#accounts). Each account has its own wardrobe, outfits, days and photos; a new account starts empty.
 
 ## Stack
 

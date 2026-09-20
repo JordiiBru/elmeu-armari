@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
-import { requireSession } from "@/lib/auth/api";
+import { requireUser } from "@/lib/auth/api";
 import { getUploadDir } from "@/lib/uploads";
+import { ownsPhoto } from "@/lib/photo-access";
 
 const SAFE_FILENAME = /^[a-z0-9]+(?:-thumb)?\.webp$/;
 
@@ -19,13 +20,20 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ filename: string }> }
 ) {
-  const denied = await requireSession();
-  if (denied) return denied;
+  const auth = await requireUser();
+  if ("response" in auth) return auth.response;
+  const { userId } = auth;
 
   const { filename } = await params;
 
   if (!SAFE_FILENAME.test(filename)) {
     return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
+  }
+
+  // Not found rather than forbidden: a photo in someone else's wardrobe
+  // must look exactly like one that does not exist.
+  if (!(await ownsPhoto(userId, filename))) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   const dir = getUploadDir();

@@ -17,6 +17,7 @@ import {
   EmptyState,
   TextLink,
 } from "@/components/ui";
+import { requireUserId } from "@/lib/auth/session";
 
 function pct(n: number, total: number) {
   if (total === 0) return "0%";
@@ -68,7 +69,7 @@ export default async function StatsPage() {
   const [t, tLabel, raw] = await Promise.all([
     getTranslations("stats"),
     getTranslations("labels"),
-    findAllGarments(),
+    requireUserId().then(findAllGarments),
   ]);
   const total = raw.length;
 

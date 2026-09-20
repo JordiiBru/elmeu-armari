@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
-import { requireSession } from "@/lib/auth/api";
+import { requireUser } from "@/lib/auth/api";
 import { findAllGarments } from "@/lib/prendas/service";
 import { findDayPhotoFilenames } from "@/lib/outfits/service";
 import { getUploadDir } from "@/lib/uploads";
@@ -28,12 +28,13 @@ async function pushImage(entries: ZipEntry[], filename: string): Promise<void> {
 }
 
 export async function GET() {
-  const denied = await requireSession();
-  if (denied) return denied;
+  const auth = await requireUser();
+  if ("response" in auth) return auth.response;
+  const { userId } = auth;
 
   const [garments, dayPhotos] = await Promise.all([
-    findAllGarments(),
-    findDayPhotoFilenames(),
+    findAllGarments(userId),
+    findDayPhotoFilenames(userId),
   ]);
 
   const data = garments.map((g) => ({

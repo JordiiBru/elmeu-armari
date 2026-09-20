@@ -67,29 +67,29 @@ beforeEach(() => {
 
 describe("settlePastWornEvents", () => {
   it("dirties what one wear soils, and leaves the trousers alone", async () => {
-    const count = await settlePastWornEvents();
+    const count = await settlePastWornEvents("u1");
     expect(count).toBe(2);
     expect(markGarmentsDirty).toHaveBeenCalledTimes(1);
     // Trousers are washable, but wearing them once is not what puts them
     // in the basket — that is a decision you make in Embrutar.
-    expect(markGarmentsDirty).toHaveBeenCalledWith(["shirt", "sweater"]);
+    expect(markGarmentsDirty).toHaveBeenCalledWith("u1", ["shirt", "sweater"]);
   });
 
   it("skips the dirty call for an outfit with nothing to soil, but still settles it", async () => {
-    await settlePastWornEvents();
-    expect(markGarmentsDirty).not.toHaveBeenCalledWith([]);
-    expect(markWornEventSettled).toHaveBeenCalledWith("w2");
+    await settlePastWornEvents("u1");
+    expect(markGarmentsDirty).not.toHaveBeenCalledWith("u1", []);
+    expect(markWornEventSettled).toHaveBeenCalledWith("u1", "w2");
   });
 
   it("marks every returned event as settled", async () => {
-    await settlePastWornEvents();
-    expect(markWornEventSettled).toHaveBeenCalledWith("w1");
+    await settlePastWornEvents("u1");
+    expect(markWornEventSettled).toHaveBeenCalledWith("u1", "w1");
     expect(markWornEventSettled).toHaveBeenCalledTimes(2);
   });
 
   it("does nothing when there is nothing to settle", async () => {
     findUnsettledPastWornEvents.mockResolvedValueOnce([]);
-    const count = await settlePastWornEvents();
+    const count = await settlePastWornEvents("u1");
     expect(count).toBe(0);
     expect(markGarmentsDirty).not.toHaveBeenCalled();
     expect(markWornEventSettled).not.toHaveBeenCalled();

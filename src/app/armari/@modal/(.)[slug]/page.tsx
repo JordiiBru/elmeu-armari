@@ -5,6 +5,7 @@ import { isSweaterInSeason, isShortsInSeason } from "@/lib/prendas/season";
 import { idSuffixFromSlug } from "@/lib/prendas/slug";
 import { palettes } from "@/lib/colors";
 import { GarmentModalRoute } from "@/components/GarmentModalRoute";
+import { requireUserId } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +20,11 @@ export default async function InterceptedGarmentModal({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const userId = await requireUserId();
   const [garment, allGarments, savedOutfitKeys] = await Promise.all([
-    findGarmentByIdSuffix(idSuffixFromSlug(slug)),
-    findAllGarments(),
-    findSavedOutfitKeys(),
+    findGarmentByIdSuffix(userId, idSuffixFromSlug(slug)),
+    findAllGarments(userId),
+    findSavedOutfitKeys(userId),
   ]);
   if (!garment) notFound();
 

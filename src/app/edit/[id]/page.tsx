@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { findGarmentById } from "@/lib/prendas/service";
 import { EditForm } from "@/components/EditForm";
 import { PageContainer, SectionHeader } from "@/components/ui";
+import { requireUserId } from "@/lib/auth/session";
 
 export default async function EditPage({
   params,
@@ -10,9 +11,10 @@ export default async function EditPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const userId = await requireUserId();
   const [t, garment] = await Promise.all([
     getTranslations("edit"),
-    findGarmentById(id),
+    findGarmentById(userId, id),
   ]);
   if (!garment) notFound();
 
