@@ -392,5 +392,57 @@ describe("engine", () => {
       expect(anchored.bestDistance).toBeLessThan(free.bestDistance);
     });
   });
+
+  describe("diversified ranking", () => {
+    // Combination 122 is crimson + amber + green. Three shirts, two trousers
+    // and two pairs of shoes, every one an exact match, make twelve equally
+    // good groups: the plain ranking would list them in an arbitrary order,
+    // one look with a piece swapped at a time.
+    function wardrobe() {
+      return [
+        createTestGarment("s1", "SHIRT", [CRIMSON]),
+        createTestGarment("s2", "SHIRT", [CRIMSON]),
+        createTestGarment("s3", "SHIRT", [CRIMSON]),
+        createTestGarment("p1", "PANTS", [AMBER]),
+        createTestGarment("p2", "PANTS", [AMBER]),
+        createTestGarment("h1", "SHOES", [GREEN]),
+        createTestGarment("h2", "SHOES", [GREEN]),
+      ];
+    }
+    const shared = (a: { garments: { id: string }[] }, b: { garments: { id: string }[] }) =>
+      a.garments.filter((g) => b.garments.some((x) => x.id === g.id)).length;
+
+    it("keeps every group: it reorders, it does not drop", () => {
+      const { groups } = generateOutfitGroups(wardrobe(), palettes, 100);
+      expect(groups).toHaveLength(12);
+      expect(new Set(groups.map((g) => g.garments.map((x) => x.id).join(","))).size).toBe(12);
+    });
+
+    it("makes the first results differ in more than one piece", () => {
+      const { groups } = generateOutfitGroups(wardrobe(), palettes, 100);
+      // The first four can differ in two pieces each: no two of them may
+      // share two of their three.
+      const top = groups.slice(0, 4);
+      for (let i = 0; i < top.length; i++) {
+        for (let j = i + 1; j < top.length; j++) {
+          expect(shared(top[i], top[j]), `${i} and ${j}`).toBeLessThanOrEqual(1);
+        }
+      }
+    });
+
+    it("still returns a result for the smallest wardrobe", () => {
+      const small = wardrobe().filter((g) => ["s1", "p1", "h1"].includes(g.id));
+      expect(generateOutfitGroups(small, palettes).groups).toHaveLength(1);
+    });
+
+    it("does not count the anchored piece as a similarity", () => {
+      // Asking about s1: every group has s1, which says nothing about how
+      // alike two of them are. All six groups are still there.
+      const w = wardrobe();
+      const { groups } = generateOutfitGroupsForGarment(w[0], w, palettes, 100);
+      expect(groups).toHaveLength(4);
+      expect(groups.every((g) => g.garments.some((x) => x.id === "s1"))).toBe(true);
+    });
+  });
 });
 

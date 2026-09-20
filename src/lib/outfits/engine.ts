@@ -93,6 +93,13 @@ const CATEGORY_LAYOUT_ORDER = ["SHIRT", "SWEATER", "PANTS", "SHOES"] as const;
 // pagination to hide the scale of it one page at a time.
 const MAX_GROUPS = 60;
 
+// What one shared piece costs a group against the most similar one already
+// chosen, in the same units as `bestDistance`. On the dev wardrobe 6 is the
+// first value at which no two of the top ten share two of their three
+// pieces; 8 keeps a margin and costs half a point of mean distance over the
+// top 60 (5.5 to 6.0).
+const DIVERSITY_PENALTY: number = 8;
+
 // Below this many groups at the strict membership threshold the result is
 // topped up from the vocabulary threshold, so a small wardrobe still gets
 // suggestions instead of an empty screen.
@@ -439,12 +446,64 @@ function groupKey(g: OutfitGroup): string {
     .join(",");
 }
 
-/** Fewest pieces first, then closest to the catalogue; out-of-season
- * sweaters and shorts sink to the end without leaving. */
+/** How many groups are considered for the diversified selection. The rest
+ * are worse on the plain ranking and would only make the greedy pass slow on
+ * a big wardrobe; `MAX_GROUPS` of them are kept. */
+const DIVERSITY_POOL = 400;
+
+/**
+ * Greedy diversification: picks the next group by the plain ranking key
+ * (fewest pieces, then distance) with a price on similarity, the number of
+ * pieces it shares with the most similar group already chosen times
+ * `DIVERSITY_PENALTY`. Without it the top of the list is one look with a
+ * different shirt: on a wardrobe where 11 of 45 colours are black, the same
+ * black trousers and shoes carried every result.
+ *
+ * `anchorId` is a piece every group already has (the one "què hi combina"
+ * was asked about): it says nothing about how alike two groups are, so it
+ * is left out of the count.
+ */
+function diversify(sorted: OutfitGroup[], anchorId?: string): OutfitGroup[] {
+  if (DIVERSITY_PENALTY === 0) return sorted;
+  const pool = sorted.slice(0, DIVERSITY_POOL).map((group) => ({
+    group,
+    ids: new Set(group.garments.map((g) => g.id).filter((id) => id !== anchorId)),
+    // Highest count of pieces shared with anything chosen so far.
+    maxShared: 0,
+  }));
+  const chosen: OutfitGroup[] = [];
+  while (pool.length > 0 && chosen.length < MAX_GROUPS) {
+    let best = 0;
+    for (let i = 1; i < pool.length; i++) {
+      const a = pool[i];
+      const b = pool[best];
+      if (a.group.garments.length !== b.group.garments.length) {
+        if (a.group.garments.length < b.group.garments.length) best = i;
+        continue;
+      }
+      const costA = a.group.bestDistance + DIVERSITY_PENALTY * a.maxShared;
+      const costB = b.group.bestDistance + DIVERSITY_PENALTY * b.maxShared;
+      if (costA < costB) best = i;
+    }
+    const [picked] = pool.splice(best, 1);
+    chosen.push(picked.group);
+    for (const other of pool) {
+      let shared = 0;
+      for (const id of picked.ids) if (other.ids.has(id)) shared++;
+      if (shared > other.maxShared) other.maxShared = shared;
+    }
+  }
+  return [...chosen, ...sorted.slice(DIVERSITY_POOL)];
+}
+
+/** Fewest pieces first, then closest to the catalogue, diversified so the
+ * top is not one look; out-of-season sweaters and shorts sink to the end
+ * without leaving. */
 function rankGroups(
   groups: OutfitGroup[],
   sweaterInSeason: boolean,
   shortsInSeason: boolean,
+  anchorId?: string,
 ): OutfitGroup[] {
   const sorted = [...groups].sort((a, b) => {
     if (a.garments.length !== b.garments.length) {
@@ -452,7 +511,10 @@ function rankGroups(
     }
     return a.bestDistance - b.bestDistance;
   });
-  return sortByShortsSeason(sortBySweaterSeason(sorted, sweaterInSeason), shortsInSeason);
+  return sortByShortsSeason(
+    sortBySweaterSeason(diversify(sorted, anchorId), sweaterInSeason),
+    shortsInSeason,
+  );
 }
 
 /**
@@ -466,14 +528,16 @@ function generateTiered(
   collect: (membership: number) => OutfitGroup[],
   sweaterInSeason: boolean,
   shortsInSeason: boolean,
+  anchorId?: string,
 ): OutfitGroup[] {
-  const strict = rankGroups(collect(MEMBERSHIP_THRESHOLD), sweaterInSeason, shortsInSeason);
+  const strict = rankGroups(collect(MEMBERSHIP_THRESHOLD), sweaterInSeason, shortsInSeason, anchorId);
   if (strict.length >= LOOSE_FALLBACK_BELOW) return strict.slice(0, MAX_GROUPS);
   const seen = new Set(strict.map(groupKey));
   const loose = rankGroups(
     collect(OKLCH_DISTANCE_THRESHOLD).filter((g) => !seen.has(groupKey(g))),
     sweaterInSeason,
     shortsInSeason,
+    anchorId,
   );
   return [...strict, ...loose].slice(0, MAX_GROUPS);
 }
@@ -535,7 +599,7 @@ export function generateOutfitGroupsForGarment(
     return collectGroups([targetCtx], () => candidates, palettes);
   };
 
-  const ranked = generateTiered(collect, sweaterInSeason, shortsInSeason);
+  const ranked = generateTiered(collect, sweaterInSeason, shortsInSeason, targetGarment.id);
   return { groups: ranked.slice(offset, offset + limit), hasMore: ranked.length > offset + limit };
 }
 
