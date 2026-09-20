@@ -439,7 +439,13 @@
         "p1": "Añade tus prendas con foto, color, temporada y talla. Si pones una foto, la app te propone los colores.",
         "p2": "Abre una prenda y mira qué combina con ella: verás outfits completos (parte de arriba, pantalones y zapatos) y podrás guardar los que te gusten.",
         "p3": "En «¿Qué me pongo?» eliges un outfit guardado para hoy o para otro día de la semana. «Me lo pongo» lo asigna a hoy; para otro día el botón lo guarda en ese día.",
-        "p4": "En la colada ves qué tienes limpio y qué está en el cesto. Marca lo que va a lavar y, cuando has hecho la colada, márcalo como lavado."
+        "p4": "En la colada ves qué tienes limpio y qué está en el cesto. Marca lo que va a lavar y, cuando has hecho la colada, márcalo como lavado.",
+        "steps": {
+          "s1": "añadir",
+          "s2": "combinar",
+          "s3": "elegir",
+          "s4": "lavar"
+        }
       },
       "colours": {
         "title": "cómo llega un color a una paleta",
@@ -472,6 +478,7 @@
       "armariSeason": "Muestra solo lo que va bien para la época del año en que estás.",
       "laundry": "Limpias son las que puedes ponerte; en el cesto, las que esperan colada. Cuando la haces, márcalas como lavadas.",
       "paleta": "Cada color aparece en varias combinaciones del libro. Tus prendas se asignan por el color más cercano, y de ahí salen los outfits."
-    }
+    },
+    "paletteExample": "Una combinación del diccionario, la n{id}: tres colores que el libro da por buenos juntos."
   }
 }
