@@ -8,7 +8,7 @@ The UI ships in Catalan, Spanish and English. Catalan is the source language. **
 
 ## 1. Local setup
 
-Prerequisites: Node 20+, npm, git.
+Prerequisites: Node 24 (the LTS the image and CI use), npm, git.
 
 ```bash
 git clone https://github.com/JordiiBru/elmeu-armari.git
