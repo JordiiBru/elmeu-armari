@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import { LaundryPicker } from "./LaundryPicker";
-import { SegmentedControl, Stack, Text } from "@/components/ui";
+import { InfoHint, SegmentedControl, Stack, Text } from "@/components/ui";
 
 type View = "clean" | "basket";
 
@@ -42,6 +42,7 @@ export function LaundryBoard({
   basket: GarmentWithColors[];
 }) {
   const t = useTranslations("bugaderia");
+  const tHelp = useTranslations("help");
   const initialParams = useSearchParams();
   const [view, setView] = useState<View>(() => parseView(initialParams.get(VIEW_PARAM)));
 
@@ -76,6 +77,11 @@ export function LaundryBoard({
         />
         <Text variant="small" italic tone="secondary">
           {t(`picker.${mode}.subtitle`)}
+          <span className="ml-3">
+            <InfoHint label={tHelp("hintLabel")} href="/ajuda#flow" moreLabel={tHelp("more")}>
+              {tHelp("hints.laundry")}
+            </InfoHint>
+          </span>
         </Text>
       </Stack>
 

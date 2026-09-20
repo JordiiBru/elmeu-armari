@@ -23,6 +23,7 @@ import {
   useToast,
 } from "@/components/ui";
 import { TOAST_DURATION_MS } from "@/components/ui/toast";
+import { InfoHint } from "@/components/ui";
 
 /** The categories an outfit is made of — accessories still
  * belong to the day, not to the look, so filtering by them has nothing
@@ -39,13 +40,17 @@ const FILTERS: Filter[] = ["ALL", "SWEATER", "SHIRT", "PANTS", "SHOES"];
 function FilterLabel({
   children,
   className,
+  hint,
 }: {
   children: React.ReactNode;
   className?: string;
+  /** An `InfoHint` for a control the label alone does not explain. */
+  hint?: React.ReactNode;
 }) {
   return (
     <Text variant="small" italic tone="secondary" className={`font-serif ${className ?? ""}`}>
       {children}
+      {hint && <span className="ml-3">{hint}</span>}
     </Text>
   );
 }
@@ -100,6 +105,13 @@ export function OutfitLibrary({
   shortsInSeason: boolean;
 }) {
   const t = useTranslations("outfits");
+  const tHelp = useTranslations("help");
+  // One place to build a hint, so each control only says what it means.
+  const hint = (text: string, section: string) => (
+    <InfoHint label={tHelp("hintLabel")} href={`/ajuda#${section}`} moreLabel={tHelp("more")}>
+      {text}
+    </InfoHint>
+  );
   const toast = useToast();
   const router = useRouter();
   const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
@@ -213,7 +225,9 @@ export function OutfitLibrary({
           sm: and up it goes back to sitting beside a single line. */}
       <div className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <Stack gap={1} className="w-full min-w-0 sm:w-auto">
-          <FilterLabel>{t("categoryFilterLabel")}</FilterLabel>
+          <FilterLabel hint={hint(tHelp("hints.pieceFilter"), "flow")}>
+            {t("categoryFilterLabel")}
+          </FilterLabel>
           <SegmentedControl<Filter>
             value={filter}
             onChange={setFilter}
@@ -225,12 +239,17 @@ export function OutfitLibrary({
             }))}
           />
         </Stack>
-        <div className="self-center sm:self-auto">{discoverButton}</div>
+        <div className="flex items-center gap-3 self-center sm:self-auto">
+          {discoverButton}
+          {hint(tHelp("hints.discover"), "flow")}
+        </div>
       </div>
 
       <div className="flex flex-wrap items-end gap-x-10 gap-y-4">
         <Stack gap={1}>
-          <FilterLabel>{t("seasonFilterLabel")}</FilterLabel>
+          <FilterLabel hint={hint(tHelp("hints.seasonFilter"), "rules")}>
+            {t("seasonFilterLabel")}
+          </FilterLabel>
           <SegmentedControl<"SEASON" | "ALL">
             value={seasonFilter}
             onChange={setSeasonFilter}
@@ -243,7 +262,9 @@ export function OutfitLibrary({
           />
         </Stack>
         <Stack gap={1} className="sm:border-l sm:border-border-subtle sm:pl-10">
-          <FilterLabel>{t("cleanFilterLabel")}</FilterLabel>
+          <FilterLabel hint={hint(tHelp("hints.cleanFilter"), "rules")}>
+            {t("cleanFilterLabel")}
+          </FilterLabel>
           <SegmentedControl<"CLEAN" | "ALL">
             value={cleanFilter}
             onChange={setCleanFilter}

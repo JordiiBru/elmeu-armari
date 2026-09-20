@@ -251,7 +251,8 @@
       "ca": "Catalán",
       "es": "Castellano",
       "en": "Inglés"
-    }
+    },
+    "help": "cómo funciona"
   },
   "home": {
     "title": "mi armario",
@@ -418,6 +419,57 @@
       "skippedRemoved": "{count, plural, one {# prenda de una categoría que ya no existe (calcetines) se ha ignorado.} other {# prendas de una categoría que ya no existe (calcetines) se han ignorado.}}",
       "unknownError": "Error desconocido",
       "networkError": "Fichero inválido o error de red."
+    }
+  },
+  "help": {
+    "title": "cómo funciona",
+    "subtitle": "qué es esta app, el día a día y las reglas que no se ven.",
+    "more": "más detalles",
+    "hintLabel": "¿Qué significa esto?",
+    "sections": {
+      "what": {
+        "title": "qué es esta app",
+        "p1": "Tu armario, organizado en torno a las combinaciones de color del diccionario de Sanzo Wada (Tokio, 1933): 348 paletas de dos a seis colores.",
+        "p2": "Cada prenda se asigna a colores del diccionario, y dos prendas combinan cuando comparten una paleta. De ahí salen los outfits que te propone la app."
+      },
+      "flow": {
+        "title": "el día a día",
+        "p1": "Añade tus prendas con foto, color, temporada y talla. Si pones una foto, la app te propone los colores.",
+        "p2": "Abre una prenda y mira qué combina con ella: verás outfits completos (parte de arriba, pantalones y zapatos) y podrás guardar los que te gusten.",
+        "p3": "En «¿Qué me pongo?» eliges un outfit guardado para hoy o para otro día de la semana. «Me lo pongo» lo asigna a hoy; para otro día el botón lo guarda en ese día.",
+        "p4": "En la colada ves qué tienes limpio y qué está en el cesto. Marca lo que va a lavar y, cuando has hecho la colada, márcalo como lavado."
+      },
+      "colours": {
+        "title": "cómo llega un color a una paleta",
+        "p1": "El color de cada prenda se aproxima al color más cercano del diccionario: hay 157, con sus nombres históricos en inglés.",
+        "p2": "Una prenda solo vive en las paletas de los colores que le quedan cerca. Cuanto más estricto, menos combinaciones pero más ajustadas. Si un color no se parece a ninguno del diccionario, la prenda no se puede combinar.",
+        "p3": "El negro, el blanco y los grises son neutros: un gris oscuro se lee como negro."
+      },
+      "numbers": {
+        "title": "el número y la franja de color",
+        "p1": "El número bajo cada outfit es el orden en que lo guardaste. No cambia si lo marcas o no como favorito.",
+        "p2": "La franja de colores es la combinación del diccionario sobre la que se construyó el outfit."
+      },
+      "rules": {
+        "title": "las reglas que no se ven",
+        "r1": "Ponerte un outfit no lo ensucia: solo ocurre cuando el día ya ha pasado.",
+        "r2": "Solo las camisetas y los jerséis se ensucian solos. Los pantalones los mandas tú al cesto; los zapatos y los accesorios no van nunca a lavar.",
+        "r3": "Todo outfit lleva zapatos: sin zapatos no se propone.",
+        "r4": "Los zapatos negros y blancos siempre combinan.",
+        "r5": "Los accesorios se eligen al ponerte el outfit; no forman parte del outfit guardado."
+      }
+    },
+    "hints": {
+      "pieceFilter": "Agrupa los outfits por la prenda que elijas. No oculta ninguno.",
+      "seasonFilter": "Oculta los outfits con alguna prenda fuera de temporada, como unos shorts en invierno o un jersey en verano.",
+      "cleanFilter": "Oculta los outfits con alguna prenda en el cesto.",
+      "discover": "Combina prenda a prenda con lo que tienes. No es la lista de favoritos.",
+      "outfitNumbers": "El número es el orden en que guardaste el outfit. La franja de color es la combinación de Sanzo Wada en la que se basa.",
+      "armariFit": "Cómo cae la prenda: regular, ancha, ajustada...",
+      "armariState": "Limpia o en el cesto: mira qué prendas están en la colada.",
+      "armariSeason": "Muestra solo lo que va bien para la época del año en que estás.",
+      "laundry": "Limpias son las que puedes ponerte; en el cesto, las que esperan colada. Cuando la haces, márcalas como lavadas.",
+      "paleta": "Cada color aparece en varias combinaciones del libro. Tus prendas se asignan por el color más cercano, y de ahí salen los outfits."
     }
   }
 }

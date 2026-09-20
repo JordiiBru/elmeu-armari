@@ -251,7 +251,8 @@
       "ca": "Català",
       "es": "Castellà",
       "en": "Anglès"
-    }
+    },
+    "help": "com funciona"
   },
   "home": {
     "title": "el meu armari",
@@ -418,6 +419,57 @@
       "skippedRemoved": "{count, plural, one {# peça d'una categoria que ja no existeix (mitjons) s'ha ignorat.} other {# peces d'una categoria que ja no existeix (mitjons) s'han ignorat.}}",
       "unknownError": "Error desconegut",
       "networkError": "Fitxer invàlid o error de xarxa."
+    }
+  },
+  "help": {
+    "title": "com funciona",
+    "subtitle": "què és aquesta app, el dia a dia i les regles que no es veuen.",
+    "more": "més detalls",
+    "hintLabel": "Què vol dir això?",
+    "sections": {
+      "what": {
+        "title": "què és aquesta app",
+        "p1": "El teu armari, organitzat al voltant de les combinacions de color del diccionari de Sanzo Wada (Tòquio, 1933): 348 paletes de dos a sis colors.",
+        "p2": "Cada peça s'assigna a colors del diccionari, i dues peces combinen quan comparteixen una paleta. D'aquí surten els outfits que et proposa l'app."
+      },
+      "flow": {
+        "title": "el dia a dia",
+        "p1": "Afegeix les teves peces amb foto, color, temporada i talla. Si poses una foto, l'app et proposa els colors.",
+        "p2": "Obre una peça i mira què hi combina: veuràs outfits complets (part de dalt, pantalons i sabates) i en pots desar els que t'agradin.",
+        "p3": "A «Què em poso?» tries un outfit desat per a avui o per a un altre dia de la setmana. «Me'l poso» l'assigna a avui; per a un altre dia el botó el desa en aquell dia.",
+        "p4": "A la bugaderia veus què tens net i què és al cistell. Marca el que va a rentar i, quan has fet la bugada, marca-ho com a rentat."
+      },
+      "colours": {
+        "title": "com arriba un color a una paleta",
+        "p1": "El color de cada peça s'aproxima al color més proper del diccionari: n'hi ha 157, amb els seus noms històrics en anglès.",
+        "p2": "Una peça només viu a les paletes dels colors que li són a prop. Com més estricte, menys combinacions però més ajustades. Si un color no s'assembla a cap del diccionari, la peça no es pot combinar.",
+        "p3": "El negre, el blanc i els grisos són neutres: un gris fosc es llegeix com a negre."
+      },
+      "numbers": {
+        "title": "el número i la franja de color",
+        "p1": "El número sota cada outfit és l'ordre en què el vas desar. No canvia si el marques o no com a favorit.",
+        "p2": "La franja de colors és la combinació del diccionari sobre la qual es va construir l'outfit."
+      },
+      "rules": {
+        "title": "les regles que no es veuen",
+        "r1": "Posar-te un outfit no el fa brut: només passa quan el dia ja ha passat.",
+        "r2": "Només les samarretes i els jerseis s'embruten sols. Els pantalons els envies tu al cistell; les sabates i els accessoris no van mai a rentar.",
+        "r3": "Tot outfit porta sabates: sense sabates no es proposa.",
+        "r4": "Les sabates negres i blanques sempre combinen.",
+        "r5": "Els accessoris es trien en posar-te l'outfit; no formen part de l'outfit desat."
+      }
+    },
+    "hints": {
+      "pieceFilter": "Agrupa els outfits per la peça que triïs. No n'amaga cap.",
+      "seasonFilter": "Amaga els outfits amb alguna peça fora de temporada, com uns shorts a l'hivern o un jersei a l'estiu.",
+      "cleanFilter": "Amaga els outfits amb alguna peça al cistell.",
+      "discover": "Combina peça per peça amb el que tens. No és la llista de favorits.",
+      "outfitNumbers": "El número és l'ordre en què vas desar l'outfit. La franja de color és la combinació de Sanzo Wada en què es basa.",
+      "armariFit": "Com cau la peça: regular, ampla, ajustada...",
+      "armariState": "Net o al cistell: mira quines peces són a la bugaderia.",
+      "armariSeason": "Mostra només el que va bé per a l'època de l'any en què ets.",
+      "laundry": "Netes són les que et pots posar; al cistell, les que esperen bugada. Quan la fas, marca-les com a rentades.",
+      "paleta": "Cada color surt a diverses combinacions del llibre. Les teves peces s'hi assignen pel color més proper, i d'aquí surten els outfits."
     }
   }
 }

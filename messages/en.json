@@ -251,7 +251,8 @@
       "ca": "Catalan",
       "es": "Spanish",
       "en": "English"
-    }
+    },
+    "help": "how it works"
   },
   "home": {
     "title": "my wardrobe",
@@ -418,6 +419,57 @@
       "skippedRemoved": "{count, plural, one {# garment from a category that no longer exists (socks) was skipped.} other {# garments from a category that no longer exists (socks) were skipped.}}",
       "unknownError": "Unknown error",
       "networkError": "Invalid file or network error."
+    }
+  },
+  "help": {
+    "title": "how it works",
+    "subtitle": "what this app is, the daily flow and the rules you cannot see.",
+    "more": "more details",
+    "hintLabel": "What does this mean?",
+    "sections": {
+      "what": {
+        "title": "what this app is",
+        "p1": "Your wardrobe, organised around the colour combinations of Sanzo Wada's dictionary (Tokyo, 1933): 348 palettes of two to six colours.",
+        "p2": "Each piece is assigned to colours of the dictionary, and two pieces go together when they share a palette. The outfits the app suggests come from that."
+      },
+      "flow": {
+        "title": "the daily flow",
+        "p1": "Add your pieces with a photo, colour, season and size. If you add a photo, the app suggests the colours.",
+        "p2": "Open a piece and see what goes with it: you get complete outfits (top, trousers and shoes) and can save the ones you like.",
+        "p3": "In \"What do I wear?\" you pick a saved outfit for today or for another day of the week. \"Wear it\" assigns it to today; for another day the button saves it on that day.",
+        "p4": "In the laundry you see what is clean and what is in the basket. Mark what goes to be washed and, once you have done the laundry, mark it as washed."
+      },
+      "colours": {
+        "title": "how a colour reaches a palette",
+        "p1": "Each piece's colour is matched to the nearest colour of the dictionary: there are 157, with their historic English names.",
+        "p2": "A piece only lives in the palettes of the colours close to it. The stricter, the fewer combinations but the closer the fit. If a colour is close to none of the dictionary's, the piece cannot be combined.",
+        "p3": "Black, white and greys are neutrals: a dark grey reads as black."
+      },
+      "numbers": {
+        "title": "the number and the colour strip",
+        "p1": "The number under each outfit is the order in which you saved it. It does not change if you favourite it or not.",
+        "p2": "The colour strip is the dictionary combination the outfit was built on."
+      },
+      "rules": {
+        "title": "the rules you cannot see",
+        "r1": "Wearing an outfit does not make it dirty: that only happens once the day has passed.",
+        "r2": "Only shirts and sweaters get dirty on their own. You send trousers to the basket yourself; shoes and accessories never go to the wash.",
+        "r3": "Every outfit has shoes: without shoes it is not suggested.",
+        "r4": "Black and white shoes always match.",
+        "r5": "Accessories are picked when you wear the outfit; they are not part of the saved outfit."
+      }
+    },
+    "hints": {
+      "pieceFilter": "Groups the outfits by the piece you pick. It does not hide any.",
+      "seasonFilter": "Hides outfits with a piece out of season, like shorts in winter or a sweater in summer.",
+      "cleanFilter": "Hides outfits with a piece in the basket.",
+      "discover": "Combine piece by piece with what you own. It is not the favourites list.",
+      "outfitNumbers": "The number is the order in which you saved the outfit. The colour strip is the Sanzo Wada combination it is based on.",
+      "armariFit": "How the piece sits: regular, loose, slim...",
+      "armariState": "Clean or in the basket: see which pieces are in the laundry.",
+      "armariSeason": "Shows only what suits the time of year you are in.",
+      "laundry": "Clean are the ones you can wear; in the basket, the ones waiting for a wash. When you do the laundry, mark them as washed.",
+      "paleta": "Each colour appears in several combinations of the book. Your pieces are assigned by the nearest colour, and the outfits come from that."
     }
   }
 }

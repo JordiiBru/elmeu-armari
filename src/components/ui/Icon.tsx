@@ -11,6 +11,7 @@ export type IconName =
   | "star"
   | "sparkle"
   | "ellipsis"
+  | "info"
   | "user"
   | "camera"
   | "sun"
@@ -53,6 +54,15 @@ export function Icon({ name, size = 16, className, ...rest }: Props) {
 }
 
 const PATHS: Record<IconName, ReactElement> = {
+  // An "i" in a circle, stroke only like the rest: the dot is a zero-length
+  // line, which the round cap draws as a point.
+  info: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <line x1="12" y1="11" x2="12" y2="16.5" />
+      <line x1="12" y1="7.75" x2="12" y2="7.75" />
+    </>
+  ),
   "chevron-down": <polyline points="6 9 12 15 18 9" />,
   "chevron-left": <polyline points="15 6 9 12 15 18" />,
   "chevron-right": <polyline points="9 6 15 12 9 18" />,
