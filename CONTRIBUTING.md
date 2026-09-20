@@ -1,166 +1,53 @@
 # Contributing to elmeu-armari
 
-Thanks for considering a contribution. This document explains how to get the project running locally, what conventions the code follows, and how to submit a change that lands quickly.
+How a change gets from a branch to `main`. Setup, scripts and environment variables are in the [README](./README.md); the rules for writing the code, and how the colour engine works, are in [`AGENTS.md`](./AGENTS.md). The UI ships in Catalan, Spanish and English; **code, comments, commit messages and PR descriptions are in English.**
 
-The UI ships in Catalan, Spanish and English. Catalan is the source language. **Code, comments, commit messages and PR descriptions are in English.**
+## Branch, commit, PR
 
----
+Nothing goes straight to `main`: every change is a pull request, squash-merged.
 
-## 1. Local setup
+Branches are `feature/<slug>`, `fix/<slug>`, `chore/<slug>` or `refactor/<slug>`, with a short kebab-case slug (`fix/back-button-history`).
 
-Prerequisites: Node 24 (the LTS the image and CI use), npm, git.
+Commits use Conventional Commits: `feat(scope):`, `fix(scope):`, `chore(scope):`, `refactor(scope):`, `docs(scope):`, with `!` when it breaks something. The subject is imperative and at most 72 characters; the body says **why**, not what. The release workflow reads these prefixes to pick the version, so `feat` and `fix` matter.
 
-```bash
-git clone https://github.com/JordiiBru/elmeu-armari.git
-cd elmeu-armari
-npm install
-npx prisma migrate dev        # creates dev.db and generates the Prisma client
+Before opening a PR:
 
-# Signs the session cookie. Required — the app cannot authenticate without it.
-echo "AUTH_SECRET=\"$(openssl rand -base64 32)\"" >> .env
-
-npm run create-user -- --username you   # prints a temporary password
-npm run dev                   # http://localhost:3000
-```
-
-The app has no public sign-up: `create-user` is the only way an account exists, and the password it prints has to be replaced the first time you sign in.
-
-The dev DB (`dev.db`) is git-ignored. Deleting it and re-running `npx prisma migrate dev` gives you a clean slate.
-
-### Scripts you will use
-
-| Command | When |
-|---|---|
-| `npm run dev` | Day-to-day. |
-| `npm run typecheck` | While editing types; fast. |
-| `npm run lint` | Before commit. |
-| `npm run build` | To reproduce CI's build step. |
-| `npm run check` | Runs lint + typecheck + build. **Run before opening a PR.** |
-| `npm run test:unit` | Vitest unit tests. Runs in CI on every PR. |
-| `npm run test:e2e` | Playwright e2e tests. Local only — not run in CI. It signs in first, creating its own account in the e2e database. |
-| `npm run create-user` | Create an account, or reset its password with `--reset`. |
-
----
-
-## 2. Where things live
-
-Read [`CLAUDE.md`](./CLAUDE.md) for the full architectural rules. The short version:
-
-- Routes: `src/app/<route>/page.tsx` (Server Component by default).
-- Server Actions: `src/app/<route>/actions.ts`, unless reused across routes.
-- Domain logic: `src/lib/<domain>/service.ts`.
-- DB access: `src/lib/<domain>/repository.ts` — **the only place** `prisma` is imported.
-- UI strings: `messages/ca.json` (source of truth), `messages/es.json`, `messages/en.json`. Never inline translated strings in a component. A key missing from a locale fails `npm run typecheck`.
-
-Client Components (`"use client"`) are the exception. Add one only when you need `useState`, event handlers, refs, or browser-only APIs.
-
----
-
-## 3. Branch, commit, PR
-
-### Branch naming
-
-```
-feature/<slug>          new feature
-fix/<slug>              bug fix
-chore/<slug>            tooling, deps, docs, tests
-refactor/<slug>         no behaviour change
-```
-
-Slug is kebab-case and short: `feature/upload-progress`, `fix/back-button-history`.
-
-### Commits
-
-- Conventional-Commit style prefix: `feat(scope):`, `fix(scope):`, `chore(scope):`, `refactor(scope):`, `docs(scope):`.
-- Subject in the imperative, ≤ 72 chars.
-- Body explains **why**, not what.
-- Prefer one focused commit per PR. Squash if you accumulate WIP commits.
-
-Example:
-
-```
-feat(outfits): tighten palette matching against garment colours
-
-Previously any palette that touched a garment's primary colour would
-match. This over-matched neutrals against saturated palettes. Require
-every non-neutral colour to have a Sanzo Wada peer within the OKLCH
-tight-match threshold.
-```
-
-### Before opening a PR
-
-1. `npm run check` passes locally.
-2. If you touched the schema, `npx prisma migrate dev` created the migration and it is committed.
-3. If you added a new UI string, it lives in `messages/ca.json` **and** in `es.json` and `en.json`, not inline.
+1. `npm run check` and `npm run test:unit` pass.
+2. If the schema changed, `npx prisma migrate dev` created the migration and it is committed.
+3. A new UI string is in `messages/ca.json`, `es.json` and `en.json`, not inline (a missing key fails `npm run typecheck`).
 4. No `dev.db` or `.env` in the diff.
-5. Description explains the **why** and lists screens to test manually.
+5. The description explains why and lists what to try by hand. Use `Closes #n` when merging finishes the issue, `Refs #n` when it still has to be checked after deploy.
 
-### PR template
+## CI, releases and deploys
 
-```markdown
-## Summary
-<1–3 bullets>
+CI runs on pull requests only: lint, typecheck, unit tests and build. **Do not merge on red.** E2E (Playwright) and Lighthouse are not run in CI; run them locally when a change touches what they cover.
 
-## Test plan
-- [ ] <first thing a reviewer should try>
-- [ ] <edge case>
-```
-
-### CI
-
-The CI workflow (PRs only) runs lint + typecheck + `npm run test:unit` + build. All must be green before merge. **Do not merge on red.** Docker build/push happens separately on `release.yml` after merge to `main`; e2e (Playwright) and Lighthouse are not run in CI — run them locally.
+A merge to `main` tags a version and publishes the image, but **does not deploy it**: that is a separate pull request that bumps the image tag in the homelab repo, where merging is the deploy.
 
 ### Dependency updates
 
-Renovate (`renovate.json`, same style as the homelab repo) opens PRs at night (Europe/Madrid) and keeps a Dependency Dashboard issue. Patch and minor updates, Next.js and Prisma included, merge by themselves once CI is green; security updates run at any hour. Majors, and anything that changes the Node runtime, open a PR with a warning and wait for a human: Node moves in the Dockerfile base images, `node-version` in `ci.yml` and `@types/node` in a single PR. The Dockerfile reads the `prisma` and `dotenv` versions from `package-lock.json`, so bump them in `package.json`, never in the Dockerfile. A merge to `main` publishes an image but does not deploy it: that is still the bump PR in the homelab repo.
+Renovate (`renovate.json`, the same style as the homelab repo) opens pull requests at night (Europe/Madrid) and keeps a Dependency Dashboard issue. Patch and minor updates, Next.js and Prisma included, merge by themselves once CI is green; security updates run at any hour. Majors, and anything that changes the Node runtime, open a PR with a warning and wait for a human. Node moves in one PR: the Dockerfile base images, `node-version` in `ci.yml` and `@types/node`. The Dockerfile reads the `prisma` and `dotenv` versions from `package-lock.json`, so bump them in `package.json`, never in the Dockerfile.
 
----
+## Testing
 
-## 4. Testing
+Unit tests live in `tests/unit`, named after what they cover. Beyond them, after a UI change, try it by hand on desktop **and** at 375 px wide:
 
-Run `npm run test:unit` for the Vitest suite (colour-matching engine, etc.) and `npm run test:e2e` for the Playwright suite before a PR that touches their covered areas. Beyond that, test manually against these paths after any UI change:
+- `/login`: a wrong password, then the right one, and the return path after being bounced from a protected screen.
+- `/armari`: the grid with several filter combinations; open a piece and use **què hi combina**.
+- `/avui`: pick an outfit for today, and a day in the week.
+- `/add` and `/edit/[id]`: validation errors, the colour picker, a photo upload.
+- `/bugaderia`, `/paleta`, `/stats`.
+- `/settings`: export a JSON, import it back.
+- `/change-password`: from the menu, and the forced version a fresh account lands on.
 
-- `/login` — wrong password, then the right one; the return path after being bounced from a protected screen.
-- `/` — home nav.
-- `/armari` — grid with several filter combinations (empty / one category / one season / crossed).
-- `/armari` → tab `Combinar` — pick a piece with colours, verify a palette appears, save, and check it lands in `Desats`.
-- `/armari` → tab `Desats` — expand a group, delete an entry.
-- `/add` and `/edit/[id]` — form validation errors, colour picker, season multi-select, photo upload.
-- `/paleta` — browse, click a palette, see matching pieces.
-- `/stats` — non-empty and empty DB.
-- `/settings` — export a JSON, wipe DB, import it back.
-- `/change-password` — from the menu, and the forced version a fresh account lands on.
+## Style
 
-Do this on desktop **and** a mobile viewport (375 px wide is a good baseline).
+Strict TypeScript, no `any`; narrow `unknown` at a boundary. Colours come from the tokens in `globals.css`, never a hex in a component. Comments only when the *why* is not obvious. The visual rules are in [`DESIGN-BIBLE.md`](./DESIGN-BIBLE.md).
 
----
+## Reporting bugs and requesting features
 
-## 5. Style
+Open an issue with the steps to reproduce (bugs) or the user problem (features: start from the problem, not a solution), a screenshot and the viewport for UI issues, and `git rev-parse --short HEAD` if you can. A vulnerability is not an issue: see [`SECURITY.md`](./SECURITY.md).
 
-- **TypeScript**: strict. Avoid `any`. If a boundary needs `unknown`, narrow it before use.
-- **React**: no `useEffect` for data. Server Components + Server Actions. `useActionState` for form state.
-- **Tailwind v4**: use CSS custom properties defined in `globals.css` (`text-foreground`, `bg-background`, `text-foreground-secondary`, `border-border`, `bg-card`). Do not hard-code hex colours.
-- **Serif / italic / small-caps tracking** is the editorial tone. See existing components for patterns.
-- **Comments**: only when the *why* is non-obvious. Well-named identifiers describe the *what*.
+## Licence
 
----
-
-## 6. Reporting bugs / requesting features
-
-Open a GitHub issue with:
-
-- **Steps to reproduce** (for bugs) or **the user problem** (for features — start from a problem, not a solution).
-- Screenshots for UI issues (device / viewport helps a lot).
-- Version: `git rev-parse --short HEAD` output if you can.
-
----
-
-## 7. Security
-
-If you find a vulnerability, do **not** open a public issue. Email the maintainer directly. See the `SECURITY.md` file if one exists; otherwise message via the profile on GitHub.
-
----
-
-## 8. Licence
-
-By contributing you agree that your contribution is released under the MIT licence, the same as the rest of the project.
+By contributing you agree that your contribution is released under the MIT licence, like the rest of the project.

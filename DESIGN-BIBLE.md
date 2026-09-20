@@ -142,7 +142,7 @@ Si escribes un color en JSX o Tailwind, has hecho algo mal. Vuelve a los tokens.
 
 ### Escala tipográfica (matemática, no arbitraria)
 
-Basada en una razón única (`major-third` o `perfect-fourth` — a decidir en Fase 1). Cada token tiene tamaño, line-height, letter-spacing y peso fijos.
+Escala fija, definida en `src/app/globals.css` (`--font-size-*`: 11, 13, 16, 18, 24, 32, 48, 72 y 96 px). Cada token tiene tamaño, line-height, letter-spacing y peso fijos; los valores viven en el CSS, aquí solo las reglas.
 
 | Token | Familia | Uso |
 |---|---|---|
@@ -165,7 +165,7 @@ Prohibido:
 
 ## 4. Espaciado
 
-Escala única, progresión constante. Ejemplo: `2, 4, 8, 12, 16, 24, 32, 48, 64, 96` (a fijar en Fase 1). Nada elegido "a ojo". Ningún `gap-y-10` sin justificación en escala.
+Escala única, progresión constante: `--space-1` a `--space-9` en `src/app/globals.css` (4, 8, 12, 16, 24, 32, 48, 64, 96 px). Nada elegido "a ojo". Ningún `gap-y-10` sin justificación en escala.
 
 Reglas:
 - Layouts respiran. Los márgenes generosos son parte de la identidad.
@@ -328,7 +328,6 @@ Obligatorio. Todo movimiento tiene fallback estático coherente. Cero animación
 - Cada pieza tiene presencia — las fotografías son protagonistas.
 - Hover físico. Selección inmediata. Ordenación real (fecha, color, uso).
 - Filtros conservan el lenguaje actual pero apoyados en `SegmentedControl` cuando sean excluyentes.
-- Tabs con indicador que desliza.
 
 ### `/paleta`
 
@@ -393,115 +392,16 @@ No negociable:
 
 ## 14. Restricciones que no se rompen
 
-- Convenciones técnicas de `CLAUDE.md` y `AGENTS.md` (Next 16.2, React 19, Prisma driver adapter, RSC-first, sin `useEffect` para data).
+- Convenciones técnicas de `AGENTS.md` (stack, capas, RSC-first, sin `useEffect` para data).
 - Labels de dominio siempre en `src/lib/prendas/labels.ts`.
-- UI copy siempre en `src/lib/prendas/ui-strings.ts` — cero catalán inline en JSX.
+- UI copy siempre en `messages/{ca,es,en}.json` — cero texto inline en JSX.
 - Regex de nombres de foto (allowlist de seguridad) se mantiene.
 - Repository → service → components inviolable.
 - `npm run check` verde antes de PR.
-- PRs de un solo commit limpio.
 
 ---
 
-## 15. Fases de trabajo
-
-Cada fase entrega un PR independiente. Antes de pasar a la siguiente fase, se ejecuta la **gate de fase** (lista de preguntas binarias). Si alguna respuesta es "no", no se avanza.
-
-### Fase 1 — Design tokens
-
-Definir en `globals.css` todos los tokens semánticos de §2, en modo claro y oscuro. Escala tipográfica (§3) y espacial (§4) como custom properties.
-
-**Gate:**
-- ¿Existe un token semántico para cada uso listado en §2?
-- ¿Cero hex en JSX en toda la app? (`grep` limpio)
-- ¿Cero `text-[Npx]` y `tracking-[N]` inline?
-- ¿Existe modo oscuro y toda la app funciona en él?
-- ¿Todos los pares texto/fondo cumplen AA?
-
-### Fase 2 — Primitivas base
-
-`Stack`, `Cluster`, `Grid`, `PageContainer`, `SectionHeader`, tipografía tokenizada como componentes (`<Text variant="body">`, `<Heading level="hero">`).
-
-**Gate:**
-- ¿Puede una pantalla nueva construirse sin escribir un solo `flex flex-col gap-*` a mano?
-- ¿La tipografía de todas las pantallas existentes pasa por `<Text>` / `<Heading>`?
-
-### Fase 3 — Botones
-
-Componente `<Button>` con todas las variantes de §7. Migración de todos los botones existentes.
-
-**Gate:**
-- ¿Existe `<button>` crudo en JSX fuera de `Button.tsx`? Debe ser cero.
-- ¿Toda pantalla tiene una y solo una acción `primary`?
-- ¿Todos los estados (hover/pressed/focus/disabled/loading) implementados y visibles?
-
-### Fase 4 — Inputs
-
-Componentes de §8. Eliminación de `<select>` nativos. Refactor de `AddForm` y `EditForm`.
-
-**Gate:**
-- ¿Cero `<select>`, `<input type="text/search/file">` nativos en JSX fuera de los componentes primitivos?
-- ¿Formularios agrupados en bloques semánticos?
-- ¿Estados de error/success visibles y accesibles?
-
-### Fase 5 — Cards
-
-`GarmentCard`, `OutfitCard`, `SavedGroupCard`, `PaletteCard` — todas reescritas sobre primitivas y tokens. Estados hover/focus físicos.
-
-**Gate:**
-- ¿Todas las cards comparten sistema hover coherente?
-- ¿Las fotos aparecen con transición al cargar?
-- ¿Cero clases Tailwind duplicadas entre cards?
-
-### Fase 6 — Sheets, modales, popovers
-
-Refactor de `GarmentModal`, `OutfitBottomSheet`, `PaletteSheet` sobre un único componente `<Sheet>` / `<Modal>` con variantes. `<Toast>` nuevo. `<Popover>` para menús.
-
-**Gate:**
-- ¿`confirm()` nativo eliminado del código?
-- ¿Guardar/eliminar/importar producen toast editorial?
-- ¿Escape, click fuera, swipe-to-close funcionan uniformemente?
-
-### Fase 7 — Grid del armario y filtros
-
-Rediseño del grid `/armari`, presencia de piezas, ordenación real, indicador de tabs deslizante.
-
-**Gate:**
-- ¿Grid comunica presencia editorial (no galería)?
-- ¿Indicador de tab desliza con `spring-editorial`?
-- ¿Filtros usan `SegmentedControl` donde aplica?
-
-### Fase 8 — Home y micro-narrativa
-
-Home cuenta historia (piezas recientes, cifras vivas, atajos claros) sin perder identidad de portada.
-
-**Gate:**
-- ¿La primera visita comunica qué hace la app sin explicación?
-- ¿La segunda visita muestra estado actual del armario?
-
-### Fase 9 — Motion completa
-
-Sistema unificado de motion. Todo movimiento pasa por los tokens de duración/easing. Iconografía reemplaza glifos.
-
-**Gate:**
-- ¿Cero glifo Unicode en JSX?
-- ¿Todas las animaciones comparten las cinco duraciones canónicas?
-- ¿`prefers-reduced-motion` respetado en toda la app?
-- ¿Cero jank observable en Safari Mac y iOS Safari?
-
-### Fase 10 — Pulido final
-
-Estados vacíos, mensajes de error, skeletons editoriales, revisión de contraste completo, auditoría de accesibilidad con teclado.
-
-**Gate:**
-- ¿Toda pantalla tiene estado vacío diseñado?
-- ¿Navegación completa por teclado en todos los flujos?
-- ¿Bundle no ha crecido más del 15% respecto al inicio?
-- ¿Lighthouse Accessibility ≥ 95?
-
----
-
-## 16. Cómo decidir cuando dudes
+## 15. Cómo decidir cuando dudes
 
 Cuando dudes entre dos opciones, pregúntate en este orden:
 
