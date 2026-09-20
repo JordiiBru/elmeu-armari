@@ -76,6 +76,15 @@ const MIN_PIECES = 2;
 // misleading because the accent is not worn.
 const MIN_DISTINCT_PALETTE_COLORS = 2;
 
+// Pure black and pure white go with everything: real styling does not wait
+// for the Sanzo Wada catalogue to agree that a black shoe, or a white
+// sweater, goes with a saturated outfit, and the catalogue is nearly blind
+// to them (White is in one of its 348 palettes). A piece whose colours all
+// anchor to one of these is a wildcard in the palette intersection. This was
+// a shoe-only rule; a white sweater with black trousers matched nothing.
+const NEUTRAL_HEXES = new Set(["#000000", "#ffffff"]);
+const ALL_PALETTE_IDS: Set<number> = new Set(namedColors.flatMap((c) => c.combinations));
+
 // What a colour with no anchor inside a palette adds to that palette's
 // score. An anchored colour is always closer than the vocabulary threshold
 // (that is what makes it a candidate), so this can never be undercut: an
@@ -132,6 +141,8 @@ interface Ctx {
   snaps: Snap[];
   paletteIds: Set<number>;
   totalDistance: number;
+  /** Every colour of the piece anchors to Black or White: see `NEUTRAL_HEXES`. */
+  neutral: boolean;
 }
 
 function snapColour(hex: string, membership: number = MEMBERSHIP_THRESHOLD): Snap | null {
@@ -221,11 +232,17 @@ function buildContext(g: GarmentWithColors, membership: number = MEMBERSHIP_THRE
     }
     return union;
   });
-  const paletteIds = intersectSets(perColour);
+  // A black or white piece is a wildcard: it lives in every palette, so it
+  // never narrows the ones an outfit can be cited on. Its own colours are
+  // still anchored where the palette has them (and cost a penalty where it
+  // does not, see `paletteMatchFor`), which ranks a palette that really
+  // contains black or white above one that merely tolerates it.
+  const neutral = snaps.every((s) => NEUTRAL_HEXES.has(s.best.canonical.hex.toLowerCase()));
+  const paletteIds = neutral ? ALL_PALETTE_IDS : intersectSets(perColour);
   if (paletteIds.size === 0) return null;
 
   const totalDistance = snaps.reduce((sum, s) => sum + s.best.distance, 0);
-  return { garment: g, snaps, paletteIds, totalDistance };
+  return { garment: g, snaps, paletteIds, totalDistance, neutral };
 }
 
 function hasTop(cats: Set<string>): boolean {
@@ -240,21 +257,6 @@ function hasBottom(cats: Set<string>): boolean {
 // none isn't an incomplete outfit, it's a wrong one.
 function hasShoes(cats: Set<string>): boolean {
   return cats.has("SHOES");
-}
-
-// Pure black and pure white are the one deliberate exception to "these
-// two garments are on the same page of the book": real styling doesn't
-// wait for the Sanzo Wada catalogue to agree that a black shoe goes
-// with a saturated outfit — it just does. Without this, making shoes
-// mandatory would have meant some outfits stop being suggested at all
-// the moment their real colour has no genuine match in the wardrobe,
-// which is a worse outcome than a "wrong" match that's actually safe.
-const SAFE_NEUTRAL_SHOE_HEXES = new Set(["#000000", "#ffffff"]);
-function isSafeNeutralShoe(g: GarmentWithColors): boolean {
-  return (
-    g.category === "SHOES" &&
-    g.colors.some((c) => SAFE_NEUTRAL_SHOE_HEXES.has(c.hex.toLowerCase()))
-  );
 }
 
 /**
@@ -275,6 +277,9 @@ function paletteMatchFor(
   let totalDistance = 0;
 
   let unanchored = 0;
+  // A wildcard piece the palette has no colour for rides along: it is not
+  // worn *in* the palette, but it does not make the outfit monochrome either.
+  let ridesFree = false;
 
   // Every colour of every piece gets its own anchor inside this palette,
   // not just the first colour of each: membership already required all of
@@ -307,11 +312,12 @@ function paletteMatchFor(
         // one; it now pays a fixed price no anchored colour can undercut.
         totalDistance += UNANCHORED_PENALTY;
         unanchored++;
+        if (c.neutral) ridesFree = true;
       }
     }
   }
 
-  if (matchedIndices.size < MIN_DISTINCT_PALETTE_COLORS) return null;
+  if (matchedIndices.size + (ridesFree ? 1 : 0) < MIN_DISTINCT_PALETTE_COLORS) return null;
 
   const unmatchedColors: number[] = [];
   for (let i = 0; i < palette.colores.length; i++) {
@@ -353,20 +359,10 @@ function enumerateOutfits(
       const withCandSets = commonSets.concat(cand.paletteIds);
       const withCandIntersection = intersectSets(withCandSets);
 
-      let nextSets: Set<number>[];
-      if (withCandIntersection.size > 0) {
-        nextSets = withCandSets;
-      } else if (isSafeNeutralShoe(cand.garment)) {
-        // Real match failed, but black/white never needed one — ride
-        // along without narrowing the palette any further, rather than
-        // costing the outfit its only possible shoe.
-        nextSets = commonSets;
-      } else {
-        continue;
-      }
+      if (withCandIntersection.size === 0) continue;
 
       current.push(cand);
-      pick(i + 1, current, nextSets);
+      pick(i + 1, current, withCandSets);
       current.pop();
     }
   };
@@ -589,11 +585,10 @@ export function generateOutfitGroupsForGarment(
       const ctx = buildContext(g, membership);
       if (!ctx) continue;
       // Prune: if target + candidate share no palette, we can drop early
-      // because deeper sets can only shrink — except a safe black/white
-      // shoe, which `enumerateOutfits` lets ride along regardless of a
-      // real match, so it needs the chance to be tried at all.
+      // because deeper sets can only shrink. A black or white piece never
+      // triggers it: its set is every palette.
       const shared = intersectSets([targetCtx.paletteIds, ctx.paletteIds]);
-      if (shared.size === 0 && !isSafeNeutralShoe(g)) continue;
+      if (shared.size === 0) continue;
       candidates.push(ctx);
     }
     return collectGroups([targetCtx], () => candidates, palettes);

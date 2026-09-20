@@ -444,5 +444,74 @@ describe("engine", () => {
       expect(groups.every((g) => g.garments.some((x) => x.id === "s1"))).toBe(true);
     });
   });
+
+  describe("black and white are wildcards", () => {
+    const OFF_WHITE = "#fff0e0";
+    const BROWN = "#6b4423";
+    const PURPLE = "#7b1fa2";
+
+    it("matches an off-white or white sweater with black trousers and a coloured shoe", () => {
+      // White is in one of 348 Sanzo palettes and that one has no black: this
+      // used to match nothing unless the shoe was black too.
+      for (const sweater of [OFF_WHITE, "#ffffff", "#f4f1ea"]) {
+        const wardrobe = [
+          createTestGarment("sw", "SWEATER", [sweater]),
+          createTestGarment("p", "PANTS", [BLACK]),
+          createTestGarment("sh", "SHOES", [BROWN]),
+        ];
+        expect(generateOutfitGroups(wardrobe, palettes).groups, sweater).toHaveLength(1);
+      }
+    });
+
+    it("cites the outfit on a palette that holds the coloured pieces", () => {
+      const wardrobe = [
+        createTestGarment("sw", "SWEATER", [OFF_WHITE]),
+        createTestGarment("p", "PANTS", [BLACK]),
+        createTestGarment("sh", "SHOES", [BROWN]),
+      ];
+      const { groups } = generateOutfitGroups(wardrobe, palettes);
+      const shoeAssignments = groups[0].palettes[0].colorAssignments.filter(
+        (a) => a.garmentId === "sh",
+      );
+      expect(shoeAssignments.length).toBeGreaterThan(0);
+    });
+
+    it("does not let a neutral make two unrelated coloured pieces compatible", () => {
+      // Teal and purple share no Sanzo palette, not even at the loose
+      // fallback threshold; black trousers must not bridge them.
+      const wardrobe = [
+        createTestGarment("s", "SHIRT", [PURPLE]),
+        createTestGarment("p", "PANTS", [BLACK]),
+        createTestGarment("sh", "SHOES", [TEAL]),
+      ];
+      expect(generateOutfitGroups(wardrobe, palettes).groups).toHaveLength(0);
+    });
+
+    it("lets an all-neutral outfit be a group, cited on a palette that has black", () => {
+      const wardrobe = [
+        createTestGarment("s", "SHIRT", ["#ffffff"]),
+        createTestGarment("p", "PANTS", [BLACK]),
+        createTestGarment("sh", "SHOES", [BLACK]),
+      ];
+      const { groups } = generateOutfitGroups(wardrobe, palettes);
+      expect(groups).toHaveLength(1);
+      expect(groups[0].palettes[0].palette.colores).toContain("#000000");
+    });
+
+    it("ranks a palette that really contains the neutral above one that only tolerates it", () => {
+      // Brown with black trousers: some palettes have both brown and black
+      // (black anchored), others only brown (black rides free, penalised).
+      const wardrobe = [
+        createTestGarment("s", "SHIRT", [BROWN]),
+        createTestGarment("p", "PANTS", [BLACK]),
+        createTestGarment("sh", "SHOES", [BROWN]),
+      ];
+      const { groups } = generateOutfitGroups(wardrobe, palettes);
+      const matches = groups[0].palettes;
+      expect(matches.length).toBeGreaterThan(0);
+      const scores = matches.map((m) => m.unanchored);
+      expect(scores).toEqual([...scores].sort((a, b) => a - b));
+    });
+  });
 });
 
