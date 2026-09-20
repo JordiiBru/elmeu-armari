@@ -3,24 +3,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * Estat compartit per bottom sheets i dialegs modals:
- * - Entrada animada (shown després de raf per triggerar transicions).
- * - Body scroll bloquejat mentre esta obert.
- * - Tecla Escape tanca.
- * - Sortida animada (closing) que crida onClose despres de exitMs.
+ * State shared by bottom sheets and modal dialogs:
+ * - Animated entrance (shown after a rAF, to trigger the transitions).
+ * - Body scroll locked while open.
+ * - Escape closes.
+ * - Animated exit (closing) that calls onClose after exitMs.
  *
- * Retorna:
- * - open: boolean que controla les transicions (true quan visible).
- * - close: funcio que engega el tancament animat.
+ * Returns:
+ * - open: boolean that drives the transitions (true while visible).
+ * - close: function that starts the animated close.
  *
- * L'exitMs ha de coincidir amb la durada mes llarga de les transicions
- * del panell perque onClose s'invoqui just quan l'animacio acaba.
+ * exitMs must match the longest of the panel's transitions so onClose runs
+ * just as the animation ends.
  *
- * `prefers-reduced-motion` ja col·lapsa les transicions CSS a ~0 (regla
- * global a globals.css), pero aquest timeout és independent del CSS —
- * sense aquest guard, onClose (que ara sovint dispara una navegació,
- * `router.back()`) trigaria els mateixos 420ms encara que l'usuari no
- * vegi cap animació.
+ * `prefers-reduced-motion` already collapses the CSS transitions to ~0 (a
+ * global rule in globals.css), but this timeout is independent of the CSS:
+ * without that guard, onClose (which now often triggers a navigation,
+ * `router.back()`) would take the same 420ms even when the user sees no
+ * animation.
  *
  * `skipEnter` starts the panel already open instead of sliding it up
  * from the bottom on the next frame. For a sheet replacing a sibling

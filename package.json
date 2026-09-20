@@ -10,6 +10,7 @@
     "rebuild-thumbs": "node --env-file-if-exists=.env scripts/rebuild-thumbs.mjs",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "knip": "knip",
     "check": "npm run lint && npm run typecheck && npm run build",
     "test:unit": "vitest run",
     "test:e2e": "playwright test"
@@ -38,6 +39,7 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9",
     "eslint-config-next": "^16.3.5",
+    "knip": "^6.37.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"

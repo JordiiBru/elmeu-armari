@@ -3,6 +3,8 @@
 
 -
 
+<!-- `Closes #n` when merging finishes the issue, `Refs #n` when it still has to be checked after deploy. -->
+
 ## Test plan
 <!-- What should a reviewer try? Include edge cases. -->
 

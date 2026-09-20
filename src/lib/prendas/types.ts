@@ -4,7 +4,7 @@ export type { Category, Pattern, Texture, Season };
 
 export const CATEGORIES: Category[] = ["SWEATER", "SHIRT", "PANTS", "SHOES", "ACCESSORI"];
 export const TEXTURES: Texture[] = ["KNIT", "DENIM", "LINEN", "COTTON", "POLYESTER", "LEATHER", "SYNTHETIC"];
-export const PATTERNS: Pattern[] = ["PLAIN", "STRIPES", "CHECKS", "FLORAL", "PRINTED", "GEOMETRIC"];
+const PATTERNS: Pattern[] = ["PLAIN", "STRIPES", "CHECKS", "FLORAL", "PRINTED", "GEOMETRIC"];
 export const SEASONS: Season[] = ["SPRING", "SUMMER", "AUTUMN", "WINTER", "ALL_YEAR"];
 
 export const SUBTYPES_BY_CATEGORY: Record<Category, string[]> = {
@@ -81,7 +81,6 @@ export const EXTRA_CATEGORIES = new Set<Category>(["ACCESSORI"]);
 
 // The complement: what a saved outfit is made of. Used by the outfit
 // builder and by the server-side validation of a worn day.
-export const OUTFIT_CATEGORIES = CATEGORIES.filter((c) => !EXTRA_CATEGORIES.has(c));
 
 // Categories that can be dirty at all. Shoes and accessories are
 // always available: they never block an outfit and never appear in the
@@ -97,10 +96,6 @@ export const AUTO_SOIL_CATEGORIES = new Set<Category>(["SWEATER", "SHIRT"]);
 
 export const ALL_FITS: string[] = [
   ...new Set(Object.values(FITS_BY_CATEGORY).flat()),
-];
-
-export const ALL_SUBTYPES: string[] = [
-  ...new Set(Object.values(SUBTYPES_BY_CATEGORY).flat()),
 ];
 
 export interface GarmentInput {

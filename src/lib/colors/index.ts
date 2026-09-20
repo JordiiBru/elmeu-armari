@@ -3,17 +3,17 @@ import rawCombinations from "./sanzo-wada.json";
 import type { SanzoPalette } from "@/lib/outfits/types";
 
 /**
- * Font unica de veritat per als colors de Sanzo Wada.
+ * Single source of truth for the Sanzo Wada colours.
  *
- * Dues fonts:
- * - sanzo-colors.json (nou): 157 colors individuals amb nom historic,
- *   cmyk/rgb/hex i llista de combinacions on apareix.
- * - sanzo-wada.json (previ): 348 combinacions (paletes) de 2-6 colors
- *   per hex. Usat pel motor de matching (engine.ts).
+ * Two sources:
+ * - sanzo-colors.json: 157 individual colours with their historic name,
+ *   cmyk/rgb/hex and the list of combinations they appear in.
+ * - sanzo-wada.json: 348 combinations (palettes) of 2-6 colours by hex,
+ *   used by the matching engine (engine.ts).
  *
- * Aquest modul enriqueix la primera amb la segona i exposa utilitats.
- * No trenca l'estructura SanzoPalette existent — nomes hi afegeix noms
- * historics via una funcio de lookup.
+ * This module enriches the second with the first and exposes lookups. It
+ * leaves the SanzoPalette structure alone and only adds the historic names
+ * through a lookup function.
  */
 
 export interface NamedColor {
@@ -55,15 +55,15 @@ const HEX_TO_NAME = new Map<string, string>(
   namedColors.map((c) => [c.hex.toLowerCase(), c.name]),
 );
 
-/** Retorna el nom historic d'un hex de Sanzo Wada, si es coneix. */
+/** The historic name of a Sanzo Wada hex, if it has one. */
 export function nameOf(hex: string): string | null {
   return HEX_TO_NAME.get(hex.toLowerCase()) ?? null;
 }
 
-/** Combinacions Sanzo Wada, mateixa forma que sanzo-wada.json. */
+/** The Sanzo Wada combinations, same shape as sanzo-wada.json. */
 export const palettes = rawCombinations as SanzoPalette[];
 
-/** Per una combinacio, retorna els seus colors enriquits amb nom. */
+/** The colours of a combination, each with its name. */
 export function paletteColors(
   palette: SanzoPalette,
 ): { hex: string; name: string | null }[] {

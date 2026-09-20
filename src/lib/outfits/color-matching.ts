@@ -20,15 +20,13 @@ export const OKLCH_DISTANCE_THRESHOLD = 14;
 export const MEMBERSHIP_THRESHOLD = 9;
 
 /**
- * Threshold estricte per paletes "addicionals" mostrades sota la principal.
- * Cada assignacio peça-color ha de complir aquest per garantir que la paleta
- * conte visualment els colors de l'outfit, no aproximacions llunyanes.
+ * Strict threshold for the "additional" palettes shown under the main one.
+ * Every piece-to-colour assignment must meet it, so the palette visibly
+ * contains the outfit's colours and not distant approximations.
  */
 export const OKLCH_TIGHT_MATCH_THRESHOLD = 9;
 
-/**
- * Nombre maxim de paletes addicionals mostrades per outfit.
- */
+/** Most additional palettes shown per outfit. */
 export const MAX_EXTRA_PALETTES = 4;
 
 /**
@@ -47,13 +45,13 @@ export const GREY_CHROMA = 0.03;
  * the hue term collapses near neutrals; this pushes them apart, and
  * does it gradually instead of at a chroma line.
  */
-export const NEUTRAL_MISMATCH_PENALTY = 3;
+const NEUTRAL_MISMATCH_PENALTY = 3;
 
 /**
  * The same penalty towards a grey-ramp rung. Milder, because the lightness
  * slack already keeps a hued piece from riding a rung far.
  */
-export const RUNG_MISMATCH_PENALTY = 2;
+const RUNG_MISMATCH_PENALTY = 2;
 
 /**
  * Hue differences between two dull colours are tiny in OKLCH (the hue
@@ -62,15 +60,15 @@ export const RUNG_MISMATCH_PENALTY = 2;
  * floor, and the term is scaled up a little (`HUE_WEIGHT`) because a
  * wrong hue reads louder than a lightness or chroma error of equal size.
  */
-export const HUE_CHROMA_FLOOR = 0.06;
-export const HUE_WEIGHT = 1.5;
+const HUE_CHROMA_FLOOR = 0.06;
+const HUE_WEIGHT = 1.5;
 
 /**
  * The hue of a nearly grey colour is noise (one step in a channel swings
  * it by tens of degrees), so the hue term fades in with the chroma of
  * the *duller* colour and is fully on from here.
  */
-export const HUE_CONFIDENCE_CHROMA = 0.02;
+const HUE_CONFIDENCE_CHROMA = 0.02;
 
 /**
  * Share of a grey-ramp rung's lightness slack that survives however
@@ -78,7 +76,7 @@ export const HUE_CONFIDENCE_CHROMA = 0.02;
  * too far from Black for the slack to reach, and the garment drops out
  * of the vocabulary altogether.
  */
-export const RUNG_SLACK_FLOOR = 0.3;
+const RUNG_SLACK_FLOOR = 0.3;
 
 function clamp01(x: number): number {
   return Math.min(1, Math.max(0, x));

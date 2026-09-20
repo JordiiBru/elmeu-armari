@@ -57,10 +57,6 @@ export function isoToDay(iso: string): Date {
   return new Date(Date.UTC(y, m - 1, d));
 }
 
-export function isSameDay(a: Date, b: Date): boolean {
-  return dayKey(a).getTime() === dayKey(b).getTime();
-}
-
 /** Whole days between two calendar days, ignoring clock time entirely. */
 export function daysBetween(from: Date, to: Date): number {
   return Math.round((dayKey(to).getTime() - dayKey(from).getTime()) / 86_400_000);

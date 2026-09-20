@@ -26,7 +26,6 @@ vi.mock("@/lib/auth/repository", () => ({
   findUserById: vi.fn(
     async (id: string) => [...users.values()].find((u) => u.id === id) ?? null,
   ),
-  countUsers: vi.fn(async () => users.size),
   touchLastLogin,
   setPassword: setPasswordRow,
   recordAttempt: vi.fn(async () => undefined),

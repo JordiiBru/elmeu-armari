@@ -1,0 +1,8 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
+  // The generated Prisma client (src/generated, gitignored) imports
+  // @prisma/client/runtime, which knip cannot see; the dependency is real.
+  "ignoreDependencies": ["@prisma/client"],
+  // Loaded by Playwright through `testMatch` in playwright.config.ts, not by an import.
+  "ignore": ["tests/e2e/auth.setup.ts"]
+}

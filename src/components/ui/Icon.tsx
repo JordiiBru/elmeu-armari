@@ -1,6 +1,6 @@
 import type { SVGProps, ReactElement } from "react";
 
-export type IconName =
+type IconName =
   | "chevron-down"
   | "chevron-left"
   | "chevron-right"

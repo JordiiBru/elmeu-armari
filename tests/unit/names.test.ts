@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { colourName } from "./names";
+import { colourName } from "@/lib/colors/names";
 import { anchorFor } from "@/lib/outfits/engine";
 import { ANCHOR_CASES } from "@/lib/outfits/anchor-reference";
 import { namedColors } from "@/lib/colors";

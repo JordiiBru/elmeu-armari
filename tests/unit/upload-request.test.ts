@@ -4,8 +4,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import sharp from "sharp";
 import { NextRequest } from "next/server";
-import { readImageUpload } from "./upload-request";
-import { saveUploadImage } from "./uploads";
+import { readImageUpload } from "@/lib/upload-request";
+import { saveUploadImage } from "@/lib/uploads";
 
 function uploadRequest(file: File, headers: Record<string, string> = {}): NextRequest {
   const body = new FormData();

@@ -8,10 +8,6 @@ export async function findUserById(id: string) {
   return prisma.user.findUnique({ where: { id } });
 }
 
-export async function countUsers() {
-  return prisma.user.count();
-}
-
 export async function touchLastLogin(id: string) {
   return prisma.user.update({ where: { id }, data: { lastLoginAt: new Date() } });
 }

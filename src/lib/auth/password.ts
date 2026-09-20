@@ -1,11 +1,5 @@
 import { hash, verify } from "@node-rs/argon2";
 import type { Algorithm } from "@node-rs/argon2";
-export {
-  MAX_PASSWORD_LENGTH,
-  MIN_PASSWORD_LENGTH,
-  passwordPolicyError,
-  type PasswordPolicyError,
-} from "./policy";
 
 /** `Algorithm` is an ambient `const enum`, which `isolatedModules` will
  * not let us read at runtime. Two is `Algorithm.Argon2id`. */

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { anchorFor } from "./engine";
+import { anchorFor } from "@/lib/outfits/engine";
 import { namedColors } from "@/lib/colors";
-import { ANCHOR_CASES, OUTSIDE, type AnchorCase } from "./anchor-reference";
+import { ANCHOR_CASES, OUTSIDE, type AnchorCase } from "@/lib/outfits/anchor-reference";
 
 function anchorName(hex: string): string {
   return anchorFor(hex)?.canonical.name ?? OUTSIDE;
