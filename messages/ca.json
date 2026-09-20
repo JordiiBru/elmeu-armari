@@ -146,8 +146,10 @@
     "saveChanges": "guardar canvis",
     "addColor": "+ afegir color",
     "noColorYet": "encara no hi ha cap color",
-    "colorsFromPhoto": "colors suggerits a partir de la foto: toca un color per canviar-lo",
-    "removeColor": "eliminar"
+    "colorsFromPhoto": "color suggerit a partir de la foto: toca'l per canviar-lo",
+    "removeColor": "eliminar",
+    "alsoMaybe": "potser també:",
+    "addOffered": "Afegir {name}"
   },
   "errors": {
     "requiredFields": "Omple tots els camps marcats amb *",
