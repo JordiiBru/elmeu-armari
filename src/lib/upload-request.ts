@@ -26,7 +26,13 @@ export async function readImageUpload(
     return { response: reject(`File exceeds ${getUploadMaxMb()} MB limit`, 413) };
   }
 
-  const file = (await request.formData()).get("file");
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return { response: reject("The upload could not be read", 400) };
+  }
+  const file = form.get("file");
   if (!(file instanceof File)) return { response: reject("No file provided", 400) };
   if (!ALLOWED_TYPES.has(file.type)) {
     return { response: reject("Only JPEG, PNG and WebP are accepted", 415) };

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth/api";
+import { requireSameOrigin } from "@/lib/auth/same-origin";
 import { addGarment, findAllGarments, deleteGarment } from "@/lib/prendas/service";
 import {
   CATEGORIES,
@@ -96,6 +97,9 @@ const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   // A session and nothing else: `mode=replace` deletes the whole wardrobe.
+  const crossOrigin = requireSameOrigin(req);
+  if (crossOrigin) return crossOrigin;
+
   const denied = await requireSession();
   if (denied) return denied;
 

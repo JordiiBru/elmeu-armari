@@ -1,5 +1,5 @@
 import { describe, it, expect, afterAll } from "vitest";
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import sharp from "sharp";
@@ -57,6 +57,15 @@ describe("saveUploadImage rejects what is not a usable image", () => {
 
   it("throws for bytes that only claim to be an image", async () => {
     await expect(saveUploadImage(Buffer.from("not an image at all"), "fake")).rejects.toThrow();
+  });
+
+  it("writes nothing when the image is truncated", async () => {
+    const whole = await sharp({ create: { width: 400, height: 400, channels: 3, background: "#456" } })
+      .jpeg()
+      .toBuffer();
+    await expect(saveUploadImage(whole.subarray(0, 200), "cut")).rejects.toThrow();
+    expect(existsSync(path.join(dir, "cut.webp"))).toBe(false);
+    expect(existsSync(path.join(dir, "cut-thumb.webp"))).toBe(false);
   });
 
   it("throws for a canvas above the pixel limit (decompression bomb)", async () => {

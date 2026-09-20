@@ -52,17 +52,14 @@ export async function saveUploadImage(buffer: Buffer, id: string): Promise<strin
   const filename = `${id}.webp`;
   const dir = getUploadDir();
   const full = sharp(buffer, { limitInputPixels: MAX_INPUT_PIXELS }).rotate();
+  const encode = (edge: number) =>
+    full.clone().resize(edge, edge, { fit: "inside", withoutEnlargement: true }).webp({ quality: 80 }).toBuffer();
+  // Encode both before writing either: a truncated file that fails halfway
+  // must not leave a half-written photo or a thumbnail out of step with it.
+  const [photo, thumb] = await Promise.all([encode(800), encode(THUMB_PX)]);
   await Promise.all([
-    full
-      .clone()
-      .resize(800, 800, { fit: "inside", withoutEnlargement: true })
-      .webp({ quality: 80 })
-      .toFile(path.join(dir, filename)),
-    full
-      .clone()
-      .resize(THUMB_PX, THUMB_PX, { fit: "inside", withoutEnlargement: true })
-      .webp({ quality: 80 })
-      .toFile(path.join(dir, thumbName(id))),
+    fs.writeFile(path.join(dir, filename), photo),
+    fs.writeFile(path.join(dir, thumbName(id)), thumb),
   ]);
   return filename;
 }

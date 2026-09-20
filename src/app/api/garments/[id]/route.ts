@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth/api";
+import { requireSameOrigin } from "@/lib/auth/same-origin";
 import { deleteGarment } from "@/lib/prendas/service";
 import { deleteUploadImage } from "@/lib/uploads";
 
@@ -17,9 +18,12 @@ import { deleteUploadImage } from "@/lib/uploads";
  * caller decides when and where to navigate after the fetch resolves.
  */
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const crossOrigin = requireSameOrigin(request);
+  if (crossOrigin) return crossOrigin;
+
   const denied = await requireSession();
   if (denied) return denied;
 
