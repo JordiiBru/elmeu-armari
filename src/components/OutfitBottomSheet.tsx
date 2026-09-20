@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette, OutfitGroup } from "@/lib/outfits/types";
 import { generateOutfitGroupsForGarment } from "@/lib/outfits/engine";
-import { optionLabel } from "@/lib/prendas/labels";
+import { cutParts } from "@/lib/prendas/labels";
 import { saveOutfitAction } from "@/app/outfits/actions";
 import { outfitKey } from "@/lib/outfits/key";
 import { OutfitGroupCard } from "./OutfitCard";
@@ -205,7 +205,7 @@ export function OutfitBottomSheet({
           </h2>
           <Text variant="small" italic tone="secondary" className="font-serif">
             {[
-              garment.fit ? optionLabel(tLabel, "fit", garment.fit) : null,
+              ...cutParts(tLabel, garment),
               garment.size ? tModal("size", { size: garment.size }) : null,
               garment.notes,
             ]

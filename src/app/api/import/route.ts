@@ -13,9 +13,10 @@ import {
   PATTERNS_BY_CATEGORY,
   SIZES_BY_CATEGORY,
   CATEGORIES_WITH_OPTIONAL_COLOR,
+  canBeCropped,
 } from "@/lib/prendas/types";
 import { isHex } from "@/lib/prendas/validation";
-import { setAsideRemovedCategories } from "@/lib/prendas/import";
+import { setAsideRemovedCategories, upgradeLegacyCropped } from "@/lib/prendas/import";
 import type { Category, Texture, Pattern, Season } from "@/lib/prendas/types";
 
 interface GarmentImport extends Record<string, unknown> {
@@ -27,6 +28,7 @@ interface GarmentImport extends Record<string, unknown> {
   fit: string | null;
   subtype?: string | null;
   length?: string | null;
+  cropped?: boolean;
   notes?: string | null;
   colors: string[];
 }
@@ -83,6 +85,11 @@ function validate(
     const subtype = gr.subtype as string | null | undefined;
     if (validSubtypes.length > 0 && subtype && !validSubtypes.includes(subtype))
       return { ok: false, error: `Peça ${i}: subtype invàlid per categoria ${category}` };
+    const cropped = gr.cropped as boolean | undefined;
+    if (cropped !== undefined && typeof cropped !== "boolean")
+      return { ok: false, error: `Peça ${i}: cropped invàlid` };
+    if (cropped && !canBeCropped(category))
+      return { ok: false, error: `Peça ${i}: cropped invàlid per categoria ${category}` };
     const validLengths = LENGTHS_BY_CATEGORY[category];
     const length = gr.length as string | null | undefined;
     if (length && (validLengths.length === 0 || !validLengths.includes(length)))
@@ -117,7 +124,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "JSON invàlid" }, { status: 400 });
   }
 
-  const { body: current, skipped, originalIndexes } = setAsideRemovedCategories(body);
+  const { body: current, skipped, originalIndexes } = setAsideRemovedCategories(
+    upgradeLegacyCropped(body),
+  );
   const result = validate(current, originalIndexes);
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 422 });
 
@@ -152,6 +161,7 @@ export async function POST(req: NextRequest) {
       subtype: g.subtype ?? null,
       length: g.length ?? null,
       fit: g.fit,
+      cropped: g.cropped ?? false,
       notes: g.notes ?? undefined,
       // Dedupe like validateGarmentForm does — the Color [garmentId, hex]
       // unique constraint would abort the import on a duplicate otherwise.

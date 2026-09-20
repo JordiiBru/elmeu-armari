@@ -19,7 +19,7 @@ import { filterGarments } from "@/lib/prendas/filtering";
 import { isDirty } from "@/lib/bugaderia/laundry";
 import { outfitKey } from "@/lib/outfits/key";
 import { saveOutfitAction } from "@/app/outfits/actions";
-import { optionLabel } from "@/lib/prendas/labels";
+import { cutParts } from "@/lib/prendas/labels";
 import { pieceTint } from "./OutfitTile";
 import { OutfitGroupCard } from "./OutfitCard";
 import { PieceThumb } from "./PieceThumb";
@@ -192,7 +192,7 @@ export function DiscoverPicker({
           <Text variant="caption">{t("eyebrow")}</Text>
           <h2 className="type-title leading-tight">{tLabel(`category.${garment.category}`)}</h2>
           <Text variant="small" italic tone="secondary" className="font-serif">
-            {[garment.fit ? optionLabel(tLabel, "fit", garment.fit) : null, pieceTint(garment)]
+            {[...cutParts(tLabel, garment), pieceTint(garment)]
               .filter(Boolean)
               .join(" · ")}
           </Text>

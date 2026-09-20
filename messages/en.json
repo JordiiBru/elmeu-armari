@@ -78,7 +78,8 @@
       "SHIRT": "Shirt",
       "PANTS": "Trousers",
       "SHOES": "Shoes",
-      "ACCESSORI": "Accessory"
+      "ACCESSORI": "Accessory",
+      "OUTERWEAR": "Outerwear"
     },
     "texture": {
       "KNIT": "Knit",
@@ -160,7 +161,16 @@
       "EARRINGS": "Earrings",
       "CAP": "Cap",
       "TIE": "Tie",
-      "GLOVES": "Gloves"
+      "GLOVES": "Gloves",
+      "JACKET": "Jacket",
+      "BLAZER": "Blazer",
+      "BOMBER": "Bomber",
+      "DENIM_JACKET": "Denim jacket",
+      "COAT": "Coat",
+      "TRENCH": "Trench",
+      "PARKA": "Parka",
+      "PUFFER": "Puffer",
+      "WINDBREAKER": "Windbreaker"
     },
     "length": {
       "SHORT": "Short",
@@ -174,7 +184,8 @@
       "AUTUMN": "Autumn",
       "WINTER": "Winter",
       "ALL_YEAR": "All year"
-    }
+    },
+    "cropped": "Cropped"
   },
   "common": {
     "back": "Back",
@@ -209,7 +220,8 @@
     "alsoMaybe": "maybe also:",
     "addOffered": "Add {name}",
     "sleeve": "Sleeve",
-    "unspecified": "not specified"
+    "unspecified": "not specified",
+    "cropped": "Cropped"
   },
   "errors": {
     "requiredFields": "Fill in every field marked with *",
@@ -370,7 +382,7 @@
     "piecesJoin": " and ",
     "accessories": "accessories",
     "suggestedAccessories": "match this outfit",
-    "noAccessories": "no accessories saved.",
+    "noAccessories": "no accessory or outerwear saved.",
     "goToAdd": "add a garment",
     "wearToday": "I'll wear it",
     "wearOnDay": "Save for {day}",
@@ -410,7 +422,8 @@
       "never": "never worn",
       "today": "worn today",
       "ago": "{days, plural, one {worn # day ago} other {worn # days ago}}"
-    }
+    },
+    "outerwear": "outerwear"
   },
   "dayPhoto": {
     "add": "photo",
@@ -546,10 +559,10 @@
       "rules": {
         "title": "the rules you cannot see",
         "r1": "Wearing an outfit does not make it dirty: that only happens once the day has passed.",
-        "r2": "Only shirts and sweaters get dirty on their own. You send trousers to the basket yourself; shoes and accessories never go to the wash.",
+        "r2": "Only shirts and sweaters get dirty on their own. You send trousers to the basket yourself; shoes, outerwear and accessories never go to the wash.",
         "r3": "Every outfit has shoes: without shoes it is not suggested.",
         "r4": "Black and white always match, on any piece and not only shoes.",
-        "r5": "Accessories are picked when you wear the outfit; they are not part of the saved outfit."
+        "r5": "Outerwear and accessories are picked when you wear the outfit; they are not part of the saved outfit."
       }
     },
     "hints": {

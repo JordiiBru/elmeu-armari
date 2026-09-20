@@ -42,6 +42,7 @@ function createTestGarment(
     subtype: null,
     size: "M",
     length,
+    cropped: false,
     notes: null,
     image: null,
     dirtySince: null,

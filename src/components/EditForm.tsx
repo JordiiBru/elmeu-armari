@@ -17,12 +17,14 @@ import {
   TEXTURES_BY_CATEGORY,
   PATTERNS_BY_CATEGORY,
   lengthRequired,
+  canBeCropped,
   CATEGORIES_WITH_OPTIONAL_COLOR,
 } from "@/lib/prendas/types";
 import type { GarmentWithColors, Season, Category, Texture, Pattern } from "@/lib/prendas/types";
 import { optionalUnless, withUnspecified } from "@/lib/prendas/options";
 import { optionLabel } from "@/lib/prendas/labels";
 import {
+  Checkbox,
   Button,
   TextButton,
   Field,
@@ -234,6 +236,10 @@ export function EditForm({ garment, defaultSeasons, defaultHexColors }: Props) {
             options={withUnspecified(t("unspecified"), fits.map((f) => ({ value: f, label: optionLabel(tLabel, "fit", f) })))}
           />
         </Field>
+      )}
+
+      {category && canBeCropped(category) && (
+        <Checkbox name="cropped" label={t("cropped")} defaultChecked={garment.cropped} />
       )}
 
       <Field label={t("notes")} htmlFor="notes">

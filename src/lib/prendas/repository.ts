@@ -43,6 +43,7 @@ export async function createGarment(userId: string, data: GarmentInput) {
       subtype: data.subtype,
       length: data.length,
       fit: data.fit,
+      cropped: data.cropped,
       notes: data.notes ?? null,
       colors: {
         create: data.hexColors.map((hex) => ({ hex })),
@@ -71,6 +72,7 @@ export async function updateGarment(userId: string, id: string, data: GarmentInp
         subtype: data.subtype,
         length: data.length,
         fit: data.fit,
+        cropped: data.cropped,
         notes: data.notes ?? null,
         colors: {
           create: data.hexColors.map((hex) => ({ hex })),

@@ -10,6 +10,7 @@ import {
   PATTERNS_BY_CATEGORY,
   CATEGORIES_WITH_OPTIONAL_COLOR,
   lengthRequired,
+  canBeCropped,
 } from "./types";
 
 /**
@@ -64,6 +65,7 @@ export function validateGarmentForm(formData: FormData): ValidationResult {
   const fit = (formData.get("fit") as string) || null;
   const subtype = (formData.get("subtype") as string) || null;
   const length = (formData.get("length") as string) || null;
+  const cropped = formData.get("cropped") === "on";
   const size = (formData.get("size") as string)?.trim() || null;
   const notes = (formData.get("notes") as string) || undefined;
   const seasons = formData.getAll("season") as Season[];
@@ -95,6 +97,11 @@ export function validateGarmentForm(formData: FormData): ValidationResult {
   });
   if (!lengthResult.ok) return lengthResult;
 
+  // A flag that does not apply to the category must not be smuggled in.
+  if (cropped && !canBeCropped(category)) {
+    return { ok: false, error: "requiredFields", field: "cropped" };
+  }
+
   if (seasons.length === 0) return { ok: false, error: "minOneSeason", field: "seasons" };
   if (!seasons.every((s) => SEASONS.includes(s))) return { ok: false, error: "minOneSeason", field: "seasons" };
 
@@ -113,6 +120,7 @@ export function validateGarmentForm(formData: FormData): ValidationResult {
       texture: textureResult.value,
       pattern: patternResult.value,
       fit: fitResult.value,
+      cropped,
       subtype: subtypeResult.value,
       length: lengthResult.value,
       size: sizeResult.value,

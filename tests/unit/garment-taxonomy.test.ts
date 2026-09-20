@@ -9,6 +9,8 @@ import {
   TEXTURES,
   CATEGORIES,
   lengthRequired,
+  canBeCropped,
+  EXTRA_CATEGORIES,
 } from "@/lib/prendas/types";
 import { validateGarmentForm } from "@/lib/prendas/validation";
 
@@ -72,6 +74,42 @@ describe("descriptive fields are optional", () => {
   });
 });
 
+describe("outerwear and cropped", () => {
+  const jacket = { category: "OUTERWEAR", subtype: "JACKET", size: "M", season: ["AUTUMN"], color: ["#112233"] };
+
+  it("accepts a jacket, which is picked on the day and never joins the colour engine", () => {
+    expect(validateGarmentForm(form(jacket)).ok).toBe(true);
+    expect(EXTRA_CATEGORIES.has("OUTERWEAR")).toBe(true);
+    expect(FITS_BY_CATEGORY.OUTERWEAR).not.toContain("CROPPED");
+  });
+
+  it("still needs a colour: unlike an accessory, a coat is worn in the look", () => {
+    const noColour: Record<string, string | string[]> = { ...jacket };
+    delete noColour.color;
+    expect(validateGarmentForm(form(noColour)).ok).toBe(false);
+  });
+
+  it("keeps cropped apart from the fit, so a piece can be both", () => {
+    const result = validateGarmentForm(form({ ...tee, fit: "OVERSIZED", cropped: "on" }));
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.data).toMatchObject({ fit: "OVERSIZED", cropped: true });
+    const plain = validateGarmentForm(form(tee));
+    if (plain.ok) expect(plain.data.cropped).toBe(false);
+  });
+
+  it("no longer offers CROPPED as a fit", () => {
+    for (const fits of Object.values(FITS_BY_CATEGORY)) expect(fits).not.toContain("CROPPED");
+    expect(validateGarmentForm(form({ ...tee, fit: "CROPPED" })).ok).toBe(false);
+  });
+
+  it("only lets tops and outerwear be cropped", () => {
+    expect(["OUTERWEAR", "SWEATER", "SHIRT"].every((c) => canBeCropped(c as never))).toBe(true);
+    expect(["PANTS", "SHOES", "ACCESSORI"].some((c) => canBeCropped(c as never))).toBe(false);
+    const trousers = { category: "PANTS", subtype: "CHINO", size: "32", length: "LONG", season: ["ALL_YEAR"], color: ["#112233"] };
+    expect(validateGarmentForm(form({ ...trousers, cropped: "on" })).ok).toBe(false);
+  });
+});
+
 describe("every option has a label in all three languages", () => {
   const messages = Object.fromEntries(
     ["ca", "es", "en"].map((locale) => [
@@ -84,12 +122,17 @@ describe("every option has a label in all three languages", () => {
   // forgotten translation would ship as "FLIP_FLOP" on screen with nothing
   // to fail. This is the thing that fails.
   const expected: Record<string, string[]> = {
+    category: CATEGORIES,
     texture: TEXTURES,
     pattern: [...new Set(Object.values(PATTERNS_BY_CATEGORY).flat())],
     fit: [...new Set(Object.values(FITS_BY_CATEGORY).flat())],
     subtype: CATEGORIES.flatMap((c) => SUBTYPES_BY_CATEGORY[c]),
     length: [...new Set(Object.values(LENGTHS_BY_CATEGORY).flat())],
   };
+
+  it("labels.cropped", () => {
+    for (const locale of Object.keys(messages)) expect(messages[locale].cropped, locale).toBeTruthy();
+  });
 
   for (const [group, keys] of Object.entries(expected)) {
     it(`labels.${group}`, () => {
