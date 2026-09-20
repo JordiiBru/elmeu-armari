@@ -1,3 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <text y="52" font-size="56">👕</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#f2e9c8"/>
+  <rect x="103" y="77" width="306" height="332" fill="#2e302b"/>
+  <rect x="128" y="102" width="118" height="282" fill="#f3ebc7"/>
+  <rect x="268" y="102" width="118" height="282" fill="#f3ebc7"/>
+  <circle cx="219" cy="249" r="11" fill="#30312c"/>
+  <circle cx="293" cy="249" r="11" fill="#30312c"/>
+  <rect x="103" y="409" width="102" height="25" fill="#853e28"/>
+  <rect x="205" y="409" width="102" height="25" fill="#586039"/>
+  <rect x="307" y="409" width="102" height="25" fill="#9f7c2b"/>
 </svg>
