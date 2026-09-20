@@ -57,7 +57,9 @@ beforeEach(async () => {
 describe("verifyCredentials", () => {
   it("accepts the right password and reports the temporary flag", async () => {
     const user = await verifyCredentials("jordi", PASSWORD);
-    expect(user).toEqual({ id: "user-1", username: "jordi", mustChangePw: true });
+    expect(user).toMatchObject({ id: "user-1", username: "jordi", mustChangePw: true });
+    // The session is stamped with the fingerprint of the password just checked.
+    expect(user?.pwv).toMatch(/^[0-9a-f]{16}$/);
     expect(touchLastLogin).toHaveBeenCalledWith("user-1");
   });
 

@@ -32,7 +32,7 @@ async function requestIp(): Promise<string> {
  * endpoint anyone can POST to directly, and a lockout it could walk past
  * would not be one.
  */
-export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
@@ -64,6 +64,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
           name: user.username,
           username: user.username,
           mustChangePw: user.mustChangePw,
+          pwv: user.pwv,
         };
       },
     }),

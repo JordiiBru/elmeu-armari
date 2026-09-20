@@ -3,11 +3,14 @@ import type { NextAuthConfig } from "next-auth";
 const SEVEN_DAYS = 7 * 24 * 60 * 60;
 
 /**
- * Everything about the session that does not need the database.
+ * Everything about the session except the credentials provider.
  *
  * The proxy builds its own Auth.js instance from this alone, so the
- * per-request authorisation check never pulls Prisma, better-sqlite3 or
- * Argon2 into the file that runs before every single request. The full
+ * per-request authorisation check never pulls Prisma or Argon2 into the
+ * file that runs before every single request. It does read one row through
+ * the bare SQLite driver (`credentials-version.ts`): a JWT cannot be revoked
+ * by itself, so the token carries a fingerprint of the password it was
+ * issued under and the proxy compares it with the account. The full
  * instance in `auth.ts` adds the credentials provider on top.
  */
 export const authConfig = {
@@ -19,30 +22,36 @@ export const authConfig = {
     error: "/login",
   },
   session: {
-    // Credentials never persist a session row (there is nothing to
-    // revoke server-side either way), so this is a signed, encrypted
-    // cookie. A week is short enough to matter and long enough that the
-    // phone by the wardrobe does not ask every morning.
+    // Credentials never persist a session row, so this is a signed,
+    // encrypted cookie; what makes it revocable is the password
+    // fingerprint it carries (see the jwt callback), not a table. A week
+    // is short enough to matter and long enough that the phone by the
+    // wardrobe does not ask every morning.
     strategy: "jwt",
     maxAge: SEVEN_DAYS,
   },
   callbacks: {
     /**
      * `user` is only present on the sign-in pass; afterwards the token
-     * is its own source. `trigger === "update"` is how the
-     * change-password action clears the flag without a new login.
+     * is its own source. `pwv` is the fingerprint of the password the
+     * session was issued under, compared with the account on every
+     * request (see `credentials-version.ts`).
+     *
+     * There is deliberately no `trigger === "update"` branch, and nothing
+     * here may ever re-stamp `pwv` from the database. `POST /api/auth/session`
+     * reaches this callback for anyone holding a cookie (a CSRF token is one
+     * GET away), so a stale token allowed to refresh itself would revive
+     * itself the moment it is refused: exactly the session a password
+     * change is meant to end. The only way to get a token with the current
+     * `pwv` is to prove the current password, which is a sign-in (the
+     * change-password action signs in again with the new one).
      */
-    jwt({ token, user, trigger, session }) {
+    jwt({ token, user }) {
       if (user) {
         token.id = user.id ?? token.sub ?? "";
         token.username = user.username ?? "";
         token.mustChangePw = user.mustChangePw ?? false;
-      }
-      if (trigger === "update" && session && typeof session === "object") {
-        const patch = session as { user?: { mustChangePw?: boolean } };
-        if (typeof patch.user?.mustChangePw === "boolean") {
-          token.mustChangePw = patch.user.mustChangePw;
-        }
+        token.pwv = user.pwv ?? "";
       }
       return token;
     },
@@ -50,6 +59,7 @@ export const authConfig = {
       session.user.id = token.id;
       session.user.username = token.username;
       session.user.mustChangePw = token.mustChangePw;
+      session.user.pwv = token.pwv;
       return session;
     },
   },

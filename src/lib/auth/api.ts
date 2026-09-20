@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { isSessionCurrent } from "./credentials-version";
 
 /**
  * Defence in depth for the route handlers. `proxy.ts` already closes
@@ -9,6 +10,12 @@ import { auth } from "@/auth";
  */
 export async function requireSession(): Promise<NextResponse | null> {
   const session = await auth();
-  if (session?.user && !session.user.mustChangePw) return null;
+  if (
+    session?.user &&
+    !session.user.mustChangePw &&
+    isSessionCurrent(session.user.id, session.user.pwv)
+  ) {
+    return null;
+  }
   return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 }
