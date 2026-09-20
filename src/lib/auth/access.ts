@@ -19,6 +19,7 @@ export const CHANGE_PASSWORD_PATH = "/change-password";
 const PUBLIC_PREFIXES = ["/api/auth/", "/icons/"];
 const PUBLIC_EXACT = [
   LOGIN_PATH,
+  "/forgot-password",
   "/manifest.webmanifest",
   "/favicon.ico",
   "/icon.svg",

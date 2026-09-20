@@ -8,16 +8,22 @@ import { credentialsVersion } from "./credentials-version";
 import { signDeviceToken, verifyDeviceToken } from "./device";
 import { hashPassword, verifyAgainstDummy, verifyPassword } from "./password";
 import { loginPressure } from "./pressure";
-import { passwordPolicyError, type PasswordPolicyError } from "./policy";
+import {
+  passwordPolicyError,
+  withinCredentialLimits,
+  type PasswordPolicyError,
+} from "./policy";
 import {
   deleteAttemptsBefore,
   findUserById,
   findUserByUsername,
   recentAttemptsByUsername,
+  clearAttemptsFor,
   recordAttempt,
-  setPassword,
+  replaceCredentials,
   touchLastLogin,
 } from "./repository";
+import { generateRecoveryCode, normalizeRecoveryCode } from "./recovery";
 
 /** Enough rows to see the streak; the window prunes the rest. */
 const ATTEMPT_PAGE = 64;
@@ -167,8 +173,15 @@ export async function mustChangePassword(username: string): Promise<boolean> {
 }
 
 export type ChangePasswordResult =
-  | { ok: true }
+  | { ok: true; recoveryCode: string }
   | { ok: false; error: "wrongPassword" | "samePassword" | PasswordPolicyError };
+
+/** Hashes a fresh recovery code and returns it with its hash. The plain code
+ * leaves this module once, to be shown, and is never stored. */
+async function newRecoveryCode(): Promise<{ code: string; hash: string }> {
+  const code = generateRecoveryCode();
+  return { code, hash: await hashPassword(normalizeRecoveryCode(code)) };
+}
 
 export async function changePassword(
   userId: string,
@@ -187,6 +200,50 @@ export async function changePassword(
 
   if (newPassword === currentPassword) return { ok: false, error: "samePassword" };
 
-  await setPassword(user.id, await hashPassword(newPassword));
-  return { ok: true };
+  const recovery = await newRecoveryCode();
+  await replaceCredentials(user.id, await hashPassword(newPassword), recovery.hash);
+  return { ok: true, recoveryCode: recovery.code };
+}
+
+export type RecoverAccountResult =
+  | { ok: true; recoveryCode: string }
+  | { ok: false; error: "invalid" | "busy" | PasswordPolicyError };
+
+/**
+ * Choosing a new password with the recovery code instead of the old
+ * password. Every way this can fail for a reason about the account (no such
+ * user, no code on file, wrong code) answers the same `invalid`, after the
+ * same hash, so it is no more an account-existence oracle than the login.
+ * It spends from the same global budget as the login: it is the same open
+ * door to the same CPU. Success issues a new code, lifts any lockout and, by
+ * changing the password hash, ends every session and trusted browser.
+ */
+export async function recoverAccount(
+  rawUsername: string,
+  rawCode: string,
+  newPassword: string,
+): Promise<RecoverAccountResult> {
+  const username = normalizeUsername(rawUsername);
+  if (!withinCredentialLimits(username, newPassword) || rawCode.length > 64) {
+    return { ok: false, error: "invalid" };
+  }
+  const policy = passwordPolicyError(newPassword);
+  if (policy) return { ok: false, error: policy };
+
+  if (!loginPressure.admit()) return { ok: false, error: "busy" };
+
+  const code = normalizeRecoveryCode(rawCode);
+  const user = await findUserByUsername(username);
+  if (!user?.recoveryHash) {
+    await verifyAgainstDummy(code);
+    return { ok: false, error: "invalid" };
+  }
+  if (!(await verifyPassword(user.recoveryHash, code))) {
+    return { ok: false, error: "invalid" };
+  }
+
+  const recovery = await newRecoveryCode();
+  await replaceCredentials(user.id, await hashPassword(newPassword), recovery.hash);
+  await clearAttemptsFor(username);
+  return { ok: true, recoveryCode: recovery.code };
 }

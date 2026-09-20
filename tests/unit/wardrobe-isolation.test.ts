@@ -1,9 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import path from "node:path";
+import { rmSync } from "node:fs";
 import Database from "better-sqlite3";
 import type { GarmentInput } from "@/lib/prendas/types";
+import { createMigratedDatabase } from "./support/migrated-db";
 
 /**
  * Two accounts, one real SQLite file built from the real migrations. What
@@ -13,8 +12,8 @@ import type { GarmentInput } from "@/lib/prendas/types";
  * noticed.
  */
 
-const dir = mkdtempSync(path.join(tmpdir(), "armari-isolation-"));
-process.env.DATABASE_URL = `file:${path.join(dir, "isolation.db")}`;
+const { dir, file } = createMigratedDatabase("armari-isolation");
+process.env.DATABASE_URL = `file:${file}`;
 
 const A = "user-a";
 const B = "user-b";
@@ -47,14 +46,7 @@ let outfitA: string;
 let dayA: string;
 
 beforeAll(async () => {
-  const db = new Database(path.join(dir, "isolation.db"));
-  const migrations = path.resolve(__dirname, "../../prisma/migrations");
-  for (const entry of readdirSync(migrations, { withFileTypes: true }).sort((a, b) =>
-    a.name.localeCompare(b.name),
-  )) {
-    if (!entry.isDirectory()) continue;
-    db.exec(readFileSync(path.join(migrations, entry.name, "migration.sql"), "utf8"));
-  }
+  const db = new Database(file);
   const insert = db.prepare(
     "INSERT INTO User (id, username, passwordHash, mustChangePw, createdAt) VALUES (?, ?, 'x', 0, ?)",
   );

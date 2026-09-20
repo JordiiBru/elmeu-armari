@@ -9,11 +9,13 @@ interface Row {
   username: string;
   passwordHash: string;
   mustChangePw: boolean;
+  recoveryHash?: string | null;
 }
 
 const users = new Map<string, Row>();
 const touchLastLogin = vi.fn(async () => undefined);
-const setPasswordRow = vi.fn(async () => undefined);
+const replaceCredentialsRow = vi.fn(async () => undefined);
+const clearAttemptsFor = vi.fn(async () => undefined);
 const attemptsByUsername = vi.fn(async () => [] as { success: boolean; createdAt: Date }[]);
 
 // Same reason as the wardrobe's service tests: the repository is the
@@ -25,13 +27,14 @@ vi.mock("@/lib/auth/repository", () => ({
     async (id: string) => [...users.values()].find((u) => u.id === id) ?? null,
   ),
   touchLastLogin,
-  setPassword: setPasswordRow,
+  replaceCredentials: replaceCredentialsRow,
+  clearAttemptsFor,
   recordAttempt: vi.fn(async () => undefined),
   recentAttemptsByUsername: (...args: unknown[]) => attemptsByUsername(...(args as [])),
   deleteAttemptsBefore: vi.fn(async () => undefined),
 }));
 
-const { verifyCredentials, changePassword, lockoutSeconds, normalizeUsername, gateLogin, deviceTokenFor } =
+const { verifyCredentials, changePassword, lockoutSeconds, normalizeUsername, gateLogin, deviceTokenFor, recoverAccount } =
   await import("@/lib/auth/service");
 const { loginPressure, PRESSURE_MAX_ATTEMPTS } = await import("@/lib/auth/pressure");
 
@@ -44,7 +47,8 @@ beforeEach(async () => {
     mustChangePw: true,
   });
   touchLastLogin.mockClear();
-  setPasswordRow.mockClear();
+  replaceCredentialsRow.mockClear();
+  clearAttemptsFor.mockClear();
   attemptsByUsername.mockClear();
   attemptsByUsername.mockResolvedValue([]);
 });
@@ -180,11 +184,22 @@ describe("gateLogin", () => {
 describe("changePassword", () => {
   it("replaces the hash and clears the temporary flag", async () => {
     const result = await changePassword("user-1", PASSWORD, "a brand new secret");
-    expect(result).toEqual({ ok: true });
-    expect(setPasswordRow).toHaveBeenCalledTimes(1);
-    const [id, hash] = setPasswordRow.mock.calls[0] as unknown as [string, string];
+    expect(result).toMatchObject({ ok: true });
+    expect(replaceCredentialsRow).toHaveBeenCalledTimes(1);
+    const [id, hash, recoveryHash] = replaceCredentialsRow.mock.calls[0] as unknown as [
+      string,
+      string,
+      string,
+    ];
     expect(id).toBe("user-1");
     expect(hash.startsWith("$argon2id$")).toBe(true);
+    // The password and its recovery code change together, and only the hash
+    // of the code is stored.
+    expect(recoveryHash.startsWith("$argon2id$")).toBe(true);
+    if (result.ok) {
+      expect(result.recoveryCode).toMatch(/^[A-Z2-9]{5}(-[A-Z2-9]{5}){3}$/);
+      expect(recoveryHash).not.toContain(result.recoveryCode);
+    }
   });
 
   it("refuses without the current password", async () => {
@@ -192,7 +207,7 @@ describe("changePassword", () => {
       ok: false,
       error: "wrongPassword",
     });
-    expect(setPasswordRow).not.toHaveBeenCalled();
+    expect(replaceCredentialsRow).not.toHaveBeenCalled();
   });
 
   it("refuses a new password that is too short", async () => {
@@ -206,6 +221,48 @@ describe("changePassword", () => {
     expect(await changePassword("user-1", PASSWORD, PASSWORD)).toEqual({
       ok: false,
       error: "samePassword",
+    });
+  });
+});
+
+describe("recoverAccount", () => {
+  const CODE = "ABCDE-FGHJK-LMNPQ-RSTUV";
+
+  beforeEach(async () => {
+    process.env.AUTH_SECRET = "test-secret";
+    while (loginPressure.isBusy()) loginPressure.admit();
+    users.get("jordi")!.recoveryHash = await hashPassword("ABCDEFGHJKLMNPQRSTUV");
+  });
+
+  it("sets a new password and a new code when the code is right, however it is typed", async () => {
+    const result = await recoverAccount("Jordi", "abcde fghjk lmnpq rstuv", "a brand new secret");
+    expect(result).toMatchObject({ ok: true });
+    expect(replaceCredentialsRow).toHaveBeenCalledTimes(1);
+    expect(clearAttemptsFor).toHaveBeenCalledWith("jordi");
+    if (result.ok) expect(result.recoveryCode).not.toBe(CODE);
+  });
+
+  it("refuses a wrong code, an unknown user and an account with no code the same way", async () => {
+    const wrong = await recoverAccount("jordi", "AAAAA-AAAAA-AAAAA-AAAAA", "a brand new secret");
+    const unknown = await recoverAccount("ningu", CODE, "a brand new secret");
+    users.get("jordi")!.recoveryHash = null;
+    const none = await recoverAccount("jordi", CODE, "a brand new secret");
+    expect(wrong).toEqual({ ok: false, error: "invalid" });
+    expect(unknown).toEqual({ ok: false, error: "invalid" });
+    expect(none).toEqual({ ok: false, error: "invalid" });
+    expect(replaceCredentialsRow).not.toHaveBeenCalled();
+  });
+
+  it("refuses a new password outside the policy without touching anything", async () => {
+    expect(await recoverAccount("jordi", CODE, "short")).toEqual({ ok: false, error: "tooShort" });
+    expect(replaceCredentialsRow).not.toHaveBeenCalled();
+  });
+
+  it("spends from the shared attempt budget and refuses once it is gone", async () => {
+    for (let i = 0; i < PRESSURE_MAX_ATTEMPTS; i++) loginPressure.admit();
+    expect(await recoverAccount("jordi", CODE, "a brand new secret")).toEqual({
+      ok: false,
+      error: "busy",
     });
   });
 });

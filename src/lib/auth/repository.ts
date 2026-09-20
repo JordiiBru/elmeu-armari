@@ -12,11 +12,24 @@ export async function touchLastLogin(id: string) {
   return prisma.user.update({ where: { id }, data: { lastLoginAt: new Date() } });
 }
 
-export async function setPassword(id: string, passwordHash: string) {
+/** The password and its recovery code change together or not at all: a
+ * code that outlived the password it was issued with would open the account
+ * to whoever held the old one. Also ends the temporary-password state. */
+export async function replaceCredentials(
+  id: string,
+  passwordHash: string,
+  recoveryHash: string,
+) {
   return prisma.user.update({
     where: { id },
-    data: { passwordHash, mustChangePw: false },
+    data: { passwordHash, recoveryHash, mustChangePw: false },
   });
+}
+
+/** Forgets what was counted against an account: once its owner has proved
+ * who they are, earlier failures are not evidence of anything. */
+export async function clearAttemptsFor(username: string) {
+  return prisma.loginAttempt.deleteMany({ where: { username } });
 }
 
 export async function recordAttempt(data: {

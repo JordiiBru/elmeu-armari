@@ -32,15 +32,17 @@ npm run dev                                # http://localhost:3000
 
 ### Accounts
 
-No screen or route creates an account: one script does, and it is also the recovery flow.
+No screen or route creates an account: one script does. Each account has its own wardrobe.
 
 ```bash
 npm run create-user -- --username you            # prints a temporary password
-npm run create-user -- --username you --reset    # forgot it? same command
+npm run create-user -- --username you --reset    # a new temporary password for an existing account
 pbpaste | npm run create-user -- --username you --stdin   # choose the password yourself
+npm run create-user -- --list                    # who exists, last login, no hashes
+npm run create-user -- --username you --delete --yes      # the account, its wardrobe and its photos
 ```
 
-The first sign-in lands on `/change-password` and nothing else opens until the password is replaced. In production the script runs inside the container: `docker exec -it elmeu-armari node scripts/create-user.mjs --username you`.
+The first sign-in lands on `/change-password` and nothing else opens until the password is replaced. Choosing a password shows a **recovery code**, once: someone who forgets the password uses it on `/forgot-password` (the link is on the login screen) to choose a new one, and gets a new code. There is no e-mail behind it. A person who lost both the password and the code needs `--reset`, which clears the code. In production the script runs inside the container: `docker exec -it elmeu-armari node scripts/create-user.mjs --username you`, or `kubectl -n services exec -it deploy/elmeu-armari -- node scripts/create-user.mjs --username you --reset`.
 
 ### Scripts
 

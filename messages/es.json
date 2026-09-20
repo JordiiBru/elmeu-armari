@@ -18,7 +18,8 @@
         "lockedOut": "Demasiados intentos seguidos. El armario se queda cerrado {seconds, plural, one {# segundo} other {# segundos}} más.",
         "busy": "Demasiados intentos a la vez. Espera un momento y vuelve a probar.",
         "unexpected": "No se ha podido abrir el armario ahora mismo. Vuelve a probar en un momento."
-      }
+      },
+      "forgot": "¿has olvidado la contraseña?"
     },
     "changePassword": {
       "title": "nueva contraseña",
@@ -36,11 +37,39 @@
         "samePassword": "Elige una nueva: esa ya es la actual.",
         "tooShort": "Se queda corta: alárgala un poco.",
         "tooLong": "Se pasa de larga: acórtala un poco."
-      }
+      },
+      "continue": "ya lo tengo"
     },
     "menu": {
       "changePassword": "contraseña",
       "signOut": "salir"
+    },
+    "forgot": {
+      "title": "recupera el acceso",
+      "note": "con el código de recuperación que te mostraron al elegir la contraseña.",
+      "username": "usuario",
+      "code": "código de recuperación",
+      "next": "nueva contraseña",
+      "confirmation": "repite",
+      "hint": "mínimo {count} caracteres",
+      "submit": "recupera",
+      "submitting": "recuperando…",
+      "noCode": "¿Sin código? Pide a quien administra el armario que restablezca la contraseña.",
+      "back": "volver a entrar",
+      "done": "Contraseña cambiada.",
+      "signIn": "entra",
+      "errors": {
+        "missingFields": "Falta algún campo.",
+        "mismatch": "Las dos tienen que coincidir, letra por letra.",
+        "invalid": "Ese usuario y ese código no coinciden.",
+        "busy": "Demasiados intentos a la vez. Espera un momento y vuelve a probar.",
+        "tooShort": "Un poco corta: hazla más larga.",
+        "tooLong": "Un poco larga: acórtala."
+      }
+    },
+    "recoveryCode": {
+      "body": "Apunta este código ahora: solo se muestra esta vez. Con él puedes poner una contraseña nueva si olvidas esta.",
+      "codeLabel": "código de recuperación"
     }
   },
   "labels": {

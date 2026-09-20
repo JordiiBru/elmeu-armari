@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { loginAction } from "@/app/login/actions";
-import { Button, Field, Input, Stack, Text } from "@/components/ui";
+import { Button, Field, Input, Stack, Text, TextLink } from "@/components/ui";
 
 export function LoginForm({ next }: { next: string | null }) {
   const t = useTranslations("auth.login");
@@ -66,6 +66,9 @@ export function LoginForm({ next }: { next: string | null }) {
         >
           {t("submit")}
         </Button>
+        <TextLink href="/forgot-password" className="self-center">
+          {t("forgot")}
+        </TextLink>
       </Stack>
     </form>
   );
