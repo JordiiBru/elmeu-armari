@@ -36,6 +36,11 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // Cloudflare does not send HSTS for this host, and browsers ignore
+          // the header over plain http, so the LAN address is unaffected. No
+          // includeSubDomains: other services live under the same domain.
+          { key: "Strict-Transport-Security", value: "max-age=15552000" },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), payment=()",

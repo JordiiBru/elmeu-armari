@@ -1,49 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth/api";
+import { requireSameOrigin } from "@/lib/auth/same-origin";
 import { findGarmentById, setGarmentImage } from "@/lib/prendas/service";
-import { saveUploadImage, deleteUploadImage, getUploadMaxMb } from "@/lib/uploads";
-
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+import { saveUploadImage, deleteUploadImage } from "@/lib/uploads";
+import { readImageUpload, notAnImage } from "@/lib/upload-request";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const crossOrigin = requireSameOrigin(request);
+  if (crossOrigin) return crossOrigin;
+
   const denied = await requireSession();
   if (denied) return denied;
 
   const { id } = await params;
-
-  const formData = await request.formData();
-  const file = formData.get("file");
-
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: "No file provided" }, { status: 400 });
-  }
-
-  if (!ALLOWED_TYPES.has(file.type)) {
-    return NextResponse.json(
-      { error: "Only JPEG, PNG and WebP are accepted" },
-      { status: 415 }
-    );
-  }
-
-  const maxBytes = getUploadMaxMb() * 1024 * 1024;
-  if (file.size > maxBytes) {
-    return NextResponse.json(
-      { error: `File exceeds ${getUploadMaxMb()} MB limit` },
-      { status: 413 }
-    );
-  }
 
   const garment = await findGarmentById(id);
   if (!garment) {
     return NextResponse.json({ error: "Garment not found" }, { status: 404 });
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const filename = await saveUploadImage(buffer, id);
+  const upload = await readImageUpload(request);
+  if ("response" in upload) return upload.response;
+
+  let filename: string;
+  try {
+    filename = await saveUploadImage(upload.buffer, id);
+  } catch {
+    return notAnImage();
+  }
 
   await setGarmentImage(id, filename);
 
@@ -56,6 +44,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const crossOrigin = requireSameOrigin(_request);
+  if (crossOrigin) return crossOrigin;
+
   const denied = await requireSession();
   if (denied) return denied;
 
