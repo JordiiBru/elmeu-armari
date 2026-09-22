@@ -27,7 +27,7 @@ function isIpAddress(host: string): boolean {
   return /^\d{1,3}(\.\d{1,3}){3}$/.test(host) || (host.startsWith("[") && host.endsWith("]"));
 }
 
-export function allowedHostnames(authUrl: string | undefined): Set<string> {
+function allowedHostnames(authUrl: string | undefined): Set<string> {
   const names = new Set(["localhost"]);
   if (authUrl) {
     try {

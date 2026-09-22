@@ -40,6 +40,9 @@ jobs:
 
       - run: npx prisma generate
 
+      - run: npm audit --omit=dev
+        continue-on-error: true
+
       - run: npm run lint
 
       - run: npx tsc --noEmit
