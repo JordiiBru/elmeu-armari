@@ -120,6 +120,10 @@ export async function logAttempt(
   ip: string,
   success: boolean,
 ): Promise<void> {
+  // The only trace of a failed login outside LoginAttempt (checked, never
+  // acted on): nobody watches the table on its own, but stdout already
+  // reaches whoever tails the pod's logs or a check built on them.
+  if (!success) console.warn(`login failed: username=${username} ip=${ip}`);
   await recordAttempt({ username, ip, success });
   // Every attempt takes the bin out, not only a successful one: the form is
   // open to the internet, and a bot that never succeeds would otherwise
