@@ -1,4 +1,4 @@
-FROM node:24-alpine AS builder
+FROM node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS builder
 WORKDIR /app
 
 RUN apk add --no-cache python3 make g++
@@ -23,7 +23,7 @@ RUN DATABASE_URL=file:/tmp/build.db npx prisma migrate deploy && \
 # The versions are read from package-lock.json, so the migration CLI is the
 # exact version the client was generated with and Renovate only has to bump
 # the app's manifest (a literal inside a `RUN` is invisible to it).
-FROM node:24-alpine AS prisma-cli
+FROM node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS prisma-cli
 WORKDIR /prisma-cli
 COPY package-lock.json /tmp/package-lock.json
 RUN echo '{}' > package.json && \
@@ -32,7 +32,7 @@ RUN echo '{}' > package.json && \
       "dotenv@$(node -p "require('/tmp/package-lock.json').packages['node_modules/dotenv'].version")"
 
 # Production image
-FROM node:24-alpine AS runner
+FROM node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
