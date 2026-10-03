@@ -21,7 +21,7 @@
     "@prisma/client": "^7.10.0",
     "@types/better-sqlite3": "^7.6.13",
     "better-sqlite3": "^12.11.1",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.0",
     "next": "^16.3.5",
     "next-auth": "^5.0.0-beta.32",
     "next-intl": "^4.14.5",
