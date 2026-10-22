@@ -331,6 +331,60 @@
       "badge": "al cistell"
     }
   },
+  "maleta": {
+    "title": "maleta",
+    "subtitle": "els dies del viatge i què t'hi emportes; et diem què posar-te cada dia.",
+    "trip": "El viatge",
+    "start": "Sortida",
+    "end": "Tornada",
+    "length": "{days, plural, one {# dia} other {# dies}} · {nights, plural, one {# nit} other {# nits}}",
+    "weather": {
+      "label": "Temps",
+      "hot": "calor",
+      "cold": "fred",
+      "mixed": "mixt"
+    },
+    "mode": {
+      "label": "Criteri",
+      "minimize": "menys peces",
+      "noRepeat": "no repetir"
+    },
+    "laundry": {
+      "label": "Faré bugada durant el viatge",
+      "hint": "Una bugada cada {every} dies. Samarretes i jerseis, {tops, plural, one {# ús} other {# usos}} entre bugades; pantalons, {pants, plural, one {# ús} other {# usos}}. Sense bugada, aquests límits valen per a tot el viatge."
+    },
+    "pool": {
+      "clothes": "Peces que poden anar a la maleta",
+      "shoes": "Sabates que t'emportes",
+      "accessories": "Accessoris que t'emportes",
+      "count": "{selected} de {total}",
+      "all": "totes",
+      "none": "cap",
+      "empty": "no en tens cap a l'armari."
+    },
+    "submit": "Fer la maleta",
+    "submitting": "pensant…",
+    "errors": {
+      "range": "La tornada ha de ser el mateix dia de la sortida o després.",
+      "tooLong": "Un viatge pot durar com a molt {max} dies."
+    },
+    "result": {
+      "packed": "A la maleta",
+      "packedCount": "{count, plural, =0 {cap peça} one {# peça} other {# peces}}",
+      "shoesRepeat": "{shoes, plural, one {# parell} other {# parells}} de sabates per a {days} dies: algun es repetirà.",
+      "days": "Dia a dia",
+      "day": "Dia {n} · {date}",
+      "missing": {
+        "shoes": "Cap combinació: no t'emportes sabates.",
+        "top": "Cap combinació: falta una samarreta o un jersei més. Una de negra o blanca combina amb tot.",
+        "pants": "Cap combinació: falten uns pantalons més. Uns de negres o blancs combinen amb tot.",
+        "colour": "Cap combinació: les peces que queden no combinen entre elles. Una peça negra o blanca combina amb tot."
+      },
+      "coatMissing": "Aquest dia demana abric i no n'hi ha cap a la llista.",
+      "laundry": "Bugades",
+      "laundryAfter": "Al final del dia {n} · {date}"
+    }
+  },
   "menu": {
     "label": "Menú",
     "stats": "estadístiques",
@@ -354,7 +408,8 @@
       "avui": "Què em poso?",
       "armari": "Armari",
       "bugaderia": "Bugaderia",
-      "paleta": "Paletes"
+      "paleta": "Paletes",
+      "maleta": "Fer la maleta"
     }
   },
   "outfits": {

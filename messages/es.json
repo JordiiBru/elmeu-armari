@@ -331,6 +331,60 @@
       "badge": "en el cesto"
     }
   },
+  "maleta": {
+    "title": "maleta",
+    "subtitle": "los días del viaje y qué te llevas; te decimos qué ponerte cada día.",
+    "trip": "El viaje",
+    "start": "Salida",
+    "end": "Vuelta",
+    "length": "{days, plural, one {# día} other {# días}} · {nights, plural, one {# noche} other {# noches}}",
+    "weather": {
+      "label": "Tiempo",
+      "hot": "calor",
+      "cold": "frío",
+      "mixed": "mixto"
+    },
+    "mode": {
+      "label": "Criterio",
+      "minimize": "menos piezas",
+      "noRepeat": "no repetir"
+    },
+    "laundry": {
+      "label": "Haré colada durante el viaje",
+      "hint": "Una colada cada {every} días. Camisetas y jerséis, {tops, plural, one {# uso} other {# usos}} entre coladas; pantalones, {pants, plural, one {# uso} other {# usos}}. Sin colada, estos límites valen para todo el viaje."
+    },
+    "pool": {
+      "clothes": "Piezas que pueden ir en la maleta",
+      "shoes": "Zapatos que te llevas",
+      "accessories": "Accesorios que te llevas",
+      "count": "{selected} de {total}",
+      "all": "todas",
+      "none": "ninguna",
+      "empty": "no tienes ninguna en el armario."
+    },
+    "submit": "Hacer la maleta",
+    "submitting": "pensando…",
+    "errors": {
+      "range": "La vuelta tiene que ser el mismo día de la salida o después.",
+      "tooLong": "Un viaje puede durar como mucho {max} días."
+    },
+    "result": {
+      "packed": "En la maleta",
+      "packedCount": "{count, plural, =0 {ninguna pieza} one {# pieza} other {# piezas}}",
+      "shoesRepeat": "{shoes, plural, one {# par} other {# pares}} de zapatos para {days} días: alguno se repetirá.",
+      "days": "Día a día",
+      "day": "Día {n} · {date}",
+      "missing": {
+        "shoes": "Ninguna combinación: no te llevas zapatos.",
+        "top": "Ninguna combinación: falta una camiseta o un jersey más. Una negra o blanca combina con todo.",
+        "pants": "Ninguna combinación: faltan unos pantalones más. Unos negros o blancos combinan con todo.",
+        "colour": "Ninguna combinación: las piezas que quedan no combinan entre sí. Una pieza negra o blanca combina con todo."
+      },
+      "coatMissing": "Este día pide abrigo y no hay ninguno en la lista.",
+      "laundry": "Coladas",
+      "laundryAfter": "Al final del día {n} · {date}"
+    }
+  },
   "menu": {
     "label": "Menú",
     "stats": "estadísticas",
@@ -354,7 +408,8 @@
       "avui": "¿Qué me pongo?",
       "armari": "Armario",
       "bugaderia": "Lavandería",
-      "paleta": "Paletas"
+      "paleta": "Paletas",
+      "maleta": "Hacer la maleta"
     }
   },
   "outfits": {

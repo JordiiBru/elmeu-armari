@@ -14,9 +14,10 @@ export const dynamic = "force-dynamic";
  * whether it is *the app* or *about the app*. Paletes is the app, so it
  * belongs in this column; estadístiques and configuració are about it,
  * and live in the header menu instead. That is also what makes this page
- * hold together: four items on one axis, and nothing else to centre.
+ * hold together: one column of items on one axis, and nothing else to
+ * centre. Packing a suitcase is the app too, so it joins the column.
  */
-const PRIMARY = ["avui", "armari", "bugaderia", "paleta"] as const;
+const PRIMARY = ["avui", "armari", "bugaderia", "maleta", "paleta"] as const;
 
 function pickPalette() {
   const i = Math.floor(Math.random() * palettes.length);

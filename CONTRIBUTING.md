@@ -37,6 +37,7 @@ Unit tests live in `tests/unit`, named after what they cover. Beyond them, after
 - `/avui`: pick an outfit for today, and a day in the week.
 - `/add` and `/edit/[id]`: validation errors, the colour picker, a photo upload.
 - `/bugaderia`, `/paleta`, `/stats`.
+- `/maleta`: a trip with and without laundry, both modes, and a pool too small for the days (each short day must say what is missing).
 - `/settings`: export a JSON, import it back.
 - `/change-password`: from the menu, and the forced version a fresh account lands on.
 
