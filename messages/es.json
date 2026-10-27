@@ -335,11 +335,11 @@
     "title": "maleta",
     "subtitle": "los días del viaje y qué te llevas; te decimos qué ponerte cada día.",
     "trip": "El viaje",
+    "preferences": "Preferencias",
     "start": "Salida",
     "end": "Vuelta",
     "length": "{days, plural, one {# día} other {# días}} · {nights, plural, one {# noche} other {# noches}}",
     "weather": {
-      "label": "Tiempo",
       "hot": "calor",
       "cold": "frío",
       "mixed": "mixto"
@@ -364,6 +364,8 @@
     },
     "submit": "Hacer la maleta",
     "submitting": "pensando…",
+    "reroll": "Otra propuesta",
+    "tryLaundry": "Probar con colada",
     "errors": {
       "range": "La vuelta tiene que ser el mismo día de la salida o después.",
       "tooLong": "Un viaje puede durar como mucho {max} días."
@@ -371,18 +373,27 @@
     "result": {
       "packed": "En la maleta",
       "packedCount": "{count, plural, =0 {ninguna pieza} one {# pieza} other {# piezas}}",
-      "shoesRepeat": "{shoes, plural, one {# par} other {# pares}} de zapatos para {days} días: alguno se repetirá.",
       "days": "Día a día",
-      "day": "Día {n} · {date}",
+      "day": "Día {n}",
+      "palette": "Paleta {name}",
       "missing": {
         "shoes": "Ninguna combinación: no te llevas zapatos.",
         "top": "Ninguna combinación: falta una camiseta o un jersey más. Una negra o blanca combina con todo.",
         "pants": "Ninguna combinación: faltan unos pantalones más. Unos negros o blancos combinan con todo.",
-        "colour": "Ninguna combinación: las piezas que quedan no combinan entre sí. Una pieza negra o blanca combina con todo."
+        "colour": "Ninguna combinación: las piezas que quedan no combinan entre sí. Una pieza negra o blanca combina con todo.",
+        "uncoloured": "Ninguna combinación: una prenda no tiene color. Ponle uno para que pueda entrar en las combinaciones."
       },
-      "coatMissing": "Este día pide abrigo y no hay ninguno en la lista.",
       "laundry": "Coladas",
-      "laundryAfter": "Al final del día {n} · {date}"
+      "laundryAfter": "Al final del día {n} · {date}",
+      "summaryEyebrow": "Tu viaje",
+      "facts": {
+        "weather": "Tiempo",
+        "mode": "Criterio",
+        "laundry": "Coladas",
+        "packed": "En la maleta"
+      },
+      "laundryCount": "{count, plural, =0 {ninguna} one {# colada} other {# coladas}}",
+      "laundryHere": "Colada al final del día"
     }
   },
   "menu": {

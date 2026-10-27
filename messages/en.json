@@ -335,11 +335,11 @@
     "title": "suitcase",
     "subtitle": "the days of the trip and what you take; we tell you what to wear each day.",
     "trip": "The trip",
+    "preferences": "Preferences",
     "start": "Leaving",
     "end": "Back",
     "length": "{days, plural, one {# day} other {# days}} · {nights, plural, one {# night} other {# nights}}",
     "weather": {
-      "label": "Weather",
       "hot": "hot",
       "cold": "cold",
       "mixed": "mixed"
@@ -364,6 +364,8 @@
     },
     "submit": "Pack the suitcase",
     "submitting": "thinking…",
+    "reroll": "Another proposal",
+    "tryLaundry": "Try with laundry",
     "errors": {
       "range": "The return has to be on or after the day you leave.",
       "tooLong": "A trip can last at most {max} days."
@@ -371,18 +373,27 @@
     "result": {
       "packed": "In the suitcase",
       "packedCount": "{count, plural, =0 {no pieces} one {# piece} other {# pieces}}",
-      "shoesRepeat": "{shoes, plural, one {# pair} other {# pairs}} of shoes for {days} days: one will be worn twice.",
       "days": "Day by day",
-      "day": "Day {n} · {date}",
+      "day": "Day {n}",
+      "palette": "Palette {name}",
       "missing": {
         "shoes": "No combination: you're not taking shoes.",
         "top": "No combination: one more shirt or sweater is needed. A black or white one goes with everything.",
         "pants": "No combination: one more pair of trousers is needed. Black or white ones go with everything.",
-        "colour": "No combination: the pieces left don't go together. A black or white piece goes with everything."
+        "colour": "No combination: the pieces left don't go together. A black or white piece goes with everything.",
+        "uncoloured": "No combination: a piece has no colour. Give it one so it can join the outfits."
       },
-      "coatMissing": "This day calls for a coat and there's none on the list.",
       "laundry": "Laundry",
-      "laundryAfter": "At the end of day {n} · {date}"
+      "laundryAfter": "At the end of day {n} · {date}",
+      "summaryEyebrow": "Your trip",
+      "facts": {
+        "weather": "Weather",
+        "mode": "Approach",
+        "laundry": "Laundry",
+        "packed": "In the suitcase"
+      },
+      "laundryCount": "{count, plural, =0 {none} one {# wash} other {# washes}}",
+      "laundryHere": "Laundry at the end of the day"
     }
   },
   "menu": {

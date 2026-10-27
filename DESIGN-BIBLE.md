@@ -203,7 +203,7 @@ Los hairlines son parte de la identidad **y se mantienen**. Pero:
 
 - Cada borde tiene un significado (divide, contiene, enfoca, activa).
 - No todo puede ser un hairline. Si el mismo hairline funciona como divisor de sección, indicador de tab activa, borde de input y subrayado hover, se ha perdido significado. Distribuir entre `border`, `border-strong`, `border-subtle`.
-- Cero border-radius por defecto (esquinas afiladas es identidad). Excepciones documentadas: swipe handle, dots separadores, avatares si aparecen.
+- Cero border-radius por defecto (esquinas afiladas es identidad). Excepciones documentadas: swipe handle, dots separadores, los puntos de día del eje de `/maleta`, avatares si aparecen.
 
 ---
 

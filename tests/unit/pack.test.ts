@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { planTrip, tripDays, MAX_TRIP_DAYS } from "@/lib/outfits/pack";
+import { planTrip, tripDays, weatherFor, MAX_TRIP_DAYS } from "@/lib/outfits/pack";
 import type { TripInput, TripPlan } from "@/lib/outfits/pack";
 import { isoToDay } from "@/lib/outfits/week";
 import { palettes } from "@/lib/colors";
@@ -192,9 +192,35 @@ describe("planTrip", () => {
     expect(hot.packed.some((x) => x.id === "coat")).toBe(false);
   });
 
-  it("flags a cold day with no coat in the pool", () => {
+  it("with no coat in the pool, a cold day simply has none", () => {
     const p = plan({ weather: "cold" });
-    expect(p.days.every((d) => d.coatMissing)).toBe(true);
+    expect(p.days.every((d) => d.outfit !== null && d.coat === null)).toBe(true);
+  });
+
+  it("in the cold, layers a sweater over a shirt every day it can", () => {
+    const sweaters = Array.from({ length: 3 }, (_, i) => g(`sweater${i + 1}`, "SWEATER", [BLACK]));
+    const p = plan({ weather: "cold", pool: [...shirts(3), ...sweaters, ...pants(1)] });
+    for (const day of p.days) {
+      expect(ofCategory(day.outfit, "SHIRT")).toHaveLength(1);
+      expect(ofCategory(day.outfit, "SWEATER")).toHaveLength(1);
+    }
+  });
+
+  it("puts a shirt under a sweater whenever it is not hot", () => {
+    const sweaters = Array.from({ length: 3 }, (_, i) => g(`sweater${i + 1}`, "SWEATER", [BLACK]));
+    const mixed = plan({ weather: "mixed", pool: [...shirts(6), ...sweaters, ...pants(1)] });
+    for (const day of mixed.days) {
+      if (ofCategory(day.outfit, "SWEATER").length > 0) {
+        expect(ofCategory(day.outfit, "SHIRT")).toHaveLength(1);
+      }
+    }
+    const hot = plan({ pool: [...shirts(6), ...sweaters, ...pants(1)] });
+    expect(hot.days.every((d) => ofCategory(d.outfit, "SHIRT").length + ofCategory(d.outfit, "SWEATER").length === 1)).toBe(true);
+  });
+
+  it("never layers at the cost of a later day without a top", () => {
+    const p = plan({ weather: "cold", pool: [...shirts(2), g("sweater", "SWEATER", [BLACK]), ...pants(1)] });
+    expect(p.days.every((d) => d.outfit !== null)).toBe(true);
   });
 
   it("in mixed weather, the coat goes with the sweater days", () => {
@@ -222,13 +248,63 @@ describe("planTrip", () => {
     expect(ofCategory(hot.days[0].outfit, "SWEATER")).toEqual([]);
   });
 
+  it("proposes looks not shown yet when asked again", () => {
+    const week = { pool: [...shirts(6), ...pants(3)], mode: "noRepeat" as const };
+    const first = plan(week);
+    const seen = new Set(first.days.flatMap((d) => (d.look ? [d.look] : [])));
+    const second = plan({ ...week, seen });
+    expect(second.days.every((d) => d.look !== null && !seen.has(d.look))).toBe(true);
+  });
+
+  it("never packs more pieces to show something new", () => {
+    const first = plan({ end: isoToDay("2026-11-07") });
+    const seen = new Set(first.days.flatMap((d) => (d.look ? [d.look] : [])));
+    expect(plan({ end: isoToDay("2026-11-07"), seen }).packed.length).toBe(first.packed.length);
+  });
+
   it("ignores the clean/dirty state of the wardrobe", () => {
     const dirty = shirts(3).map((s) => ({ ...s, dirtySince: new Date("2026-10-01T00:00:00Z") }));
     const p = plan({ pool: [...dirty, ...pants(1)] });
     expect(p.days.every((d) => d.outfit !== null)).toBe(true);
   });
 
+  it("says a piece without colour instead of a colour mismatch", () => {
+    const result = planTrip(input({ pool: [g("shirt-blank", "SHIRT", []), ...pants(2)] }));
+    if (typeof result === "string") throw new Error(result);
+    expect(result.days[0].missing).toBe("uncoloured");
+  });
+
   it("returns the range error instead of a plan", () => {
     expect(planTrip(input({ start: isoToDay("2026-11-04"), end: isoToDay("2026-11-02") }))).toBe("range");
+  });
+});
+
+describe("accessories steer the palette", () => {
+  // Teal completes the palette of the teal shirt, so the bag makes the planner
+  // pick that look on the day it can be worn, without packing another piece.
+  const bag = g("bag1", "ACCESSORI", [TEAL]);
+  const pool = [g("shirt-rust", "SHIRT", [RUST]), g("shirt-teal", "SHIRT", [TEAL]), g("shirt-black", "SHIRT", [BLACK]), ...pants(3)];
+  const range = { end: isoToDay("2026-11-04") };
+
+  it("wears the packed accessory on a day its colour completes", () => {
+    const withBag = plan({ pool, accessories: [bag], ...range });
+    expect(withBag.days.some((d) => ids(d.accessories).includes("bag1"))).toBe(true);
+    expect(ids(withBag.packed)).toContain("bag1");
+  });
+
+  it("never packs an extra piece to make the accessory fit", () => {
+    const withBag = plan({ pool, accessories: [bag], ...range });
+    const without = plan({ pool, accessories: [], ...range });
+    const clothes = (p: TripPlan) => p.packed.filter((x) => x.category !== "ACCESSORI").length;
+    expect(clothes(withBag)).toBe(clothes(without));
+  });
+});
+
+describe("weatherFor", () => {
+  it("reads the weather from the pieces packed", () => {
+    expect(weatherFor([g("s", "SHIRT")])).toBe("hot");
+    expect(weatherFor([g("s", "SHIRT"), g("c", "OUTERWEAR")])).toBe("cold");
+    expect(weatherFor([g("s", "SHIRT"), g("j", "SWEATER")])).toBe("mixed");
+    expect(weatherFor([g("j", "SWEATER"), g("c", "OUTERWEAR")])).toBe("mixed");
   });
 });

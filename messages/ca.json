@@ -335,11 +335,11 @@
     "title": "maleta",
     "subtitle": "els dies del viatge i què t'hi emportes; et diem què posar-te cada dia.",
     "trip": "El viatge",
+    "preferences": "Preferències",
     "start": "Sortida",
     "end": "Tornada",
     "length": "{days, plural, one {# dia} other {# dies}} · {nights, plural, one {# nit} other {# nits}}",
     "weather": {
-      "label": "Temps",
       "hot": "calor",
       "cold": "fred",
       "mixed": "mixt"
@@ -364,6 +364,8 @@
     },
     "submit": "Fer la maleta",
     "submitting": "pensant…",
+    "reroll": "Una altra proposta",
+    "tryLaundry": "Provar amb bugada",
     "errors": {
       "range": "La tornada ha de ser el mateix dia de la sortida o després.",
       "tooLong": "Un viatge pot durar com a molt {max} dies."
@@ -371,18 +373,27 @@
     "result": {
       "packed": "A la maleta",
       "packedCount": "{count, plural, =0 {cap peça} one {# peça} other {# peces}}",
-      "shoesRepeat": "{shoes, plural, one {# parell} other {# parells}} de sabates per a {days} dies: algun es repetirà.",
       "days": "Dia a dia",
-      "day": "Dia {n} · {date}",
+      "day": "Dia {n}",
+      "palette": "Paleta {name}",
       "missing": {
         "shoes": "Cap combinació: no t'emportes sabates.",
         "top": "Cap combinació: falta una samarreta o un jersei més. Una de negra o blanca combina amb tot.",
         "pants": "Cap combinació: falten uns pantalons més. Uns de negres o blancs combinen amb tot.",
-        "colour": "Cap combinació: les peces que queden no combinen entre elles. Una peça negra o blanca combina amb tot."
+        "colour": "Cap combinació: les peces que queden no combinen entre elles. Una peça negra o blanca combina amb tot.",
+        "uncoloured": "Cap combinació: una peça no té color. Posa-li'n un perquè pugui entrar en les combinacions."
       },
-      "coatMissing": "Aquest dia demana abric i no n'hi ha cap a la llista.",
       "laundry": "Bugades",
-      "laundryAfter": "Al final del dia {n} · {date}"
+      "laundryAfter": "Al final del dia {n} · {date}",
+      "summaryEyebrow": "El teu viatge",
+      "facts": {
+        "weather": "Temps",
+        "mode": "Criteri",
+        "laundry": "Bugades",
+        "packed": "A la maleta"
+      },
+      "laundryCount": "{count, plural, =0 {cap} one {# bugada} other {# bugades}}",
+      "laundryHere": "Bugada al final del dia"
     }
   },
   "menu": {

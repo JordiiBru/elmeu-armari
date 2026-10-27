@@ -7,12 +7,23 @@
 
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 import type { OutfitGroup, SanzoPalette } from "./types";
-import { generateOutfitGroups, isGreyColour } from "./engine";
+import { generateOutfitGroups, generateOutfitGroupsForGarment, isGreyColour } from "./engine";
 import { suggestAccessories } from "./accessories";
 import { perceptualDistance } from "./color-matching";
 import { addDays, daysBetween, dayToISO } from "./week";
 
 export type TripWeather = "hot" | "cold" | "mixed";
+
+/** The weather a trip is planned for, read from the pieces packed: a coat
+ * means cold, a sweater means it turns, neither means heat. */
+export function weatherFor(pool: GarmentWithColors[]): TripWeather {
+  const coat = pool.some((g) => g.category === "OUTERWEAR");
+  const sweater = pool.some((g) => g.category === "SWEATER");
+  if (coat && sweater) return "mixed";
+  if (coat) return "cold";
+  if (sweater) return "mixed";
+  return "hot";
+}
 
 /** "minimize": as few pieces in the suitcase as the wear limits allow.
  * "noRepeat": a different look every day, fresh pieces first. */
@@ -45,6 +56,16 @@ const ENGINE_LIMIT = 60;
  * engine's ranking: a piece always matters more than the colour order. */
 const PIECE_WEIGHT = 1000;
 
+/** Price of a look the person has already been shown, against one place
+ * in the engine's ranking (60 at most): an unseen look of the same number
+ * of pieces always wins, but never one with more pieces. */
+const SEEN_WEIGHT = 100;
+
+/** Price of a palette no packed accessory completes, against one place in
+ * the ranking: the accessories steer the choice of palette, but never add
+ * a piece or outrank a look that has more pieces. */
+const NO_ACCESSORY_WEIGHT = 40;
+
 export interface TripInput {
   /** First and last day of the trip, UTC-midnight day keys, inclusive. */
   start: Date;
@@ -60,10 +81,13 @@ export interface TripInput {
   /** Accessories packed: suggested on the days they match. */
   accessories: GarmentWithColors[];
   palettes: SanzoPalette[];
+  /** Looks (`TripDay.look`) from earlier proposals: "fer la maleta" again
+   * proposes others while there are any. */
+  seen?: ReadonlySet<string>;
 }
 
 /** Why a day has no outfit, most basic cause first. */
-export type MissingPiece = "shoes" | "top" | "pants" | "colour";
+export type MissingPiece = "shoes" | "top" | "pants" | "uncoloured" | "colour";
 
 export interface TripDay {
   /** YYYY-MM-DD */
@@ -72,12 +96,14 @@ export interface TripDay {
    * null when no combination was possible. */
   outfit: GarmentWithColors[] | null;
   palette: SanzoPalette | null;
-  /** Needed (cold, or a sweater day in mixed weather) and found. */
+  /** Cold, or a sweater day in mixed weather, and a coat was packed.
+   * No coat in the pool means none, without a warning: the person knows
+   * what they own. */
   coat: GarmentWithColors | null;
-  /** True when the day called for a coat and the pool has none. */
-  coatMissing: boolean;
   accessories: GarmentWithColors[];
   missing: MissingPiece | null;
+  /** The day's look before layers, to pass back in `seen`. */
+  look: string | null;
 }
 
 export interface LaundrySession {
@@ -188,6 +214,18 @@ function pickCoat(
   return best;
 }
 
+/** Which top to add over or under the day's, or null. A sweater is always
+ * worn over a shirt when it is not hot; in the cold a shirt also gets a
+ * sweater over it. The person can still leave a layer off on the day. */
+function layerWanted(weather: TripWeather, clothes: GarmentWithColors[]): Category | null {
+  if (weather === "hot") return null;
+  const shirt = clothes.some((g) => g.category === "SHIRT");
+  const sweater = clothes.some((g) => g.category === "SWEATER");
+  if (sweater && !shirt) return "SHIRT";
+  if (weather === "cold" && shirt && !sweater) return "SWEATER";
+  return null;
+}
+
 /** No forecast, so in mixed weather a cold day is one whose outfit carries
  * a sweater: the engine already ranks sweaters for the weather. */
 function needsCoat(weather: TripWeather, outfit: GarmentWithColors[] | null): boolean {
@@ -239,10 +277,77 @@ export function planTrip(input: TripInput): TripPlan | TripError {
     return found;
   };
 
+  // A palette the packed accessories complete wins over one they do not,
+  // so the suitcase's accessories choose the colour story of the day.
+  const completedByAccessory = (c: Candidate): boolean =>
+    suggestAccessories([...c.clothes, c.shoes], c.palette, accessories).length > 0;
+
   const cost = (c: Candidate): number => {
     const fresh = c.clothes.filter((g) => !used.has(g.id)).length;
     const pieces = input.mode === "minimize" ? fresh : c.clothes.length - fresh;
-    return pieces * PIECE_WEIGHT + c.rank;
+    const accessoryPenalty =
+      accessories.length > 0 && !completedByAccessory(c) ? NO_ACCESSORY_WEIGHT : 0;
+    return (
+      pieces * PIECE_WEIGHT +
+      (input.seen?.has(c.key) ? SEEN_WEIGHT : 0) +
+      accessoryPenalty +
+      c.rank
+    );
+  };
+
+  // The last day of the wash cycle a day belongs to: the next wash, or the
+  // end of the trip.
+  const cycleEnd = (dayNumber: number): number =>
+    input.laundry
+      ? Math.min(Math.ceil(dayNumber / LAUNDRY_EVERY_DAYS) * LAUNDRY_EVERY_DAYS, dates.length)
+      : dates.length;
+
+  // A second top over or under the day's, checked by the engine against the
+  // rest of the outfit. A layer only goes on when the tops left in the cycle
+  // still cover the days left in it: a warmer Monday must not leave Friday
+  // with nothing to wear.
+  const addLayer = (
+    chosen: Candidate,
+    wearable: GarmentWithColors[],
+    dayNumber: number,
+  ): { garments: GarmentWithColors[]; palette: SanzoPalette } | null => {
+    const need = layerWanted(input.weather, chosen.clothes);
+    if (!need) return null;
+    const today = new Set(chosen.clothes.map((g) => g.id));
+    const options = wearable.filter((g) => g.category === need && !today.has(g.id));
+    if (options.length === 0) return null;
+    const spare = wearable
+      .filter((g) => TOPS.has(g.category) && !today.has(g.id))
+      .reduce((sum, g) => sum + (MAX_WEARS_BETWEEN_WASHES[g.category] ?? 1) - (wears.get(g.id) ?? 0), 0);
+    if (spare - 1 < cycleEnd(dayNumber) - dayNumber) return null;
+
+    const top = chosen.clothes.find((g) => TOPS.has(g.category));
+    const rest = chosen.clothes.filter((g) => g !== top);
+    if (!top) return null;
+    const { groups } = generateOutfitGroupsForGarment(
+      top,
+      [...rest, chosen.shoes, ...options],
+      input.palettes,
+      ENGINE_LIMIT,
+      0,
+      sweaterInSeason,
+      shortsInSeason,
+    );
+    let best: { garments: GarmentWithColors[]; palette: SanzoPalette } | null = null;
+    let bestCost = Infinity;
+    for (const [rank, group] of groups.entries()) {
+      const layer = group.garments.find((g) => g.category === need);
+      if (!layer || !group.garments.some((g) => g.category === "PANTS")) continue;
+      // minimize: a layer already packed wins; noRepeat: a new one wins.
+      const reuse = used.has(layer.id);
+      const penalty = (input.mode === "minimize" ? !reuse : reuse) ? PIECE_WEIGHT : 0;
+      const total = penalty + rank;
+      if (total < bestCost) {
+        bestCost = total;
+        best = { garments: group.garments, palette: group.palettes[0].palette };
+      }
+    }
+    return best;
   };
 
   const days: TripDay[] = [];
@@ -265,18 +370,23 @@ export function planTrip(input: TripInput): TripPlan | TripError {
       if (shoes.length === 0) missing = "shoes";
       else if (!wearable.some((g) => TOPS.has(g.category))) missing = "top";
       else if (!wearable.some((g) => g.category === "PANTS")) missing = "pants";
+      else if (wearable.some((g) => g.colors.length === 0)) missing = "uncoloured";
       else missing = "colour";
     }
 
-    const outfit = chosen ? [...chosen.clothes, chosen.shoes] : null;
-    const palette = chosen?.palette ?? null;
-    const wantsCoat = chosen !== null && needsCoat(input.weather, outfit);
-    const coat = wantsCoat ? pickCoat(coats, palette, input.mode, usedCoats) : null;
+    const dayNumber = i + 1;
+    const layered = chosen ? addLayer(chosen, wearable, dayNumber) : null;
+    const outfit = layered?.garments ?? (chosen ? [...chosen.clothes, chosen.shoes] : null);
+    const palette = layered?.palette ?? chosen?.palette ?? null;
+    const coat =
+      chosen !== null && needsCoat(input.weather, outfit)
+        ? pickCoat(coats, palette, input.mode, usedCoats)
+        : null;
 
-    if (chosen) {
+    if (chosen && outfit) {
       usedKeys.add(chosen.key);
       usedShoes.add(chosen.shoes.id);
-      for (const g of chosen.clothes) {
+      for (const g of outfit.filter((x) => CLOTHES.has(x.category))) {
         used.add(g.id);
         wears.set(g.id, (wears.get(g.id) ?? 0) + 1);
         sinceWash.set(g.id, g);
@@ -289,14 +399,13 @@ export function planTrip(input: TripInput): TripPlan | TripError {
       outfit,
       palette,
       coat,
-      coatMissing: wantsCoat && coat === null,
       accessories: outfit
         ? suggestAccessories(outfit, palette, accessories).map((s) => s.garment)
         : [],
       missing,
+      look: chosen?.key ?? null,
     });
 
-    const dayNumber = i + 1;
     const isLast = dayNumber === dates.length;
     if (input.laundry && dayNumber % LAUNDRY_EVERY_DAYS === 0 && !isLast && sinceWash.size > 0) {
       laundry.push({ after: dayToISO(date), garments: [...sinceWash.values()] });
