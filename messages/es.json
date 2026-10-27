@@ -629,6 +629,13 @@
         "r3": "Todo outfit lleva zapatos: sin zapatos no se propone.",
         "r4": "El negro y el blanco combinan siempre con todo, no solo los zapatos.",
         "r5": "Los abrigos y los accesorios se eligen al ponerte el outfit; no forman parte del outfit guardado."
+      },
+      "maleta": {
+        "title": "la maleta",
+        "p1": "Marca las prendas que te llevas, los zapatos y los accesorios, y elige las fechas. La app te propone qué ponerte cada día con lo que has marcado, sin guardar nada.",
+        "p2": "El tiempo sale de lo que marcas: con abrigo, frío; con jersey, mixto; sin ninguno de los dos, calor. Los accesorios que te llevas eligen la paleta del día: si un look combina con uno, gana.",
+        "p3": "Con colada, la app lava cada dos días y reutiliza las prendas. Sin colada, cada prenda aguanta tantos usos como permitan los límites entre lavados, y el día dice qué falta.",
+        "p4": "«Otra propuesta» cambia los looks sin añadir prendas. Si tocas algo del formulario, la lista vuelve a empezar. Si el viaje empieza hoy, las prendas sucias se quedan en casa."
       }
     },
     "hints": {

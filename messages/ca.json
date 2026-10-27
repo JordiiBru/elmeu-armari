@@ -629,6 +629,13 @@
         "r3": "Tot outfit porta sabates: sense sabates no es proposa.",
         "r4": "El negre i el blanc combinen sempre amb tot, no només les sabates.",
         "r5": "Els abrics i els accessoris es trien en posar-te l'outfit; no formen part de l'outfit desat."
+      },
+      "maleta": {
+        "title": "la maleta",
+        "p1": "Marca les peces que t'enduus, les sabates i els accessoris, i tria les dates. L'app et proposa què posar-te cada dia amb el que has marcat, sense guardar res.",
+        "p2": "El temps surt del que marques: amb abric, fred; amb jersei, mixt; sense cap dels dos, calor. Els accessoris que t'enduus trien la paleta del dia: si un look hi combina, guanya.",
+        "p3": "Amb bugada, l'app renta cada dos dies i reutilitza les peces. Sense bugada, cada peça aguanta tants usos com permetin els límits entre rentats, i el dia diu què falta.",
+        "p4": "«Una altra proposta» canvia els looks sense afegir peces. Si toques alguna cosa del formulari, la llista torna a començar. Si el viatge comença avui, les peces brutes es queden a casa."
       }
     },
     "hints": {
