@@ -331,6 +331,71 @@
       "badge": "in the basket"
     }
   },
+  "maleta": {
+    "title": "suitcase",
+    "subtitle": "the days of the trip and what you take; we tell you what to wear each day.",
+    "trip": "The trip",
+    "preferences": "Preferences",
+    "start": "Leaving",
+    "end": "Back",
+    "length": "{days, plural, one {# day} other {# days}} · {nights, plural, one {# night} other {# nights}}",
+    "weather": {
+      "hot": "hot",
+      "cold": "cold",
+      "mixed": "mixed"
+    },
+    "mode": {
+      "label": "Approach",
+      "minimize": "fewer pieces",
+      "noRepeat": "no repeats"
+    },
+    "laundry": {
+      "label": "I'll do laundry during the trip",
+      "hint": "One wash every {every} days. Shirts and sweaters, {tops, plural, one {# wear} other {# wears}} between washes; trousers, {pants, plural, one {# wear} other {# wears}}. Without laundry, these limits hold for the whole trip."
+    },
+    "pool": {
+      "clothes": "Pieces that can go in the suitcase",
+      "shoes": "Shoes you're taking",
+      "accessories": "Accessories you're taking",
+      "count": "{selected} of {total}",
+      "all": "all",
+      "none": "none",
+      "empty": "you have none in the wardrobe."
+    },
+    "submit": "Pack the suitcase",
+    "submitting": "thinking…",
+    "reroll": "Another proposal",
+    "tryLaundry": "Try with laundry",
+    "errors": {
+      "range": "The return has to be on or after the day you leave.",
+      "tooLong": "A trip can last at most {max} days."
+    },
+    "result": {
+      "packed": "In the suitcase",
+      "packedCount": "{count, plural, =0 {no pieces} one {# piece} other {# pieces}}",
+      "days": "Day by day",
+      "day": "Day {n}",
+      "palette": "Palette {name}",
+      "missing": {
+        "shoes": "No combination: you're not taking shoes.",
+        "top": "No combination: one more shirt or sweater is needed. A black or white one goes with everything.",
+        "pants": "No combination: one more pair of trousers is needed. Black or white ones go with everything.",
+        "colour": "No combination: the pieces left don't go together. A black or white piece goes with everything.",
+        "uncoloured": "No combination: a piece has no colour. Give it one so it can join the outfits."
+      },
+      "laundry": "Laundry",
+      "laundryAfter": "At the end of day {n} · {date}",
+      "summaryEyebrow": "Your trip",
+      "facts": {
+        "weather": "Weather",
+        "mode": "Approach",
+        "laundry": "Laundry",
+        "packed": "In the suitcase"
+      },
+      "laundryCount": "{count, plural, =0 {none} one {# wash} other {# washes}}",
+      "laundryHere": "Laundry at the end of the day"
+    }
+  },
   "menu": {
     "label": "Menu",
     "stats": "statistics",
@@ -354,7 +419,8 @@
       "avui": "What do I wear?",
       "armari": "Wardrobe",
       "bugaderia": "Laundry",
-      "paleta": "Palettes"
+      "paleta": "Palettes",
+      "maleta": "Pack a suitcase"
     }
   },
   "outfits": {
