@@ -109,6 +109,15 @@ export default async function HelpPage() {
           ))}
         </ol>
       </PageRow>
+
+      <PageRow id="maleta" number="06" title={t("sections.maleta.title")}>
+        <Text variant="subtitle" as="p" className="text-2xl leading-snug md:text-3xl">
+          {t("sections.maleta.p1")}
+        </Text>
+        <P>{t("sections.maleta.p2")}</P>
+        <P>{t("sections.maleta.p3")}</P>
+        <P>{t("sections.maleta.p4")}</P>
+      </PageRow>
     </PageContainer>
   );
 }

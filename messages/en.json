@@ -629,6 +629,13 @@
         "r3": "Every outfit has shoes: without shoes it is not suggested.",
         "r4": "Black and white always match, on any piece and not only shoes.",
         "r5": "Outerwear and accessories are picked when you wear the outfit; they are not part of the saved outfit."
+      },
+      "maleta": {
+        "title": "the suitcase",
+        "p1": "Tick the pieces you take, your shoes and accessories, and pick the dates. The app proposes what to wear each day from what you ticked, and saves nothing.",
+        "p2": "The weather comes from what you tick: with a coat, cold; with a sweater, mixed; with neither, warm. Accessories you take choose the day's palette: a look that matches one wins.",
+        "p3": "With laundry, the app washes every two days and reuses pieces. Without it, each piece lasts as many wears as the limits between washes allow, and the day says what is missing.",
+        "p4": "Another proposal changes the looks without adding pieces. If you change anything in the form, the list starts again. If the trip starts today, dirty pieces stay home."
       }
     },
     "hints": {
