@@ -29,7 +29,7 @@ function garment(
 }
 
 function outfit(id: string, garments: GarmentWithColors[]): SavedOutfit {
-  return { id, name: id, paletteId: 1, favorite: true, createdAt: new Date(), garments, wornEvents: [] };
+  return { id, name: id, paletteId: 1, favorite: true, createdAt: new Date(), garments, accessories: [], wornEvents: [] };
 }
 
 const shirtA = garment("shirt-a", "SHIRT", new Date(1));

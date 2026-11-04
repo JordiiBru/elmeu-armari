@@ -58,55 +58,100 @@ export function paletteName(palette: SanzoPalette | null): string | null {
   return names.length > 0 ? names.join(" · ") : palette.nombre;
 }
 
-/** Tiled photo composite: the outfit's own garments, not swatches/icons. */
+/** One piece, whole, inside its box with a margin of the box's own
+ * surface around it. */
+export function BoxPiece({
+  garment,
+  sizes,
+  thumb = true,
+}: {
+  garment: GarmentWithColors;
+  sizes?: string;
+  thumb?: boolean;
+}) {
+  return (
+    <span className="absolute inset-[8%]">
+      <PieceThumb garment={garment} thumb={thumb} sizes={sizes} fit="contain" flat className="h-full w-full" />
+    </span>
+  );
+}
+
+/** The accessories box: one fills it; two stand side by side; three put
+ * the first one tall beside the other two; four share it two by two;
+ * past four the last cell counts the rest. Every piece gets the largest
+ * cell its count allows, never a quarter box beside an empty one. */
+export function AccessoryGrid({ pieces, sizes = "6rem" }: { pieces: GarmentWithColors[]; sizes?: string }) {
+  if (pieces.length === 0) return null;
+  if (pieces.length === 1) return <BoxPiece garment={pieces[0]} sizes={sizes} />;
+  const shown = pieces.length > 4 ? pieces.slice(0, 3) : pieces;
+  const rest = pieces.length - shown.length;
+  const layout = shown.length === 2 ? "grid-cols-2 grid-rows-1" : "grid-cols-2 grid-rows-2";
+  return (
+    <div className={`absolute inset-[6%] grid gap-1 ${layout}`}>
+      {shown.map((g, i) => (
+        <PieceThumb
+          key={g.id}
+          garment={g}
+          thumb
+          sizes={sizes}
+          fit="contain"
+          flat
+          className={`h-full min-h-0 w-full ${shown.length === 3 && rest === 0 && i === 0 ? "row-span-2" : ""}`}
+        />
+      ))}
+      {rest > 0 && (
+        <span className="flex items-center justify-center type-caption tabular-nums text-text-secondary">+{rest}</span>
+      )}
+    </div>
+  );
+}
+
+/** The four boxes of an outfit, in reading order. A sweater over a shirt
+ * shows the sweater: it is the one on top. */
+export function outfitBoxes(garments: GarmentWithColors[], accessories: GarmentWithColors[]) {
+  const top =
+    garments.find((g) => g.category === "SWEATER") ?? garments.find((g) => g.category === "SHIRT");
+  return {
+    top,
+    pants: garments.find((g) => g.category === "PANTS"),
+    shoes: garments.find((g) => g.category === "SHOES"),
+    accessories,
+  };
+}
+
+/**
+ * An outfit as four boxes of one size, two by two: top, trousers, shoes,
+ * accessories. The same figure the builder fills in as you pick, so a
+ * saved outfit, a day in the week and the one on the stage all read
+ * alike. Each piece is whole, never cropped; an empty slot is just the
+ * box.
+ */
 export function OutfitCollage({
   garments,
+  accessories = [],
   className,
   thumb = true,
   sizes,
-  max = 3,
 }: {
   garments: GarmentWithColors[];
+  /** Accessories (and, on a day, the coat): the fourth box. */
+  accessories?: GarmentWithColors[];
   className?: string;
   thumb?: boolean;
   sizes?: string;
-  /** Past this the collage reads as a wall of thumbnails rather than a
-   * look. The calendar raises it: a day is the whole outfit plus what you
-   * wore it with, and hiding half of it behind a "+2" defeats the point. */
-  max?: number;
 }) {
-  if (garments.length === 0) {
-    return <div className={`bg-surface ${className ?? ""}`} />;
-  }
-  if (garments.length === 1) {
-    return (
-      <PieceThumb garment={garments[0]} thumb={thumb} sizes={sizes} className={className} />
-    );
-  }
-  const shown = garments.slice(0, max);
-  const hidden = garments.length - shown.length;
-  // Two columns up to four pieces, three beyond that, so the tiles stay
-  // as square as the frame allows instead of turning into slivers.
-  const cols = shown.length > 4 ? "grid-cols-3" : "grid-cols-2";
-  const rows = shown.length > 2 ? "grid-rows-2" : "";
+  const boxes = outfitBoxes(garments, accessories);
+  const cell = "relative min-h-0 min-w-0 overflow-hidden bg-surface";
   return (
-    <div className={`relative ${className ?? ""}`}>
-      <div className={`grid h-full w-full gap-0.5 ${cols} ${rows}`}>
-        {shown.map((g, i) => (
-          <PieceThumb
-            key={g.id}
-            garment={g}
-            thumb={thumb}
-            sizes={sizes}
-            className={`h-full w-full ${shown.length === 3 && i === 0 ? "row-span-2" : ""}`}
-          />
-        ))}
+    <div className={`grid grid-cols-2 grid-rows-2 gap-[3px] ${className ?? ""}`}>
+      {[boxes.top, boxes.pants, boxes.shoes].map((g, i) => (
+        <div key={i} className={cell}>
+          {g && <BoxPiece garment={g} thumb={thumb} sizes={sizes} />}
+        </div>
+      ))}
+      <div className={cell}>
+        <AccessoryGrid pieces={boxes.accessories} />
       </div>
-      {hidden > 0 && (
-        <span className="absolute bottom-1.5 right-1.5 type-caption bg-elevated px-1.5 py-0.5">
-          +{hidden}
-        </span>
-      )}
     </div>
   );
 }
@@ -131,7 +176,7 @@ function Mark({
   );
 }
 
-const TILE_SIZES = "(min-width: 1280px) 12vw, (min-width: 1024px) 15vw, (min-width: 640px) 22vw, 45vw";
+const TILE_SIZES = "(min-width: 1280px) 6vw, (min-width: 1024px) 8vw, (min-width: 640px) 11vw, 22vw";
 
 /**
  * The one card for a saved outfit, shared by Desats, Què em poso and the
@@ -158,6 +203,7 @@ export function OutfitTile({
    * the collection, so it never passes this. */
   onToggleFavorite?: () => void;
 }) {
+  const favorite = outfit.favorite;
   const t = useTranslations("labels");
   const tOutfits = useTranslations("outfits");
 
@@ -185,9 +231,10 @@ export function OutfitTile({
         data-testid="saved-outfit-card"
         className="w-full"
       >
-        <div className="relative aspect-[3/4] w-full overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0">
+        <div className="relative aspect-[4/5] w-full overflow-hidden transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:-translate-y-1 group-active:translate-y-0">
           <OutfitCollage
             garments={outfit.garments}
+            accessories={outfit.accessories}
             sizes={TILE_SIZES}
             className="h-full w-full"
           />
@@ -220,15 +267,15 @@ export function OutfitTile({
         <button
           type="button"
           onClick={onToggleFavorite}
-          aria-label={tOutfits("unfavorite")}
-          aria-pressed
+          aria-label={favorite ? tOutfits("unfavorite") : tOutfits("favorite")}
+          aria-pressed={favorite}
           className="absolute top-0 right-0 inline-flex min-h-11 min-w-11 items-center justify-center text-text-primary"
         >
           {/* The tap target is the full 44px corner; the visual chip
               inside it stays the same small badge size as `Mark`, so the
               photograph is still what the eye reads. */}
           <span className="inline-flex bg-elevated p-1.5 transition-transform active:scale-90">
-            <Icon name="star" size={14} className="fill-current" />
+            <Icon name="star" size={14} className={favorite ? "fill-current" : ""} />
           </span>
         </button>
       )}

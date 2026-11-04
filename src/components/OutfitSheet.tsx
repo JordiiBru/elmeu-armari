@@ -18,6 +18,7 @@ import { WearGrid, useWearGroups } from "./WearPicker";
 import { suggestAccessories } from "@/lib/outfits/accessories";
 import {
   Button,
+  SegmentedControl,
   Sheet,
   Stack,
   Text,
@@ -27,6 +28,8 @@ import {
 function weekdayLabel(iso: string, locale: string): string {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString(locale, {
     weekday: "long",
+    day: "numeric",
+    month: "short",
     // The ISO string is already the day's key, minted at UTC midnight —
     // reading it back in any other zone slides it by a day.
     timeZone: "UTC",
@@ -59,6 +62,12 @@ interface Props {
   onChangeOutfit?: () => void;
   /** Calendar only: empty the day. */
   onClear?: () => void;
+  /** The collection: the day is chosen here (today, yesterday, any
+   * date), so a day already gone can be recorded after the fact. The
+   * calendar passes its own day and leaves this off. */
+  chooseDay?: boolean;
+  /** Load this outfit into the builder to keep trying from it. */
+  onTry?: () => void;
   /** True when this sheet is stepping in for a sibling sheet rather than
    * opening fresh — see `Sheet`'s own doc on the prop it forwards to. */
   skipEnter?: boolean;
@@ -84,6 +93,8 @@ export function OutfitSheet({
   onCommitted,
   onChangeOutfit,
   onClear,
+  chooseDay = false,
+  onTry,
   skipEnter,
 }: Props) {
   const t = useTranslations("outfits");
@@ -105,10 +116,18 @@ export function OutfitSheet({
   const [editing, setEditing] = useState(false);
   const showPicker = !isRecord || editing;
 
+  // The day starts from the accessories saved with the outfit (they are
+  // part of its palette); untick them if they stay home today.
   const preselected = useMemo(
-    () => (isCommitted && dayExtras ? dayExtras : lastWornExtras(outfit)),
+    () =>
+      isCommitted && dayExtras
+        ? dayExtras
+        : outfit.accessories.length > 0
+          ? outfit.accessories
+          : lastWornExtras(outfit),
     [isCommitted, dayExtras, outfit],
   );
+  const [day, setDay] = useState(dayISO);
 
   const [extraIds, setExtraIds] = useState<string[]>(() => preselected.map((g) => g.id));
   const groups = useWearGroups(extraCandidates);
@@ -119,10 +138,11 @@ export function OutfitSheet({
 
   const title = outfitSubtitle(tLabel, outfit) || outfit.name || "";
   const blockedBy = dirtyGarmentsOf(outfit);
-  const isToday = dayISO === todayISO;
-  // The clean gate is only about today and the past: a shirt in the
-  // basket on Monday can perfectly well be clean by Thursday.
-  const blocked = dayISO <= todayISO && blockedBy.length > 0;
+  const isToday = day === todayISO;
+  // The clean gate is only about today: a shirt in the basket on Monday
+  // can perfectly well be clean by Thursday, and the basket now says
+  // nothing about a day that has already gone.
+  const blocked = isToday && blockedBy.length > 0;
 
   const picked = useMemo(() => {
     const byId = new Map(extraCandidates.map((g) => [g.id, g]));
@@ -146,7 +166,7 @@ export function OutfitSheet({
   // resolves — the button stays pending forever.
   const handleWear = () => {
     startTransition(async () => {
-      await wearOutfitAction(outfit.id, dayISO, picked.map((g) => g.id));
+      await wearOutfitAction(outfit.id, day, picked.map((g) => g.id));
       onCommitted?.();
       onClose();
     });
@@ -169,10 +189,10 @@ export function OutfitSheet({
   return (
     <Sheet
       onClose={onClose}
-      // A record stands the photograph up beside what it is a photograph
-      // of; the picker is one column of grids and stays one column wide.
-      size={isRecord ? "2xl" : "xl"}
-      split={isRecord}
+      // The photograph (or the outfit's figure) stands in its own column
+      // beside the body, the same split as the garment sheet.
+      size="2xl"
+      split
       skipEnter={skipEnter}
       // A record's photograph and a picker's grid are different heights,
       // and the sheet used to resize under the header on every state
@@ -186,51 +206,33 @@ export function OutfitSheet({
             sizes="(min-width: 640px) 24rem, 100vw"
             className="h-full w-full"
           />
-        ) : isRecord ? (
-          // No photograph taken: the collage stands in for it. Wide, it
-          // is boxed to its own proportion rather than stretched up a
-          // whole column, which turns two garments into two slivers —
-          // and the proportion is taken from the height, which is the
-          // definite one. Deriving it from the width and capping the
-          // height with `max-h-full` is what Safari ignores: it drew the
-          // box at 523px inside a 224px band and spilled it over the
-          // pieces. So the column derives the height from the width, the
-          // direction every engine agrees on, and the column is always
-          // taller than the box that comes out of it. Stacked there is
-          // no proportion to keep at all: the band is already the shape
-          // of a photograph.
-          <div className="flex h-full w-full items-center justify-center p-4 sm:p-6">
-            <div className="h-full w-full sm:h-auto sm:max-h-full sm:aspect-[3/4]">
+        ) : (
+          // No photograph: the outfit as it is worn stands in for it.
+          // Wide, it is boxed to its own proportion rather than stretched
+          // up a whole column — and the proportion is taken from the
+          // width, the direction every engine agrees on (Safari ignored
+          // `max-h-full` against a derived width and spilled the box over
+          // the pieces). Stacked there is no proportion to keep: the band
+          // is already the shape of a photograph.
+          <div className="flex h-full w-full items-center justify-center p-2 sm:p-6">
+            <div className="aspect-[4/5] h-full max-w-full sm:h-auto sm:w-full sm:max-h-full">
               <OutfitCollage
                 garments={outfit.garments}
+                accessories={outfit.accessories}
                 thumb={false}
                 sizes="(min-width: 640px) 20rem, 80vw"
                 className="h-full w-full"
               />
             </div>
           </div>
-        ) : (
-          <OutfitCollage
-            garments={outfit.garments}
-            thumb={false}
-            sizes="(min-width: 640px) 32rem, 100vw"
-            className="h-full w-full"
-          />
         )
       }
-      // On a phone a record is stacked, so the photograph takes a third of
-      // the panel and leaves the rest to the pieces. While picking it goes
-      // away entirely there — a standing figure over a grid of shoes is a
-      // grid of shoes you cannot see. Wide, the column keeps it: there is
-      // room for both, and it is what you are dressing.
+      // Phone: the record keeps a third of the panel for the photograph;
+      // while picking the figure shrinks to a band, so the accessories
+      // stay in view. Wide, the column always holds it: it is what you
+      // are dressing.
       mediaHeight={
-        isRecord
-          ? editing
-            ? "hidden sm:block"
-            : photo
-              ? "h-[38dvh]"
-              : "h-56"
-          : "h-36 sm:h-56"
+        isRecord && !editing ? (photo ? "h-[38dvh]" : "h-56") : "h-52"
       }
       header={
         <Stack gap={1}>
@@ -358,7 +360,7 @@ export function OutfitSheet({
                 >
                   {isToday
                     ? t("wearToday")
-                    : t("wearOnDay", { day: weekdayLabel(dayISO, locale) })}
+                    : t("wearOnDay", { day: weekdayLabel(day, locale) })}
                 </Button>
               </>
             )}
@@ -366,6 +368,9 @@ export function OutfitSheet({
         ) : undefined
       }
     >
+      {showPicker && chooseDay && (
+        <DayChooser value={day} todayISO={todayISO} onChange={setDay} disabled={pending} />
+      )}
       {showPicker ? (
         <WearGrid
           groups={groups}
@@ -381,6 +386,14 @@ export function OutfitSheet({
       {/* What's left once the destructive action moved to the pinned
           footer: quieter, occasional actions that earning a scroll past
           the grid is a fair price for. */}
+      {onTry && !isRecord && (
+        <div className="mt-6 border-t border-border pt-4">
+          <TextButton type="button" tone="secondary" onClick={onTry} disabled={pending}>
+            {t("tryInBuilder")}
+          </TextButton>
+        </div>
+      )}
+
       {(isRecord || onChangeOutfit) && (
         <Stack gap={4} className="mt-auto">
           {isRecord && !editing && dayEvent && (
@@ -421,5 +434,53 @@ export function OutfitSheet({
         </Stack>
       )}
     </Sheet>
+  );
+}
+
+
+/**
+ * Which day this outfit goes on: today, or any other date. A past day
+ * records what was worn after the fact (it never dirties anything); a
+ * future one plans it.
+ */
+function DayChooser({
+  value,
+  todayISO,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  todayISO: string;
+  onChange: (iso: string) => void;
+  disabled: boolean;
+}) {
+  const t = useTranslations("outfits.day");
+  const [other, setOther] = useState(value !== todayISO);
+  return (
+    <div className="mb-6 flex min-h-11 flex-wrap items-center gap-x-6 gap-y-3 border-b border-border-subtle pb-4">
+      <SegmentedControl<"TODAY" | "OTHER">
+        value={other ? "OTHER" : "TODAY"}
+        onChange={(v) => {
+          setOther(v === "OTHER");
+          if (v === "TODAY") onChange(todayISO);
+        }}
+        wrap={false}
+        ariaLabel={t("aria")}
+        options={[
+          { value: "TODAY", label: t("today") },
+          { value: "OTHER", label: t("other") },
+        ]}
+      />
+      {other && (
+        <input
+          type="date"
+          value={value}
+          onChange={(e) => e.target.value && onChange(e.target.value)}
+          disabled={disabled}
+          aria-label={t("aria")}
+          className="min-h-11 border-b border-border bg-transparent font-serif type-small text-text-primary outline-none focus-visible:border-border-strong"
+        />
+      )}
+    </div>
   );
 }

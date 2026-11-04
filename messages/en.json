@@ -435,17 +435,13 @@
       "week": "the week",
       "all": "your outfits"
     },
-    "filtersLabel": "Filter outfits",
-    "categoryFilterLabel": "piece",
     "seasonFilterLabel": "Filter by season",
     "seasonOnly": "in season",
     "allSeasons": "all year",
     "cleanFilterLabel": "Filter by state",
     "cleanOnly": "clean",
     "allClean": "all",
-    "filterAll": "all",
     "unfavorite": "remove from favourites",
-    "removedFromFavorites": "removed from favourites",
     "undo": "undo",
     "pickForMe": "pick for me",
     "today": "today",
@@ -464,29 +460,18 @@
     "deleteCostMany": "the calendar days you wore it on will be cleared too.",
     "changeOutfit": "change outfit",
     "removeFromDay": "clear the day",
-    "emptyNoOutfitsBrowse": "the first outfit is yet to be made.",
     "emptyWeek": "the week, blank.",
     "emptyWeekHint": "once you save an outfit, you can put it on any day here.",
-    "emptyNoOutfitsHintDiscover": "discover combinations with your clothes and save the first one.",
     "emptyWardrobe": "nothing to choose from, yet.",
     "emptyWardrobeHint": "add your first pieces and combinations will start to appear here.",
     "emptyNoneReady": "time to do the laundry",
     "goToArmari": "go to the wardrobe",
     "goToRentar": "go and wash",
     "sheetLabel": "Outfit {title}",
-    "axes": {
-      "SHIRT": "shirts",
-      "PANTS": "trousers",
-      "SWEATER": "sweaters",
-      "SHOES": "shoes"
-    },
+    "favorite": "add to favourites",
+    "tryInBuilder": "try it in the builder",
+    "day": {"aria": "Day", "today": "today", "yesterday": "yesterday", "other": "another day"},
     "axisEmpty": "no outfit for this filter yet.",
-    "seeMore": "more combinations",
-    "discover": "discover",
-    "discoverSheetLabel": "Discover by {category}",
-    "discoverAxisAria": "browse by piece",
-    "discoverPieceEmpty": "no outfit saved with this piece yet.",
-    "discoverAxisEmpty": "no piece of this kind yet.",
     "plan": "plan",
     "back": "back",
     "planned": "planned",
@@ -496,6 +481,43 @@
       "ago": "{days, plural, one {worn # day ago} other {worn # days ago}}"
     },
     "outerwear": "outerwear"
+  },
+  "builder": {
+    "slots": {
+      "TOP": "top",
+      "PANTS": "trousers",
+      "SHOES": "shoes",
+      "ACCESSORIES": "accessories"
+    },
+    "prompts": {
+      "TOP": "sweater or shirt",
+      "PANTS": "trousers",
+      "SHOES": "shoes",
+      "ACCESSORIES": "accessories"
+    },
+    "slotsAria": "Piece to choose",
+    "palettes": "{count, plural, =0 {no palette} one {# palette} other {# palettes}}",
+    "wildcard": "goes with all",
+    "noFit": "closes the palette",
+    "noColour": "no colour",
+    "completes": "completes",
+    "noOptions": "no pieces of this kind with these filters.",
+    "alternatives": "or",
+    "save": "save outfit",
+    "saving": "saving…",
+    "open": "Open outfit n{number}",
+    "clear": "restart",
+    "savedEmpty": "no saved outfits yet. build one above.",
+    "backToStage": "Back to the outfit",
+    "blocked": {
+      "empty": "pick a piece before saving.",
+      "missing": "to save it, add {pieces}.",
+      "noPair": "no palette yet: add a piece with a second colour.",
+      "dead": "these pieces share no palette. swap one."
+    },
+    "savedNoneWithPicks": "no saved outfit with these pieces.",
+    "savedAs": "saved as n{number}, with another palette",
+    "withPicks": "with these pieces"
   },
   "dayPhoto": {
     "add": "photo",
@@ -510,29 +532,6 @@
   "week": {
     "previous": "Previous week",
     "next": "Next week"
-  },
-  "combine": {
-    "sheetLabel": "Combinations for {category}",
-    "eyebrow": "combine",
-    "all": "all",
-    "pieces": "{count, plural, one {# piece} other {# pieces}}",
-    "emptyFiltered": "{count, plural, one {no one-piece combinations loaded.} other {no #-piece combinations loaded.}}",
-    "loadMore": "load more",
-    "empty": "no combination found for this garment.",
-    "count": "{count, plural, one {# combination} other {# combinations}}",
-    "showMore": "show all combinations",
-    "save": "save outfit",
-    "saved": "saved",
-    "savingOutfit": "saving…",
-    "less": "less",
-    "morePalettes": "{count, plural, one {+# palette} other {+# palettes}}",
-    "pickTop": "pick a sweater or shirt",
-    "pickPants": "pick trousers",
-    "pickShoes": "pick shoes",
-    "unmatched": "free",
-    "savePalette": "save",
-    "savePaletteAria": "Save palette",
-    "savedPaletteAria": "Already saved"
   },
   "paleta": {
     "eyebrow": "colour catalogue",
@@ -602,13 +601,13 @@
       "what": {
         "title": "what this app is",
         "p1": "Your wardrobe, organised around the colour combinations of Sanzo Wada's dictionary (Tokyo, 1933): 348 palettes of two to six colours.",
-        "p2": "Each piece is assigned to colours of the dictionary, and two pieces go together when they share a palette. The outfits the app suggests come from that."
+        "p2": "Every piece is assigned to colours from the dictionary, and pieces go together when they share a palette. With that you build your outfits piece by piece and see which palette they belong to."
       },
       "flow": {
         "title": "the daily flow",
-        "p1": "Add your pieces with a photo, colour, season and size. If you add a photo, the app suggests the colours.",
-        "p2": "Open a piece and see what goes with it: you get complete outfits (top, trousers and shoes) and can save the ones you like.",
-        "p3": "In \"What do I wear?\" you pick a saved outfit for today or for another day of the week. \"Wear it\" assigns it to today; for another day the button saves it on that day.",
+        "p1": "Add your pieces with a photo, colour, season and size. If you add a photo, the app suggests its colours. In the wardrobe, open a piece to see each colour beside the dictionary colour it is read as, and every palette it appears in.",
+        "p2": "In “What do I wear?” you build piece by piece in four boxes: a top (sweater or shirt), trousers, shoes and, if you like, accessories. Each option says how many palettes it keeps open and the palette forms as you go: colours you already wear stand up, the missing ones stay low. An accessory wearing a colour still missing is marked “completes”.",
+        "p3": "Save it once it has a top, trousers, shoes and a palette; if it cannot be saved yet, pressing “save outfit” tells you what is missing. Accessories are saved with the outfit because they are part of its palette: the same outfit with and without the bag are two outfits. Open a saved one to wear it today or on another day; a past day is recorded without dirtying anything.",
         "p4": "In the laundry you see what is clean and what is in the basket. Mark what goes to be washed and, once you have done the laundry, mark it as washed.",
         "steps": {
           "s1": "add",
@@ -624,17 +623,18 @@
         "p3": "Black, white and greys are neutrals: a dark grey reads as black."
       },
       "numbers": {
-        "title": "the number and the colour strip",
-        "p1": "The number under each outfit is the order in which you saved it. It does not change if you favourite it or not.",
-        "p2": "The colour strip is the dictionary combination the outfit was built on."
+        "title": "the number, the strip and the boxes",
+        "p1": "The number under each outfit (n001, n002…) is the order you saved it in, and it never changes. You can have as many outfits as you like on the same palette: each one has its own number.",
+        "p2": "The colour strip is the dictionary combination the outfit was built on.",
+        "p3": "Every outfit is drawn with the same four boxes you build it in: top, trousers, shoes and accessories. The same in the list, the calendar and the outfit sheet."
       },
       "rules": {
         "title": "the rules you cannot see",
         "r1": "Wearing an outfit does not make it dirty: that only happens once the day has passed.",
         "r2": "Only shirts and sweaters get dirty on their own. You send trousers to the basket yourself; shoes, outerwear and accessories never go to the wash.",
-        "r3": "Every outfit has shoes: without shoes it is not suggested.",
+        "r3": "Every outfit has shoes: without shoes it cannot be saved.",
         "r4": "Black and white always match, on any piece and not only shoes.",
-        "r5": "Outerwear and accessories are picked when you wear the outfit; they are not part of the saved outfit."
+        "r5": "Coats are picked when you wear the outfit. Accessories are saved with the outfit, but each day you decide whether to wear them."
       },
       "maleta": {
         "title": "the suitcase",
@@ -645,11 +645,6 @@
       }
     },
     "hints": {
-      "pieceFilter": "Groups the outfits by the piece you pick. It does not hide any.",
-      "seasonFilter": "Hides outfits with a piece out of season, like shorts in winter or a sweater in summer.",
-      "cleanFilter": "Hides outfits with a piece in the basket.",
-      "discover": "Combine piece by piece with what you own. It is not the favourites list.",
-      "outfitNumbers": "The number is the order in which you saved the outfit. The colour strip is the Sanzo Wada combination it is based on.",
       "armariFit": "How the piece sits: regular, loose, slim...",
       "armariState": "Clean or in the basket: see which pieces are in the laundry.",
       "armariSeason": "Shows only what suits the time of year you are in.",

@@ -8,15 +8,16 @@ import {
   toSavedOutfit,
 } from "@/lib/outfits/service";
 import { findAllGarments } from "@/lib/prendas/service";
-import { getCurrentSeason, isShortsInSeason, isSweaterInSeason } from "@/lib/prendas/season";
+import { getCurrentSeason } from "@/lib/prendas/season";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { isWearable, rankOutfitsForToday } from "@/lib/bugaderia/laundry";
 import { startOfWeek, addDays, dayToISO, isoToDay, today } from "@/lib/outfits/week";
 import { palettes } from "@/lib/colors";
+import { catalogueNumbers } from "@/lib/outfits/catalogue";
 import { TodayLine } from "@/components/TodayLine";
 import { WeekCalendar } from "@/components/WeekCalendar";
-import { OutfitLibrary } from "@/components/OutfitLibrary";
-import { PageContainer, SectionHeader, Stack, Text, Icon, EmptyState, InfoHint } from "@/components/ui";
+import { OutfitStudio } from "@/components/OutfitStudio";
+import { PageContainer, SectionHeader, Stack, Text, Icon, EmptyState } from "@/components/ui";
 import { requireUserId } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
@@ -100,12 +101,10 @@ function WeekNav({
 }
 
 /**
- * "Què em poso?" — the one place outfits live, in two strata now: the
- * week, and the whole collection. The day's answer used to be a third,
- * above both, and it was the same photograph the calendar was already
- * showing one cell down. Folding it into the week gives the calendar the
- * top of the screen and the room to be read, and leaves the day with
- * only what a cell cannot carry: the action it still wants.
+ * "Què em poso?" — the one place outfits live. The builder leads: build
+ * a look piece by piece and watch its palette form, with every saved
+ * outfit under it, narrowed by the same taps. The week closes the page:
+ * it is where a decided outfit goes, not where one is decided.
  */
 export default async function AvuiPage({
   searchParams,
@@ -113,10 +112,9 @@ export default async function AvuiPage({
   searchParams: Promise<{ start?: string }>;
 }) {
   const { start: startParam } = await searchParams;
-  const [t, tWeek, tHelp, locale] = await Promise.all([
+  const [t, tWeek, locale] = await Promise.all([
     getTranslations("outfits"),
     getTranslations("week"),
-    getTranslations("help"),
     getLocale(),
   ]);
   const currentDay = today();
@@ -137,19 +135,15 @@ export default async function AvuiPage({
   const todayISO = dayToISO(currentDay);
   const extraCandidates = garments.filter((g) => EXTRA_CATEGORIES.has(g.category));
 
-  // Ranked once, on the server, and shared by both the plate and the
-  // grid: the proposal at the top of the page and the first tile of the
-  // collection must never disagree about what comes first. Favourites
-  // only — an outfit saved from the wardrobe's discovery sheet is a
-  // candidate; favouriting it is what promotes it into daily rotation.
+  // Ranked once, on the server. The week and today's line take the
+  // favourites: favouriting is what puts an outfit into daily rotation.
   const allSaved = outfits.map(toSavedOutfit);
   const favorites = allSaved.filter((o) => o.favorite);
   const ranked = rankOutfitsForToday(favorites, season);
-  // The unfiltered ranking too, so "descobreix" can show every outfit
-  // already saved with a piece — favourited or not — and so a catalogue
-  // number stays the same one outfit whether it turns up favourited in
-  // Desats or unfavourited in a discover row.
+  // The builder's collection shows every saved outfit (favourites is a
+  // toggle there), and numbers them off this same list.
   const allRanked = rankOutfitsForToday(allSaved, season);
+  const numbers = catalogueNumbers(allSaved);
   const committed = ranked.find((o) => o.id === todayOutfitId) ?? null;
 
   // The only real dead end is an empty wardrobe: with nothing to wear
@@ -181,8 +175,21 @@ export default async function AvuiPage({
     <PageContainer width="full">
       <SectionHeader title={t("screenTitle")} level="title-xl" />
 
-      <Stack gap={8} className="md:gap-16">
+      <Stack gap={9} className="md:gap-20">
+        <OutfitStudio
+          garments={garments}
+          outfits={allRanked}
+          palettes={palettes}
+          extraCandidates={extraCandidates}
+          savedOutfitKeys={savedOutfitKeys}
+          todayISO={todayISO}
+          todayOutfitId={todayOutfitId}
+          season={season}
+          numbers={numbers}
+        />
+
         <Stratum
+          id="setmana"
           title={t("sections.week")}
           aside={
             <WeekNav
@@ -199,6 +206,7 @@ export default async function AvuiPage({
             palettes={palettes}
             extraCandidates={extraCandidates}
             todayISO={todayISO}
+            numbers={numbers}
           />
           <TodayLine
             committed={committed}
@@ -209,36 +217,9 @@ export default async function AvuiPage({
             todayEvent={todayWorn?.event ?? null}
           />
         </Stratum>
-
-        <Stratum
-          id="tots-els-outfits"
-          title={t("sections.all")}
-          aside={
-            <InfoHint
-              label={tHelp("hintLabel")}
-              href="/ajuda#numbers"
-              moreLabel={tHelp("more")}
-              inline={false}
-            >
-              {tHelp("hints.outfitNumbers")}
-            </InfoHint>
-          }
-        >
-          <OutfitLibrary
-            outfits={ranked}
-            allOutfits={allRanked}
-            allGarments={garments}
-            palettes={palettes}
-            extraCandidates={extraCandidates}
-            savedOutfitKeys={savedOutfitKeys}
-            todayISO={todayISO}
-            todayOutfitId={todayOutfitId}
-            season={season}
-            sweaterInSeason={isSweaterInSeason()}
-            shortsInSeason={isShortsInSeason()}
-          />
-        </Stratum>
       </Stack>
+      {/* Room for the builder's bar, fixed to the bottom of the screen. */}
+      <div aria-hidden className="h-20" />
     </PageContainer>
   );
 }

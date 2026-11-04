@@ -54,13 +54,15 @@ interface OutfitWithGarments {
  * them with.
  */
 export function toSavedOutfit(outfit: OutfitWithGarments): SavedOutfit {
+  const pieces = sortByWardrobeOrder(outfit.garments.map((og) => og.garment));
   return {
     id: outfit.id,
     name: outfit.name,
     paletteId: outfit.paletteId,
     favorite: outfit.favorite,
     createdAt: outfit.createdAt,
-    garments: sortByWardrobeOrder(outfit.garments.map((og) => og.garment)),
+    garments: pieces.filter((g) => !EXTRA_CATEGORIES.has(g.category)),
+    accessories: pieces.filter((g) => EXTRA_CATEGORIES.has(g.category)),
     wornEvents: (outfit.wornEvents ?? []).map((w) => ({
       id: w.id,
       date: w.date,
@@ -89,8 +91,14 @@ async function findSavedOutfitById(userId: string, id: string): Promise<SavedOut
 
 /**
  * A day is an outfit plus what you wore it with. The clean gate only
- * applies to today or a past day: a shirt in the basket on Monday can
- * perfectly well be clean by Thursday, so planning ahead is allowed.
+ * applies to today: a shirt in the basket on Monday can perfectly well be
+ * clean by Thursday, and what is in the basket now says nothing about
+ * what was clean last week, when that day is being recorded after the
+ * fact.
+ *
+ * A past day is history, not a plan: it is written already settled, so
+ * `settlePastWornEvents` never dirties pieces that have been washed
+ * since. Only today's outfit soils its pieces, once the day is over.
  *
  * The extras are filtered here and not only in the picker, same spirit as
  * the washable filter in `markGarmentsDirty` — ids reach this from the
@@ -106,7 +114,8 @@ export async function wearOutfit(
   if (!outfit) throw new Error(`Outfit not found: ${outfitId}`);
 
   const day = dayKey(date);
-  if (day.getTime() <= today().getTime()) {
+  const past = day.getTime() < today().getTime();
+  if (day.getTime() === today().getTime()) {
     const dirty = dirtyGarmentsOf(outfit);
     if (dirty.length > 0) {
       throw new Error(
@@ -127,7 +136,7 @@ export async function wearOutfit(
     garmentIds.push(id);
   }
 
-  await setWornDay(userId, outfitId, day, garmentIds);
+  await setWornDay(userId, outfitId, day, garmentIds, past);
 }
 
 /**
@@ -268,6 +277,11 @@ export async function saveOutfit(
   const owned = await findGarmentCategories(userId, data.garmentIds);
   if (owned.length !== new Set(data.garmentIds).size) {
     throw new Error("Outfit references garments outside this wardrobe");
+  }
+  // Accessories may be saved with an outfit (their colour is part of its
+  // palette); a coat is still picked for the weather on the day.
+  if (owned.some((g) => g.category === "OUTERWEAR")) {
+    throw new Error("Outerwear is not part of an outfit");
   }
 
   const existing = await findOutfitByGarmentsAndPalette(userId, data.garmentIds, data.paletteId);

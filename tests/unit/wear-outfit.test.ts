@@ -114,7 +114,7 @@ describe("wearOutfit", () => {
 
     await wearOutfit("u1", "o1", new Date("2026-08-20T00:00:00Z"), ["coat", "ring"]);
 
-    expect(setWornDay).toHaveBeenCalledWith("u1", "o1", new Date("2026-08-20T00:00:00Z"), ["coat", "ring"]);
+    expect(setWornDay).toHaveBeenCalledWith("u1", "o1", new Date("2026-08-20T00:00:00Z"), ["coat", "ring"], false);
   });
 
   it("drops ids that are not an extra category", async () => {
@@ -129,6 +129,7 @@ describe("wearOutfit", () => {
       // is what enforces one outfit per day, so the time must never survive.
       new Date("2026-08-20T00:00:00Z"),
       ["ring"],
+      false,
     );
   });
 
@@ -142,6 +143,7 @@ describe("wearOutfit", () => {
       "o1",
       expect.any(Date),
       ["ring"],
+      false,
     );
   });
 
@@ -156,15 +158,22 @@ describe("wearOutfit", () => {
     expect(setWornDay).not.toHaveBeenCalled();
   });
 
-  it("throws when planned for a past day with a dirty piece", async () => {
+  it("records a past day even with a piece dirty now, already settled", async () => {
+    // What is in the basket today says nothing about last Monday, and a
+    // day recorded after the fact must not soil pieces washed since.
     findOutfitById.mockResolvedValue(
       outfitRow("o1", [garment("sh", "SHIRT", { dirty: true })]),
     );
 
-    await expect(
-      wearOutfit("u1", "o1", new Date("2026-08-10T00:00:00Z"), []),
-    ).rejects.toThrow();
-    expect(setWornDay).not.toHaveBeenCalled();
+    await wearOutfit("u1", "o1", new Date("2026-08-10T00:00:00Z"), []);
+
+    expect(setWornDay).toHaveBeenCalledWith(
+      "u1",
+      "o1",
+      new Date("2026-08-10T00:00:00Z"),
+      [],
+      true,
+    );
   });
 
   it("wears today when every piece is clean", async () => {
@@ -177,6 +186,7 @@ describe("wearOutfit", () => {
       "o1",
       new Date("2026-08-15T00:00:00Z"),
       ["ring"],
+      false,
     );
   });
 
@@ -187,7 +197,7 @@ describe("wearOutfit", () => {
 
     await wearOutfit("u1", "o1", new Date("2026-08-20T00:00:00Z"), []);
 
-    expect(setWornDay).toHaveBeenCalledWith("u1", "o1", expect.any(Date), []);
+    expect(setWornDay).toHaveBeenCalledWith("u1", "o1", expect.any(Date), [], false);
   });
 
   it("throws for an unknown outfit id", async () => {
@@ -213,6 +223,7 @@ describe("lastWornExtras", () => {
       favorite: true,
       createdAt: new Date("2026-01-01T00:00:00Z"),
       garments: [],
+      accessories: [],
       wornEvents: events,
     };
     expect(lastWornExtras(outfit).map((g) => g.id)).toEqual(["ring1"]);
@@ -226,6 +237,7 @@ describe("lastWornExtras", () => {
       favorite: true,
       createdAt: new Date("2026-01-01T00:00:00Z"),
       garments: [],
+      accessories: [],
       wornEvents: [],
     };
     expect(lastWornExtras(outfit)).toEqual([]);

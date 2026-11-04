@@ -29,8 +29,13 @@ export interface SavedOutfit {
   paletteId: number;
   favorite: boolean;
   createdAt: Date;
-  /** Clothes only, no role wrapper — an outfit has nothing else in it. */
+  /** The clothes: top, trousers, shoes. Everything that is washed, worn
+   * and dirtied goes through this list. */
   garments: GarmentWithColors[];
+  /** Accessories saved with the outfit, because their colour is part of
+   * its palette. Optional on the day: wearing the outfit starts with them
+   * ticked, and the day records what was actually put on. */
+  accessories: GarmentWithColors[];
   /** Most recent first, past days only, capped at 3. */
   wornEvents: WornDay[];
 }
