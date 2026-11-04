@@ -1,9 +1,6 @@
 import { notFound } from "next/navigation";
-import { findGarmentByIdSuffix, findAllGarments } from "@/lib/prendas/service";
-import { findSavedOutfitKeys } from "@/lib/outfits/service";
-import { isSweaterInSeason, isShortsInSeason } from "@/lib/prendas/season";
+import { findGarmentByIdSuffix } from "@/lib/prendas/service";
 import { idSuffixFromSlug } from "@/lib/prendas/slug";
-import { palettes } from "@/lib/colors";
 import { GarmentModalRoute } from "@/components/GarmentModalRoute";
 import { ArmariPageBody } from "../ArmariPageBody";
 import { requireUserId } from "@/lib/auth/session";
@@ -23,24 +20,13 @@ export default async function GarmentDirectPage({
 }) {
   const { slug } = await params;
   const userId = await requireUserId();
-  const [garment, allGarments, savedOutfitKeys] = await Promise.all([
-    findGarmentByIdSuffix(userId, idSuffixFromSlug(slug)),
-    findAllGarments(userId),
-    findSavedOutfitKeys(userId),
-  ]);
+  const garment = await findGarmentByIdSuffix(userId, idSuffixFromSlug(slug));
   if (!garment) notFound();
 
   return (
     <>
       <ArmariPageBody />
-      <GarmentModalRoute
-      garment={garment}
-      allGarments={allGarments}
-      palettes={palettes}
-      savedOutfitKeys={savedOutfitKeys}
-      sweaterInSeason={isSweaterInSeason()}
-      shortsInSeason={isShortsInSeason()}
-    />
+      <GarmentModalRoute garment={garment} />
     </>
   );
 }

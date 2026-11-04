@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import type { GarmentWithColors } from "@/lib/prendas/types";
-import type { SanzoPalette } from "@/lib/outfits/types";
 import { GarmentModal } from "./GarmentModal";
 
 /**
@@ -23,30 +22,11 @@ import { GarmentModal } from "./GarmentModal";
  * afterward if it went too far — by then the modal is already gone
  * either way, so a follow-up `replace` is safe.
  */
-export function GarmentModalRoute({
-  garment,
-  allGarments,
-  palettes,
-  savedOutfitKeys,
-  sweaterInSeason,
-  shortsInSeason,
-}: {
-  garment: GarmentWithColors;
-  allGarments: GarmentWithColors[];
-  palettes: SanzoPalette[];
-  savedOutfitKeys: string[];
-  sweaterInSeason: boolean;
-  shortsInSeason: boolean;
-}) {
+export function GarmentModalRoute({ garment }: { garment: GarmentWithColors }) {
   const router = useRouter();
   return (
     <GarmentModal
       garment={garment}
-      allGarments={allGarments}
-      palettes={palettes}
-      savedOutfitKeys={savedOutfitKeys}
-      sweaterInSeason={sweaterInSeason}
-      shortsInSeason={shortsInSeason}
       onClose={() => {
         router.back();
         setTimeout(() => {
