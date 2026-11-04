@@ -17,6 +17,12 @@ interface Props {
   sizes?: string;
   /** Direction of the coloured-stripes fallback. */
   fallbackDirection?: "horizontal" | "vertical";
+  /** `contain` shows the whole piece, uncropped: how an outfit figure
+   * lays its pieces out, one above the other. */
+  fit?: "cover" | "contain";
+  /** No backdrop of its own, and the photo multiplied onto whatever is
+   * behind it (light mode only): for pieces laid out on one surface. */
+  flat?: boolean;
   className?: string;
 }
 
@@ -35,6 +41,8 @@ export function PieceThumb({
   priority,
   sizes,
   fallbackDirection = "horizontal",
+  fit = "cover",
+  flat = false,
   className,
 }: Props) {
   const src = thumb ? garmentThumbSrc(garment) : garmentImageSrc(garment);
@@ -59,7 +67,7 @@ export function PieceThumb({
   const broken = src !== null && src === failedSrc;
 
   return (
-    <div className={`relative overflow-hidden bg-surface ${className ?? ""}`.trim()}>
+    <div className={`relative overflow-hidden ${flat ? "" : "bg-surface"} ${className ?? ""}`.trim()}>
       {src && !broken ? (
         <Image
           src={src}
@@ -68,7 +76,8 @@ export function PieceThumb({
           unoptimized // sharp already produces final WebP; re-encoding would lose quality
           sizes={sizes}
           className={[
-            "object-cover",
+            fit === "contain" ? "object-contain" : "object-cover",
+            flat ? "mix-blend-multiply dark:mix-blend-normal" : "",
             "transition-opacity duration-[var(--duration-slow)] ease-[var(--ease-standard)]",
             loaded ? "opacity-100" : "opacity-0",
           ].join(" ")}
@@ -80,9 +89,9 @@ export function PieceThumb({
         />
       ) : (
         <div
-          className={`flex h-full w-full ${
-            fallbackDirection === "vertical" ? "flex-col" : ""
-          }`}
+          className={`flex ${
+            fit === "contain" ? "mx-auto aspect-square h-full max-w-full" : "h-full w-full"
+          } ${fallbackDirection === "vertical" ? "flex-col" : ""}`}
         >
           {garment.colors.map((c) => (
             <div

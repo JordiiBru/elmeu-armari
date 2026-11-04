@@ -435,17 +435,13 @@
       "week": "la setmana",
       "all": "els teus outfits"
     },
-    "filtersLabel": "Filtrar outfits",
-    "categoryFilterLabel": "peça",
     "seasonFilterLabel": "Filtrar per temporada",
     "seasonOnly": "de temporada",
     "allSeasons": "tot l'any",
     "cleanFilterLabel": "Filtrar per estat",
     "cleanOnly": "nets",
     "allClean": "tots",
-    "filterAll": "tots",
     "unfavorite": "treure de favorits",
-    "removedFromFavorites": "tret de favorits",
     "undo": "desfer",
     "pickForMe": "tria per mi",
     "today": "avui",
@@ -464,29 +460,18 @@
     "deleteCostMany": "s'esborraran també els dies del calendari on el portaves.",
     "changeOutfit": "canviar d'outfit",
     "removeFromDay": "treure del dia",
-    "emptyNoOutfitsBrowse": "el primer outfit encara és per fer.",
     "emptyWeek": "la setmana, en blanc.",
     "emptyWeekHint": "quan desis un outfit, aquí el podràs posar a cada dia.",
-    "emptyNoOutfitsHintDiscover": "descobreix combinacions amb la teva roba i desa la primera.",
     "emptyWardrobe": "res per triar, encara.",
     "emptyWardrobeHint": "afegeix les primeres peces i aquí començaran a sortir combinacions.",
     "emptyNoneReady": "toca fer bugada",
     "goToArmari": "anar a l'armari",
     "goToRentar": "anar a rentar",
     "sheetLabel": "Outfit {title}",
-    "axes": {
-      "SHIRT": "samarretes",
-      "PANTS": "pantalons",
-      "SWEATER": "jerseis",
-      "SHOES": "sabates"
-    },
+    "favorite": "afegir a preferits",
+    "tryInBuilder": "provar-lo al combinador",
+    "day": {"aria": "Dia", "today": "avui", "yesterday": "ahir", "other": "un altre dia"},
     "axisEmpty": "cap outfit per aquest filtre encara.",
-    "seeMore": "més combinacions",
-    "discover": "descobreix",
-    "discoverSheetLabel": "Descobreix per {category}",
-    "discoverAxisAria": "explorar per peça",
-    "discoverPieceEmpty": "cap outfit desat amb aquesta peça encara.",
-    "discoverAxisEmpty": "cap peça d'aquesta mena encara.",
     "plan": "planificar",
     "back": "tornar",
     "planned": "planificat",
@@ -496,6 +481,43 @@
       "ago": "{days, plural, one {portat fa # dia} other {portat fa # dies}}"
     },
     "outerwear": "abric"
+  },
+  "builder": {
+    "slots": {
+      "TOP": "a dalt",
+      "PANTS": "pantalons",
+      "SHOES": "sabates",
+      "ACCESSORIES": "complements"
+    },
+    "prompts": {
+      "TOP": "jersei o samarreta",
+      "PANTS": "pantalons",
+      "SHOES": "sabates",
+      "ACCESSORIES": "complements"
+    },
+    "slotsAria": "Peça a triar",
+    "palettes": "{count, plural, =0 {cap paleta} one {# paleta} other {# paletes}}",
+    "wildcard": "va amb tot",
+    "noFit": "tanca la paleta",
+    "noColour": "sense color",
+    "completes": "completa",
+    "noOptions": "cap peça d'aquesta mena amb aquests filtres.",
+    "alternatives": "o bé",
+    "save": "desar outfit",
+    "saving": "desant…",
+    "open": "Obrir l'outfit n{number}",
+    "clear": "reinicia",
+    "savedEmpty": "encara cap outfit desat. combina'n un a dalt.",
+    "backToStage": "Tornar a l'outfit",
+    "blocked": {
+      "empty": "tria alguna peça abans de desar.",
+      "missing": "per desar-lo falten {pieces}.",
+      "noPair": "encara cap paleta: falta una peça amb un segon color.",
+      "dead": "aquestes peces no comparteixen cap paleta. canvia'n una."
+    },
+    "savedNoneWithPicks": "cap outfit desat amb aquestes peces.",
+    "savedAs": "desat com a n{number}, amb una altra paleta",
+    "withPicks": "amb aquestes peces"
   },
   "dayPhoto": {
     "add": "foto",
@@ -510,29 +532,6 @@
   "week": {
     "previous": "Setmana anterior",
     "next": "Setmana següent"
-  },
-  "combine": {
-    "sheetLabel": "Combinacions per {category}",
-    "eyebrow": "combinar",
-    "all": "totes",
-    "pieces": "{count, plural, one {# peça} other {# peces}}",
-    "emptyFiltered": "{count, plural, one {no hi ha combinacions d'una peça carregades.} other {no hi ha combinacions de # peces carregades.}}",
-    "loadMore": "carregar més",
-    "empty": "cap combinació trobada per a aquesta peça.",
-    "count": "{count, plural, one {# combinació} other {# combinacions}}",
-    "showMore": "veure totes les combinacions",
-    "save": "desar outfit",
-    "saved": "desat",
-    "savingOutfit": "desant…",
-    "less": "menys",
-    "morePalettes": "{count, plural, one {+# paleta} other {+# paletes}}",
-    "pickTop": "tria jersei o samarreta",
-    "pickPants": "tria pantalons",
-    "pickShoes": "tria sabates",
-    "unmatched": "lliure",
-    "savePalette": "desar",
-    "savePaletteAria": "Desar paleta",
-    "savedPaletteAria": "Ja desat"
   },
   "paleta": {
     "eyebrow": "catàleg cromàtic",
@@ -602,13 +601,13 @@
       "what": {
         "title": "què és aquesta app",
         "p1": "El teu armari, organitzat al voltant de les combinacions de color del diccionari de Sanzo Wada (Tòquio, 1933): 348 paletes de dos a sis colors.",
-        "p2": "Cada peça s'assigna a colors del diccionari, i dues peces combinen quan comparteixen una paleta. D'aquí surten els outfits que et proposa l'app."
+        "p2": "Cada peça s'assigna a colors del diccionari, i les peces combinen quan comparteixen una paleta. Amb això construeixes els teus outfits peça a peça i veus a quina paleta pertanyen."
       },
       "flow": {
         "title": "el dia a dia",
-        "p1": "Afegeix les teves peces amb foto, color, temporada i talla. Si poses una foto, l'app et proposa els colors.",
-        "p2": "Obre una peça i mira què hi combina: veuràs outfits complets (part de dalt, pantalons i sabates) i en pots desar els que t'agradin.",
-        "p3": "A «Què em poso?» tries un outfit desat per a avui o per a un altre dia de la setmana. «Me'l poso» l'assigna a avui; per a un altre dia el botó el desa en aquell dia.",
+        "p1": "Afegeix les teves peces amb foto, color, temporada i talla. Si poses una foto, l'app et proposa els colors. A l'armari, obre una peça per veure cada color al costat del color del diccionari amb què es llegeix i totes les paletes on surt.",
+        "p2": "A «Què em poso?» combines peça a peça en quatre caixes: part de dalt (jersei o samarreta), pantalons, sabates i, si vols, complements. Cada opció diu quantes paletes deixa obertes i la paleta es va formant: els colors que ja portes s'aixequen i els que falten queden baixos. Un complement que porta un color que encara falta surt marcat com a «completa».",
+        "p3": "Desa'l quan tingui dalt, pantalons, sabates i paleta; si encara no es pot, en prémer «desar outfit» et diu què falta. Els complements es desen amb l'outfit perquè formen part de la seva paleta: el mateix outfit amb bossa i sense són dos outfits. Obre'n un de desat per posar-te'l avui o un altre dia; un dia passat queda registrat sense embrutar res.",
         "p4": "A la bugaderia veus què tens net i què és al cistell. Marca el que va a rentar i, quan has fet la bugada, marca-ho com a rentat.",
         "steps": {
           "s1": "afegir",
@@ -624,17 +623,18 @@
         "p3": "El negre, el blanc i els grisos són neutres: un gris fosc es llegeix com a negre."
       },
       "numbers": {
-        "title": "el número i la franja de color",
-        "p1": "El número sota cada outfit és l'ordre en què el vas desar. No canvia si el marques o no com a favorit.",
-        "p2": "La franja de colors és la combinació del diccionari sobre la qual es va construir l'outfit."
+        "title": "el número, la franja i les caixes",
+        "p1": "El número sota cada outfit (n001, n002…) és l'ordre en què el vas desar, i no canvia mai. Pots tenir tants outfits com vulguis amb la mateixa paleta: cadascun té el seu número.",
+        "p2": "La franja de colors és la combinació del diccionari sobre la qual es va construir l'outfit.",
+        "p3": "Cada outfit es dibuixa amb les mateixes quatre caixes que fas servir per combinar-lo: dalt, pantalons, sabates i complements. Igual a la llista, al calendari i a la fitxa."
       },
       "rules": {
         "title": "les regles que no es veuen",
         "r1": "Posar-te un outfit no el fa brut: només passa quan el dia ja ha passat.",
         "r2": "Només les samarretes i els jerseis s'embruten sols. Els pantalons els envies tu al cistell; les sabates, els abrics i els accessoris no van mai a rentar.",
-        "r3": "Tot outfit porta sabates: sense sabates no es proposa.",
+        "r3": "Tot outfit porta sabates: sense sabates no es pot desar.",
         "r4": "El negre i el blanc combinen sempre amb tot, no només les sabates.",
-        "r5": "Els abrics i els accessoris es trien en posar-te l'outfit; no formen part de l'outfit desat."
+        "r5": "Els abrics es trien en posar-te l'outfit. Els complements es desen amb l'outfit, però cada dia decideixes si te'ls poses."
       },
       "maleta": {
         "title": "la maleta",
@@ -645,11 +645,6 @@
       }
     },
     "hints": {
-      "pieceFilter": "Agrupa els outfits per la peça que triïs. No n'amaga cap.",
-      "seasonFilter": "Amaga els outfits amb alguna peça fora de temporada, com uns shorts a l'hivern o un jersei a l'estiu.",
-      "cleanFilter": "Amaga els outfits amb alguna peça al cistell.",
-      "discover": "Combina peça per peça amb el que tens. No és la llista de favorits.",
-      "outfitNumbers": "El número és l'ordre en què vas desar l'outfit. La franja de color és la combinació de Sanzo Wada en què es basa.",
       "armariFit": "Com cau la peça: regular, ampla, ajustada...",
       "armariState": "Net o al cistell: mira quines peces són a la bugaderia.",
       "armariSeason": "Mostra només el que va bé per a l'època de l'any en què ets.",

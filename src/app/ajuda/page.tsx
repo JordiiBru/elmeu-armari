@@ -92,6 +92,7 @@ export default async function HelpPage() {
       <PageRow id="numbers" number="04" title={t("sections.numbers.title")}>
         <P>{t("sections.numbers.p1")}</P>
         <P>{t("sections.numbers.p2")}</P>
+        <P>{t("sections.numbers.p3")}</P>
       </PageRow>
 
       <PageRow id="rules" number="05" title={t("sections.rules.title")}>

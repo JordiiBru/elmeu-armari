@@ -55,6 +55,7 @@ function outfit(
       extras: [],
     })),
     garments: clothes,
+    accessories: [],
   };
 }
 

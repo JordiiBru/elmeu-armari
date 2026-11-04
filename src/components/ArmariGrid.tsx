@@ -238,7 +238,7 @@ export function ArmariGrid({ garments, defaultSeason }: Props) {
         </div>
 
         {/* Panell col·lapsable */}
-        {/* See `OutfitLibrary`: closed, this is still tabbable without
+        {/* Closed, this is still tabbable without
             `inert`. */}
         <div className="collapse-panel" data-open={filtersOpen} inert={!filtersOpen}>
           <div>

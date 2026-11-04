@@ -37,7 +37,7 @@ export function useToast(): ToastAPI {
 }
 
 // Long enough to read one line, short enough not to loiter. Exported so
-// an "undo" caller (OutfitLibrary's unfavourite) can delay the write it
+// an "undo" caller (a favourite toggle) can delay the write it
 // is describing until exactly the moment the button offering to cancel
 // it disappears — the window to undo is the toast's own lifetime, not a
 // second timer that could drift from what's on screen.

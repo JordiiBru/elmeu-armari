@@ -212,8 +212,14 @@ function intersectSets(sets: Set<number>[]): Set<number> {
   return out;
 }
 
-function buildContext(g: GarmentWithColors, membership: number = MEMBERSHIP_THRESHOLD): Ctx | null {
-  if (EXTRA_CATEGORIES.has(g.category)) return null;
+function buildContext(
+  g: GarmentWithColors,
+  membership: number = MEMBERSHIP_THRESHOLD,
+  /** The builder reads accessories through the same measure; the
+   * generator never does (see `EXTRA_CATEGORIES` above). */
+  allowExtras = false,
+): Ctx | null {
+  if (!allowExtras && EXTRA_CATEGORIES.has(g.category)) return null;
   if (g.colors.length === 0) return null;
 
   const snaps: Snap[] = [];
@@ -559,6 +565,74 @@ function collectGroups(
     });
   }
   return Array.from(groupsByKey.values());
+}
+
+/**
+ * The palettes one piece can be worn in, by the same rule the generator
+ * uses to enumerate: `"any"` for a black or white wildcard, `null` when a
+ * colour sits outside the vocabulary (it can never be matched) or the
+ * piece has no colour at all. Accessories are read too: the outfit
+ * builder lets them narrow the palette, the generator still does not.
+ */
+export function paletteSetFor(
+  g: GarmentWithColors,
+  membership: number = MEMBERSHIP_THRESHOLD,
+): Set<number> | "any" | null {
+  const ctx = buildContext(g, membership, true);
+  if (!ctx) return null;
+  return ctx.neutral ? "any" : ctx.paletteIds;
+}
+
+/**
+ * The palettes a hand-picked set of pieces is worn in, scored and
+ * refined exactly as a generated group's are: the builder's live palette
+ * and a generated card can never disagree about the same pieces.
+ * Colourless pieces (a silver ring) ride along without a say. Empty when
+ * a coloured piece is out of the vocabulary or no palette is shared.
+ *
+ * Strict membership first and the vocabulary threshold only when that
+ * finds nothing, the same two tiers as `generateTiered`: a set the
+ * generator offered from its loose tier (and that was saved from it) must
+ * still have its palette here.
+ */
+export function matchPieces(garments: GarmentWithColors[], palettes: SanzoPalette[]): PaletteMatch[] {
+  const at = (membership: number): PaletteMatch[] => {
+    const ctxs: Ctx[] = [];
+    for (const g of garments) {
+      if (g.colors.length === 0) continue;
+      const ctx = buildContext(g, membership, true);
+      if (!ctx) return [];
+      ctxs.push(ctx);
+    }
+    if (ctxs.length < 2) return [];
+    const common = intersectSets(ctxs.map((c) => c.paletteIds));
+    return refinePalettes([...common], ctxs, palettes);
+  };
+  const strict = at(MEMBERSHIP_THRESHOLD);
+  return strict.length > 0 ? strict : at(OKLCH_DISTANCE_THRESHOLD);
+}
+
+/**
+ * The pieces scored on one given palette, or `null` when they do not all
+ * live in it. For a saved outfit whose palette is not among the ones
+ * `matchPieces` leads with (an extra the refinement cut, or one saved
+ * from the loose tier): the builder still shows the palette it was
+ * saved with.
+ */
+export function matchPiecesOn(
+  garments: GarmentWithColors[],
+  palettes: SanzoPalette[],
+  paletteId: number,
+): PaletteMatch | null {
+  const ctxs: Ctx[] = [];
+  for (const g of garments) {
+    if (g.colors.length === 0) continue;
+    const ctx = buildContext(g, OKLCH_DISTANCE_THRESHOLD, true);
+    if (!ctx || !ctx.paletteIds.has(paletteId)) return null;
+    ctxs.push(ctx);
+  }
+  if (ctxs.length < 2) return null;
+  return paletteMatchFor(paletteId, palettes, ctxs);
 }
 
 export function generateOutfitGroupsForGarment(

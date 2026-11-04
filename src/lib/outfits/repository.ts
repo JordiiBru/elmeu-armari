@@ -99,12 +99,16 @@ export async function setWornDay(
   outfitId: string,
   day: Date,
   garmentIds: string[],
+  /** A past day recorded after the fact: written settled, so nothing is
+   * dirtied for it later. */
+  settled = false,
 ) {
+  const settledAt = settled ? { settledAt: new Date() } : {};
   return prisma.$transaction(async (tx) => {
     const event = await tx.wornEvent.upsert({
       where: { userId_date: { userId, date: day } },
-      update: { outfitId },
-      create: { userId, outfitId, date: day },
+      update: { outfitId, ...settledAt },
+      create: { userId, outfitId, date: day, ...settledAt },
     });
     await tx.wornEventGarment.deleteMany({ where: { wornEventId: event.id } });
     if (garmentIds.length > 0) {

@@ -33,8 +33,8 @@ Renovate (`renovate.json`, the same style as the homelab repo) opens pull reques
 Unit tests live in `tests/unit`, named after what they cover. Beyond them, after a UI change, try it by hand on desktop **and** at 375 px wide:
 
 - `/login`: a wrong password, then the right one, and the return path after being bounced from a protected screen.
-- `/armari`: the grid with several filter combinations; open a piece and use **què hi combina**.
-- `/avui`: pick an outfit for today, and a day in the week.
+- `/armari`: the grid with several filter combinations; open a piece and check its colours and palettes.
+- `/avui`: build an outfit in the four boxes and save it, open a saved one and wear it today or on another day, and a day in the week.
 - `/add` and `/edit/[id]`: validation errors, the colour picker, a photo upload.
 - `/bugaderia`, `/paleta`, `/stats`.
 - `/maleta`: a trip with and without laundry, both modes, and a pool too small for the days (each short day must say what is missing).

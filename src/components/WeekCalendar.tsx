@@ -38,12 +38,15 @@ export function WeekCalendar({
   palettes,
   extraCandidates,
   todayISO,
+  numbers,
 }: {
   days: WeekDayPlan[];
   savedOutfits: SavedOutfit[];
   palettes: SanzoPalette[];
   extraCandidates: GarmentWithColors[];
   todayISO: string;
+  /** Catalogue numbers (`catalogueNumbers`), the same on every surface. */
+  numbers: Record<string, number>;
 }) {
   const t = useTranslations("outfits");
   const paletteMap = useMemo(() => new Map(palettes.map((p) => [p.id, p])), [palettes]);
@@ -114,6 +117,7 @@ export function WeekCalendar({
           savedOutfits={savedOutfits}
           paletteMap={paletteMap}
           assignedOutfitId={openDay.outfit?.id ?? null}
+          numbers={numbers}
           onPick={(id) => {
             setPickedId(id);
             setPicking(false);
@@ -203,8 +207,8 @@ function DayCell({
           // not the outfit, it is the outfit plus the shoes and
           // accessories you actually put on.
           <OutfitCollage
-            garments={[...day.outfit.garments, ...day.extras]}
-            max={6}
+            garments={day.outfit.garments}
+            accessories={day.extras}
             sizes="(min-width: 1024px) 12vw, (min-width: 640px) 22vw, 45vw"
             className="h-full w-full"
           />
@@ -233,6 +237,7 @@ function DayPickerSheet({
   savedOutfits,
   paletteMap,
   assignedOutfitId,
+  numbers,
   onPick,
   onBack,
   onClose,
@@ -241,6 +246,7 @@ function DayPickerSheet({
   savedOutfits: SavedOutfit[];
   paletteMap: Map<number, SanzoPalette>;
   assignedOutfitId: string | null;
+  numbers: Record<string, number>;
   onPick: (outfitId: string) => void;
   onBack?: () => void;
   onClose: () => void;
@@ -267,12 +273,12 @@ function DayPickerSheet({
       }
     >
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-8">
-        {savedOutfits.map((outfit, i) => (
+        {savedOutfits.map((outfit) => (
           <OutfitTile
             key={outfit.id}
             outfit={outfit}
             palette={paletteMap.get(outfit.paletteId) ?? null}
-            index={i}
+            index={(numbers[outfit.id] ?? 1) - 1}
             mark={outfit.id === assignedOutfitId ? t("planned") : null}
             onOpen={() => onPick(outfit.id)}
           />
