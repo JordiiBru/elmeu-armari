@@ -269,7 +269,13 @@
     "colors": "Colors",
     "seasons": "Temporada",
     "note": "nota",
-    "size": "talla {size}"
+    "size": "talla {size}",
+    "colorExact": "exacte",
+    "colorNearest": "Sanzo Wada",
+    "outsideVocabulary": "cap color de Sanzo Wada s'hi acosta",
+    "paletteCount": "{count, plural, =0 {cap paleta} one {# paleta} other {# paletes}}",
+    "paletteSize": "{count} colors",
+    "noPalettes": "Aquest color no surt a cap paleta."
   },
   "armari": {
     "title": "el meu armari",

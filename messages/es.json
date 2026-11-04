@@ -269,7 +269,13 @@
     "colors": "Colores",
     "seasons": "Temporada",
     "note": "nota",
-    "size": "talla {size}"
+    "size": "talla {size}",
+    "colorExact": "exacto",
+    "colorNearest": "Sanzo Wada",
+    "outsideVocabulary": "ningún color de Sanzo Wada se le acerca",
+    "paletteCount": "{count, plural, =0 {ninguna paleta} one {# paleta} other {# paletas}}",
+    "paletteSize": "{count} colores",
+    "noPalettes": "Este color no sale en ninguna paleta."
   },
   "armari": {
     "title": "mi armario",
