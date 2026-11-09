@@ -37,7 +37,7 @@ function paletteSetFor(g: GarmentWithColors): Set<number> | "any" | null {
 export type Slot = "TOP" | "PANTS" | "SHOES" | "ACCESSORIES";
 export const SLOTS: Slot[] = ["TOP", "PANTS", "SHOES", "ACCESSORIES"];
 /** What an outfit cannot be saved without. */
-export const REQUIRED_SLOTS: Slot[] = ["TOP", "PANTS", "SHOES"];
+const REQUIRED_SLOTS: Slot[] = ["TOP", "PANTS", "SHOES"];
 
 export function slotOf(category: Category | string): Slot | null {
   switch (category) {

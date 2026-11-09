@@ -432,15 +432,10 @@
   "outfits": {
     "screenTitle": "What do I wear?",
     "sections": {
-      "week": "the week",
-      "all": "your outfits"
+      "week": "the week"
     },
-    "seasonFilterLabel": "Filter by season",
     "seasonOnly": "in season",
-    "allSeasons": "all year",
-    "cleanFilterLabel": "Filter by state",
     "cleanOnly": "clean",
-    "allClean": "all",
     "unfavorite": "remove from favourites",
     "undo": "undo",
     "pickForMe": "pick for me",
@@ -508,7 +503,6 @@
     "open": "Open outfit n{number}",
     "clear": "restart",
     "savedEmpty": "no saved outfits yet. build one above.",
-    "backToStage": "Back to the outfit",
     "blocked": {
       "empty": "pick a piece before saving.",
       "missing": "to save it, add {pieces}.",
@@ -517,7 +511,13 @@
     },
     "savedNoneWithPicks": "no saved outfit with these pieces.",
     "savedAs": "saved as n{number}, with another palette",
-    "withPicks": "with these pieces"
+    "withPicks": "with these pieces",
+    "views": {
+      "BUILD": "build",
+      "SAVED": "saved",
+      "WEEK": "week"
+    },
+    "viewsAria": "View"
   },
   "dayPhoto": {
     "add": "photo",
@@ -606,7 +606,7 @@
       "flow": {
         "title": "the daily flow",
         "p1": "Add your pieces with a photo, colour, season and size. If you add a photo, the app suggests its colours. In the wardrobe, open a piece to see each colour beside the dictionary colour it is read as, and every palette it appears in.",
-        "p2": "In “What do I wear?” you build piece by piece in four boxes: a top (sweater or shirt), trousers, shoes and, if you like, accessories. Each option says how many palettes it keeps open and the palette forms as you go: colours you already wear stand up, the missing ones stay low. An accessory wearing a colour still missing is marked “completes”.",
+        "p2": "In “What do I wear?” you build piece by piece in four boxes: a top (sweater or shirt), trousers, shoes and, if you like, accessories. Each option says how many palettes it keeps open and the palette forms as you go: colours you already wear stand up, the missing ones stay low. An accessory wearing a colour still missing is marked “completes”. The outfit you are building always stays in view; beside it (below it, on a phone) you switch between build, saved and the week.",
         "p3": "Save it once it has a top, trousers, shoes and a palette; if it cannot be saved yet, pressing “save outfit” tells you what is missing. Accessories are saved with the outfit because they are part of its palette: the same outfit with and without the bag are two outfits. Open a saved one to wear it today or on another day; a past day is recorded without dirtying anything.",
         "p4": "In the laundry you see what is clean and what is in the basket. Mark what goes to be washed and, once you have done the laundry, mark it as washed.",
         "steps": {

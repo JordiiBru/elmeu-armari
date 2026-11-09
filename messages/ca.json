@@ -432,15 +432,10 @@
   "outfits": {
     "screenTitle": "Què em poso?",
     "sections": {
-      "week": "la setmana",
-      "all": "els teus outfits"
+      "week": "la setmana"
     },
-    "seasonFilterLabel": "Filtrar per temporada",
     "seasonOnly": "de temporada",
-    "allSeasons": "tot l'any",
-    "cleanFilterLabel": "Filtrar per estat",
     "cleanOnly": "nets",
-    "allClean": "tots",
     "unfavorite": "treure de favorits",
     "undo": "desfer",
     "pickForMe": "tria per mi",
@@ -508,7 +503,6 @@
     "open": "Obrir l'outfit n{number}",
     "clear": "reinicia",
     "savedEmpty": "encara cap outfit desat. combina'n un a dalt.",
-    "backToStage": "Tornar a l'outfit",
     "blocked": {
       "empty": "tria alguna peça abans de desar.",
       "missing": "per desar-lo falten {pieces}.",
@@ -517,7 +511,13 @@
     },
     "savedNoneWithPicks": "cap outfit desat amb aquestes peces.",
     "savedAs": "desat com a n{number}, amb una altra paleta",
-    "withPicks": "amb aquestes peces"
+    "withPicks": "amb aquestes peces",
+    "views": {
+      "BUILD": "combinar",
+      "SAVED": "desats",
+      "WEEK": "setmana"
+    },
+    "viewsAria": "Vista"
   },
   "dayPhoto": {
     "add": "foto",
@@ -606,7 +606,7 @@
       "flow": {
         "title": "el dia a dia",
         "p1": "Afegeix les teves peces amb foto, color, temporada i talla. Si poses una foto, l'app et proposa els colors. A l'armari, obre una peça per veure cada color al costat del color del diccionari amb què es llegeix i totes les paletes on surt.",
-        "p2": "A «Què em poso?» combines peça a peça en quatre caixes: part de dalt (jersei o samarreta), pantalons, sabates i, si vols, complements. Cada opció diu quantes paletes deixa obertes i la paleta es va formant: els colors que ja portes s'aixequen i els que falten queden baixos. Un complement que porta un color que encara falta surt marcat com a «completa».",
+        "p2": "A «Què em poso?» combines peça a peça en quatre caixes: part de dalt (jersei o samarreta), pantalons, sabates i, si vols, complements. Cada opció diu quantes paletes deixa obertes i la paleta es va formant: els colors que ja portes s'aixequen i els que falten queden baixos. Un complement que porta un color que encara falta surt marcat com a «completa». L'outfit que construeixes es queda sempre a la vista; al costat (a sota, al mòbil) tries entre combinar, els desats i la setmana.",
         "p3": "Desa'l quan tingui dalt, pantalons, sabates i paleta; si encara no es pot, en prémer «desar outfit» et diu què falta. Els complements es desen amb l'outfit perquè formen part de la seva paleta: el mateix outfit amb bossa i sense són dos outfits. Obre'n un de desat per posar-te'l avui o un altre dia; un dia passat queda registrat sense embrutar res.",
         "p4": "A la bugaderia veus què tens net i què és al cistell. Marca el que va a rentar i, quan has fet la bugada, marca-ho com a rentat.",
         "steps": {

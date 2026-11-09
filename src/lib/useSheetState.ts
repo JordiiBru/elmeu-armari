@@ -24,7 +24,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
  *
  * `skipEnter` starts the panel already open instead of sliding it up
  * from the bottom on the next frame. For a sheet replacing a sibling
- * sheet inside `useViewTransition` — the panel's "after" DOM snapshot
+ * sheet inside a view transition — the panel's "after" DOM snapshot
  * has to already read as open, or the browser morphs into the closed
  * position and the panel's own entrance transition then fights it a
  * frame later.
