@@ -75,7 +75,7 @@ interface Props {
    * For a sheet that is replacing a sibling sheet — piece detail into
    * "què hi combina", discover's rail into a piece's combinations —
    * rather than opening fresh. Starts already open instead of sliding
-   * up from the bottom, so pairing this with `useViewTransition` morphs
+   * up from the bottom, so pairing this with a view transition morphs
    * one panel into the other instead of a slide-up cutting in on top of
    * it. Leave it off for a sheet's first open.
    */
@@ -257,7 +257,7 @@ export function Sheet({
         // trapped inside it, and a browser's default ring around a whole
         // sheet is not a focus indicator anybody asked for. The controls
         // inside keep theirs.
-        // vt-sheet-panel: inert unless a `useViewTransition` update is
+        // vt-sheet-panel: inert unless a a view transition update is
         // actually in flight — only then does the browser look at
         // `view-transition-name` at all. Safe to leave on every sheet:
         // the app's own rule that only one is ever open means the name

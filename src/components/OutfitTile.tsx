@@ -64,11 +64,24 @@ export function BoxPiece({
   garment,
   sizes,
   thumb = true,
+  cover = false,
 }: {
   garment: GarmentWithColors;
   sizes?: string;
   thumb?: boolean;
+  /** Fill the box edge to edge (the photo cropped to it) instead of
+   * showing the whole piece inside a margin. */
+  cover?: boolean;
 }) {
+  if (cover) {
+    // Wrapped: PieceThumb is `relative` itself, and an `absolute` passed in
+    // loses to it, leaving a box with no height.
+    return (
+      <span className="absolute inset-0">
+        <PieceThumb garment={garment} thumb={thumb} sizes={sizes} className="h-full w-full" />
+      </span>
+    );
+  }
   return (
     <span className="absolute inset-[8%]">
       <PieceThumb garment={garment} thumb={thumb} sizes={sizes} fit="contain" flat className="h-full w-full" />
@@ -80,22 +93,30 @@ export function BoxPiece({
  * the first one tall beside the other two; four share it two by two;
  * past four the last cell counts the rest. Every piece gets the largest
  * cell its count allows, never a quarter box beside an empty one. */
-export function AccessoryGrid({ pieces, sizes = "6rem" }: { pieces: GarmentWithColors[]; sizes?: string }) {
+export function AccessoryGrid({
+  pieces,
+  sizes = "6rem",
+  cover = false,
+}: {
+  pieces: GarmentWithColors[];
+  sizes?: string;
+  cover?: boolean;
+}) {
   if (pieces.length === 0) return null;
-  if (pieces.length === 1) return <BoxPiece garment={pieces[0]} sizes={sizes} />;
+  if (pieces.length === 1) return <BoxPiece garment={pieces[0]} sizes={sizes} cover={cover} />;
   const shown = pieces.length > 4 ? pieces.slice(0, 3) : pieces;
   const rest = pieces.length - shown.length;
   const layout = shown.length === 2 ? "grid-cols-2 grid-rows-1" : "grid-cols-2 grid-rows-2";
   return (
-    <div className={`absolute inset-[6%] grid gap-1 ${layout}`}>
+    <div className={`absolute grid ${cover ? "inset-0 gap-[2px]" : "inset-[6%] gap-1"} ${layout}`}>
       {shown.map((g, i) => (
         <PieceThumb
           key={g.id}
           garment={g}
           thumb
           sizes={sizes}
-          fit="contain"
-          flat
+          fit={cover ? "cover" : "contain"}
+          flat={!cover}
           className={`h-full min-h-0 w-full ${shown.length === 3 && rest === 0 && i === 0 ? "row-span-2" : ""}`}
         />
       ))}
@@ -108,7 +129,7 @@ export function AccessoryGrid({ pieces, sizes = "6rem" }: { pieces: GarmentWithC
 
 /** The four boxes of an outfit, in reading order. A sweater over a shirt
  * shows the sweater: it is the one on top. */
-export function outfitBoxes(garments: GarmentWithColors[], accessories: GarmentWithColors[]) {
+function outfitBoxes(garments: GarmentWithColors[], accessories: GarmentWithColors[]) {
   const top =
     garments.find((g) => g.category === "SWEATER") ?? garments.find((g) => g.category === "SHIRT");
   return {
@@ -121,10 +142,12 @@ export function outfitBoxes(garments: GarmentWithColors[], accessories: GarmentW
 
 /**
  * An outfit as four boxes of one size, two by two: top, trousers, shoes,
- * accessories. The same figure the builder fills in as you pick, so a
- * saved outfit, a day in the week and the one on the stage all read
- * alike. Each piece is whole, never cropped; an empty slot is just the
- * box.
+ * accessories, in the builder's order. Here the photographs fill their
+ * boxes edge to edge with a hairline between them, so each outfit reads
+ * as one picture: a grid of outfits made of boxes with margins inside
+ * boxes read as a grid of loose photos, and one look could not be told
+ * from the next. The builder keeps the margins; it shows one outfit,
+ * piece by piece.
  */
 export function OutfitCollage({
   garments,
@@ -143,14 +166,14 @@ export function OutfitCollage({
   const boxes = outfitBoxes(garments, accessories);
   const cell = "relative min-h-0 min-w-0 overflow-hidden bg-surface";
   return (
-    <div className={`grid grid-cols-2 grid-rows-2 gap-[3px] ${className ?? ""}`}>
+    <div className={`grid grid-cols-2 grid-rows-2 gap-[2px] ${className ?? ""}`}>
       {[boxes.top, boxes.pants, boxes.shoes].map((g, i) => (
         <div key={i} className={cell}>
-          {g && <BoxPiece garment={g} thumb={thumb} sizes={sizes} />}
+          {g && <BoxPiece garment={g} thumb={thumb} sizes={sizes} cover />}
         </div>
       ))}
       <div className={cell}>
-        <AccessoryGrid pieces={boxes.accessories} />
+        <AccessoryGrid pieces={boxes.accessories} cover />
       </div>
     </div>
   );

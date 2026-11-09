@@ -41,7 +41,7 @@ export function useToast(): ToastAPI {
 // is describing until exactly the moment the button offering to cancel
 // it disappears — the window to undo is the toast's own lifetime, not a
 // second timer that could drift from what's on screen.
-export const TOAST_DURATION_MS = 2600;
+const TOAST_DURATION_MS = 2600;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);

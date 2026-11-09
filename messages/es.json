@@ -432,15 +432,10 @@
   "outfits": {
     "screenTitle": "¿Qué me pongo?",
     "sections": {
-      "week": "la semana",
-      "all": "tus outfits"
+      "week": "la semana"
     },
-    "seasonFilterLabel": "Filtrar por temporada",
     "seasonOnly": "de temporada",
-    "allSeasons": "todo el año",
-    "cleanFilterLabel": "Filtrar por estado",
     "cleanOnly": "limpios",
-    "allClean": "todos",
     "unfavorite": "quitar de favoritos",
     "undo": "deshacer",
     "pickForMe": "elige por mí",
@@ -508,7 +503,6 @@
     "open": "Abrir el outfit n{number}",
     "clear": "reinicia",
     "savedEmpty": "aún no hay outfits guardados. combina uno arriba.",
-    "backToStage": "Volver al outfit",
     "blocked": {
       "empty": "elige alguna prenda antes de guardar.",
       "missing": "para guardarlo faltan {pieces}.",
@@ -517,7 +511,13 @@
     },
     "savedNoneWithPicks": "ningún outfit guardado con estas prendas.",
     "savedAs": "guardado como n{number}, con otra paleta",
-    "withPicks": "con estas prendas"
+    "withPicks": "con estas prendas",
+    "views": {
+      "BUILD": "combinar",
+      "SAVED": "guardados",
+      "WEEK": "semana"
+    },
+    "viewsAria": "Vista"
   },
   "dayPhoto": {
     "add": "foto",
@@ -606,7 +606,7 @@
       "flow": {
         "title": "el día a día",
         "p1": "Añade tus prendas con foto, color, temporada y talla. Si pones una foto, la app te propone los colores. En el armario, abre una prenda para ver cada color junto al color del diccionario con el que se lee y todas las paletas en las que sale.",
-        "p2": "En «¿Qué me pongo?» combinas prenda a prenda en cuatro cajas: parte de arriba (jersey o camiseta), pantalones, zapatos y, si quieres, complementos. Cada opción dice cuántas paletas deja abiertas y la paleta se va formando: los colores que ya llevas se levantan y los que faltan quedan bajos. Un complemento que lleva un color que aún falta sale marcado como «completa».",
+        "p2": "En «¿Qué me pongo?» combinas prenda a prenda en cuatro cajas: parte de arriba (jersey o camiseta), pantalones, zapatos y, si quieres, complementos. Cada opción dice cuántas paletas deja abiertas y la paleta se va formando: los colores que ya llevas se levantan y los que faltan quedan bajos. Un complemento que lleva un color que aún falta sale marcado como «completa». El outfit que construyes se queda siempre a la vista; al lado (debajo, en el móvil) eliges entre combinar, los guardados y la semana.",
         "p3": "Guárdalo cuando tenga arriba, pantalones, zapatos y paleta; si aún no se puede, al pulsar «guardar outfit» te dice qué falta. Los complementos se guardan con el outfit porque forman parte de su paleta: el mismo outfit con bolso y sin él son dos outfits. Abre uno guardado para ponértelo hoy u otro día; un día pasado queda registrado sin ensuciar nada.",
         "p4": "En la colada ves qué tienes limpio y qué está en el cesto. Marca lo que va a lavar y, cuando has hecho la colada, márcalo como lavado.",
         "steps": {

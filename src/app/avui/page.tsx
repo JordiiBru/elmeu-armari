@@ -11,13 +11,26 @@ import { findAllGarments } from "@/lib/prendas/service";
 import { getCurrentSeason } from "@/lib/prendas/season";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { isWearable, rankOutfitsForToday } from "@/lib/bugaderia/laundry";
-import { startOfWeek, addDays, dayToISO, isoToDay, today } from "@/lib/outfits/week";
+import {
+  startOfWeek,
+  addDays,
+  dayToISO,
+  isoToDay,
+  today,
+} from "@/lib/outfits/week";
 import { palettes } from "@/lib/colors";
 import { catalogueNumbers } from "@/lib/outfits/catalogue";
 import { TodayLine } from "@/components/TodayLine";
 import { WeekCalendar } from "@/components/WeekCalendar";
 import { OutfitStudio } from "@/components/OutfitStudio";
-import { PageContainer, SectionHeader, Stack, Text, Icon, EmptyState } from "@/components/ui";
+import {
+  PageContainer,
+  SectionHeader,
+  Stack,
+  Text,
+  Icon,
+  EmptyState,
+} from "@/components/ui";
 import { requireUserId } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
@@ -26,36 +39,12 @@ function formatWeekRange(start: Date, end: Date, locale: string): string {
   const fmt = (d: Date) =>
     // Both ends are UTC-midnight day keys, so they are read back in UTC.
     // Which day they name was already settled in Barcelona's zone.
-    d.toLocaleDateString(locale, { day: "numeric", month: "short", timeZone: "UTC" });
+    d.toLocaleDateString(locale, {
+      day: "numeric",
+      month: "short",
+      timeZone: "UTC",
+    });
   return `${fmt(start)} — ${fmt(end)}`;
-}
-
-/**
- * One heading per stratum, in the page's quietest voice. They are what
- * turns a long scroll into three named places.
- */
-function Stratum({
-  id,
-  title,
-  aside,
-  children,
-}: {
-  id?: string;
-  title: string;
-  aside?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <Stack as="section" id={id} gap={5} className="scroll-mt-6">
-      <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
-        <Text variant="caption" as="h2">
-          {title}
-        </Text>
-        {aside}
-      </div>
-      {children}
-    </Stack>
-  );
 }
 
 function WeekNav({
@@ -122,18 +111,21 @@ export default async function AvuiPage({
   const weekEnd = addDays(weekStart, 6);
 
   const userId = await requireUserId();
-  const [outfits, garments, todayWorn, days, savedOutfitKeys] = await Promise.all([
-    findAllOutfits(userId),
-    findAllGarments(userId),
-    findTodayWorn(userId),
-    findWeekPlan(userId, weekStart),
-    findSavedOutfitKeys(userId),
-  ]);
+  const [outfits, garments, todayWorn, days, savedOutfitKeys] =
+    await Promise.all([
+      findAllOutfits(userId),
+      findAllGarments(userId),
+      findTodayWorn(userId),
+      findWeekPlan(userId, weekStart),
+      findSavedOutfitKeys(userId),
+    ]);
   const todayOutfitId = todayWorn?.outfitId ?? null;
 
   const season = getCurrentSeason();
   const todayISO = dayToISO(currentDay);
-  const extraCandidates = garments.filter((g) => EXTRA_CATEGORIES.has(g.category));
+  const extraCandidates = garments.filter((g) =>
+    EXTRA_CATEGORIES.has(g.category),
+  );
 
   // Ranked once, on the server. The week and today's line take the
   // favourites: favouriting is what puts an outfit into daily rotation.
@@ -175,31 +167,26 @@ export default async function AvuiPage({
     <PageContainer width="full">
       <SectionHeader title={t("screenTitle")} level="title-xl" />
 
-      <Stack gap={9} className="md:gap-20">
-        <OutfitStudio
-          garments={garments}
-          outfits={allRanked}
-          palettes={palettes}
-          extraCandidates={extraCandidates}
-          savedOutfitKeys={savedOutfitKeys}
-          todayISO={todayISO}
-          todayOutfitId={todayOutfitId}
-          season={season}
-          numbers={numbers}
-        />
-
-        <Stratum
-          id="setmana"
-          title={t("sections.week")}
-          aside={
+      <OutfitStudio
+        garments={garments}
+        outfits={allRanked}
+        palettes={palettes}
+        extraCandidates={extraCandidates}
+        savedOutfitKeys={savedOutfitKeys}
+        todayISO={todayISO}
+        todayOutfitId={todayOutfitId}
+        season={season}
+        numbers={numbers}
+      >
+        <Stack as="section" id="setmana" gap={5} aria-label={t("sections.week")}>
+          <div className="flex items-center justify-end border-b border-border pb-3">
             <WeekNav
               weekStart={weekStart}
               weekEnd={weekEnd}
               locale={locale}
               labels={{ previous: tWeek("previous"), next: tWeek("next") }}
             />
-          }
-        >
+          </div>
           <WeekCalendar
             days={days}
             savedOutfits={ranked}
@@ -216,10 +203,8 @@ export default async function AvuiPage({
             todayISO={todayISO}
             todayEvent={todayWorn?.event ?? null}
           />
-        </Stratum>
-      </Stack>
-      {/* Room for the builder's bar, fixed to the bottom of the screen. */}
-      <div aria-hidden className="h-20" />
+        </Stack>
+      </OutfitStudio>
     </PageContainer>
   );
 }

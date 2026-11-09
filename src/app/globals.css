@@ -392,7 +392,7 @@ button, a, input, textarea, select {
    "què hi combina", discover's rail into a piece's combinations —
    named so the browser morphs the outgoing panel into the incoming one
    instead of cross-fading the whole page. Only takes effect inside a
-   `document.startViewTransition` call (see useViewTransition); an
+   `document.startViewTransition` call (the app no longer starts one); an
    ordinary open or close never triggers one, so this is otherwise
    inert. `prefers-reduced-motion` is handled in JS, before the
    transition is ever started, not here. */

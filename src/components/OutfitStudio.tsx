@@ -32,6 +32,8 @@ import { PieceThumb } from "./PieceThumb";
 import { Button, Grid, Icon, Stack, Text } from "@/components/ui";
 
 type SingleSlot = Exclude<Slot, "ACCESSORIES">;
+type View = "BUILD" | "SAVED" | "WEEK";
+const VIEWS: View[] = ["BUILD", "SAVED", "WEEK"];
 
 /**
  * "Què em poso?": build an outfit by hand and see its palette form, with
@@ -58,6 +60,7 @@ export function OutfitStudio({
   todayOutfitId,
   season,
   numbers,
+  children,
 }: {
   /** The whole wardrobe; outerwear is left out here. */
   garments: GarmentWithColors[];
@@ -71,6 +74,9 @@ export function OutfitStudio({
   season: Season;
   /** Catalogue number of every saved outfit, in the order it was saved. */
   numbers: Record<string, number>;
+  /** What follows the collection on the page (the week): it scrolls
+   * beside, or under, the pinned stage like the rest. */
+  children?: React.ReactNode;
 }) {
   const t = useTranslations("builder");
   const tOutfits = useTranslations("outfits");
@@ -79,6 +85,7 @@ export function OutfitStudio({
 
   const [picks, setPicks] = useState<Picks>(EMPTY_PICKS);
   const [slot, setSlot] = useState<Slot>("TOP");
+  const [view, setView] = useState<View>("BUILD");
   const [chosenPalette, setChosenPalette] = useState<number | null>(null);
   const [seasonOnly, setSeasonOnly] = useState(true);
   const [cleanOnly, setCleanOnly] = useState(true);
@@ -89,16 +96,73 @@ export function OutfitStudio({
   const [savedHere, setSavedHere] = useState<string[]>([]);
 
   const stageRef = useRef<HTMLDivElement>(null);
-  const [stageVisible, setStageVisible] = useState(true);
+  const stickyRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  // What sits pinned above the content: the whole stage band below lg,
+  // the bar of view and slot tabs from lg (the stage is a column there).
+  const barRef = useRef<HTMLDivElement>(null);
+  const pinned = () => {
+    const bar = barRef.current;
+    return bar && bar.offsetParent !== null ? bar : stickyRef.current;
+  };
+  const [pinnedH, setPinnedH] = useState(0);
   useEffect(() => {
-    const el = stageRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([entry]) => setStageVisible(entry.isIntersecting), {
-      threshold: 0.15,
-    });
-    io.observe(el);
-    return () => io.disconnect();
+    const measure = () => setPinnedH(pinned()?.offsetHeight ?? 0);
+    const ro = new ResizeObserver(measure);
+    [stickyRef.current, barRef.current].forEach((e) => e && ro.observe(e));
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, []);
+
+  // From lg the stage is a column that never moves, so it is pinned at
+  // the height that centres it in the screen below the header rather
+  // than at the header itself: a screen of its own, not a block hanging
+  // from the top with empty space under it. Below lg it is a band and
+  // stays right under the header.
+  const [stageStickTop, setStageStickTop] = useState<number | null>(null);
+  useEffect(() => {
+    const el = stickyRef.current;
+    if (!el) return;
+    const place = () => {
+      const columnLayout = barRef.current?.offsetParent != null;
+      if (!columnLayout) return setStageStickTop(null);
+      const free = window.innerHeight - HEADER_H - el.offsetHeight;
+      setStageStickTop(HEADER_H + Math.max(0, Math.round(free / 2)));
+    };
+    place();
+    const ro = new ResizeObserver(place);
+    ro.observe(el);
+    window.addEventListener("resize", place);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", place);
+    };
+  }, []);
+
+  // Changing view or slot while scrolled down starts the new content at
+  // its top, right under what is pinned, without animating: the old rows
+  // are gone, so there is nothing to glide past.
+  const toContentTop = () => {
+    const content = contentRef.current;
+    const sticky = pinned();
+    if (!content || !sticky) return;
+    const stuckBottom = sticky.getBoundingClientRect().bottom;
+    const top = content.getBoundingClientRect().top;
+    if (top < stuckBottom) window.scrollBy({ top: top - stuckBottom, behavior: "auto" });
+  };
+  const changeView = (next: View) => {
+    setView(next);
+    toContentTop();
+  };
+  // A box of the stage, or a slot tab: always about combining.
+  const changeSlot = (next: Slot) => {
+    setView("BUILD");
+    setSlot(next);
+    toContentTop();
+  };
 
   // What can be tried: the toggles narrow the builder and the collection
   // alike, so "de temporada" never shows a look the builder could not.
@@ -122,10 +186,18 @@ export function OutfitStudio({
     [garments, seasonOnly, cleanOnly, season],
   );
 
-  // The palette a loaded outfit was saved with. It stays first for as
-  // long as the pieces still live in it, so adding a bag to a saved look
-  // does not swap its palette from under it.
-  const [savedPalette, setSavedPalette] = useState<number | null>(null);
+  // The palette a loaded outfit was saved with, kept first only while its
+  // clothes are all still on the stage: adding a bag to a saved look
+  // does not swap its palette from under it, but swapping its trousers
+  // makes it another outfit, judged by the engine from scratch. Kept
+  // longer, it pinned a palette the new pieces do not share (grey jeans
+  // shown as wearing its slate blue).
+  const [loaded, setLoaded] = useState<{ paletteId: number; clothes: string[] } | null>(null);
+  const savedPalette = useMemo(() => {
+    if (!loaded) return null;
+    const ids = new Set([picks.TOP, picks.PANTS, picks.SHOES].map((g) => g?.id));
+    return loaded.clothes.every((id) => ids.has(id)) ? loaded.paletteId : null;
+  }, [loaded, picks]);
   const state = useMemo(() => buildState(picks, palettes, savedPalette), [picks, palettes, savedPalette]);
   const match: PaletteMatch | undefined =
     state.matches.find((m) => m.palette.id === chosenPalette) ?? state.matches[0];
@@ -153,17 +225,26 @@ export function OutfitStudio({
         : new Set<string>(),
     [slot, picks, match, options, palettes],
   );
-  // The accessory that brings the palette's missing colour in leads.
-  const shown = useMemo(
-    () =>
-      completing.size === 0
-        ? options
-        : [
-            ...options.filter((o) => completing.has(o.garment.id)),
-            ...options.filter((o) => !completing.has(o.garment.id)),
-          ],
-    [options, completing],
+  // The order of a tab is fixed while you pick inside it: it is ranked
+  // against the other slots only, so ticking a bag never reshuffles the
+  // accessories under your finger. Captions and marks stay live. The
+  // accessory that brings the palette's missing colour in leads, judged
+  // on the clothes alone.
+  const orderPicks = useMemo<Picks>(
+    () => (slot === "ACCESSORIES" ? { ...picks, ACCESSORIES: [] } : picks),
+    [slot, picks],
   );
+  const shown = useMemo(() => {
+    const candidates = pool.filter((g) => slotOf(g.category) === slot);
+    const ranked = scoreOptions(candidates, orderPicks, slot, palettes.length).map((o) => o.garment.id);
+    const leads =
+      slot === "ACCESSORIES"
+        ? completingAccessories(orderPicks, buildState(orderPicks, palettes).matches[0], candidates, palettes)
+        : new Set<string>();
+    const order = [...ranked.filter((id) => leads.has(id)), ...ranked.filter((id) => !leads.has(id))];
+    const byId = new Map(options.map((o) => [o.garment.id, o]));
+    return order.map((id) => byId.get(id)!).filter(Boolean);
+  }, [pool, slot, orderPicks, palettes, options]);
 
   const pieces = pickedPieces(picks);
   const complete = state.missing.length === 0;
@@ -202,17 +283,16 @@ export function OutfitStudio({
     setChosenPalette(null);
     // A refusal is about the outfit as it was; one tap later it is stale.
     setFlash(null);
-    // A slot just filled hands over to the next empty one; accessories
-    // stay open, since there can be several.
-    const s = slotOf(g.category);
-    if (s && s !== "ACCESSORIES" && next[s as SingleSlot]) setSlot(nextSlot(next));
+    // The tab stays where it is: jumping to the next slot on every tap
+    // swapped the whole grid under the finger and lost your place. The
+    // empty boxes above already say what is left.
   };
 
   const clear = () => {
     setPicks(EMPTY_PICKS);
     setFlash(null);
     setChosenPalette(null);
-    setSavedPalette(null);
+    setLoaded(null);
     setSlot("TOP");
   };
 
@@ -231,8 +311,15 @@ export function OutfitStudio({
   const tryOutfit = (outfit: SavedOutfit) => {
     setPicks(picksFromOutfit(outfit));
     setChosenPalette(outfit.paletteId);
-    setSavedPalette(outfit.paletteId);
+    {
+      const p = picksFromOutfit(outfit);
+      setLoaded({
+        paletteId: outfit.paletteId,
+        clothes: [p.TOP, p.PANTS, p.SHOES].flatMap((g) => (g ? [g.id] : [])),
+      });
+    }
     setSlot("ACCESSORIES");
+    setView("BUILD");
     scrollToStage.current = true;
     setOpenOutfitId(null);
   };
@@ -285,7 +372,7 @@ export function OutfitStudio({
   const openOutfit = outfits.find((o) => o.id === openOutfitId) ?? null;
 
   const slotLabel = (s: Slot) => t(`slots.${s}`);
-  const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const viewLabel = (v: View) => t(`views.${v}`);
   const number = (o: SavedOutfit) => String(numbers[o.id] ?? 0).padStart(3, "0");
   // A saved outfit with these pieces, under this palette or another one.
   const mine = existing ?? samePieces;
@@ -298,7 +385,7 @@ export function OutfitStudio({
   const actions = (
     <div className="relative">
       <Flash flash={flash} className="inset-x-0 bottom-full mb-2 sm:right-auto" />
-      <div className="grid grid-cols-1 gap-2 sm:flex sm:justify-start sm:gap-3">
+      <div className="grid grid-cols-1 gap-1 sm:flex sm:justify-start sm:gap-3 lg:grid lg:grid-cols-2 lg:gap-2">
         {isSaved && existing ? (
           <Button
             type="button"
@@ -338,11 +425,14 @@ export function OutfitStudio({
   );
 
   const stage = (
-    <div ref={stageRef} className="flex min-w-0 items-stretch gap-4 scroll-mt-28 sm:gap-8 lg:gap-12">
-      <div className="w-[56%] flex-shrink-0 sm:w-80 lg:w-[24rem] xl:w-[28rem]">
-        <Figure picks={picks} active={slot} onSlot={setSlot} label={slotLabel} prompt={(s) => t(`prompts.${s}`)} />
+    <div className="flex min-w-0 items-stretch gap-4 sm:gap-8 lg:flex-col lg:gap-5">
+      {/* Sized from the screen's height as well as its width: the stage
+          stays pinned while the pieces scroll under it, so it must leave
+          most of the screen to them. Square boxes, for the same reason. */}
+      <div className="w-[max(46%,9.75rem)] max-w-[15rem] flex-shrink-0 sm:w-[clamp(13rem,30vh,20rem)] sm:max-w-none lg:w-full">
+        <Figure picks={picks} active={slot} onSlot={changeSlot} label={slotLabel} prompt={(s) => t(`prompts.${s}`)} />
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-5 lg:max-w-2xl">
+      <div data-stage-side className="flex min-w-0 flex-1 flex-col gap-2 sm:gap-4 lg:flex-none">
         <PalettePanel
           pieces={pieces}
           match={match}
@@ -374,128 +464,138 @@ export function OutfitStudio({
           <FilterToggle on={cleanOnly} onToggle={() => setCleanOnly((v) => !v)} label={tOutfits("cleanOnly")} />
         </div>
 
-        {stage}
+        {/* The stage is pinned under the site header for the whole page:
+            whatever the view below it shows, what you are building and its
+            palette stay on screen. Below lg it is a band across the top
+            with the view switch under it; from lg it is a column of its
+            own, centred in the screen, and the view switch (plus the slot
+            tabs while combining) rides over the right-hand column.
 
-        <Stack gap={5} className="min-w-0">
-          <SlotTabs active={slot} picks={picks} onSlot={setSlot} label={slotLabel} ariaLabel={t("slotsAria")} />
-          {shown.length === 0 ? (
-            <Text italic tone="secondary" className="font-serif py-8">
-              {t("noOptions")}
-            </Text>
-          ) : (
-            <div
-              key={slot}
-              className="panel-enter grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4 sm:gap-x-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7"
-            >
-              {shown.map((o) => (
-                <OptionCard
-                  key={o.garment.id}
-                  garment={o.garment}
-                  picked={isPicked(picks, o.garment)}
-                  fits={o.fits}
-                  completes={completing.has(o.garment.id)}
-                  caption={
-                    o.garment.colors.length === 0
-                      ? t("noColour")
-                      : !o.fits
-                        ? t("noFit")
-                        : o.wildcard || o.palettes === null
-                          ? t("wildcard")
-                          : t("palettes", { count: o.palettes })
-                  }
-                  marks={{ completes: t("completes"), dirty: tOutfits("inBasket") }}
-                  onPick={() => pick(o.garment)}
-                />
-              ))}
+            The three views (combinar · desats · setmana) share the space
+            instead of stacking: a short category no longer pulls the
+            collection up under your finger, and the week is one tap away
+            rather than a long scroll. */}
+        <div
+          ref={stageRef}
+          className="min-w-0 scroll-mt-[84px] lg:grid lg:grid-cols-[var(--stage-w)_minmax(0,1fr)] lg:items-start lg:gap-12 xl:gap-16"
+          style={{ ["--stage-w" as string]: "max(15rem, min(22rem, 26vw, calc(100svh - 84px - 20rem)))" }}
+        >
+          <div
+            ref={stickyRef}
+            data-stage
+            style={stageStickTop !== null ? { top: stageStickTop } : undefined}
+            className="sticky top-[84px] z-20 -mt-3 border-b border-border bg-background pt-3 lg:mt-0 lg:border-b-0 lg:pt-0"
+          >
+            {stage}
+            <div className="mt-3 sm:mt-5 lg:hidden">
+              <ViewTabs active={view} onView={changeView} label={viewLabel} ariaLabel={t("viewsAria")} />
             </div>
-          )}
-        </Stack>
-      </Stack>
+          </div>
 
-      <Stack as="section" gap={5}>
-        <div className="flex min-h-11 flex-wrap items-center justify-between gap-4 border-b border-border pb-1">
-          <Text variant="caption" as="h2">
-            {tOutfits("sections.all")}
-          </Text>
-          {pieces.length > 0 && (
-            <FilterToggle on={withPicks} onToggle={() => setWithPicks((v) => !v)} label={t("withPicks")} />
-          )}
-        </div>
-        {saved.length === 0 ? (
-          <Text italic tone="secondary" className="font-serif">
-            {outfits.length === 0
-              ? t("savedEmpty")
-              : pieces.length > 0 && withPicks
-                ? t("savedNoneWithPicks")
-                : tOutfits("axisEmpty")}
-          </Text>
-        ) : (
-          <Grid cols="mosaic" gapX={5} gapY={8}>
-            {saved.map((outfit) => (
-              <OutfitTile
-                key={outfit.id}
-                outfit={outfit}
-                palette={paletteMap.get(outfit.paletteId) ?? null}
-                index={(numbers[outfit.id] ?? 1) - 1}
-                mark={outfit.id === todayOutfitId ? tOutfits("today") : null}
-                onOpen={() => setOpenOutfitId(outfit.id)}
-                onToggleFavorite={() => toggleFavorite(outfit)}
-              />
-            ))}
-          </Grid>
-        )}
-      </Stack>
-
-      {/* Once the stage scrolls away under the pieces, the outfit, its
-          palette and the save stay one tap away, at every width. */}
-      {!stageVisible && pieces.length > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-elevated pb-[env(safe-area-inset-bottom)]">
-          <div className="relative mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 md:px-10">
-            <button
-              type="button"
-              onClick={() => stageRef.current?.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth" })}
-              aria-label={t("backToStage")}
-              className="flex min-w-0 flex-1 items-center gap-1.5"
-            >
-              {pieces.map((g) => (
-                <PieceThumb key={g.id} garment={g} thumb sizes="40px" className="h-9 w-9 flex-shrink-0 md:h-11 md:w-11" />
-              ))}
-              {match && (
-                <span aria-hidden className="ml-2 flex h-3 min-w-10 max-w-48 flex-1 overflow-hidden">
-                  {match.palette.colores.map((hex, i) => (
-                    <span key={i} className="flex-1" style={{ backgroundColor: hex }} />
-                  ))}
-                </span>
+          <div className="min-w-0">
+            <div ref={barRef} className="sticky top-[84px] z-20 hidden bg-background lg:block">
+              <ViewTabs active={view} onView={changeView} label={viewLabel} ariaLabel={t("viewsAria")} />
+              {view === "BUILD" && (
+                <div className="mt-1">
+                  <SlotTabs active={slot} picks={picks} onSlot={changeSlot} label={slotLabel} ariaLabel={t("slotsAria")} />
+                </div>
               )}
-            </button>
-            {isSaved && existing ? (
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => setOpenOutfitId(existing.id)}
-                aria-label={t("open", { number: number(existing) })}
-                className="min-w-[9.5rem] flex-shrink-0 justify-center tabular-nums"
-              >
-                n{number(existing)}
-                <Icon name="arrow-right" size={12} className="ml-2" />
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                size="sm"
-                onClick={save}
-                disabled={pending}
-                loading={pending}
-                loadingText={t("saving")}
-                className="min-w-[9.5rem] flex-shrink-0 justify-center"
-              >
-                {t("save")}
-              </Button>
-            )}
-            <Flash flash={stageVisible ? null : flash} className="bottom-full left-4 right-4 mb-2 text-right sm:left-auto md:right-10" />
+            </div>
+
+            {/* At least one screen tall, whatever the view holds: a short
+                view must not shrink the page and drag the scroll with it. */}
+            <div
+              ref={contentRef}
+              className="pt-5"
+              style={{ minHeight: pinnedH ? `calc(100svh - ${HEADER_H + pinnedH}px)` : undefined }}
+            >
+              {view === "BUILD" && (
+                <div key="build">
+                  {/* On a phone the four boxes above already switch slot;
+                      the tabs are here too, at the top of the pieces, for
+                      whoever reads the list before the boxes. */}
+                  <div className="mb-5 -mt-1 lg:hidden">
+                    <SlotTabs active={slot} picks={picks} onSlot={changeSlot} label={slotLabel} ariaLabel={t("slotsAria")} />
+                  </div>
+                {shown.length === 0 ? (
+                  <Text italic tone="secondary" className="font-serif py-8">
+                    {t("noOptions")}
+                  </Text>
+                ) : (
+                  <div
+                    key={slot}
+                    // From sm the grid holds as many pieces of a fixed size
+                    // as fit, instead of a column count that grew them with
+                    // the screen: what matters is seeing many at once.
+                    className="panel-enter grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] sm:gap-x-4 sm:gap-y-6"
+                  >
+                    {shown.map((o) => (
+                      <OptionCard
+                        key={o.garment.id}
+                        garment={o.garment}
+                        picked={isPicked(picks, o.garment)}
+                        fits={o.fits}
+                        completes={completing.has(o.garment.id)}
+                        caption={
+                          o.garment.colors.length === 0
+                            ? t("noColour")
+                            : !o.fits
+                              ? t("noFit")
+                              : o.wildcard || o.palettes === null
+                                ? t("wildcard")
+                                : t("palettes", { count: o.palettes })
+                        }
+                        marks={{ completes: t("completes"), dirty: tOutfits("inBasket") }}
+                        onPick={() => pick(o.garment)}
+                      />
+                    ))}
+                  </div>
+                )}
+                </div>
+              )}
+
+              {view === "SAVED" && (
+                <Stack key="saved" gap={5} className="panel-enter">
+                  {pieces.length > 0 && (
+                    <div className="-mt-2 flex min-h-11 items-center justify-end">
+                      <FilterToggle on={withPicks} onToggle={() => setWithPicks((v) => !v)} label={t("withPicks")} />
+                    </div>
+                  )}
+              {saved.length === 0 ? (
+                <Text italic tone="secondary" className="font-serif">
+                  {outfits.length === 0
+                    ? t("savedEmpty")
+                    : pieces.length > 0 && withPicks
+                      ? t("savedNoneWithPicks")
+                      : tOutfits("axisEmpty")}
+                </Text>
+              ) : (
+                <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] sm:gap-x-6">
+                  {saved.map((outfit) => (
+                    <OutfitTile
+                      key={outfit.id}
+                      outfit={outfit}
+                      palette={paletteMap.get(outfit.paletteId) ?? null}
+                      index={(numbers[outfit.id] ?? 1) - 1}
+                      mark={outfit.id === todayOutfitId ? tOutfits("today") : null}
+                      onOpen={() => setOpenOutfitId(outfit.id)}
+                      onToggleFavorite={() => toggleFavorite(outfit)}
+                    />
+                  ))}
+                </div>
+              )}
+                </Stack>
+              )}
+
+              {view === "WEEK" && (
+                <div key="week" className="panel-enter">
+                  {children}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      )}
+      </Stack>
 
       {openOutfit && (
         <OutfitSheet
@@ -514,6 +614,10 @@ export function OutfitStudio({
     </Stack>
   );
 }
+
+/** The site header's height (pt-6 + h-11 + pb-4): where pinned things
+ * start. */
+const HEADER_H = 84;
 
 /** How long a refused save explains itself before it goes quiet again. */
 const FLASH_MS = 3200;
@@ -591,7 +695,7 @@ function Figure({
             onClick={() => onSlot(s)}
             aria-label={single ? `${label(s)}: ${pieceTint(single) ?? ""}` : prompt(s)}
             aria-pressed={active === s}
-            className={`group relative aspect-[4/5] w-full overflow-hidden bg-surface outline-none transition-shadow duration-[var(--duration-base)] focus-visible:ring-1 focus-visible:ring-focus-ring ${
+            className={`group relative aspect-square w-full overflow-hidden bg-surface outline-none transition-shadow duration-[var(--duration-base)] focus-visible:ring-1 focus-visible:ring-focus-ring ${
               active === s ? "ring-1 ring-border-strong ring-inset" : ""
             }`}
           >
@@ -612,13 +716,24 @@ function Figure({
 function EmptySlot({ text, quiet = false }: { text: string; quiet?: boolean }) {
   return (
     <span
-      className={`absolute inset-0 flex items-center justify-center border border-dashed px-2 text-center font-serif italic type-small leading-tight transition-colors group-hover:text-text-primary ${
+      className={`absolute inset-0 flex items-center justify-center border border-dashed px-1 text-center font-serif italic type-small leading-tight max-sm:text-[0.7rem] transition-colors group-hover:text-text-primary ${
         quiet ? "border-border-subtle text-text-muted" : "border-border text-text-secondary"
       }`}
     >
       {text}
     </span>
   );
+}
+
+/** The palette named by the colours the outfit actually wears, then the
+ * rest: naming it by its first two colours put an unworn yellow first
+ * on an outfit of brown and blue. */
+function wornPaletteName(match: PaletteMatch): string | null {
+  const worn = new Set(match.colorAssignments.map((a) => a.paletteColorIndex));
+  const order = match.palette.colores
+    .map((_, i) => i)
+    .sort((a, b) => Number(worn.has(b)) - Number(worn.has(a)) || a - b);
+  return paletteName({ ...match.palette, colores: order.map((i) => match.palette.colores[i]) });
 }
 
 /**
@@ -659,8 +774,8 @@ function PalettePanel({
       ].slice(0, 5);
   const alternatives = match ? matches.filter((m) => m.palette.id !== match.palette.id) : [];
   return (
-    <div className="flex flex-1 flex-col gap-4">
-      <div className="flex h-12 w-full items-end gap-1 sm:h-16 lg:h-20" title={match?.palette.nombre}>
+    <div className="flex flex-1 flex-col gap-2 sm:gap-4">
+      <div className="flex h-8 w-full items-end gap-1 sm:h-14" title={match?.palette.nombre}>
         {match
           ? match.palette.colores.map((hex, i) => (
               <span
@@ -680,24 +795,41 @@ function PalettePanel({
               )),
             ]}
       </div>
-      {/* Two lines reserved on a phone, where a palette name wraps: the
-          save button under it must not move as names come and go. */}
-      <div className="flex min-h-[2.6rem] items-start justify-between gap-3 sm:min-h-7 sm:items-baseline">
-        <Text as="span" className="min-w-0 font-serif lowercase leading-tight line-clamp-2 lg:type-subtitle">
-          {match ? paletteName(match.palette) : "\u00a0"}
+      {/* One line, reserved even when empty: the buttons under it must
+          not move as names come and go. */}
+      <div className="flex min-h-5 items-baseline justify-between gap-3 sm:min-h-7">
+        <Text as="span" className="min-w-0 truncate font-serif lowercase leading-tight max-sm:type-small lg:type-subtitle">
+          {match ? wornPaletteName(match) : "\u00a0"}
         </Text>
         {match && (
-          <Text variant="caption" tabular className="hidden flex-shrink-0 sm:inline">
+          <Text variant="caption" tabular className="hidden flex-shrink-0 lg:inline">
             {match.palette.nombre}
           </Text>
+        )}
+        {/* Below lg there is no room for the row of alternatives without
+            pushing the buttons down, so the palette itself steps through
+            them: "2/5 ›" says there are more, and a tap shows the next. */}
+        {match && matches.length > 1 && (
+          <button
+            type="button"
+            onClick={() => {
+              const i = matches.findIndex((m) => m.palette.id === match.palette.id);
+              onChoose(matches[(i + 1) % matches.length].palette.id);
+            }}
+            aria-label={moreLabel}
+            className="-my-3 inline-flex min-h-11 flex-shrink-0 items-center gap-0.5 type-caption tabular-nums text-text-secondary transition-colors hover:text-text-primary lg:hidden"
+          >
+            {matches.findIndex((m) => m.palette.id === match.palette.id) + 1}/{matches.length}
+            <Icon name="chevron-right" size={10} />
+          </button>
         )}
       </div>
       {/* Alternatives and the "saved as" line take whatever room is left
           above the buttons and never more: on a phone they would
           otherwise push the buttons down. */}
-      <div className="flex min-h-0 flex-1 basis-0 flex-col gap-3 overflow-hidden">
+      <div className="flex min-h-0 flex-1 basis-0 flex-col gap-3 overflow-hidden lg:flex-none lg:basis-auto">
       {alternatives.length > 0 && (
-        <div className="flex flex-wrap items-center gap-3 ">
+        <div className="hidden flex-wrap items-center gap-3 lg:flex">
           <Text variant="caption" tone="secondary" as="span">
             {moreLabel}
           </Text>
@@ -723,6 +855,41 @@ function PalettePanel({
   );
 }
 
+
+/** The three views beside the stage. Set in the serif, larger than the
+ * slot tabs under it, so the two rows read as a section and its parts. */
+function ViewTabs({
+  active,
+  onView,
+  label,
+  ariaLabel,
+}: {
+  active: View;
+  onView: (v: View) => void;
+  label: (v: View) => string;
+  ariaLabel: string;
+}) {
+  return (
+    <div role="tablist" aria-label={ariaLabel} className="grid grid-cols-3 border-b border-border">
+      {VIEWS.map((v) => (
+        <button
+          key={v}
+          type="button"
+          role="tab"
+          aria-selected={active === v}
+          onClick={() => onView(v)}
+          className={`-mb-px flex min-h-11 items-center justify-center whitespace-nowrap border-b font-serif lowercase type-body transition-colors duration-[var(--duration-base)] lg:type-subtitle ${
+            active === v
+              ? "border-border-strong text-text-primary"
+              : "border-transparent text-text-secondary hover:text-text-primary"
+          }`}
+        >
+          {label(v)}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function SlotTabs({
   active,
