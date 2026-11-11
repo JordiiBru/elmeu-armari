@@ -3,367 +3,367 @@
     "id": 1,
     "nombre": "Combination 1",
     "colores": [
-      "#de4500",
-      "#29bdad"
+      "#d86310",
+      "#008ea5"
     ]
   },
   {
     "id": 2,
     "nombre": "Combination 2",
     "colores": [
-      "#ff8c00",
-      "#0d2b52"
+      "#f5a100",
+      "#093451"
     ]
   },
   {
     "id": 3,
     "nombre": "Combination 3",
     "colores": [
-      "#b85e00",
-      "#fff59e"
+      "#c37608",
+      "#fff3b2"
     ]
   },
   {
     "id": 4,
     "nombre": "Combination 4",
     "colores": [
-      "#c3a55c",
-      "#3400a3"
+      "#d0b16c",
+      "#551c68"
     ]
   },
   {
     "id": 5,
     "nombre": "Combination 5",
     "colores": [
-      "#328e13",
-      "#003e83"
+      "#39793c",
+      "#00486c"
     ]
   },
   {
     "id": 6,
     "nombre": "Combination 6",
     "colores": [
-      "#ff616b",
-      "#000831"
+      "#ef805f",
+      "#001231"
     ]
   },
   {
     "id": 7,
     "nombre": "Combination 7",
     "colores": [
-      "#ff5200",
-      "#b3e8c2"
+      "#ed7100",
+      "#bed4c7"
     ]
   },
   {
     "id": 8,
     "nombre": "Combination 8",
     "colores": [
-      "#c2612c",
-      "#b8b8ff"
+      "#c97838",
+      "#c0b8db"
     ]
   },
   {
     "id": 9,
     "nombre": "Combination 9",
     "colores": [
-      "#3d0079",
-      "#6e66d4"
+      "#5e2657",
+      "#816e9d"
     ]
   },
   {
     "id": 10,
     "nombre": "Combination 10",
     "colores": [
-      "#c2612c",
-      "#7e8743"
+      "#c97838",
+      "#978c56"
     ]
   },
   {
     "id": 11,
     "nombre": "Combination 11",
     "colores": [
-      "#ebd999",
-      "#9fc2b2"
+      "#efdba5",
+      "#afbbb5"
     ]
   },
   {
     "id": 12,
     "nombre": "Combination 12",
     "colores": [
-      "#c3a55c",
-      "#2dbc94"
+      "#d0b16c",
+      "#008f97"
     ]
   },
   {
     "id": 13,
     "nombre": "Combination 13",
     "colores": [
-      "#b85e00",
-      "#7e3075"
+      "#c37608",
+      "#94495e"
     ]
   },
   {
     "id": 14,
     "nombre": "Combination 14",
     "colores": [
-      "#ff4dc9",
-      "#faed8f"
+      "#ec6e8d",
+      "#fbeca3"
     ]
   },
   {
     "id": 15,
     "nombre": "Combination 15",
     "colores": [
-      "#00d973",
-      "#b8b8ff"
+      "#009087",
+      "#c0b8db"
     ]
   },
   {
     "id": 16,
     "nombre": "Combination 16",
     "colores": [
-      "#740909",
-      "#abf5ed"
+      "#8c1d19",
+      "#b4dae9"
     ]
   },
   {
     "id": 17,
     "nombre": "Combination 17",
     "colores": [
-      "#e62e73",
-      "#33ff7d"
+      "#db4f58",
+      "#00ac95"
     ]
   },
   {
     "id": 18,
     "nombre": "Combination 18",
     "colores": [
-      "#d1b0b3",
-      "#2d0060"
+      "#d6b8aa",
+      "#4d194a"
     ]
   },
   {
     "id": 19,
     "nombre": "Combination 19",
     "colores": [
-      "#522000",
-      "#7aff00"
+      "#703509",
+      "#88c122"
     ]
   },
   {
     "id": 20,
     "nombre": "Combination 20",
     "colores": [
-      "#80ffcc",
-      "#cc85d1"
+      "#83ccd2",
+      "#cf97ab"
     ]
   },
   {
     "id": 21,
     "nombre": "Combination 21",
     "colores": [
-      "#ff616b",
-      "#33ff7d"
+      "#ef805f",
+      "#00ac95"
     ]
   },
   {
     "id": 22,
     "nombre": "Combination 22",
     "colores": [
-      "#ffff00",
-      "#0024cc"
+      "#fff100",
+      "#033983"
     ]
   },
   {
     "id": 23,
     "nombre": "Combination 23",
     "colores": [
-      "#ffbf6e",
-      "#9161f2"
+      "#fbcc7a",
+      "#a070a8"
     ]
   },
   {
     "id": 24,
     "nombre": "Combination 24",
     "colores": [
-      "#503d00",
-      "#7e3075"
+      "#6d4f14",
+      "#94495e"
     ]
   },
   {
     "id": 25,
     "nombre": "Combination 25",
     "colores": [
-      "#c9303e",
-      "#bfffe6"
+      "#ca503d",
+      "#c8e7e9"
     ]
   },
   {
     "id": 26,
     "nombre": "Combination 26",
     "colores": [
-      "#fa9442",
-      "#5e4017"
+      "#f2a84b",
+      "#7a5329"
     ]
   },
   {
     "id": 27,
     "nombre": "Combination 27",
     "colores": [
-      "#ffa6d9",
-      "#1b3644"
+      "#f6bdc1",
+      "#2c424a"
     ]
   },
   {
     "id": 28,
     "nombre": "Combination 28",
     "colores": [
-      "#651300",
-      "#000831"
+      "#802911",
+      "#001231"
     ]
   },
   {
     "id": 29,
     "nombre": "Combination 29",
     "colores": [
-      "#759243",
-      "#96bfe6"
+      "#8c8e58",
+      "#a2b2cd"
     ]
   },
   {
     "id": 30,
     "nombre": "Combination 30",
     "colores": [
-      "#a90636",
-      "#9fc2b2"
+      "#b31831",
+      "#afbbb5"
     ]
   },
   {
     "id": 31,
     "nombre": "Combination 31",
     "colores": [
-      "#e81900",
-      "#fff59e"
+      "#db3815",
+      "#fff3b2"
     ]
   },
   {
     "id": 32,
     "nombre": "Combination 32",
     "colores": [
-      "#d99e73",
-      "#7aff00"
+      "#dcab77",
+      "#88c122"
     ]
   },
   {
     "id": 33,
     "nombre": "Combination 33",
     "colores": [
-      "#b85e00",
-      "#1b3644"
+      "#c37608",
+      "#2c424a"
     ]
   },
   {
     "id": 34,
     "nombre": "Combination 34",
     "colores": [
-      "#ff5ec4",
-      "#b5d1cc"
+      "#ed7e92",
+      "#c0c7c6"
     ]
   },
   {
     "id": 35,
     "nombre": "Combination 35",
     "colores": [
-      "#b08699",
-      "#a10b2b"
+      "#c1a19e",
+      "#ad242f"
     ]
   },
   {
     "id": 36,
     "nombre": "Combination 36",
     "colores": [
-      "#baa600",
-      "#b5ffc2"
+      "#c8a800",
+      "#c0e1ce"
     ]
   },
   {
     "id": 37,
     "nombre": "Combination 37",
     "colores": [
-      "#a32100",
-      "#3400a3"
+      "#b03f16",
+      "#551c68"
     ]
   },
   {
     "id": 38,
     "nombre": "Combination 38",
     "colores": [
-      "#1b8e13",
-      "#0024cc"
+      "#00873a",
+      "#033983"
     ]
   },
   {
     "id": 39,
     "nombre": "Combination 39",
     "colores": [
-      "#d60036",
-      "#0057ba"
+      "#cd002d",
+      "#00558e"
     ]
   },
   {
     "id": 40,
     "nombre": "Combination 40",
     "colores": [
-      "#c74300",
-      "#a6d40d"
+      "#cb6012",
+      "#b7bc21"
     ]
   },
   {
     "id": 41,
     "nombre": "Combination 41",
     "colores": [
-      "#7e8743",
-      "#80ffcc"
+      "#978c56",
+      "#83ccd2"
     ]
   },
   {
     "id": 42,
     "nombre": "Combination 42",
     "colores": [
-      "#e0b81f",
-      "#2619d1"
+      "#e5bc2a",
+      "#443580"
     ]
   },
   {
     "id": 43,
     "nombre": "Combination 43",
     "colores": [
-      "#ffa6d9",
-      "#9c52f2"
+      "#f6bdc1",
+      "#a966a2"
     ]
   },
   {
     "id": 44,
     "nombre": "Combination 44",
     "colores": [
-      "#23c17c",
-      "#4f8fe6"
+      "#008e88",
+      "#5981b5"
     ]
   },
   {
     "id": 45,
     "nombre": "Combination 45",
     "colores": [
-      "#ffcfc4",
-      "#f2ff26"
+      "#fbdcc4",
+      "#f9ee28"
     ]
   },
   {
     "id": 46,
     "nombre": "Combination 46",
     "colores": [
-      "#ff5200",
+      "#ed7100",
       "#000000"
     ]
   },
@@ -371,47 +371,47 @@
     "id": 47,
     "nombre": "Combination 47",
     "colores": [
-      "#c9303e",
-      "#bfabcc"
+      "#ca503d",
+      "#c7b0b8"
     ]
   },
   {
     "id": 48,
     "nombre": "Combination 48",
     "colores": [
-      "#b319ab",
-      "#0057ba"
+      "#b8356d",
+      "#00558e"
     ]
   },
   {
     "id": 49,
     "nombre": "Combination 49",
     "colores": [
-      "#abf5ed",
-      "#0d75ff"
+      "#b4dae9",
+      "#0065b3"
     ]
   },
   {
     "id": 50,
     "nombre": "Combination 50",
     "colores": [
-      "#ebd999",
-      "#2d0060"
+      "#efdba5",
+      "#4d194a"
     ]
   },
   {
     "id": 51,
     "nombre": "Combination 51",
     "colores": [
-      "#a10b2b",
-      "#0d75ff"
+      "#ad242f",
+      "#0065b3"
     ]
   },
   {
     "id": 52,
     "nombre": "Combination 52",
     "colores": [
-      "#f5f5b8",
+      "#f8f2c8",
       "#000000"
     ]
   },
@@ -419,23 +419,23 @@
     "id": 53,
     "nombre": "Combination 53",
     "colores": [
-      "#ff8c00",
-      "#2d0060"
+      "#f5a100",
+      "#4d194a"
     ]
   },
   {
     "id": 54,
     "nombre": "Combination 54",
     "colores": [
-      "#00d973",
-      "#a6e6db"
+      "#009087",
+      "#b0cfd7"
     ]
   },
   {
     "id": 55,
     "nombre": "Combination 55",
     "colores": [
-      "#d94d99",
+      "#d56a75",
       "#ffffff"
     ]
   },
@@ -443,55 +443,55 @@
     "id": 56,
     "nombre": "Combination 56",
     "colores": [
-      "#bfabcc",
-      "#2619d1"
+      "#c7b0b8",
+      "#443580"
     ]
   },
   {
     "id": 57,
     "nombre": "Combination 57",
     "colores": [
-      "#6b2e63",
-      "#1b3644"
+      "#854659",
+      "#2c424a"
     ]
   },
   {
     "id": 58,
     "nombre": "Combination 58",
     "colores": [
-      "#681916",
-      "#33ff7d"
+      "#833121",
+      "#00ac95"
     ]
   },
   {
     "id": 59,
     "nombre": "Combination 59",
     "colores": [
-      "#ff5ec4",
-      "#000000"
+      "#ed7e92",
+      "#ac9d12"
     ]
   },
   {
     "id": 60,
     "nombre": "Combination 60",
     "colores": [
-      "#fff59e",
-      "#0d2b52"
+      "#fff3b2",
+      "#093451"
     ]
   },
   {
     "id": 61,
     "nombre": "Combination 61",
     "colores": [
-      "#bdf226",
-      "#340059"
+      "#ccd53c",
+      "#520e45"
     ]
   },
   {
     "id": 62,
     "nombre": "Combination 62",
     "colores": [
-      "#ffff00",
+      "#fff100",
       "#000000"
     ]
   },
@@ -499,55 +499,55 @@
     "id": 63,
     "nombre": "Combination 63",
     "colores": [
-      "#5c2c45",
-      "#29bdad"
+      "#784244",
+      "#008ea5"
     ]
   },
   {
     "id": 64,
     "nombre": "Combination 64",
     "colores": [
-      "#9c52f2",
-      "#4d52de"
+      "#a966a2",
+      "#645b99"
     ]
   },
   {
     "id": 65,
     "nombre": "Combination 65",
     "colores": [
-      "#baa600",
-      "#80ffcc"
+      "#c8a800",
+      "#83ccd2"
     ]
   },
   {
     "id": 66,
     "nombre": "Combination 66",
     "colores": [
-      "#d1bd19",
-      "#58771e"
+      "#dabb24",
+      "#71773a"
     ]
   },
   {
     "id": 67,
     "nombre": "Combination 67",
     "colores": [
-      "#4f8fe6",
-      "#0d2b52"
+      "#5981b5",
+      "#093451"
     ]
   },
   {
     "id": 68,
     "nombre": "Combination 68",
     "colores": [
-      "#b08699",
-      "#ffff00"
+      "#c1a19e",
+      "#fff100"
     ]
   },
   {
     "id": 69,
     "nombre": "Combination 69",
     "colores": [
-      "#9cb29e",
+      "#acac9e",
       "#000000"
     ]
   },
@@ -555,343 +555,343 @@
     "id": 70,
     "nombre": "Combination 70",
     "colores": [
-      "#b85e00",
-      "#405416"
+      "#c37608",
+      "#5a5c2f"
     ]
   },
   {
     "id": 71,
     "nombre": "Combination 71",
     "colores": [
-      "#a90636",
-      "#d99e73"
+      "#b31831",
+      "#dcab77"
     ]
   },
   {
     "id": 72,
     "nombre": "Combination 72",
     "colores": [
-      "#f5f5b8",
-      "#abf5ed"
+      "#f8f2c8",
+      "#b4dae9"
     ]
   },
   {
     "id": 73,
     "nombre": "Combination 73",
     "colores": [
-      "#5e4017",
-      "#85b857"
+      "#7a5329",
+      "#84925e"
     ]
   },
   {
     "id": 74,
     "nombre": "Combination 74",
     "colores": [
-      "#b5ffc2",
-      "#2dbc94"
+      "#c0e1ce",
+      "#008f97"
     ]
   },
   {
     "id": 75,
     "nombre": "Combination 75",
     "colores": [
-      "#abf5ed",
-      "#202d85"
+      "#b4dae9",
+      "#373f68"
     ]
   },
   {
     "id": 76,
     "nombre": "Combination 76",
     "colores": [
-      "#fff59e",
-      "#9cb29e"
+      "#fff3b2",
+      "#acac9e"
     ]
   },
   {
     "id": 77,
     "nombre": "Combination 77",
     "colores": [
-      "#e62e73",
-      "#003e83"
+      "#db4f58",
+      "#00486c"
     ]
   },
   {
     "id": 78,
     "nombre": "Combination 78",
     "colores": [
-      "#f2ad78",
-      "#6bffb3"
+      "#efbc7e",
+      "#68c3be"
     ]
   },
   {
     "id": 79,
     "nombre": "Combination 79",
     "colores": [
-      "#651300",
-      "#2dbc94"
+      "#802911",
+      "#008f97"
     ]
   },
   {
     "id": 80,
     "nombre": "Combination 80",
     "colores": [
-      "#f5f5b8",
-      "#9161f2"
+      "#f8f2c8",
+      "#a070a8"
     ]
   },
   {
     "id": 81,
     "nombre": "Combination 81",
     "colores": [
-      "#fa9442",
-      "#9cb29e"
+      "#f2a84b",
+      "#acac9e"
     ]
   },
   {
     "id": 82,
     "nombre": "Combination 82",
     "colores": [
-      "#681916",
-      "#2d0060"
+      "#833121",
+      "#4d194a"
     ]
   },
   {
     "id": 83,
     "nombre": "Combination 83",
     "colores": [
-      "#bcd382",
-      "#202d85"
+      "#ced19b",
+      "#373f68"
     ]
   },
   {
     "id": 84,
     "nombre": "Combination 84",
     "colores": [
-      "#ffcfc4",
-      "#0f261f"
+      "#fbdcc4",
+      "#0b2f2c"
     ]
   },
   {
     "id": 85,
     "nombre": "Combination 85",
     "colores": [
-      "#c74300",
-      "#008aa1"
+      "#cb6012",
+      "#006e93"
     ]
   },
   {
     "id": 86,
     "nombre": "Combination 86",
     "colores": [
-      "#b85e00",
-      "#33ff7d"
+      "#c37608",
+      "#00ac95"
     ]
   },
   {
     "id": 87,
     "nombre": "Combination 87",
     "colores": [
-      "#ffa6d9",
-      "#a6d40d"
+      "#f6bdc1",
+      "#b7bc21"
     ]
   },
   {
     "id": 88,
     "nombre": "Combination 88",
     "colores": [
-      "#ffcfc4",
-      "#0d75ff"
+      "#fbdcc4",
+      "#0065b3"
     ]
   },
   {
     "id": 89,
     "nombre": "Combination 89",
     "colores": [
-      "#ff8c00",
-      "#202d85"
+      "#f5a100",
+      "#373f68"
     ]
   },
   {
     "id": 90,
     "nombre": "Combination 90",
     "colores": [
-      "#ff5ec4",
-      "#9c52f2"
+      "#ed7e92",
+      "#a966a2"
     ]
   },
   {
     "id": 91,
     "nombre": "Combination 91",
     "colores": [
-      "#5c2c45",
-      "#c05200"
+      "#784244",
+      "#c86c0e"
     ]
   },
   {
     "id": 92,
     "nombre": "Combination 92",
     "colores": [
-      "#ff7399",
-      "#00d973"
+      "#f09082",
+      "#009087"
     ]
   },
   {
     "id": 93,
     "nombre": "Combination 93",
     "colores": [
-      "#000000",
-      "#a6e6db"
+      "#b0cfd7",
+      "#ac9d12"
     ]
   },
   {
     "id": 94,
     "nombre": "Combination 94",
     "colores": [
-      "#ebd999",
-      "#00592e"
+      "#efdba5",
+      "#005147"
     ]
   },
   {
     "id": 95,
     "nombre": "Combination 95",
     "colores": [
-      "#681916",
-      "#06004f"
+      "#833121",
+      "#011b45"
     ]
   },
   {
     "id": 96,
     "nombre": "Combination 96",
     "colores": [
-      "#e0b81f",
-      "#718600"
+      "#e5bc2a",
+      "#8a851f"
     ]
   },
   {
     "id": 97,
     "nombre": "Combination 97",
     "colores": [
-      "#ffa6d9",
-      "#c9303e"
+      "#f6bdc1",
+      "#ca503d"
     ]
   },
   {
     "id": 98,
     "nombre": "Combination 98",
     "colores": [
-      "#651300",
-      "#202d85"
+      "#802911",
+      "#373f68"
     ]
   },
   {
     "id": 99,
     "nombre": "Combination 99",
     "colores": [
-      "#fff59e",
-      "#29bdad"
+      "#fff3b2",
+      "#008ea5"
     ]
   },
   {
     "id": 100,
     "nombre": "Combination 100",
     "colores": [
-      "#888d2a",
-      "#6e66d4"
+      "#9e8e43",
+      "#816e9d"
     ]
   },
   {
     "id": 101,
     "nombre": "Combination 101",
     "colores": [
-      "#e6adcf",
-      "#0024cc"
+      "#e5bcbc",
+      "#033983"
     ]
   },
   {
     "id": 102,
     "nombre": "Combination 102",
     "colores": [
-      "#ebd999",
-      "#c05200"
+      "#efdba5",
+      "#c86c0e"
     ]
   },
   {
     "id": 103,
     "nombre": "Combination 103",
     "colores": [
-      "#c2612c",
-      "#2d0060"
+      "#c97838",
+      "#4d194a"
     ]
   },
   {
     "id": 104,
     "nombre": "Combination 104",
     "colores": [
-      "#a10b2b",
-      "#f5f5b8"
+      "#ad242f",
+      "#f8f2c8"
     ]
   },
   {
     "id": 105,
     "nombre": "Combination 105",
     "colores": [
-      "#e6adcf",
-      "#66ab56"
+      "#e5bcbc",
+      "#7a9c6f"
     ]
   },
   {
     "id": 106,
     "nombre": "Combination 106",
     "colores": [
-      "#008aa1",
-      "#06004f"
+      "#006e93",
+      "#011b45"
     ]
   },
   {
     "id": 107,
     "nombre": "Combination 107",
     "colores": [
-      "#ffe600",
-      "#76844e"
+      "#ffe100",
+      "#8e885f"
     ]
   },
   {
     "id": 108,
     "nombre": "Combination 108",
     "colores": [
-      "#ff5ec4",
-      "#a32100"
+      "#ed7e92",
+      "#b03f16"
     ]
   },
   {
     "id": 109,
     "nombre": "Combination 109",
     "colores": [
-      "#fff59e",
-      "#324e2a"
+      "#fff3b2",
+      "#48583e"
     ]
   },
   {
     "id": 110,
     "nombre": "Combination 110",
     "colores": [
-      "#6c2b11",
-      "#362304"
+      "#86431f",
+      "#513412"
     ]
   },
   {
     "id": 111,
     "nombre": "Combination 111",
     "colores": [
-      "#fff59e",
-      "#a6ff47"
+      "#fff3b2",
+      "#b6d564"
     ]
   },
   {
     "id": 112,
     "nombre": "Combination 112",
     "colores": [
-      "#ff616b",
+      "#ef805f",
       "#000000"
     ]
   },
@@ -899,39 +899,39 @@
     "id": 113,
     "nombre": "Combination 113",
     "colores": [
-      "#ffcfc4",
-      "#362304"
+      "#fbdcc4",
+      "#513412"
     ]
   },
   {
     "id": 114,
     "nombre": "Combination 114",
     "colores": [
-      "#ffab00",
-      "#008aa1"
+      "#f9b900",
+      "#006e93"
     ]
   },
   {
     "id": 115,
     "nombre": "Combination 115",
     "colores": [
-      "#faed8f",
-      "#ff3319"
+      "#fbeca3",
+      "#ea5520"
     ]
   },
   {
     "id": 116,
     "nombre": "Combination 116",
     "colores": [
-      "#e6adcf",
-      "#4733ff"
+      "#e5bcbc",
+      "#614498"
     ]
   },
   {
     "id": 117,
     "nombre": "Combination 117",
     "colores": [
-      "#d60036",
+      "#cd002d",
       "#000000"
     ]
   },
@@ -939,239 +939,239 @@
     "id": 118,
     "nombre": "Combination 118",
     "colores": [
-      "#e0b81f",
-      "#362304"
+      "#e5bc2a",
+      "#513412"
     ]
   },
   {
     "id": 119,
     "nombre": "Combination 119",
     "colores": [
-      "#a6e6db",
-      "#0d2b52"
+      "#b0cfd7",
+      "#093451"
     ]
   },
   {
     "id": 120,
     "nombre": "Combination 120",
     "colores": [
-      "#e6adcf",
-      "#a90636"
+      "#e5bcbc",
+      "#b31831"
     ]
   },
   {
     "id": 121,
     "nombre": "Combination 121",
     "colores": [
-      "#6c2b11",
-      "#d99e73",
-      "#405416"
+      "#86431f",
+      "#dcab77",
+      "#5a5c2f"
     ]
   },
   {
     "id": 122,
     "nombre": "Combination 122",
     "colores": [
-      "#d60036",
-      "#ffb852",
-      "#00d973"
+      "#cd002d",
+      "#fac55f",
+      "#009087"
     ]
   },
   {
     "id": 123,
     "nombre": "Combination 123",
     "colores": [
-      "#ff7399",
-      "#f2ff26",
-      "#6b2e63"
+      "#f09082",
+      "#f9ee28",
+      "#854659"
     ]
   },
   {
     "id": 124,
     "nombre": "Combination 124",
     "colores": [
-      "#730f1f",
-      "#e0b81f",
-      "#99b333"
+      "#8a2322",
+      "#e5bc2a",
+      "#aaa64d"
     ]
   },
   {
     "id": 125,
     "nombre": "Combination 125",
     "colores": [
-      "#d1b0b3",
-      "#29bdad",
-      "#202d85"
+      "#d6b8aa",
+      "#008ea5",
+      "#373f68"
     ]
   },
   {
     "id": 126,
     "nombre": "Combination 126",
     "colores": [
-      "#ebd999",
-      "#e0b81f",
-      "#0024cc"
+      "#efdba5",
+      "#e5bc2a",
+      "#033983"
     ]
   },
   {
     "id": 127,
     "nombre": "Combination 127",
     "colores": [
-      "#ffbf6e",
-      "#56aa69",
-      "#4d52de"
+      "#fbcc7a",
+      "#649278",
+      "#645b99"
     ]
   },
   {
     "id": 128,
     "nombre": "Combination 128",
     "colores": [
-      "#ffa6d9",
-      "#6bffb3",
-      "#9161f2"
+      "#f6bdc1",
+      "#68c3be",
+      "#a070a8"
     ]
   },
   {
     "id": 129,
     "nombre": "Combination 129",
     "colores": [
-      "#ffe600",
-      "#b68400",
-      "#96bfe6"
+      "#ffe100",
+      "#c49007",
+      "#a2b2cd"
     ]
   },
   {
     "id": 130,
     "nombre": "Combination 130",
     "colores": [
-      "#b85e00",
-      "#a10b2b",
-      "#2619d1"
+      "#c37608",
+      "#ad242f",
+      "#443580"
     ]
   },
   {
     "id": 131,
     "nombre": "Combination 131",
     "colores": [
-      "#b85e00",
-      "#de4500",
-      "#00cf91"
+      "#c37608",
+      "#d86310",
+      "#008c97"
     ]
   },
   {
     "id": 132,
     "nombre": "Combination 132",
     "colores": [
-      "#f5f5b8",
-      "#fa9442",
-      "#000000"
+      "#f8f2c8",
+      "#f2a84b",
+      "#ac9d12"
     ]
   },
   {
     "id": 133,
     "nombre": "Combination 133",
     "colores": [
-      "#740909",
-      "#000000",
-      "#33ff7d"
+      "#8c1d19",
+      "#00ac95",
+      "#ac9d12"
     ]
   },
   {
     "id": 134,
     "nombre": "Combination 134",
     "colores": [
-      "#ff5ec4",
-      "#9161f2",
-      "#3400a3"
+      "#ed7e92",
+      "#a070a8",
+      "#551c68"
     ]
   },
   {
     "id": 135,
     "nombre": "Combination 135",
     "colores": [
-      "#f5f5b8",
-      "#328e13",
-      "#96bfe6"
+      "#f8f2c8",
+      "#39793c",
+      "#a2b2cd"
     ]
   },
   {
     "id": 136,
     "nombre": "Combination 136",
     "colores": [
-      "#d50c42",
-      "#19cc33",
-      "#3400a3"
+      "#cf2438",
+      "#008e5c",
+      "#551c68"
     ]
   },
   {
     "id": 137,
     "nombre": "Combination 137",
     "colores": [
-      "#c9303e",
-      "#ffbf6e",
-      "#56aa69"
+      "#ca503d",
+      "#fbcc7a",
+      "#649278"
     ]
   },
   {
     "id": 138,
     "nombre": "Combination 138",
     "colores": [
-      "#fa9442",
-      "#f2ff26",
-      "#6bffb3"
+      "#f2a84b",
+      "#f9ee28",
+      "#68c3be"
     ]
   },
   {
     "id": 139,
     "nombre": "Combination 139",
     "colores": [
-      "#96bfe6",
-      "#000831",
-      "#b5d1cc"
+      "#a2b2cd",
+      "#001231",
+      "#c0c7c6"
     ]
   },
   {
     "id": 140,
     "nombre": "Combination 140",
     "colores": [
-      "#fa9442",
-      "#008aa1",
-      "#1b3644"
+      "#f2a84b",
+      "#006e93",
+      "#2c424a"
     ]
   },
   {
     "id": 141,
     "nombre": "Combination 141",
     "colores": [
-      "#ff5200",
-      "#a6ff47",
-      "#0d2b52"
+      "#ed7100",
+      "#b6d564",
+      "#093451"
     ]
   },
   {
     "id": 142,
     "nombre": "Combination 142",
     "colores": [
-      "#9e194d",
-      "#baa600",
-      "#96bfe6"
+      "#ab3945",
+      "#c8a800",
+      "#a2b2cd"
     ]
   },
   {
     "id": 143,
     "nombre": "Combination 143",
     "colores": [
-      "#0d75ff",
-      "#b875eb",
-      "#9cb29e"
+      "#0065b3",
+      "#bf87b0",
+      "#acac9e"
     ]
   },
   {
     "id": 144,
     "nombre": "Combination 144",
     "colores": [
-      "#b319ab",
-      "#ff5200",
+      "#b8356d",
+      "#ed7100",
       "#000000"
     ]
   },
@@ -1179,413 +1179,413 @@
     "id": 145,
     "nombre": "Combination 145",
     "colores": [
-      "#6c2b11",
-      "#a6d40d",
-      "#06004f"
+      "#86431f",
+      "#b7bc21",
+      "#011b45"
     ]
   },
   {
     "id": 146,
     "nombre": "Combination 146",
     "colores": [
-      "#b68400",
-      "#505423",
-      "#1b8e13"
+      "#c49007",
+      "#6c6037",
+      "#00873a"
     ]
   },
   {
     "id": 147,
     "nombre": "Combination 147",
     "colores": [
-      "#ff4dc9",
-      "#740909",
-      "#b5ffc2"
+      "#ec6e8d",
+      "#8c1d19",
+      "#c0e1ce"
     ]
   },
   {
     "id": 148,
     "nombre": "Combination 148",
     "colores": [
-      "#d1bd19",
-      "#ffab00",
-      "#29bdad"
+      "#dabb24",
+      "#f9b900",
+      "#008ea5"
     ]
   },
   {
     "id": 149,
     "nombre": "Combination 149",
     "colores": [
-      "#d1bd19",
-      "#ff5200",
-      "#0f261f"
+      "#dabb24",
+      "#ed7100",
+      "#0b2f2c"
     ]
   },
   {
     "id": 150,
     "nombre": "Combination 150",
     "colores": [
-      "#ffcfc4",
-      "#a6d40d",
-      "#b3e8c2"
+      "#fbdcc4",
+      "#b7bc21",
+      "#bed4c7"
     ]
   },
   {
     "id": 151,
     "nombre": "Combination 151",
     "colores": [
-      "#f5f5b8",
-      "#ff8c00",
-      "#003e83"
+      "#f8f2c8",
+      "#f5a100",
+      "#00486c"
     ]
   },
   {
     "id": 152,
     "nombre": "Combination 152",
     "colores": [
-      "#c9303e",
-      "#681916",
-      "#a6e6db"
+      "#ca503d",
+      "#833121",
+      "#b0cfd7"
     ]
   },
   {
     "id": 153,
     "nombre": "Combination 153",
     "colores": [
-      "#ff5ec4",
-      "#ffab00",
-      "#a6d40d"
+      "#ed7e92",
+      "#f9b900",
+      "#b7bc21"
     ]
   },
   {
     "id": 154,
     "nombre": "Combination 154",
     "colores": [
-      "#d60036",
-      "#ffff00",
-      "#0d75ff"
+      "#cd002d",
+      "#fff100",
+      "#0065b3"
     ]
   },
   {
     "id": 155,
     "nombre": "Combination 155",
     "colores": [
-      "#fa2b00",
-      "#00d973",
-      "#000831"
+      "#e74c0a",
+      "#009087",
+      "#001231"
     ]
   },
   {
     "id": 156,
     "nombre": "Combination 156",
     "colores": [
-      "#d1bd19",
-      "#94ff94",
-      "#2619d1"
+      "#dabb24",
+      "#a0d2a8",
+      "#443580"
     ]
   },
   {
     "id": 157,
     "nombre": "Combination 157",
     "colores": [
-      "#6f0043",
-      "#d1bd19",
-      "#4f8fe6"
+      "#870836",
+      "#dabb24",
+      "#5981b5"
     ]
   },
   {
     "id": 158,
     "nombre": "Combination 158",
     "colores": [
-      "#f2ff26",
-      "#c2612c",
-      "#7aff00"
+      "#f9ee28",
+      "#c97838",
+      "#88c122"
     ]
   },
   {
     "id": 159,
     "nombre": "Combination 159",
     "colores": [
-      "#b68400",
-      "#80ffcc",
-      "#b8b8ff"
+      "#c49007",
+      "#83ccd2",
+      "#c0b8db"
     ]
   },
   {
     "id": 160,
     "nombre": "Combination 160",
     "colores": [
-      "#baa600",
-      "#5e4017",
-      "#417777"
+      "#c8a800",
+      "#7a5329",
+      "#527177"
     ]
   },
   {
     "id": 161,
     "nombre": "Combination 161",
     "colores": [
-      "#6c2b11",
-      "#f2ad78",
-      "#0057ba"
+      "#86431f",
+      "#efbc7e",
+      "#00558e"
     ]
   },
   {
     "id": 162,
     "nombre": "Combination 162",
     "colores": [
-      "#d94d99",
-      "#85b857",
-      "#b875eb"
+      "#d56a75",
+      "#84925e",
+      "#bf87b0"
     ]
   },
   {
     "id": 163,
     "nombre": "Combination 163",
     "colores": [
-      "#ffe600",
-      "#b5ffc2",
-      "#008aa1"
+      "#ffe100",
+      "#c0e1ce",
+      "#006e93"
     ]
   },
   {
     "id": 164,
     "nombre": "Combination 164",
     "colores": [
-      "#e81900",
-      "#ffab00",
-      "#2619d1"
+      "#db3815",
+      "#f9b900",
+      "#443580"
     ]
   },
   {
     "id": 165,
     "nombre": "Combination 165",
     "colores": [
-      "#e6adcf",
-      "#ff4dc9",
-      "#5c2c45"
+      "#e5bcbc",
+      "#ec6e8d",
+      "#784244"
     ]
   },
   {
     "id": 166,
     "nombre": "Combination 166",
     "colores": [
-      "#ff616b",
-      "#faed8f",
-      "#0f261f"
+      "#ef805f",
+      "#fbeca3",
+      "#0b2f2c"
     ]
   },
   {
     "id": 167,
     "nombre": "Combination 167",
     "colores": [
-      "#c0b490",
-      "#abf5ed",
-      "#003e83"
+      "#ccb998",
+      "#b4dae9",
+      "#00486c"
     ]
   },
   {
     "id": 168,
     "nombre": "Combination 168",
     "colores": [
-      "#f2ff26",
-      "#003e83",
-      "#7e3075"
+      "#f9ee28",
+      "#00486c",
+      "#94495e"
     ]
   },
   {
     "id": 169,
     "nombre": "Combination 169",
     "colores": [
-      "#ffa6d9",
-      "#fff59e",
-      "#9cb29e"
+      "#f6bdc1",
+      "#fff3b2",
+      "#acac9e"
     ]
   },
   {
     "id": 170,
     "nombre": "Combination 170",
     "colores": [
-      "#b319ab",
-      "#ffab00",
-      "#3400a3"
+      "#b8356d",
+      "#f9b900",
+      "#551c68"
     ]
   },
   {
     "id": 171,
     "nombre": "Combination 171",
     "colores": [
-      "#730f1f",
-      "#ff8c00",
-      "#b3e8c2"
+      "#8a2322",
+      "#f5a100",
+      "#bed4c7"
     ]
   },
   {
     "id": 172,
     "nombre": "Combination 172",
     "colores": [
-      "#c2612c",
-      "#008aa1",
-      "#3400a3"
+      "#c97838",
+      "#006e93",
+      "#551c68"
     ]
   },
   {
     "id": 173,
     "nombre": "Combination 173",
     "colores": [
-      "#f2ff26",
-      "#651300",
-      "#b5ffc2"
+      "#f9ee28",
+      "#802911",
+      "#c0e1ce"
     ]
   },
   {
     "id": 174,
     "nombre": "Combination 174",
     "colores": [
-      "#ffa6d9",
-      "#bfabcc",
-      "#6b2e63"
+      "#f6bdc1",
+      "#c7b0b8",
+      "#854659"
     ]
   },
   {
     "id": 175,
     "nombre": "Combination 175",
     "colores": [
-      "#f2ad78",
-      "#bcd382",
-      "#4733ff"
+      "#efbc7e",
+      "#ced19b",
+      "#614498"
     ]
   },
   {
     "id": 176,
     "nombre": "Combination 176",
     "colores": [
-      "#ffb3f0",
-      "#ffcfc4",
-      "#80ffcc"
+      "#f7c9d5",
+      "#fbdcc4",
+      "#83ccd2"
     ]
   },
   {
     "id": 177,
     "nombre": "Combination 177",
     "colores": [
-      "#730f1f",
-      "#888d2a",
-      "#b8b8ff"
+      "#8a2322",
+      "#9e8e43",
+      "#c0b8db"
     ]
   },
   {
     "id": 178,
     "nombre": "Combination 178",
     "colores": [
-      "#ebd999",
-      "#a6e6db",
-      "#2dbc94"
+      "#efdba5",
+      "#b0cfd7",
+      "#008f97"
     ]
   },
   {
     "id": 179,
     "nombre": "Combination 179",
     "colores": [
-      "#e81900",
-      "#fa9442",
-      "#0024cc"
+      "#db3815",
+      "#f2a84b",
+      "#033983"
     ]
   },
   {
     "id": 180,
     "nombre": "Combination 180",
     "colores": [
-      "#ffbf6e",
-      "#9161f2",
-      "#b5d1cc"
+      "#fbcc7a",
+      "#a070a8",
+      "#c0c7c6"
     ]
   },
   {
     "id": 181,
     "nombre": "Combination 181",
     "colores": [
-      "#a10b2b",
-      "#2619d1",
-      "#340059"
+      "#ad242f",
+      "#443580",
+      "#520e45"
     ]
   },
   {
     "id": 182,
     "nombre": "Combination 182",
     "colores": [
-      "#b85e00",
-      "#362304",
-      "#000831"
+      "#c37608",
+      "#513412",
+      "#001231"
     ]
   },
   {
     "id": 183,
     "nombre": "Combination 183",
     "colores": [
-      "#5c7287",
-      "#7e3075",
-      "#3400a3"
+      "#72737c",
+      "#94495e",
+      "#551c68"
     ]
   },
   {
     "id": 184,
     "nombre": "Combination 184",
     "colores": [
-      "#ff4dc9",
-      "#ebd999",
-      "#76844e"
+      "#ec6e8d",
+      "#efdba5",
+      "#8e885f"
     ]
   },
   {
     "id": 185,
     "nombre": "Combination 185",
     "colores": [
-      "#b08699",
-      "#c9303e",
-      "#fff59e"
+      "#c1a19e",
+      "#ca503d",
+      "#fff3b2"
     ]
   },
   {
     "id": 186,
     "nombre": "Combination 186",
     "colores": [
-      "#681916",
-      "#d99e73",
-      "#0d75ff"
+      "#833121",
+      "#dcab77",
+      "#0065b3"
     ]
   },
   {
     "id": 187,
     "nombre": "Combination 187",
     "colores": [
-      "#0057ba",
-      "#bfabcc",
-      "#9c52f2"
+      "#00558e",
+      "#c7b0b8",
+      "#a966a2"
     ]
   },
   {
     "id": 188,
     "nombre": "Combination 188",
     "colores": [
-      "#85b857",
-      "#96bfe6",
-      "#94ff94"
+      "#84925e",
+      "#a2b2cd",
+      "#a0d2a8"
     ]
   },
   {
     "id": 189,
     "nombre": "Combination 189",
     "colores": [
-      "#f2ff26",
-      "#172713",
-      "#6bffb3"
+      "#f9ee28",
+      "#253121",
+      "#68c3be"
     ]
   },
   {
     "id": 190,
     "nombre": "Combination 190",
     "colores": [
-      "#ebd999",
-      "#de4500",
+      "#efdba5",
+      "#d86310",
       "#000000"
     ]
   },
@@ -1593,152 +1593,152 @@
     "id": 191,
     "nombre": "Combination 191",
     "colores": [
-      "#b08699",
-      "#e0b81f",
-      "#0d75ff"
+      "#c1a19e",
+      "#e5bc2a",
+      "#0065b3"
     ]
   },
   {
     "id": 192,
     "nombre": "Combination 192",
     "colores": [
-      "#ffb852",
-      "#362304",
-      "#5c7287"
+      "#fac55f",
+      "#513412",
+      "#72737c"
     ]
   },
   {
     "id": 193,
     "nombre": "Combination 193",
     "colores": [
-      "#ff616b",
-      "#faed8f",
-      "#23c17c"
+      "#ef805f",
+      "#fbeca3",
+      "#008e88"
     ]
   },
   {
     "id": 194,
     "nombre": "Combination 194",
     "colores": [
-      "#fa2b00",
-      "#ffcfc4",
-      "#4f8fe6"
+      "#e74c0a",
+      "#fbdcc4",
+      "#5981b5"
     ]
   },
   {
     "id": 195,
     "nombre": "Combination 195",
     "colores": [
-      "#ff4dc9",
-      "#fff59e",
-      "#b5d1cc"
+      "#ec6e8d",
+      "#fff3b2",
+      "#c0c7c6"
     ]
   },
   {
     "id": 196,
     "nombre": "Combination 196",
     "colores": [
-      "#a6d40d",
-      "#abf5ed",
-      "#4733ff"
+      "#b7bc21",
+      "#b4dae9",
+      "#614498"
     ]
   },
   {
     "id": 197,
     "nombre": "Combination 197",
     "colores": [
-      "#ff5ec4",
-      "#4d52de",
-      "#b5d1cc"
+      "#ed7e92",
+      "#645b99",
+      "#c0c7c6"
     ]
   },
   {
     "id": 198,
     "nombre": "Combination 198",
     "colores": [
-      "#a93400",
-      "#ffe600",
-      "#40c945"
+      "#b65115",
+      "#ffe100",
+      "#3a9764"
     ]
   },
   {
     "id": 199,
     "nombre": "Combination 199",
     "colores": [
-      "#a7374b",
-      "#706934",
-      "#0024cc"
+      "#b45447",
+      "#8b7546",
+      "#033983"
     ]
   },
   {
     "id": 200,
     "nombre": "Combination 200",
     "colores": [
-      "#a10b2b",
-      "#bcd382",
-      "#66ab56"
+      "#ad242f",
+      "#ced19b",
+      "#7a9c6f"
     ]
   },
   {
     "id": 201,
     "nombre": "Combination 201",
     "colores": [
-      "#ff616b",
-      "#718600",
-      "#94ff94"
+      "#ef805f",
+      "#8a851f",
+      "#a0d2a8"
     ]
   },
   {
     "id": 202,
     "nombre": "Combination 202",
     "colores": [
-      "#b5ffc2",
-      "#94ff94",
-      "#1b3644"
+      "#c0e1ce",
+      "#a0d2a8",
+      "#2c424a"
     ]
   },
   {
     "id": 203,
     "nombre": "Combination 203",
     "colores": [
-      "#fff59e",
-      "#f59994",
-      "#405416"
+      "#fff3b2",
+      "#efae8d",
+      "#5a5c2f"
     ]
   },
   {
     "id": 204,
     "nombre": "Combination 204",
     "colores": [
-      "#b319ab",
-      "#c2612c",
-      "#a6e6db"
+      "#b8356d",
+      "#c97838",
+      "#b0cfd7"
     ]
   },
   {
     "id": 205,
     "nombre": "Combination 205",
     "colores": [
-      "#730f1f",
-      "#f59994",
-      "#2619d1"
+      "#8a2322",
+      "#efae8d",
+      "#443580"
     ]
   },
   {
     "id": 206,
     "nombre": "Combination 206",
     "colores": [
-      "#ffa6d9",
-      "#fa9442",
-      "#c2612c"
+      "#f6bdc1",
+      "#f2a84b",
+      "#c97838"
     ]
   },
   {
     "id": 207,
     "nombre": "Combination 207",
     "colores": [
-      "#9b5348",
-      "#b3e8c2",
+      "#ad6b4c",
+      "#bed4c7",
       "#000000"
     ]
   },
@@ -1746,80 +1746,80 @@
     "id": 208,
     "nombre": "Combination 208",
     "colores": [
-      "#f5f5b8",
-      "#2dbc94",
-      "#008aa1"
+      "#f8f2c8",
+      "#008f97",
+      "#006e93"
     ]
   },
   {
     "id": 209,
     "nombre": "Combination 209",
     "colores": [
-      "#ebd999",
-      "#ff8c00",
-      "#96bfe6"
+      "#efdba5",
+      "#f5a100",
+      "#a2b2cd"
     ]
   },
   {
     "id": 210,
     "nombre": "Combination 210",
     "colores": [
-      "#ffbf6e",
-      "#f2ff26",
-      "#405416"
+      "#fbcc7a",
+      "#f9ee28",
+      "#5a5c2f"
     ]
   },
   {
     "id": 211,
     "nombre": "Combination 211",
     "colores": [
-      "#ff7340",
-      "#99b333",
-      "#000831"
+      "#f18f44",
+      "#aaa64d",
+      "#001231"
     ]
   },
   {
     "id": 212,
     "nombre": "Combination 212",
     "colores": [
-      "#a90636",
-      "#8c6510",
-      "#96bfe6"
+      "#b31831",
+      "#a37821",
+      "#a2b2cd"
     ]
   },
   {
     "id": 213,
     "nombre": "Combination 213",
     "colores": [
-      "#f59994",
-      "#ffe600",
-      "#abf5ed"
+      "#efae8d",
+      "#ffe100",
+      "#b4dae9"
     ]
   },
   {
     "id": 214,
     "nombre": "Combination 214",
     "colores": [
-      "#ebd999",
-      "#9b5348",
-      "#2619d1"
+      "#efdba5",
+      "#ad6b4c",
+      "#443580"
     ]
   },
   {
     "id": 215,
     "nombre": "Combination 215",
     "colores": [
-      "#ffb852",
-      "#0d75ff",
-      "#bf36e0"
+      "#fac55f",
+      "#0065b3",
+      "#c1528e"
     ]
   },
   {
     "id": 216,
     "nombre": "Combination 216",
     "colores": [
-      "#fa2b00",
-      "#40c945",
+      "#e74c0a",
+      "#3a9764",
       "#000000"
     ]
   },
@@ -1827,44 +1827,44 @@
     "id": 217,
     "nombre": "Combination 217",
     "colores": [
-      "#730f1f",
-      "#d99e73",
-      "#1b8e13"
+      "#8a2322",
+      "#dcab77",
+      "#00873a"
     ]
   },
   {
     "id": 218,
     "nombre": "Combination 218",
     "colores": [
-      "#0057ba",
-      "#b8b8ff",
-      "#5c7287"
+      "#00558e",
+      "#c0b8db",
+      "#72737c"
     ]
   },
   {
     "id": 219,
     "nombre": "Combination 219",
     "colores": [
-      "#fa2b00",
-      "#00592e",
-      "#66ab56"
+      "#e74c0a",
+      "#005147",
+      "#7a9c6f"
     ]
   },
   {
     "id": 220,
     "nombre": "Combination 220",
     "colores": [
-      "#b90078",
-      "#d99e73",
-      "#9c52f2"
+      "#bc0b50",
+      "#dcab77",
+      "#a966a2"
     ]
   },
   {
     "id": 221,
     "nombre": "Combination 221",
     "colores": [
-      "#a10b2b",
-      "#b5d1cc",
+      "#ad242f",
+      "#c0c7c6",
       "#000000"
     ]
   },
@@ -1872,190 +1872,190 @@
     "id": 222,
     "nombre": "Combination 222",
     "colores": [
-      "#e0b81f",
-      "#ff8c00",
-      "#c05200"
+      "#e5bc2a",
+      "#f5a100",
+      "#c86c0e"
     ]
   },
   {
     "id": 223,
     "nombre": "Combination 223",
     "colores": [
-      "#b08699",
-      "#d99e73",
-      "#b5ffc2"
+      "#c1a19e",
+      "#dcab77",
+      "#c0e1ce"
     ]
   },
   {
     "id": 224,
     "nombre": "Combination 224",
     "colores": [
-      "#ff4dc9",
-      "#417777",
-      "#6b2e63"
+      "#ec6e8d",
+      "#527177",
+      "#854659"
     ]
   },
   {
     "id": 225,
     "nombre": "Combination 225",
     "colores": [
-      "#d60036",
-      "#00592e",
-      "#53225c"
+      "#cd002d",
+      "#005147",
+      "#703d51"
     ]
   },
   {
     "id": 226,
     "nombre": "Combination 226",
     "colores": [
-      "#5c2c45",
-      "#ffb852",
-      "#2619d1"
+      "#784244",
+      "#fac55f",
+      "#443580"
     ]
   },
   {
     "id": 227,
     "nombre": "Combination 227",
     "colores": [
-      "#ffb3f0",
-      "#a6e6db",
-      "#29bdad"
+      "#f7c9d5",
+      "#b0cfd7",
+      "#008ea5"
     ]
   },
   {
     "id": 228,
     "nombre": "Combination 228",
     "colores": [
-      "#a10b2b",
-      "#fff59e",
-      "#b5d1cc"
+      "#ad242f",
+      "#fff3b2",
+      "#c0c7c6"
     ]
   },
   {
     "id": 229,
     "nombre": "Combination 229",
     "colores": [
-      "#fa9442",
-      "#172713",
-      "#b5d1cc"
+      "#f2a84b",
+      "#253121",
+      "#c0c7c6"
     ]
   },
   {
     "id": 230,
     "nombre": "Combination 230",
     "colores": [
-      "#ff616b",
-      "#b5ffc2",
-      "#94ff94"
+      "#ef805f",
+      "#c0e1ce",
+      "#a0d2a8"
     ]
   },
   {
     "id": 231,
     "nombre": "Combination 231",
     "colores": [
-      "#e6adcf",
-      "#681916",
-      "#4f8fe6"
+      "#e5bcbc",
+      "#833121",
+      "#5981b5"
     ]
   },
   {
     "id": 232,
     "nombre": "Combination 232",
     "colores": [
-      "#d60036",
-      "#f2ad78",
-      "#000831"
+      "#cd002d",
+      "#efbc7e",
+      "#001231"
     ]
   },
   {
     "id": 233,
     "nombre": "Combination 233",
     "colores": [
-      "#a10b2b",
-      "#888d2a",
-      "#202d85"
+      "#ad242f",
+      "#9e8e43",
+      "#373f68"
     ]
   },
   {
     "id": 234,
     "nombre": "Combination 234",
     "colores": [
-      "#ffbf6e",
-      "#5e4017",
-      "#abf5ed"
+      "#fbcc7a",
+      "#7a5329",
+      "#b4dae9"
     ]
   },
   {
     "id": 235,
     "nombre": "Combination 235",
     "colores": [
-      "#ebd999",
-      "#ff8c00",
-      "#bfabcc"
+      "#efdba5",
+      "#f5a100",
+      "#c7b0b8"
     ]
   },
   {
     "id": 236,
     "nombre": "Combination 236",
     "colores": [
-      "#b68400",
-      "#0024cc",
-      "#754260"
+      "#c49007",
+      "#033983",
+      "#8e585a"
     ]
   },
   {
     "id": 237,
     "nombre": "Combination 237",
     "colores": [
-      "#a10b2b",
-      "#651300",
-      "#96bfe6"
+      "#ad242f",
+      "#802911",
+      "#a2b2cd"
     ]
   },
   {
     "id": 238,
     "nombre": "Combination 238",
     "colores": [
-      "#d99e73",
-      "#340059",
-      "#9cb29e"
+      "#dcab77",
+      "#520e45",
+      "#acac9e"
     ]
   },
   {
     "id": 239,
     "nombre": "Combination 239",
     "colores": [
-      "#b08699",
-      "#c4bf33",
-      "#b3e8c2"
+      "#c1a19e",
+      "#cfb948",
+      "#bed4c7"
     ]
   },
   {
     "id": 240,
     "nombre": "Combination 240",
     "colores": [
-      "#ff788c",
-      "#ffff00",
-      "#29bdad"
+      "#f1947c",
+      "#fff100",
+      "#008ea5"
     ]
   },
   {
     "id": 241,
     "nombre": "Combination 241",
     "colores": [
-      "#e81900",
-      "#fff59e",
-      "#c3a55c",
-      "#417777"
+      "#db3815",
+      "#fff3b2",
+      "#d0b16c",
+      "#527177"
     ]
   },
   {
     "id": 242,
     "nombre": "Combination 242",
     "colores": [
-      "#ff5ec4",
-      "#a93400",
-      "#1b8e13",
+      "#ed7e92",
+      "#b65115",
+      "#00873a",
       "#000000"
     ]
   },
@@ -2063,129 +2063,129 @@
     "id": 243,
     "nombre": "Combination 243",
     "colores": [
-      "#b85e00",
-      "#ebd999",
-      "#58771e",
-      "#1b3644"
+      "#c37608",
+      "#efdba5",
+      "#71773a",
+      "#2c424a"
     ]
   },
   {
     "id": 244,
     "nombre": "Combination 244",
     "colores": [
-      "#b08699",
-      "#c74300",
-      "#5c8a73",
-      "#008aa1"
+      "#c1a19e",
+      "#cb6012",
+      "#6f8277",
+      "#006e93"
     ]
   },
   {
     "id": 245,
     "nombre": "Combination 245",
     "colores": [
-      "#a10b2b",
-      "#6ea900",
-      "#0d2b52",
-      "#1b3644"
+      "#ad242f",
+      "#849725",
+      "#093451",
+      "#2c424a"
     ]
   },
   {
     "id": 246,
     "nombre": "Combination 246",
     "colores": [
-      "#ffa6d9",
-      "#a32100",
-      "#f5f5b8",
-      "#ffbf6e"
+      "#f6bdc1",
+      "#b03f16",
+      "#f8f2c8",
+      "#fbcc7a"
     ]
   },
   {
     "id": 247,
     "nombre": "Combination 247",
     "colores": [
-      "#b85e00",
-      "#ffe600",
-      "#00d973",
-      "#0024cc"
+      "#c37608",
+      "#ffe100",
+      "#009087",
+      "#033983"
     ]
   },
   {
     "id": 248,
     "nombre": "Combination 248",
     "colores": [
-      "#ff5ec4",
-      "#b68400",
-      "#b8b8ff",
-      "#53225c"
+      "#ed7e92",
+      "#c49007",
+      "#c0b8db",
+      "#703d51"
     ]
   },
   {
     "id": 249,
     "nombre": "Combination 249",
     "colores": [
-      "#681916",
-      "#c0b490",
-      "#d1bd19",
-      "#417777"
+      "#833121",
+      "#ccb998",
+      "#dabb24",
+      "#527177"
     ]
   },
   {
     "id": 250,
     "nombre": "Combination 250",
     "colores": [
-      "#c4bf33",
-      "#ff3319",
-      "#33ff7d",
-      "#bfffe6"
+      "#cfb948",
+      "#ea5520",
+      "#00ac95",
+      "#c8e7e9"
     ]
   },
   {
     "id": 251,
     "nombre": "Combination 251",
     "colores": [
-      "#a10045",
-      "#ffff00",
-      "#1b8e13",
-      "#1b3644"
+      "#ad153b",
+      "#fff100",
+      "#00873a",
+      "#2c424a"
     ]
   },
   {
     "id": 252,
     "nombre": "Combination 252",
     "colores": [
-      "#e62e73",
-      "#b85e00",
-      "#baa600",
-      "#2dbc94"
+      "#db4f58",
+      "#c37608",
+      "#c8a800",
+      "#008f97"
     ]
   },
   {
     "id": 253,
     "nombre": "Combination 253",
     "colores": [
-      "#f2ff26",
-      "#ff7340",
-      "#340059",
-      "#1b3644"
+      "#f9ee28",
+      "#f18f44",
+      "#520e45",
+      "#2c424a"
     ]
   },
   {
     "id": 254,
     "nombre": "Combination 254",
     "colores": [
-      "#ffa6d9",
-      "#f5f5b8",
-      "#718600",
-      "#cc85d1"
+      "#f6bdc1",
+      "#f8f2c8",
+      "#8a851f",
+      "#cf97ab"
     ]
   },
   {
     "id": 255,
     "nombre": "Combination 255",
     "colores": [
-      "#b85e00",
-      "#c4bf33",
-      "#80ffcc",
+      "#c37608",
+      "#cfb948",
+      "#83ccd2",
       "#000000"
     ]
   },
@@ -2193,9 +2193,9 @@
     "id": 256,
     "nombre": "Combination 256",
     "colores": [
-      "#f59994",
-      "#ff5200",
-      "#19cc33",
+      "#efae8d",
+      "#ed7100",
+      "#008e5c",
       "#000000"
     ]
   },
@@ -2203,129 +2203,129 @@
     "id": 257,
     "nombre": "Combination 257",
     "colores": [
-      "#f20000",
-      "#ffab00",
-      "#0d75ff",
-      "#9c52f2"
+      "#df0716",
+      "#f9b900",
+      "#0065b3",
+      "#a966a2"
     ]
   },
   {
     "id": 258,
     "nombre": "Combination 258",
     "colores": [
-      "#730f1f",
-      "#f2ad78",
-      "#718600",
-      "#008aa1"
+      "#8a2322",
+      "#efbc7e",
+      "#8a851f",
+      "#006e93"
     ]
   },
   {
     "id": 259,
     "nombre": "Combination 259",
     "colores": [
-      "#f2ff26",
-      "#2dbc94",
-      "#0057ba",
-      "#9cb29e"
+      "#f9ee28",
+      "#008f97",
+      "#00558e",
+      "#acac9e"
     ]
   },
   {
     "id": 260,
     "nombre": "Combination 260",
     "colores": [
-      "#d94d99",
-      "#f59994",
-      "#b3e8c2",
-      "#33ff7d"
+      "#d56a75",
+      "#efae8d",
+      "#bed4c7",
+      "#00ac95"
     ]
   },
   {
     "id": 261,
     "nombre": "Combination 261",
     "colores": [
-      "#a10045",
-      "#fff59e",
-      "#80ffcc",
-      "#9cb29e"
+      "#ad153b",
+      "#fff3b2",
+      "#83ccd2",
+      "#acac9e"
     ]
   },
   {
     "id": 262,
     "nombre": "Combination 262",
     "colores": [
-      "#e62e73",
-      "#ebd999",
-      "#000000",
-      "#328e13"
+      "#db4f58",
+      "#efdba5",
+      "#39793c",
+      "#ac9d12"
     ]
   },
   {
     "id": 263,
     "nombre": "Combination 263",
     "colores": [
-      "#a93400",
-      "#f2ad78",
-      "#b5ffc2",
-      "#1b3644"
+      "#b65115",
+      "#efbc7e",
+      "#c0e1ce",
+      "#2c424a"
     ]
   },
   {
     "id": 264,
     "nombre": "Combination 264",
     "colores": [
-      "#ffa6d9",
-      "#e81900",
-      "#b3d9a3",
-      "#29bdad"
+      "#f6bdc1",
+      "#db3815",
+      "#bfc9ac",
+      "#008ea5"
     ]
   },
   {
     "id": 265,
     "nombre": "Combination 265",
     "colores": [
-      "#d94d99",
-      "#ffe600",
-      "#99b333",
-      "#06004f"
+      "#d56a75",
+      "#ffe100",
+      "#aaa64d",
+      "#011b45"
     ]
   },
   {
     "id": 266,
     "nombre": "Combination 266",
     "colores": [
-      "#f20000",
-      "#ebd999",
-      "#85b857",
-      "#00d973"
+      "#df0716",
+      "#efdba5",
+      "#84925e",
+      "#009087"
     ]
   },
   {
     "id": 267,
     "nombre": "Combination 267",
     "colores": [
-      "#ffb852",
-      "#ff8c00",
-      "#00d973",
-      "#0d75ff"
+      "#fac55f",
+      "#f5a100",
+      "#009087",
+      "#0065b3"
     ]
   },
   {
     "id": 268,
     "nombre": "Combination 268",
     "colores": [
-      "#b08699",
-      "#b85e00",
-      "#172713",
-      "#bfffe6"
+      "#c1a19e",
+      "#c37608",
+      "#253121",
+      "#c8e7e9"
     ]
   },
   {
     "id": 269,
     "nombre": "Combination 269",
     "colores": [
-      "#b85e00",
-      "#730f1f",
-      "#9c52f2",
+      "#c37608",
+      "#8a2322",
+      "#a966a2",
       "#000000"
     ]
   },
@@ -2333,69 +2333,69 @@
     "id": 270,
     "nombre": "Combination 270",
     "colores": [
-      "#e62e73",
-      "#f5f5b8",
-      "#58771e",
-      "#328e13"
+      "#db4f58",
+      "#f8f2c8",
+      "#71773a",
+      "#39793c"
     ]
   },
   {
     "id": 271,
     "nombre": "Combination 271",
     "colores": [
-      "#b90078",
-      "#94ff94",
-      "#2dbc94",
-      "#0f261f"
+      "#bc0b50",
+      "#a0d2a8",
+      "#008f97",
+      "#0b2f2c"
     ]
   },
   {
     "id": 272,
     "nombre": "Combination 272",
     "colores": [
-      "#fff59e",
-      "#ff5200",
-      "#b5ffc2",
-      "#96bfe6"
+      "#fff3b2",
+      "#ed7100",
+      "#c0e1ce",
+      "#a2b2cd"
     ]
   },
   {
     "id": 273,
     "nombre": "Combination 273",
     "colores": [
-      "#ffb3f0",
-      "#6f0043",
-      "#9b5348",
-      "#b5d1cc"
+      "#f7c9d5",
+      "#870836",
+      "#ad6b4c",
+      "#c0c7c6"
     ]
   },
   {
     "id": 274,
     "nombre": "Combination 274",
     "colores": [
-      "#ff3319",
-      "#7e8743",
-      "#4f8fe6",
-      "#9161f2"
+      "#ea5520",
+      "#978c56",
+      "#5981b5",
+      "#a070a8"
     ]
   },
   {
     "id": 275,
     "nombre": "Combination 275",
     "colores": [
-      "#c9303e",
-      "#c0b490",
-      "#651300",
-      "#6b2e63"
+      "#ca503d",
+      "#ccb998",
+      "#802911",
+      "#854659"
     ]
   },
   {
     "id": 276,
     "nombre": "Combination 276",
     "colores": [
-      "#ff5ec4",
-      "#ffcfc4",
-      "#a6ff47",
+      "#ed7e92",
+      "#fbdcc4",
+      "#b6d564",
       "#000000"
     ]
   },
@@ -2403,119 +2403,119 @@
     "id": 277,
     "nombre": "Combination 277",
     "colores": [
-      "#ff4dc9",
-      "#b319ab",
-      "#718600",
-      "#06004f"
+      "#ec6e8d",
+      "#b8356d",
+      "#8a851f",
+      "#011b45"
     ]
   },
   {
     "id": 278,
     "nombre": "Combination 278",
     "colores": [
-      "#ffb852",
-      "#d1bd19",
-      "#328e13",
-      "#00592e"
+      "#fac55f",
+      "#dabb24",
+      "#39793c",
+      "#005147"
     ]
   },
   {
     "id": 279,
     "nombre": "Combination 279",
     "colores": [
-      "#b85e00",
-      "#f59994",
-      "#c0b490",
-      "#0d2b52"
+      "#c37608",
+      "#efae8d",
+      "#ccb998",
+      "#093451"
     ]
   },
   {
     "id": 280,
     "nombre": "Combination 280",
     "colores": [
-      "#e62e73",
-      "#405416",
-      "#cc85d1",
-      "#6b2e63"
+      "#db4f58",
+      "#5a5c2f",
+      "#cf97ab",
+      "#854659"
     ]
   },
   {
     "id": 281,
     "nombre": "Combination 281",
     "colores": [
-      "#fff59e",
-      "#00d973",
-      "#94ff94",
-      "#008aa1"
+      "#fff3b2",
+      "#009087",
+      "#a0d2a8",
+      "#006e93"
     ]
   },
   {
     "id": 282,
     "nombre": "Combination 282",
     "colores": [
-      "#e62e73",
-      "#c2975a",
-      "#94ff94",
-      "#b875eb"
+      "#db4f58",
+      "#d0ac6b",
+      "#a0d2a8",
+      "#bf87b0"
     ]
   },
   {
     "id": 283,
     "nombre": "Combination 283",
     "colores": [
-      "#a7374b",
-      "#730f1f",
-      "#6bffb3",
-      "#66ab56"
+      "#b45447",
+      "#8a2322",
+      "#68c3be",
+      "#7a9c6f"
     ]
   },
   {
     "id": 284,
     "nombre": "Combination 284",
     "colores": [
-      "#ed3d66",
-      "#ffe600",
-      "#33ff7d",
-      "#00592e"
+      "#e05d53",
+      "#ffe100",
+      "#00ac95",
+      "#005147"
     ]
   },
   {
     "id": 285,
     "nombre": "Combination 285",
     "colores": [
-      "#b08699",
-      "#a93400",
-      "#ff3319",
-      "#b5ffc2"
+      "#c1a19e",
+      "#b65115",
+      "#ea5520",
+      "#c0e1ce"
     ]
   },
   {
     "id": 286,
     "nombre": "Combination 286",
     "colores": [
-      "#a93400",
-      "#ffab00",
-      "#00cf91",
-      "#202d85"
+      "#b65115",
+      "#f9b900",
+      "#008c97",
+      "#373f68"
     ]
   },
   {
     "id": 287,
     "nombre": "Combination 287",
     "colores": [
-      "#ff5ec4",
-      "#c4bf33",
-      "#abf5ed",
-      "#80ffcc"
+      "#ed7e92",
+      "#cfb948",
+      "#b4dae9",
+      "#83ccd2"
     ]
   },
   {
     "id": 288,
     "nombre": "Combination 288",
     "colores": [
-      "#ff8c00",
-      "#503d00",
-      "#6b2e63",
+      "#f5a100",
+      "#6d4f14",
+      "#854659",
       "#000000"
     ]
   },
@@ -2523,99 +2523,99 @@
     "id": 289,
     "nombre": "Combination 289",
     "colores": [
-      "#f2ff26",
-      "#bdf226",
-      "#202d85",
-      "#06004f"
+      "#f9ee28",
+      "#ccd53c",
+      "#373f68",
+      "#011b45"
     ]
   },
   {
     "id": 290,
     "nombre": "Combination 290",
     "colores": [
-      "#5c2c45",
-      "#fff59e",
-      "#405416",
-      "#94ff94"
+      "#784244",
+      "#fff3b2",
+      "#5a5c2f",
+      "#a0d2a8"
     ]
   },
   {
     "id": 291,
     "nombre": "Combination 291",
     "colores": [
-      "#bdf226",
-      "#33ff7d",
-      "#94ff94",
-      "#80ffcc"
+      "#ccd53c",
+      "#00ac95",
+      "#a0d2a8",
+      "#83ccd2"
     ]
   },
   {
     "id": 292,
     "nombre": "Combination 292",
     "colores": [
-      "#fff59e",
-      "#f2ad78",
-      "#c3a55c",
-      "#c0b490"
+      "#fff3b2",
+      "#efbc7e",
+      "#d0b16c",
+      "#ccb998"
     ]
   },
   {
     "id": 293,
     "nombre": "Combination 293",
     "colores": [
-      "#b85e00",
-      "#b5ffc2",
-      "#65a98f",
-      "#40c945"
+      "#c37608",
+      "#c0e1ce",
+      "#759894",
+      "#3a9764"
     ]
   },
   {
     "id": 294,
     "nombre": "Combination 294",
     "colores": [
-      "#f5f5b8",
-      "#ffb852",
-      "#328e13",
-      "#96bfe6"
+      "#f8f2c8",
+      "#fac55f",
+      "#39793c",
+      "#a2b2cd"
     ]
   },
   {
     "id": 295,
     "nombre": "Combination 295",
     "colores": [
-      "#ffb852",
-      "#ffff00",
-      "#0d75ff",
-      "#06004f"
+      "#fac55f",
+      "#fff100",
+      "#0065b3",
+      "#011b45"
     ]
   },
   {
     "id": 296,
     "nombre": "Combination 296",
     "colores": [
-      "#f5f5b8",
-      "#d99e73",
-      "#5e4017",
-      "#1b3644"
+      "#f8f2c8",
+      "#dcab77",
+      "#7a5329",
+      "#2c424a"
     ]
   },
   {
     "id": 297,
     "nombre": "Combination 297",
     "colores": [
-      "#a93400",
-      "#ff8c00",
-      "#58771e",
-      "#202d85"
+      "#b65115",
+      "#f5a100",
+      "#71773a",
+      "#373f68"
     ]
   },
   {
     "id": 298,
     "nombre": "Combination 298",
     "colores": [
-      "#b85e00",
-      "#f2ff26",
-      "#ff3319",
+      "#c37608",
+      "#f9ee28",
+      "#ea5520",
       "#000000"
     ]
   },
@@ -2623,149 +2623,149 @@
     "id": 299,
     "nombre": "Combination 299",
     "colores": [
-      "#cc1a97",
-      "#f59994",
-      "#6ea900",
-      "#008aa1"
+      "#c93465",
+      "#efae8d",
+      "#849725",
+      "#006e93"
     ]
   },
   {
     "id": 300,
     "nombre": "Combination 300",
     "colores": [
-      "#ff616b",
-      "#ffb852",
-      "#b5ffc2",
-      "#80ffcc"
+      "#ef805f",
+      "#fac55f",
+      "#c0e1ce",
+      "#83ccd2"
     ]
   },
   {
     "id": 301,
     "nombre": "Combination 301",
     "colores": [
-      "#f20000",
-      "#ebd999",
-      "#85b857",
-      "#9c52f2"
+      "#df0716",
+      "#efdba5",
+      "#84925e",
+      "#a966a2"
     ]
   },
   {
     "id": 302,
     "nombre": "Combination 302",
     "colores": [
-      "#ffb852",
-      "#c0b490",
-      "#bfffe6",
-      "#008aa1"
+      "#fac55f",
+      "#ccb998",
+      "#c8e7e9",
+      "#006e93"
     ]
   },
   {
     "id": 303,
     "nombre": "Combination 303",
     "colores": [
-      "#faed8f",
-      "#ff3319",
-      "#172713",
-      "#b5d1cc"
+      "#fbeca3",
+      "#ea5520",
+      "#253121",
+      "#c0c7c6"
     ]
   },
   {
     "id": 304,
     "nombre": "Combination 304",
     "colores": [
-      "#681916",
-      "#ffb852",
-      "#7e8743",
-      "#00d973"
+      "#833121",
+      "#fac55f",
+      "#978c56",
+      "#009087"
     ]
   },
   {
     "id": 305,
     "nombre": "Combination 305",
     "colores": [
-      "#f2ad78",
-      "#ffe600",
-      "#a6d40d",
-      "#b5ffc2"
+      "#efbc7e",
+      "#ffe100",
+      "#b7bc21",
+      "#c0e1ce"
     ]
   },
   {
     "id": 306,
     "nombre": "Combination 306",
     "colores": [
-      "#f2ff26",
-      "#00d973",
-      "#19cc33",
-      "#bfffe6"
+      "#f9ee28",
+      "#009087",
+      "#008e5c",
+      "#c8e7e9"
     ]
   },
   {
     "id": 307,
     "nombre": "Combination 307",
     "colores": [
-      "#d60036",
-      "#b8b8ff",
-      "#9c52f2",
-      "#340059"
+      "#cd002d",
+      "#c0b8db",
+      "#a966a2",
+      "#520e45"
     ]
   },
   {
     "id": 308,
     "nombre": "Combination 308",
     "colores": [
-      "#d1b0b3",
-      "#d50c42",
-      "#de4500",
-      "#94ff94"
+      "#d6b8aa",
+      "#cf2438",
+      "#d86310",
+      "#a0d2a8"
     ]
   },
   {
     "id": 309,
     "nombre": "Combination 309",
     "colores": [
-      "#fa9442",
-      "#ff7340",
-      "#202d85",
-      "#003e83"
+      "#f2a84b",
+      "#f18f44",
+      "#373f68",
+      "#00486c"
     ]
   },
   {
     "id": 310,
     "nombre": "Combination 310",
     "colores": [
-      "#f5f5b8",
-      "#f2ad78",
-      "#718600",
-      "#172713"
+      "#f8f2c8",
+      "#efbc7e",
+      "#8a851f",
+      "#253121"
     ]
   },
   {
     "id": 311,
     "nombre": "Combination 311",
     "colores": [
-      "#a90636",
-      "#ffb852",
-      "#b3d9a3",
-      "#bdf226"
+      "#b31831",
+      "#fac55f",
+      "#bfc9ac",
+      "#ccd53c"
     ]
   },
   {
     "id": 312,
     "nombre": "Combination 312",
     "colores": [
-      "#a93400",
-      "#ff8c00",
-      "#65a98f",
-      "#0057ba"
+      "#b65115",
+      "#f5a100",
+      "#759894",
+      "#00558e"
     ]
   },
   {
     "id": 313,
     "nombre": "Combination 313",
     "colores": [
-      "#d60036",
-      "#ffff00",
-      "#1b8e13",
+      "#cd002d",
+      "#fff100",
+      "#00873a",
       "#000000"
     ]
   },
@@ -2773,99 +2773,99 @@
     "id": 314,
     "nombre": "Combination 314",
     "colores": [
-      "#ff5ec4",
-      "#681916",
-      "#0024cc",
-      "#2d0060"
+      "#ed7e92",
+      "#833121",
+      "#033983",
+      "#4d194a"
     ]
   },
   {
     "id": 315,
     "nombre": "Combination 315",
     "colores": [
-      "#ff616b",
-      "#f5f5b8",
-      "#fa9442",
-      "#bf36e0"
+      "#ef805f",
+      "#f8f2c8",
+      "#f2a84b",
+      "#c1528e"
     ]
   },
   {
     "id": 316,
     "nombre": "Combination 316",
     "colores": [
-      "#740909",
-      "#19cc33",
-      "#2619d1",
-      "#3400a3"
+      "#8c1d19",
+      "#008e5c",
+      "#443580",
+      "#551c68"
     ]
   },
   {
     "id": 317,
     "nombre": "Combination 317",
     "colores": [
-      "#ffbf99",
-      "#c0b490",
-      "#f2ff26",
-      "#b5ffc2"
+      "#face9d",
+      "#ccb998",
+      "#f9ee28",
+      "#c0e1ce"
     ]
   },
   {
     "id": 318,
     "nombre": "Combination 318",
     "colores": [
-      "#706934",
-      "#324e2a",
-      "#00592e",
-      "#0f261f"
+      "#8b7546",
+      "#48583e",
+      "#005147",
+      "#0b2f2c"
     ]
   },
   {
     "id": 319,
     "nombre": "Combination 319",
     "colores": [
-      "#b85e00",
-      "#ffe600",
-      "#ff8c00",
-      "#328e13"
+      "#c37608",
+      "#ffe100",
+      "#f5a100",
+      "#39793c"
     ]
   },
   {
     "id": 320,
     "nombre": "Combination 320",
     "colores": [
-      "#ff7399",
-      "#f5f5b8",
-      "#6ea900",
-      "#a6e6db"
+      "#f09082",
+      "#f8f2c8",
+      "#849725",
+      "#b0cfd7"
     ]
   },
   {
     "id": 321,
     "nombre": "Combination 321",
     "colores": [
-      "#b08699",
-      "#f5f5b8",
-      "#172713",
-      "#96bfe6"
+      "#c1a19e",
+      "#f8f2c8",
+      "#253121",
+      "#a2b2cd"
     ]
   },
   {
     "id": 322,
     "nombre": "Combination 322",
     "colores": [
-      "#f20000",
-      "#a32100",
-      "#bf36e0",
-      "#4733ff"
+      "#df0716",
+      "#b03f16",
+      "#c1528e",
+      "#614498"
     ]
   },
   {
     "id": 323,
     "nombre": "Combination 323",
     "colores": [
-      "#ffbf6e",
-      "#a6d40d",
-      "#651300",
+      "#fbcc7a",
+      "#b7bc21",
+      "#802911",
       "#000000"
     ]
   },
@@ -2873,139 +2873,139 @@
     "id": 324,
     "nombre": "Combination 324",
     "colores": [
-      "#a90636",
-      "#4f8fe6",
-      "#9c52f2",
-      "#b5d1cc"
+      "#b31831",
+      "#5981b5",
+      "#a966a2",
+      "#c0c7c6"
     ]
   },
   {
     "id": 325,
     "nombre": "Combination 325",
     "colores": [
-      "#e62e73",
-      "#faed8f",
-      "#e0b81f",
-      "#0f261f"
+      "#db4f58",
+      "#fbeca3",
+      "#e5bc2a",
+      "#0b2f2c"
     ]
   },
   {
     "id": 326,
     "nombre": "Combination 326",
     "colores": [
-      "#f5f5b8",
-      "#ff3319",
-      "#a6ff47",
-      "#7aff00"
+      "#f8f2c8",
+      "#ea5520",
+      "#b6d564",
+      "#88c122"
     ]
   },
   {
     "id": 327,
     "nombre": "Combination 327",
     "colores": [
-      "#ff5ec4",
-      "#b85e00",
-      "#c0b490",
-      "#bfabcc"
+      "#ed7e92",
+      "#c37608",
+      "#ccb998",
+      "#c7b0b8"
     ]
   },
   {
     "id": 328,
     "nombre": "Combination 328",
     "colores": [
-      "#a32100",
-      "#ff7340",
-      "#362304",
-      "#23c17c"
+      "#b03f16",
+      "#f18f44",
+      "#513412",
+      "#008e88"
     ]
   },
   {
     "id": 329,
     "nombre": "Combination 329",
     "colores": [
-      "#ffb852",
-      "#bfabcc",
-      "#340059",
-      "#1b3644"
+      "#fac55f",
+      "#c7b0b8",
+      "#520e45",
+      "#2c424a"
     ]
   },
   {
     "id": 330,
     "nombre": "Combination 330",
     "colores": [
-      "#bcd382",
-      "#bfffe6",
-      "#96bfe6",
-      "#2dbc94"
+      "#ced19b",
+      "#c8e7e9",
+      "#a2b2cd",
+      "#008f97"
     ]
   },
   {
     "id": 331,
     "nombre": "Combination 331",
     "colores": [
-      "#cc1a97",
-      "#06004f",
-      "#9161f2",
-      "#2619d1"
+      "#c93465",
+      "#011b45",
+      "#a070a8",
+      "#443580"
     ]
   },
   {
     "id": 332,
     "nombre": "Combination 332",
     "colores": [
-      "#ff7399",
-      "#d50c42",
-      "#172713",
-      "#00592e"
+      "#f09082",
+      "#cf2438",
+      "#253121",
+      "#005147"
     ]
   },
   {
     "id": 333,
     "nombre": "Combination 333",
     "colores": [
-      "#a93400",
-      "#f2ff26",
-      "#94ff94",
-      "#0d75ff"
+      "#b65115",
+      "#f9ee28",
+      "#a0d2a8",
+      "#0065b3"
     ]
   },
   {
     "id": 334,
     "nombre": "Combination 334",
     "colores": [
-      "#ffcfc4",
-      "#718600",
-      "#a6ff47",
-      "#008aa1"
+      "#fbdcc4",
+      "#8a851f",
+      "#b6d564",
+      "#006e93"
     ]
   },
   {
     "id": 335,
     "nombre": "Combination 335",
     "colores": [
-      "#740909",
-      "#ff8c00",
-      "#2619d1",
-      "#1b3644"
+      "#8c1d19",
+      "#f5a100",
+      "#443580",
+      "#2c424a"
     ]
   },
   {
     "id": 336,
     "nombre": "Combination 336",
     "colores": [
-      "#ff5ec4",
-      "#681916",
-      "#fff59e",
-      "#324e2a"
+      "#ed7e92",
+      "#833121",
+      "#fff3b2",
+      "#48583e"
     ]
   },
   {
     "id": 337,
     "nombre": "Combination 337",
     "colores": [
-      "#5c2c45",
-      "#cc85d1",
-      "#531745",
+      "#784244",
+      "#cf97ab",
+      "#703645",
       "#000000"
     ]
   },
@@ -3013,29 +3013,29 @@
     "id": 338,
     "nombre": "Combination 338",
     "colores": [
-      "#a10b2b",
-      "#ffab00",
-      "#00592e",
-      "#bfabcc"
+      "#ad242f",
+      "#f9b900",
+      "#005147",
+      "#c7b0b8"
     ]
   },
   {
     "id": 339,
     "nombre": "Combination 339",
     "colores": [
-      "#d99e73",
-      "#de4500",
-      "#a6e6db",
-      "#202d85"
+      "#dcab77",
+      "#d86310",
+      "#b0cfd7",
+      "#373f68"
     ]
   },
   {
     "id": 340,
     "nombre": "Combination 340",
     "colores": [
-      "#ff3319",
-      "#33ff7d",
-      "#b5d1cc",
+      "#ea5520",
+      "#00ac95",
+      "#c0c7c6",
       "#000000"
     ]
   },
@@ -3043,39 +3043,39 @@
     "id": 341,
     "nombre": "Combination 341",
     "colores": [
-      "#ff616b",
-      "#328e13",
-      "#172713",
-      "#a6e6db"
+      "#ef805f",
+      "#39793c",
+      "#253121",
+      "#b0cfd7"
     ]
   },
   {
     "id": 342,
     "nombre": "Combination 342",
     "colores": [
-      "#ffa6d9",
-      "#ffb852",
-      "#8c6510",
-      "#172713"
+      "#f6bdc1",
+      "#fac55f",
+      "#a37821",
+      "#253121"
     ]
   },
   {
     "id": 343,
     "nombre": "Combination 343",
     "colores": [
-      "#a93400",
-      "#ebd999",
-      "#505423",
-      "#003e83"
+      "#b65115",
+      "#efdba5",
+      "#6c6037",
+      "#00486c"
     ]
   },
   {
     "id": 344,
     "nombre": "Combination 344",
     "colores": [
-      "#ffbf6e",
-      "#0024cc",
-      "#9c52f2",
+      "#fbcc7a",
+      "#033983",
+      "#a966a2",
       "#000000"
     ]
   },
@@ -3083,40 +3083,40 @@
     "id": 345,
     "nombre": "Combination 345",
     "colores": [
-      "#681916",
-      "#bfffe6",
-      "#6bffb3",
-      "#4733ff"
+      "#833121",
+      "#c8e7e9",
+      "#68c3be",
+      "#614498"
     ]
   },
   {
     "id": 346,
     "nombre": "Combination 346",
     "colores": [
-      "#b319ab",
-      "#b5ffc2",
-      "#bdf226",
-      "#5c8a73"
+      "#b8356d",
+      "#c0e1ce",
+      "#ccd53c",
+      "#6f8277"
     ]
   },
   {
     "id": 347,
     "nombre": "Combination 347",
     "colores": [
-      "#99b333",
-      "#33ff7d",
-      "#0057ba",
-      "#b875eb"
+      "#aaa64d",
+      "#00ac95",
+      "#00558e",
+      "#bf87b0"
     ]
   },
   {
     "id": 348,
     "nombre": "Combination 348",
     "colores": [
-      "#bcd382",
-      "#328e13",
-      "#172713",
-      "#340059"
+      "#ced19b",
+      "#39793c",
+      "#253121",
+      "#520e45"
     ]
   }
 ]

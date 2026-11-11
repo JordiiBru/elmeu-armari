@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { anchorFor, candidatesFor } from "@/lib/outfits/engine";
-import { hexToOklch, OKLCH_DISTANCE_THRESHOLD } from "@/lib/outfits/color-matching";
+import { hexToOklch, perceptualDistance, OKLCH_DISTANCE_THRESHOLD } from "@/lib/outfits/color-matching";
 
 // The old engine switched strategy at chroma 0.02 and 0.05, so two
 // colours a fraction of a ΔE apart on either side of one of those lines
@@ -55,6 +55,18 @@ function nearThresholdEdge(a: string, b: string): boolean {
   return (!anchorFor(a) && near(b)) || (!anchorFor(b) && near(a));
 }
 
+// Two canonicals almost equally near (within half a unit) may swap on a
+// sub-ΔE step: that is a tie being broken, not a change of strategy.
+function nearTie(a: string, b: string): boolean {
+  const A = anchorFor(a);
+  const B = anchorFor(b);
+  if (!A || !B) return false;
+  return (
+    Math.abs(perceptualDistance(a, B.canonical.hex) - A.distance) < 0.5 &&
+    Math.abs(perceptualDistance(b, A.canonical.hex) - B.distance) < 0.5
+  );
+}
+
 describe("anchor continuity across the old chroma boundaries", () => {
   // Lines of constant lightness and hue whose chroma sweeps 0 to 0.08 in
   // steps far below one ΔE: the walk crosses each old boundary once, and
@@ -89,7 +101,7 @@ describe("anchor continuity across the old chroma boundaries", () => {
         for (const edge of OLD_BOUNDARIES) {
           if (ca < edge !== cb < edge) {
             crossings++;
-            if (nearThresholdEdge(a, b)) continue;
+            if (nearThresholdEdge(a, b) || nearTie(a, b)) continue;
             expect(name(a), `${a} -> ${b} across chroma ${edge}`).toBe(name(b));
           }
         }

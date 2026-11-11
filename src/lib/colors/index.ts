@@ -6,10 +6,15 @@ import type { SanzoPalette } from "@/lib/outfits/types";
  * Single source of truth for the Sanzo Wada colours.
  *
  * Two sources:
- * - sanzo-colors.json: 157 individual colours with their historic name,
+ * - sanzo-colors.json: 159 individual colours with their historic name,
  *   cmyk/rgb/hex and the list of combinations they appear in.
  * - sanzo-wada.json: 348 combinations (palettes) of 2-6 colours by hex,
  *   used by the matching engine (engine.ts).
+ *
+ * Hex values are the ones wadacolors.com publishes, for colours and
+ * combinations alike (#220); Black stays #000000. `combinations` is derived
+ * from the palettes, so the two files cannot disagree. Do not derive hex
+ * from CMYK: the shortcut formula moved dark colours far from the book.
  *
  * This module enriches the second with the first and exposes lookups. It
  * leaves the SanzoPalette structure alone and only adds the historic names

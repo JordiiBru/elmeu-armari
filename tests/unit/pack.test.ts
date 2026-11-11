@@ -10,8 +10,8 @@ import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 // about colour. Rust + teal (Sanzo combination 1) is the coloured case.
 const BLACK = "#000000";
 const WHITE = "#ffffff";
-const RUST = "#de4500";
-const TEAL = "#29bdad";
+const RUST = "#d86310";
+const TEAL = "#008ea5";
 
 function g(id: string, category: Category, hexes: string[] = [BLACK], length: string | null = null): GarmentWithColors {
   return {
@@ -146,8 +146,8 @@ describe("planTrip", () => {
 
   it("says when what is left does not combine in colour", () => {
     const p = plan({
-      // A taupe has no Sanzo reading, so it combines with nothing.
-      pool: [g("rust", "SHIRT", [RUST]), g("teal", "PANTS", [TEAL]), g("taupe", "SHIRT", ["#8b7d72"])],
+      // A neon green has no Sanzo reading, so it combines with nothing.
+      pool: [g("rust", "SHIRT", [RUST]), g("teal", "PANTS", [TEAL]), g("neon", "SHIRT", ["#18f800"])],
       shoes: [g("shoesT", "SHOES", [TEAL])],
       end: isoToDay("2026-11-03"),
     });
@@ -172,7 +172,7 @@ describe("planTrip", () => {
   it("chooses per day the pair of shoes that matches best", () => {
     const p = plan({
       pool: [g("rust", "SHIRT", [RUST]), g("teal", "PANTS", [TEAL])],
-      shoes: [g("crimson", "SHOES", ["#d60036"]), g("rustShoes", "SHOES", [RUST])],
+      shoes: [g("crimson", "SHOES", ["#cd002d"]), g("rustShoes", "SHOES", [RUST])],
       end: isoToDay("2026-11-02"),
     });
     expect(ofCategory(p.days[0].outfit, "SHOES")).toEqual(["rustShoes"]);

@@ -618,7 +618,7 @@
       },
       "colours": {
         "title": "how a colour reaches a palette",
-        "p1": "Each piece's colour is matched to the nearest colour of the dictionary: there are 157, with their historic English names.",
+        "p1": "Each piece's colour is matched to the nearest colour of the dictionary: there are 159, with their historic English names.",
         "p2": "A piece only lives in the palettes of the colours close to it. The stricter, the fewer combinations but the closer the fit. If a colour is close to none of the dictionary's, the piece cannot be combined.",
         "p3": "Black, white and greys are neutrals: a dark grey reads as black."
       },
