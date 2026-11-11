@@ -618,7 +618,7 @@
       },
       "colours": {
         "title": "com arriba un color a una paleta",
-        "p1": "El color de cada peça s'aproxima al color més proper del diccionari: n'hi ha 157, amb els seus noms històrics en anglès.",
+        "p1": "El color de cada peça s'aproxima al color més proper del diccionari: n'hi ha 159, amb els seus noms històrics en anglès.",
         "p2": "Una peça només viu a les paletes dels colors que li són a prop. Com més estricte, menys combinacions però més ajustades. Si un color no s'assembla a cap del diccionari, la peça no es pot combinar.",
         "p3": "El negre, el blanc i els grisos són neutres: un gris fosc es llegeix com a negre."
       },

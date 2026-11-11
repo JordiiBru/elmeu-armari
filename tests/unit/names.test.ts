@@ -21,9 +21,9 @@ describe("colourName", () => {
   });
 
   it("does not give a colour outside the vocabulary a wrong name", () => {
-    // Sanzo Wada has no taupe: the engine leaves it out and so does the name.
-    expect(anchorFor("#8b7d72")).toBeNull();
-    expect(colourName("#8b7d72")).toBeNull();
+    // Sanzo Wada has no neon green: the engine leaves it out and so does the name.
+    expect(anchorFor("#18f800")).toBeNull();
+    expect(colourName("#18f800")).toBeNull();
   });
 
   it("is case-insensitive and repeatable", () => {

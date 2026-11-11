@@ -17,14 +17,14 @@ import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 // Combination 1: rust + teal. The shoe reuses rust exactly — repeating
 // a colour is legal, and it's simplest way to hand this combination a
 // shoe that's guaranteed to intersect it.
-const RUST = "#de4500";
-const TEAL = "#29bdad";
+const RUST = "#d86310";
+const TEAL = "#008ea5";
 const SHOE_FOR_RUST_TEAL = RUST;
 // Combination 122: crimson + amber + green — three colours, so a shirt,
 // pants and shoe can each take a different one.
-const CRIMSON = "#d60036";
-const AMBER = "#ffb852";
-const GREEN = "#00d973";
+const CRIMSON = "#cd002d";
+const AMBER = "#fac55f";
+const GREEN = "#009087";
 const BLACK = "#000000";
 
 function createTestGarment(
@@ -303,7 +303,7 @@ describe("engine", () => {
     // the strict threshold it only lives in Hermosa Pink's palettes, which
     // share none with the Light Brown Drab trousers and shoes.
     const PINK = "#dda1d1";
-    const DRAB = "#b08699";
+    const DRAB = "#c1a19e";
     // A shirt that goes with the trousers and shoes at the strict threshold:
     // the other colour of a palette that has the Light Brown Drab.
     const drabPalette = palettes.find((p) => p.colores.includes(DRAB) && p.colores.length >= 2)!;
@@ -449,7 +449,7 @@ describe("engine", () => {
   describe("black and white are wildcards", () => {
     const OFF_WHITE = "#fff0e0";
     const BROWN = "#6b4423";
-    const PURPLE = "#7b1fa2";
+    const PURPLE = "#8e24aa";
 
     it("matches an off-white or white sweater with black trousers and a coloured shoe", () => {
       // White is in one of 348 Sanzo palettes and that one has no black: this
@@ -478,8 +478,9 @@ describe("engine", () => {
     });
 
     it("does not let a neutral make two unrelated coloured pieces compatible", () => {
-      // Teal and purple share no Sanzo palette, not even at the loose
-      // fallback threshold; black trousers must not bridge them.
+      // Teal and this purple share no Sanzo palette, not even at the loose
+      // fallback threshold; black trousers must not bridge them. (A bluer
+      // purple, #7b1fa2, does share combination 172 with teal.)
       const wardrobe = [
         createTestGarment("s", "SHIRT", [PURPLE]),
         createTestGarment("p", "PANTS", [BLACK]),

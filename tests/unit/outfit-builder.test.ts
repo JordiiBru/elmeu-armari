@@ -20,10 +20,10 @@ import type { SavedOutfit } from "@/lib/outfits/types";
 
 // Real Sanzo Wada hexes (see engine.test.ts): combination 122 is crimson
 // + amber + green, so a shirt, trousers and shoes can each take one.
-const CRIMSON = "#d60036";
-const AMBER = "#ffb852";
-const GREEN = "#00d973";
-const RUST = "#de4500";
+const CRIMSON = "#cd002d";
+const AMBER = "#fac55f";
+const GREEN = "#009087";
+const RUST = "#d86310";
 const BLACK = "#000000";
 
 function g(id: string, category: Category, hexes: string[]): GarmentWithColors {
@@ -137,10 +137,10 @@ describe("builder palettes", () => {
   });
 
   it("still offers a piece that closes every palette, last", () => {
-    // Crimson and amber together leave no palette with Eosine Pink in it,
-    // even at the loose threshold the builder counts with.
+    // Crimson and amber together leave no palette with Plumbeous (a lead
+    // grey) in it, even at the loose threshold the builder counts with.
     const picks: Picks = { ACCESSORIES: [], TOP: shirt, PANTS: pants };
-    const pink = g("pink-shoes", "SHOES", ["#ff5ec4"]);
+    const pink = g("pink-shoes", "SHOES", ["#72737c"]);
     const amberShoes = g("amber-shoes", "SHOES", [AMBER]);
     const scored = scoreOptions([pink, amberShoes], picks, "SHOES", palettes.length);
     expect(scored.map((s) => [s.garment.id, s.fits])).toEqual([

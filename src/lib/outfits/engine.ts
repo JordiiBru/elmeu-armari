@@ -17,21 +17,24 @@ import {
 // piece may sit from the rung and still read as it. A charcoal shirt is
 // black to anyone dressing, hence 0.4 for Black; the light greys stretch
 // less; White barely, because a light grey has a real grey to go to.
-// Fawn (a pink), Plumbeous (blue) and the deep slates are not rungs:
-// they are hued, and a grey earns no slack towards them.
+// Fawn (a pink), Plumbeous and the deep slates are not rungs: a grey earns
+// no slack towards them. The published Plumbeous (#72737c) is itself close
+// to grey, so a mid grey reaches it on plain distance without slack.
+// Keyed by slug, not hex, so new catalogue hex values cannot silently drop
+// the slack.
 const GREY_RUNGS = new Map<string, number>([
-  ["#000000", 0.4], // Black
-  ["#ffffff", 0.05], // White
-  ["#9cb29e", 0.15], // Warm Gray
-  ["#b5d1cc", 0.15], // Neutral Gray
-  ["#9fc2b2", 0.15], // Mineral Gray
+  ["black", 0.4],
+  ["white", 0.05],
+  ["warm-gray", 0.15],
+  ["neutral-gray", 0.15],
+  ["mineral-gray", 0.15],
 ]);
 
 /**
  * Outfit engine — canonical + intersection.
  *
  * The Sanzo Wada catalogue exposes two related datasets:
- *   - 157 canonical colours (`namedColors`), each with a
+ *   - 159 canonical colours (`namedColors`), each with a
  *     `combinations` array listing every palette id it appears in.
  *   - 348 combinations (`palettes`), each a set of 2–6 canonical
  *     hexes.
@@ -82,7 +85,7 @@ const MIN_DISTINCT_PALETTE_COLORS = 2;
 // to them (White is in one of its 348 palettes). A piece whose colours all
 // anchor to one of these is a wildcard in the palette intersection. This was
 // a shoe-only rule; a white sweater with black trousers matched nothing.
-const NEUTRAL_HEXES = new Set(["#000000", "#ffffff"]);
+const NEUTRAL_SLUGS = new Set(["black", "white"]);
 const ALL_PALETTE_IDS: Set<number> = new Set(namedColors.flatMap((c) => c.combinations));
 
 // What a colour with no anchor inside a palette adds to that palette's
@@ -141,7 +144,7 @@ interface Ctx {
   snaps: Snap[];
   paletteIds: Set<number>;
   totalDistance: number;
-  /** Every colour of the piece anchors to Black or White: see `NEUTRAL_HEXES`. */
+  /** Every colour of the piece anchors to Black or White: see `NEUTRAL_SLUGS`. */
   neutral: boolean;
 }
 
@@ -153,7 +156,7 @@ function snapColour(hex: string, membership: number = MEMBERSHIP_THRESHOLD): Sna
   // the nearest stays as the display anchor.
   const found: Candidate[] = [];
   for (const canonical of namedColors) {
-    const distance = perceptualDistance(hex, canonical.hex, GREY_RUNGS.get(canonical.hex));
+    const distance = perceptualDistance(hex, canonical.hex, GREY_RUNGS.get(canonical.slug));
     if (distance < OKLCH_DISTANCE_THRESHOLD) found.push({ canonical, distance });
   }
   if (found.length === 0) return null;
@@ -182,7 +185,7 @@ export function anchorFor(hex: string): Candidate | null {
  */
 export function isGreyColour(hex: string): boolean {
   const anchor = anchorFor(hex);
-  return anchor !== null && GREY_RUNGS.has(anchor.canonical.hex.toLowerCase());
+  return anchor !== null && GREY_RUNGS.has(anchor.canonical.slug);
 }
 
 /**
@@ -243,7 +246,7 @@ function buildContext(
   // still anchored where the palette has them (and cost a penalty where it
   // does not, see `paletteMatchFor`), which ranks a palette that really
   // contains black or white above one that merely tolerates it.
-  const neutral = snaps.every((s) => NEUTRAL_HEXES.has(s.best.canonical.hex.toLowerCase()));
+  const neutral = snaps.every((s) => NEUTRAL_SLUGS.has(s.best.canonical.slug));
   const paletteIds = neutral ? ALL_PALETTE_IDS : intersectSets(perColour);
   if (paletteIds.size === 0) return null;
 

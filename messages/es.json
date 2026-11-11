@@ -618,7 +618,7 @@
       },
       "colours": {
         "title": "cómo llega un color a una paleta",
-        "p1": "El color de cada prenda se aproxima al color más cercano del diccionario: hay 157, con sus nombres históricos en inglés.",
+        "p1": "El color de cada prenda se aproxima al color más cercano del diccionario: hay 159, con sus nombres históricos en inglés.",
         "p2": "Una prenda solo vive en las paletas de los colores que le quedan cerca. Cuanto más estricto, menos combinaciones pero más ajustadas. Si un color no se parece a ninguno del diccionario, la prenda no se puede combinar.",
         "p3": "El negro, el blanco y los grises son neutros: un gris oscuro se lee como negro."
       },

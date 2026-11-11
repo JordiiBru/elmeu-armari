@@ -5,8 +5,8 @@ import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 
 // Combination 1 is rust + teal. An outfit that wears only the rust leaves
 // the teal as its natural accent.
-const RUST = "#de4500";
-const TEAL = "#29bdad";
+const RUST = "#d86310";
+const TEAL = "#008ea5";
 const palette = palettes.find((p) => p.id === 1)!;
 
 function garment(id: string, category: Category, hexes: string[]): GarmentWithColors {
@@ -55,8 +55,8 @@ describe("suggestAccessories", () => {
     const neutrals = [
       "#000000",
       "#1c1c1e",
-      "#9cb29e", // Warm Gray
-      "#9fc2b2", // Mineral Gray
+      "#acac9e", // Warm Gray
+      "#afbbb5", // Mineral Gray
       "#a3b5a5", // a tinted grey no Sanzo entry names
       "#808080",
     ].map((hex, i) => garment(`n${i}`, "ACCESSORI", [hex]));
@@ -68,8 +68,8 @@ describe("suggestAccessories", () => {
 
   it("does suggest a dull colour that only looks nearly grey (a blush pink, an olive drab)", () => {
     const blushPalette = palettes.find((p) => p.id === 45)!; // Seashell Pink + a yellow
-    const blush = garment("blush", "ACCESSORI", ["#e8d5d5"]);
-    expect(ids(suggestAccessories([garment("s", "SHIRT", ["#ffcfc4"])], blushPalette, [blush]))).toEqual([
+    const blush = garment("blush", "ACCESSORI", ["#e9d9cc"]);
+    expect(ids(suggestAccessories([garment("s", "SHIRT", ["#fbdcc4"])], blushPalette, [blush]))).toEqual([
       "blush",
     ]);
   });
@@ -79,8 +79,8 @@ describe("suggestAccessories", () => {
     // brown does not mean wearing the Vandyke Brown, so an accessory in it
     // is still the accent.
     const brownPalette = palettes.find((p) => p.id === 110)!;
-    const brownOutfit = [garment("s", "SHIRT", ["#6c2b11"]), garment("p", "PANTS", ["#6c2b11"])];
-    const vandyke = garment("v", "ACCESSORI", ["#362304"]);
+    const brownOutfit = [garment("s", "SHIRT", ["#86431f"]), garment("p", "PANTS", ["#86431f"])];
+    const vandyke = garment("v", "ACCESSORI", ["#513412"]);
     const result = suggestAccessories(brownOutfit, brownPalette, [vandyke]);
     expect(ids(result)).toEqual(["v"]);
     expect(result[0].accent).toBe(true);
@@ -91,7 +91,7 @@ describe("suggestAccessories", () => {
   });
 
   it("does not suggest a colour the palette does not have", () => {
-    const purple = garment("purple", "ACCESSORI", ["#4733ff"]);
+    const purple = garment("purple", "ACCESSORI", ["#614498"]);
     expect(suggestAccessories(outfit, palette, [purple])).toEqual([]);
   });
 
@@ -101,7 +101,7 @@ describe("suggestAccessories", () => {
   });
 
   it("needs every coloured part to match (rust with a purple trim does not)", () => {
-    const bag = garment("bag", "ACCESSORI", [RUST, "#4733ff"]);
+    const bag = garment("bag", "ACCESSORI", [RUST, "#614498"]);
     expect(suggestAccessories(outfit, palette, [bag])).toEqual([]);
   });
 

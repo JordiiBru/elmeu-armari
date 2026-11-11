@@ -8,7 +8,7 @@ import {
   OKLCH_DISTANCE_THRESHOLD,
 } from "@/lib/outfits/color-matching";
 import { anchorFor } from "@/lib/outfits/engine";
-import { namedColors } from "@/lib/colors";
+import { namedColors, palettes } from "@/lib/colors";
 
 describe("color-matching", () => {
   describe("greyness", () => {
@@ -197,14 +197,13 @@ describe("color-matching", () => {
     });
 
   describe("Sanzo Wada canonical catalogue", () => {
-    it("Plumbeous (#5c7287) is hued, not a rung of the grey ramp — protects grey snapping", () => {
-      // Plumbeous is a low-chroma blue-grey (C≈0.042): technically dull,
-      // clearly hued. A grey piece must not anchor to it, whatever its
-      // lightness, so it reads as fully hued and earns no lightness slack.
-      const { C } = hexToOklch("#5c7287");
-      expect(greyness(C)).toBe(0);
+    it("greys anchor to a grey: Black, Plumbeous or a light Sanzo grey", () => {
+      // The published Plumbeous (#72737c) is a lead grey, not the blue-grey
+      // the CMYK shortcut gave (#5c7287), so a mid grey may read as it.
+      expect(greyness(hexToOklch("#72737c").C)).toBeGreaterThan(0.5);
+      const greys = ["Black", "Deep Violet / Plumbeous", "Warm Gray", "Neutral Gray", "Mineral Gray"];
       for (const grey of ["#5d5d5f", "#6e6e6e", "#7f8183"]) {
-        expect(anchorFor(grey)?.canonical.name).not.toBe("Deep Violet / Plumbeous");
+        expect(greys).toContain(anchorFor(grey)?.canonical.name);
       }
     });
 
@@ -215,15 +214,15 @@ describe("color-matching", () => {
       }
     });
 
-    it("all but one canonical colour map to at least one combination id", () => {
-      // "Vandar Poel's Blue" (#003e83) is the only colour in the Sanzo Wada
-      // dictionary that does not appear in any of the 348 recorded combinations.
-      // This is a property of the source data, not a bug.
-      const withoutCombinations = namedColors.filter(
-        (c) => c.combinations.length === 0,
-      );
-      expect(withoutCombinations).toHaveLength(1);
-      expect(withoutCombinations[0].hex.toLowerCase()).toBe("#003e83");
+    it("every canonical colour is in at least one combination, and the lists agree", () => {
+      // `combinations` is derived from the palettes, so a colour lists
+      // exactly the palettes that contain its hex. (The old data left
+      // Vandar Poel's Blue out of the seven palettes it is in.)
+      for (const c of namedColors) {
+        expect(c.combinations.length, c.name).toBeGreaterThan(0);
+        const holding = palettes.filter((p) => p.colores.includes(c.hex)).map((p) => p.id);
+        expect(c.combinations, c.name).toEqual(holding);
+      }
     });
 
     it("Black (#000000) is within OKLCH_DISTANCE_THRESHOLD of itself", () => {

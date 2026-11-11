@@ -26,8 +26,9 @@ export interface AnchorCase {
 }
 
 // Families, so a list reads as "any of these" instead of repeating names.
-// Sanzo Wada has no taupe: a dull warm grey-brown that far from every
-// canonical is better left outside the vocabulary than pinned to a blue.
+// Hex values are the published ones (wadacolors.com, #220). With them
+// Plumbeous is a lead grey (#72737c), so it joins the grey families, and
+// a taupe finds a brownish olive instead of falling outside.
 export const OUTSIDE = "(outside the vocabulary)";
 const NAVY = ["Dark Tyrian Blue", "Deep Indigo", "Dull Violet Black"];
 const DARK_BROWN = ["Vandyke Brown", "Mars Brown / Tobacco", "Pale Raw Umber", "Sepia"];
@@ -41,14 +42,31 @@ const BROWN_OLIVE = [
 ];
 const WARM_LIGHT = ["Ecru", "Ivory Buff", "Seashell Pink"];
 const LIGHT_GREY = ["Neutral Gray", "Warm Gray", "Mineral Gray"];
-const MID_GREY = ["Black", ...LIGHT_GREY];
-const DARK_GREEN = ["Blackish Olive", "Dusky Green", "Lincoln Green", "Deep Grayish Olive"];
+const MID_GREY = ["Black", "Deep Violet / Plumbeous", ...LIGHT_GREY];
+// Deep Slate Olive (#253121) is a dark green in the published data.
+const DARK_GREEN = [
+  "Blackish Olive",
+  "Dusky Green",
+  "Lincoln Green",
+  "Deep Grayish Olive",
+  "Deep Slate Olive",
+];
 const OLIVE = ["Light Brownish Olive", "Deep Grayish Olive", "Olive Green", "Lincoln Green"];
-const BURGUNDY = ["Pale Burnt Lake", "Vandyke Red", "Hay's Russet", "Madder Brown"];
+// Violet Carmine (#703645) and Pansy Purple (#870836) are wine reds in the
+// published data.
+const BURGUNDY = [
+  "Pale Burnt Lake",
+  "Vandyke Red",
+  "Hay's Russet",
+  "Madder Brown",
+  "Violet Carmine",
+  "Pansy Purple",
+];
 const MUSTARD = ["Yellow Ocher", "Isabella Color", "Khaki", "Sulphine Yellow"];
 const RUST = ["Vinaceous Tawny", "Burnt Sienna", "Orange Rufous", "Cinnamon Rufous", "Brick Red"];
 const CHARCOAL_SLATE = ["Slate Color", "Deep Slate Green"];
-const SLATE_BLUE = ["Deep Violet / Plumbeous", "Slate Color"];
+// Dark Medici Blue (#527177) is a grey slate blue in the published data.
+const SLATE_BLUE = ["Deep Violet / Plumbeous", "Slate Color", "Dark Medici Blue"];
 
 function wardrobe(
   hex: string,
@@ -73,19 +91,17 @@ function synthetic(
 const WARDROBE_CASES: AnchorCase[] = [
   wardrobe("#000000", "black", ["Black"]),
   wardrobe("#153f0a", "dark green", DARK_GREEN),
-  wardrobe("#af82d9", "lavender", ["Lilac", "Grayish Lavender - B"]),
+  wardrobe("#af82d9", "lavender", ["Lilac", "Grayish Lavender - B", "Light Mauve"]),
   wardrobe("#f1f8da", "pale green-white", ["White", "Sulpher Yellow"]),
   wardrobe("#fdfdfd", "near white", ["White"]),
   wardrobe("#ffffff", "white", ["White"]),
   wardrobe("#0f164d", "midnight navy", NAVY),
-  wardrobe("#102b96", "royal blue", ["Violet Blue", "Vandar Poel's Blue"]),
+  wardrobe("#102b96", "royal blue", ["Violet Blue", "Vandar Poel's Blue", "Deep Lyons Blue"]),
   wardrobe("#3a2921", "dark brown", DARK_BROWN),
   wardrobe("#726052", "khaki chino", BROWN_OLIVE),
   wardrobe("#736251", "khaki cargo", BROWN_OLIVE),
   wardrobe("#7f8183", "mid grey trousers", MID_GREY),
-  wardrobe("#d9cab8", "beige trousers", WARM_LIGHT,
-    "snaps to Light Pinkish Cinnamon (a peach, chroma 0.09 against 0.03): a near tie with Ivory Buff and Ecru",
-  ),
+  wardrobe("#d9cab8", "beige trousers", WARM_LIGHT),
   wardrobe("#1b2c50", "navy", NAVY),
   wardrobe("#1c2f26", "black-green", ["Deep Slate Green", "Deep Slate Olive", "Blackish Olive"]),
   wardrobe("#524f52", "dark grey", ["Black"]),
@@ -107,7 +123,9 @@ const WARDROBE_CASES: AnchorCase[] = [
   wardrobe("#000025", "blue-black", ["Deep Indigo", "Dull Violet Black", "Black"]),
   wardrobe("#214259", "petrol blue", ["Slate Color", "Vandar Poel's Blue", "Dark Tyrian Blue"]),
   wardrobe("#4e2a09", "espresso", DARK_BROWN),
-  wardrobe("#4f0007", "oxblood", [...BURGUNDY, "Mars Brown / Tobacco"]),
+  wardrobe("#4f0007", "oxblood", [...BURGUNDY, "Mars Brown / Tobacco"],
+    "snaps to Vandyke Brown (13.3): the published reds are lighter, Madder Brown is 14.5, past the vocabulary line",
+  ),
   wardrobe("#fff0e0", "warm off-white", ["White", "Seashell Pink"]),
 ];
 
@@ -116,17 +134,29 @@ const WARDROBE_CASES: AnchorCase[] = [
 const SYNTHETIC_CASES: AnchorCase[] = [
   synthetic("#c3b091", "khaki", ["Ecru", "Ivory Buff"]),
   synthetic("#8a7d55", "olive khaki", [...BROWN_OLIVE, "Dark Citrine"]),
-  synthetic("#a89a78", "greige khaki", ["Ecru", "Isabella Color", "Light Grayish Olive", "Maple"]),
+  synthetic("#a89a78", "greige khaki", [
+    "Ecru",
+    "Isabella Color",
+    "Light Grayish Olive",
+    "Maple",
+    "Dark Citrine",
+  ]),
   synthetic("#c19a6b", "camel", ["Maple", "Isabella Color", "Ochraceous Salmon"]),
-  synthetic("#b48a5a", "dark camel", ["Maple", "Khaki", "Isabella Color"]),
+  synthetic("#b48a5a", "dark camel", ["Maple", "Khaki", "Isabella Color"],
+    "snaps to Cinnamon Rufous (6.0), an orange; Khaki is 7.3",
+  ),
   synthetic("#8b7d72", "taupe", [OUTSIDE, "Light Brownish Olive", "Light Grayish Olive", "Warm Gray", "Pale Raw Umber"]),
   synthetic("#483c32", "dark taupe", DARK_BROWN),
   synthetic("#b8a99a", "light taupe", ["Ecru", "Warm Gray", "Light Brown Drab"]),
   synthetic("#36454f", "blue charcoal", CHARCOAL_SLATE),
   synthetic("#3b3b3d", "charcoal", ["Black"]),
   synthetic("#2b2b2d", "dark charcoal", ["Black"]),
-  synthetic("#4c5866", "marengo", SLATE_BLUE),
-  synthetic("#3e4552", "dark marengo", SLATE_BLUE),
+  synthetic("#4c5866", "marengo", SLATE_BLUE,
+    "snaps to Helvetia Blue (10.7), a saturated blue; Slate Color is 12.0",
+  ),
+  synthetic("#3e4552", "dark marengo", SLATE_BLUE,
+    "snaps to Violet Blue (7.1), an indigo; Slate Color is 9.4",
+  ),
   synthetic("#1f2a44", "navy", NAVY),
   synthetic("#0b1f3a", "deep navy", NAVY),
   synthetic("#14213d", "night navy", NAVY),
@@ -140,7 +170,9 @@ const SYNTHETIC_CASES: AnchorCase[] = [
   synthetic("#6b8cae", "washed denim", ["Deep Violet / Plumbeous", "Olympic Blue", "Salvia Blue"]),
   synthetic("#6d1f2b", "burgundy", BURGUNDY),
   synthetic("#800020", "bordeaux", BURGUNDY),
-  synthetic("#4a0e1a", "dark burgundy", [...BURGUNDY, "Violet Carmine", "Mars Brown / Tobacco"]),
+  synthetic("#4a0e1a", "dark burgundy", [...BURGUNDY, "Mars Brown / Tobacco"],
+    "snaps to Cotinga Purple (10.8), a dark magenta; Violet Carmine is 13.9",
+  ),
   synthetic("#d4a017", "mustard", MUSTARD),
   synthetic("#c9a227", "dull mustard", MUSTARD),
   synthetic("#e1ad01", "bright mustard", [...MUSTARD, "Olive Ocher", "Orange Yellow"]),
@@ -154,8 +186,16 @@ const SYNTHETIC_CASES: AnchorCase[] = [
   synthetic("#eae6dd", "bone", ["White", "Seashell Pink"]),
   synthetic("#1f4d2b", "bottle green", DARK_GREEN),
   synthetic("#b7410e", "rust", RUST),
-  synthetic("#c66b4a", "terracotta", ["Cinnamon Rufous", "Raw Sienna", "Vinaceous Tawny", "Ochraceous Salmon"]),
-  synthetic("#dcc9a6", "sand", ["Ecru", "Ivory Buff", "Light Pinkish Cinnamon"]),
+  synthetic("#c66b4a", "terracotta", [
+    "Cinnamon Rufous",
+    "Raw Sienna",
+    "Vinaceous Tawny",
+    "Ochraceous Salmon",
+    "Sudan Brown",
+  ]),
+  synthetic("#dcc9a6", "sand", ["Ecru", "Ivory Buff", "Light Pinkish Cinnamon"],
+    "snaps to Olive Buff (4.9), a near tie with Ecru (5.0)",
+  ),
   synthetic("#1f6f6b", "teal", ["Dark Medici Blue"]),
   synthetic("#c8c8c8", "silver grey", LIGHT_GREY),
   synthetic("#e8e8e8", "pale grey", ["White", "Neutral Gray"]),
