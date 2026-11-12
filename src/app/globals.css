@@ -384,8 +384,12 @@ button, a, input, textarea, select {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: none; }
 }
+/* backwards, not both: a transform kept after the animation makes the
+   panel the containing block of every fixed child, and a sheet opened
+   from inside it (a day of the week) was drawn inside the panel, under
+   the pinned stage, instead of over the screen. */
 .panel-enter {
-  animation: panel-enter var(--duration-base) var(--ease-standard) both;
+  animation: panel-enter var(--duration-base) var(--ease-standard) backwards;
 }
 
 /* One sheet stepping into another of the same kind — piece detail into
