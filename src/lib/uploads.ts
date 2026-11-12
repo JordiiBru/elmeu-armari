@@ -51,12 +51,21 @@ export async function saveUploadImage(buffer: Buffer, id: string): Promise<strin
   await ensureUploadDir();
   const filename = `${id}.webp`;
   const dir = getUploadDir();
-  const full = sharp(buffer, { limitInputPixels: MAX_INPUT_PIXELS }).rotate();
+  // One pipeline per size, each decoding the buffer itself, one after the
+  // other. Both used to be clones of a single input run in parallel, and
+  // some photos came out with their top rows black (in whole 16-row bands)
+  // while the thumbnail made from the same upload was intact.
+  // `npm run find-banded-photos` lists the ones already stored.
   const encode = (edge: number) =>
-    full.clone().resize(edge, edge, { fit: "inside", withoutEnlargement: true }).webp({ quality: 80 }).toBuffer();
+    sharp(buffer, { limitInputPixels: MAX_INPUT_PIXELS })
+      .rotate()
+      .resize(edge, edge, { fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toBuffer();
   // Encode both before writing either: a truncated file that fails halfway
   // must not leave a half-written photo or a thumbnail out of step with it.
-  const [photo, thumb] = await Promise.all([encode(800), encode(THUMB_PX)]);
+  const photo = await encode(800);
+  const thumb = await encode(THUMB_PX);
   await Promise.all([
     fs.writeFile(path.join(dir, filename), photo),
     fs.writeFile(path.join(dir, thumbName(id)), thumb),

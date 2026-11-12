@@ -8,6 +8,7 @@
     "start": "next start",
     "create-user": "node --env-file-if-exists=.env scripts/create-user.mjs",
     "rebuild-thumbs": "node --env-file-if-exists=.env scripts/rebuild-thumbs.mjs",
+    "find-banded-photos": "node --env-file-if-exists=.env scripts/find-banded-photos.mjs",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "knip": "knip",
