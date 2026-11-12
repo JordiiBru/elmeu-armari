@@ -56,6 +56,7 @@ The first sign-in lands on `/change-password` and nothing else opens until the p
 | `npm run knip` | Unused files, exports and dependencies. |
 | `npm run create-user` | Create an account or reset its password. |
 | `npm run rebuild-thumbs` | Regenerate photo thumbnails after changing their size. |
+| `npm run find-banded-photos` | List stored photos whose top rows came out black (read only). |
 
 ## Docker
 
