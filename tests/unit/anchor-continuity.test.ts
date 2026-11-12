@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { anchorFor, candidatesFor } from "@/lib/outfits/engine";
-import { hexToOklch, perceptualDistance, OKLCH_DISTANCE_THRESHOLD } from "@/lib/outfits/color-matching";
+import { anchorFor, candidatesFor, snapDistance } from "@/lib/outfits/engine";
+import { hexToOklch, VOCABULARY_THRESHOLD } from "@/lib/outfits/color-matching";
 
 // The old engine switched strategy at chroma 0.02 and 0.05, so two
 // colours a fraction of a ΔE apart on either side of one of those lines
@@ -50,21 +50,31 @@ const name = (hex: string) => anchorFor(hex)?.canonical.name ?? "(outside)";
 function nearThresholdEdge(a: string, b: string): boolean {
   const near = (hex: string) => {
     const d = anchorFor(hex)?.distance;
-    return d !== undefined && d > OKLCH_DISTANCE_THRESHOLD - 1;
+    return d !== undefined && d > VOCABULARY_THRESHOLD - 1;
   };
   return (!anchorFor(a) && near(b)) || (!anchorFor(b) && near(a));
 }
 
-// Two canonicals almost equally near (within half a unit) may swap on a
-// sub-ΔE step: that is a tie being broken, not a change of strategy.
-function nearTie(a: string, b: string): boolean {
-  const A = anchorFor(a);
-  const B = anchorFor(b);
+// Most an anchor's snap distance may move over one step of these walks (a
+// sub-ΔE change of colour) for a swap to count as two curves crossing. The
+// two swaps the walks meet at the old lines move 0.7 at most (#220). A
+// nearby canonical can move up to 4.1 on a step elsewhere: an 8-bit step
+// changes chroma by up to 0.0035, which moves the greyness penalty and the
+// rung slack with it. The OKLCH metric this replaced moved 8.5 on that same
+// step.
+const STEP_CHANGE = 2.5;
+
+// Two canonicals whose distances cross between neighbours may swap the
+// anchor: that is a tie being broken, not a change of strategy. Each is
+// the nearest on its own side by definition, so the swap is a crossing
+// when both distances move less than `STEP_CHANGE` over the step (both
+// curves are continuous there). The distances are the engine's own,
+// grey-ramp slack included.
+function crossing(a: string, b: string): boolean {
+  const A = anchorFor(a)?.canonical;
+  const B = anchorFor(b)?.canonical;
   if (!A || !B) return false;
-  return (
-    Math.abs(perceptualDistance(a, B.canonical.hex) - A.distance) < 0.5 &&
-    Math.abs(perceptualDistance(b, A.canonical.hex) - B.distance) < 0.5
-  );
+  return [A, B].every((c) => Math.abs(snapDistance(a, c) - snapDistance(b, c)) < STEP_CHANGE);
 }
 
 describe("anchor continuity across the old chroma boundaries", () => {
@@ -101,7 +111,7 @@ describe("anchor continuity across the old chroma boundaries", () => {
         for (const edge of OLD_BOUNDARIES) {
           if (ca < edge !== cb < edge) {
             crossings++;
-            if (nearThresholdEdge(a, b) || nearTie(a, b)) continue;
+            if (nearThresholdEdge(a, b) || crossing(a, b)) continue;
             expect(name(a), `${a} -> ${b} across chroma ${edge}`).toBe(name(b));
           }
         }

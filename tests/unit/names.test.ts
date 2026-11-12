@@ -21,9 +21,10 @@ describe("colourName", () => {
   });
 
   it("does not give a colour outside the vocabulary a wrong name", () => {
-    // Sanzo Wada has no neon green: the engine leaves it out and so does the name.
-    expect(anchorFor("#18f800")).toBeNull();
-    expect(colourName("#18f800")).toBeNull();
+    // Sanzo Wada has no pure magenta (its nearest canonical is 17 away): the
+    // engine leaves it out and so does the name.
+    expect(anchorFor("#ff00ff")).toBeNull();
+    expect(colourName("#ff00ff")).toBeNull();
   });
 
   it("is case-insensitive and repeatable", () => {

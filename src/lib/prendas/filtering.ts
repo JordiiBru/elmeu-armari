@@ -1,6 +1,6 @@
 import type { GarmentWithColors, Category, Texture, Season } from "./types";
 import { CATEGORIES, SUBTYPES_BY_CATEGORY } from "./types";
-import { perceptualDistance, OKLCH_DISTANCE_THRESHOLD } from "@/lib/outfits/color-matching";
+import { perceptualDistance, VOCABULARY_THRESHOLD } from "@/lib/outfits/color-matching";
 import { isDirty } from "@/lib/bugaderia/laundry";
 
 export type GarmentState = "clean" | "dirty";
@@ -49,7 +49,7 @@ export function filterGarments(
 
     if (colors.length > 0) {
       const passesColor = g.colors.some((c) =>
-        colors.some((target) => perceptualDistance(c.hex, target) < OKLCH_DISTANCE_THRESHOLD)
+        colors.some((target) => perceptualDistance(c.hex, target) < VOCABULARY_THRESHOLD)
       );
       if (!passesColor) return false;
     }

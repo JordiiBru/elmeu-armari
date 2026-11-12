@@ -104,9 +104,12 @@ const WARDROBE_CASES: AnchorCase[] = [
   wardrobe("#d9cab8", "beige trousers", WARM_LIGHT),
   wardrobe("#1b2c50", "navy", NAVY),
   wardrobe("#1c2f26", "black-green", ["Deep Slate Green", "Deep Slate Olive", "Blackish Olive"]),
-  wardrobe("#524f52", "dark grey", ["Black"]),
+  // Plumbeous (#72737c, L 0.56) is the only Sanzo grey between Black and
+  // the light greys; a dark grey at L 0.43 to 0.48 is nearer to it than to
+  // Black (CIEDE2000 13.6 and 9.2 against 23 and 27). Black stays fair.
+  wardrobe("#524f52", "dark grey", ["Black", "Deep Violet / Plumbeous"]),
   wardrobe("#546779", "slate blue", SLATE_BLUE),
-  wardrobe("#5d5d5f", "dark grey", ["Black"]),
+  wardrobe("#5d5d5f", "dark grey", ["Black", "Deep Violet / Plumbeous"]),
   wardrobe("#c2d3c0", "pale sage", [
     ...LIGHT_GREY,
     "Dark Greenish Glaucous",
@@ -118,14 +121,14 @@ const WARDROBE_CASES: AnchorCase[] = [
   wardrobe("#121b3b", "ink navy", NAVY),
   wardrobe("#3d5a3d", "forest green", DARK_GREEN),
   wardrobe("#6b4423", "brown", ["Pale Raw Umber", "Brown", "Mars Brown / Tobacco"]),
-  wardrobe("#716c63", "warm mid grey", ["Warm Gray", ...BROWN_OLIVE]),
+  // A mid grey at Plumbeous's lightness (L 0.53 against 0.56), as grey as
+  // it (C 0.015 against 0.014): MID_GREY already counts Plumbeous.
+  wardrobe("#716c63", "warm mid grey", ["Warm Gray", "Deep Violet / Plumbeous", ...BROWN_OLIVE]),
   wardrobe("#d6d6d6", "light grey", [...LIGHT_GREY, "White"]),
   wardrobe("#000025", "blue-black", ["Deep Indigo", "Dull Violet Black", "Black"]),
   wardrobe("#214259", "petrol blue", ["Slate Color", "Vandar Poel's Blue", "Dark Tyrian Blue"]),
   wardrobe("#4e2a09", "espresso", DARK_BROWN),
-  wardrobe("#4f0007", "oxblood", [...BURGUNDY, "Mars Brown / Tobacco"],
-    "snaps to Vandyke Brown (13.3): the published reds are lighter, Madder Brown is 14.5, past the vocabulary line",
-  ),
+  wardrobe("#4f0007", "oxblood", [...BURGUNDY, "Mars Brown / Tobacco"]),
   wardrobe("#fff0e0", "warm off-white", ["White", "Seashell Pink"]),
 ];
 
@@ -142,21 +145,17 @@ const SYNTHETIC_CASES: AnchorCase[] = [
     "Dark Citrine",
   ]),
   synthetic("#c19a6b", "camel", ["Maple", "Isabella Color", "Ochraceous Salmon"]),
-  synthetic("#b48a5a", "dark camel", ["Maple", "Khaki", "Isabella Color"],
-    "snaps to Cinnamon Rufous (6.0), an orange; Khaki is 7.3",
-  ),
+  // Ochraceous Salmon is a fair camel above, and here it has the piece's
+  // hue (68 against 69) and chroma; it is lighter by as much as Maple is.
+  synthetic("#b48a5a", "dark camel", ["Maple", "Khaki", "Isabella Color", "Ochraceous Salmon"]),
   synthetic("#8b7d72", "taupe", [OUTSIDE, "Light Brownish Olive", "Light Grayish Olive", "Warm Gray", "Pale Raw Umber"]),
   synthetic("#483c32", "dark taupe", DARK_BROWN),
   synthetic("#b8a99a", "light taupe", ["Ecru", "Warm Gray", "Light Brown Drab"]),
   synthetic("#36454f", "blue charcoal", CHARCOAL_SLATE),
   synthetic("#3b3b3d", "charcoal", ["Black"]),
   synthetic("#2b2b2d", "dark charcoal", ["Black"]),
-  synthetic("#4c5866", "marengo", SLATE_BLUE,
-    "snaps to Helvetia Blue (10.7), a saturated blue; Slate Color is 12.0",
-  ),
-  synthetic("#3e4552", "dark marengo", SLATE_BLUE,
-    "snaps to Violet Blue (7.1), an indigo; Slate Color is 9.4",
-  ),
+  synthetic("#4c5866", "marengo", SLATE_BLUE),
+  synthetic("#3e4552", "dark marengo", SLATE_BLUE),
   synthetic("#1f2a44", "navy", NAVY),
   synthetic("#0b1f3a", "deep navy", NAVY),
   synthetic("#14213d", "night navy", NAVY),
@@ -170,9 +169,7 @@ const SYNTHETIC_CASES: AnchorCase[] = [
   synthetic("#6b8cae", "washed denim", ["Deep Violet / Plumbeous", "Olympic Blue", "Salvia Blue"]),
   synthetic("#6d1f2b", "burgundy", BURGUNDY),
   synthetic("#800020", "bordeaux", BURGUNDY),
-  synthetic("#4a0e1a", "dark burgundy", [...BURGUNDY, "Mars Brown / Tobacco"],
-    "snaps to Cotinga Purple (10.8), a dark magenta; Violet Carmine is 13.9",
-  ),
+  synthetic("#4a0e1a", "dark burgundy", [...BURGUNDY, "Mars Brown / Tobacco"]),
   synthetic("#d4a017", "mustard", MUSTARD),
   synthetic("#c9a227", "dull mustard", MUSTARD),
   synthetic("#e1ad01", "bright mustard", [...MUSTARD, "Olive Ocher", "Orange Yellow"]),
@@ -193,10 +190,10 @@ const SYNTHETIC_CASES: AnchorCase[] = [
     "Ochraceous Salmon",
     "Sudan Brown",
   ]),
-  synthetic("#dcc9a6", "sand", ["Ecru", "Ivory Buff", "Light Pinkish Cinnamon"],
-    "snaps to Olive Buff (4.9), a near tie with Ecru (5.0)",
-  ),
-  synthetic("#1f6f6b", "teal", ["Dark Medici Blue"]),
+  synthetic("#dcc9a6", "sand", ["Ecru", "Ivory Buff", "Light Pinkish Cinnamon"]),
+  // Dusky Green (#005147) has the teal's hue and chroma and is darker;
+  // Dark Medici Blue has half its chroma. Both are fair.
+  synthetic("#1f6f6b", "teal", ["Dark Medici Blue", "Dusky Green"]),
   synthetic("#c8c8c8", "silver grey", LIGHT_GREY),
   synthetic("#e8e8e8", "pale grey", ["White", "Neutral Gray"]),
   synthetic("#9a9a9a", "mid grey", LIGHT_GREY),

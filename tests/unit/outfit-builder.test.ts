@@ -14,7 +14,7 @@ import {
   type Picks,
 } from "@/lib/outfits/builder";
 import { palettes } from "@/lib/colors";
-import { OKLCH_DISTANCE_THRESHOLD } from "@/lib/outfits/color-matching";
+import { VOCABULARY_THRESHOLD } from "@/lib/outfits/color-matching";
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 import type { SavedOutfit } from "@/lib/outfits/types";
 
@@ -131,21 +131,22 @@ describe("builder palettes", () => {
     const own = scored.find((s) => s.garment.id === "shirt")!;
     expect(own.fits).toBe(true);
     // Its count is the palettes the trousers leave it, not shirt ∩ shirt.
-    const loose = (x: GarmentWithColors) => paletteSetFor(x, OKLCH_DISTANCE_THRESHOLD) as Set<number>;
+    const loose = (x: GarmentWithColors) => paletteSetFor(x, VOCABULARY_THRESHOLD) as Set<number>;
     const expected = [...loose(shirt)].filter((id) => loose(pants).has(id)).length;
     expect(own.palettes).toBe(expected);
   });
 
   it("still offers a piece that closes every palette, last", () => {
-    // Crimson and amber together leave no palette with Plumbeous (a lead
-    // grey) in it, even at the loose threshold the builder counts with.
+    // Crimson and amber together leave no palette with Vandyke Brown in it,
+    // even at the loose threshold the builder counts with. (A grey shoe
+    // would not do here: it is a wildcard and fits any palette.)
     const picks: Picks = { ACCESSORIES: [], TOP: shirt, PANTS: pants };
-    const pink = g("pink-shoes", "SHOES", ["#72737c"]);
+    const brown = g("brown-shoes", "SHOES", ["#513412"]);
     const amberShoes = g("amber-shoes", "SHOES", [AMBER]);
-    const scored = scoreOptions([pink, amberShoes], picks, "SHOES", palettes.length);
+    const scored = scoreOptions([brown, amberShoes], picks, "SHOES", palettes.length);
     expect(scored.map((s) => [s.garment.id, s.fits])).toEqual([
       ["amber-shoes", true],
-      ["pink-shoes", false],
+      ["brown-shoes", false],
     ]);
   });
 

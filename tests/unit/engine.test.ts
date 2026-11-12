@@ -1,6 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { generateOutfitGroups, generateOutfitGroupsForGarment, candidatesFor } from "@/lib/outfits/engine";
-import { MEMBERSHIP_THRESHOLD, OKLCH_DISTANCE_THRESHOLD } from "@/lib/outfits/color-matching";
+import {
+  generateOutfitGroups,
+  generateOutfitGroupsForGarment,
+  candidatesFor,
+  paletteSetFor,
+} from "@/lib/outfits/engine";
+import { MEMBERSHIP_THRESHOLD, VOCABULARY_THRESHOLD } from "@/lib/outfits/color-matching";
 import { ANCHOR_CASES } from "@/lib/outfits/anchor-reference";
 import { palettes } from "@/lib/colors";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
@@ -287,7 +292,7 @@ describe("engine", () => {
 
   describe("palette membership", () => {
     it("is stricter than the vocabulary threshold", () => {
-      expect(MEMBERSHIP_THRESHOLD).toBeLessThan(OKLCH_DISTANCE_THRESHOLD);
+      expect(MEMBERSHIP_THRESHOLD).toBeLessThan(VOCABULARY_THRESHOLD);
     });
 
     it("keeps the nearest reading and only readings within the threshold besides it", () => {
@@ -299,10 +304,10 @@ describe("engine", () => {
       }
     });
 
-    // A pink that is 8 from Hermosa Pink and 12.5 from Light Brown Drab: at
-    // the strict threshold it only lives in Hermosa Pink's palettes, which
-    // share none with the Light Brown Drab trousers and shoes.
-    const PINK = "#dda1d1";
+    // A pink lilac that reads as Lilac (7.0): at the strict threshold its
+    // palettes share none with the Light Brown Drab trousers and shoes, at
+    // the vocabulary threshold they do.
+    const PINK = "#d89cd8";
     const DRAB = "#c1a19e";
     // A shirt that goes with the trousers and shoes at the strict threshold:
     // the other colour of a palette that has the Light Brown Drab.
@@ -378,7 +383,7 @@ describe("engine", () => {
       const { groups } = generateOutfitGroups([shirt, pants, blackShoe], palettes);
       const primary = groups[0].palettes[0];
       expect(primary.unanchored).toBe(1);
-      expect(primary.totalDistance).toBeGreaterThanOrEqual(OKLCH_DISTANCE_THRESHOLD);
+      expect(primary.totalDistance).toBeGreaterThanOrEqual(VOCABULARY_THRESHOLD);
     });
 
     it("never lets an unanchored piece score better than an anchored one", () => {
@@ -450,6 +455,7 @@ describe("engine", () => {
     const OFF_WHITE = "#fff0e0";
     const BROWN = "#6b4423";
     const PURPLE = "#8e24aa";
+    const OLIVE = "#71773a";
 
     it("matches an off-white or white sweater with black trousers and a coloured shoe", () => {
       // White is in one of 348 Sanzo palettes and that one has no black: this
@@ -478,15 +484,35 @@ describe("engine", () => {
     });
 
     it("does not let a neutral make two unrelated coloured pieces compatible", () => {
-      // Teal and this purple share no Sanzo palette, not even at the loose
-      // fallback threshold; black trousers must not bridge them. (A bluer
-      // purple, #7b1fa2, does share combination 172 with teal.)
+      // This purple and an olive share no Sanzo palette, not even at the
+      // loose fallback threshold; black trousers must not bridge them.
       const wardrobe = [
         createTestGarment("s", "SHIRT", [PURPLE]),
         createTestGarment("p", "PANTS", [BLACK]),
-        createTestGarment("sh", "SHOES", [TEAL]),
+        createTestGarment("sh", "SHOES", [OLIVE]),
       ];
       expect(generateOutfitGroups(wardrobe, palettes).groups).toHaveLength(0);
+    });
+
+    it("treats a grey shoe as a wildcard, but not a grey top", () => {
+      // The dev wardrobe case from #220: this blue sweater and these
+      // khaki-brown chinos share one palette (343), and no shoe the owner
+      // has is in it. The grey sneaker anchors to Plumbeous, a grey rung,
+      // so it goes with them the way a black shoe would.
+      const greyShoe = createTestGarment("sh", "SHOES", ["#716c63"]);
+      const wardrobe = [
+        createTestGarment("s", "SWEATER", ["#386585"]),
+        createTestGarment("p", "PANTS", ["#5d5246"]),
+        greyShoe,
+      ];
+      expect(paletteSetFor(greyShoe)).toBe("any");
+      const { groups } = generateOutfitGroups(wardrobe, palettes);
+      expect(groups).toHaveLength(1);
+      expect(groups[0].palettes[0].palette.id).toBe(343);
+      // The same grey on a top still narrows the palettes.
+      expect(paletteSetFor(createTestGarment("t", "SWEATER", ["#716c63"]))).not.toBe("any");
+      // A coloured shoe is not a wildcard.
+      expect(paletteSetFor(createTestGarment("b", "SHOES", ["#5e2b24"]))).not.toBe("any");
     });
 
     it("lets an all-neutral outfit be a group, cited on a palette that has black", () => {

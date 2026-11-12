@@ -1,7 +1,7 @@
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 import type { PaletteMatch, SanzoPalette, SavedOutfit } from "./types";
 import { matchPieces, matchPiecesOn, paletteSetFor as enginePaletteSetFor } from "./engine";
-import { OKLCH_DISTANCE_THRESHOLD } from "./color-matching";
+import { VOCABULARY_THRESHOLD } from "./color-matching";
 
 // Every tap rescores every option, and snapping a colour walks the whole
 // vocabulary: a piece's palettes are read once per colour set, not once
@@ -14,7 +14,7 @@ import { OKLCH_DISTANCE_THRESHOLD } from "./color-matching";
 const setCache = new Map<string, Set<number> | "any" | null>();
 function paletteSetFor(g: GarmentWithColors): Set<number> | "any" | null {
   const key = `${g.id}:${g.colors.map((c) => c.hex).join(",")}`;
-  if (!setCache.has(key)) setCache.set(key, enginePaletteSetFor(g, OKLCH_DISTANCE_THRESHOLD));
+  if (!setCache.has(key)) setCache.set(key, enginePaletteSetFor(g, VOCABULARY_THRESHOLD));
   return setCache.get(key)!;
 }
 

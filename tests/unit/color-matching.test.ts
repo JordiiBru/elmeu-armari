@@ -1,11 +1,12 @@
 import { describe, it, expect } from "vitest";
 import {
+  ciede2000,
   greyness,
   hexToOklch,
   oklchDistance,
   perceptualDistance,
   GREY_CHROMA,
-  OKLCH_DISTANCE_THRESHOLD,
+  VOCABULARY_THRESHOLD,
 } from "@/lib/outfits/color-matching";
 import { anchorFor } from "@/lib/outfits/engine";
 import { namedColors, palettes } from "@/lib/colors";
@@ -69,15 +70,62 @@ describe("color-matching", () => {
     it("gives a grey slack in lightness towards a grey-ramp rung, faded by its chroma", () => {
       const charcoal = "#5d5d5f";
       const black = "#000000";
+      const rung = { darker: 0, lighter: 0.4 };
       const plain = perceptualDistance(charcoal, black);
-      const slack = perceptualDistance(charcoal, black, 0.4);
+      const slack = perceptualDistance(charcoal, black, rung);
       expect(slack).toBeLessThan(plain);
-      expect(slack).toBeLessThan(OKLCH_DISTANCE_THRESHOLD);
+      expect(slack).toBeLessThan(VOCABULARY_THRESHOLD);
       // A brown is not grey, so it gets none of it: the slack is faded
-      // by the chroma of the piece and it stays far from Black.
-      expect(perceptualDistance("#4e2a09", black, 0.4)).toBeGreaterThan(
-        OKLCH_DISTANCE_THRESHOLD * 2,
+      // by the chroma of the piece and it stays well past the vocabulary
+      // threshold from Black (25.6; CIEDE2000 keeps dark colours closer
+      // together than the OKLCH metric did, hence 1.5 and not 2).
+      expect(perceptualDistance("#4e2a09", black, rung)).toBeGreaterThan(
+        VOCABULARY_THRESHOLD * 1.5,
       );
+    });
+
+    it("gives the slack only on the side the rung stretches to", () => {
+      // Plumbeous reaches down to the dark greys Sanzo Wada lacks, not up
+      // to the light greys that have rungs of their own.
+      const plumbeous = "#72737c";
+      const rung = { darker: 0.15, lighter: 0 };
+      const darker = "#55555a";
+      const lighter = "#909096";
+      expect(perceptualDistance(darker, plumbeous, rung)).toBeLessThan(
+        perceptualDistance(darker, plumbeous, { darker: 0, lighter: 0 }),
+      );
+      expect(perceptualDistance(lighter, plumbeous, rung)).toBeCloseTo(
+        perceptualDistance(lighter, plumbeous, { darker: 0, lighter: 0 }),
+        8,
+      );
+    });
+  });
+
+  describe("ciede2000", () => {
+    // Test pairs and expected differences from Sharma, Wu and Dalal (2005),
+    // "The CIEDE2000 color-difference formula: implementation notes,
+    // supplementary test data, and mathematical observations", table 1.
+    // Pairs 9 to 13 sit on the formula's hue-mean discontinuities.
+    const cases: [number, [number, number, number], [number, number, number], number][] = [
+      [1, [50, 2.6772, -79.7751], [50, 0, -82.7485], 2.0425],
+      [2, [50, 3.1571, -77.2803], [50, 0, -82.7485], 2.8615],
+      [3, [50, 2.8361, -74.02], [50, 0, -82.7485], 3.4412],
+      [7, [50, 0, 0], [50, -1, 2], 2.3669],
+      [9, [50, 2.49, -0.001], [50, -2.49, 0.0009], 7.1792],
+      [10, [50, 2.49, -0.001], [50, -2.49, 0.001], 7.1792],
+      [11, [50, 2.49, -0.001], [50, -2.49, 0.0011], 7.2195],
+      [12, [50, 2.49, -0.001], [50, -2.49, 0.0012], 7.2195],
+      [13, [50, -0.001, 2.49], [50, 0.0009, -2.49], 4.8045],
+      [17, [50, 2.5, 0], [73, 25, -18], 27.1492],
+      [18, [50, 2.5, 0], [61, -5, 29], 22.8977],
+      [19, [50, 2.5, 0], [56, -27, -3], 31.903],
+      [20, [50, 2.5, 0], [58, 24, 15], 19.4535],
+      [25, [60.2574, -34.0099, 36.2677], [60.4626, -34.1751, 39.4387], 1.2644],
+      [34, [22.7233, 20.0904, -46.694], [23.0331, 14.973, -42.5619], 2.0373],
+    ];
+    it.each(cases)("matches Sharma et al. pair %i", (_, a, b, expected) => {
+      expect(ciede2000(a, b)).toBeCloseTo(expected, 4);
+      expect(ciede2000(b, a)).toBeCloseTo(expected, 4);
     });
   });
 
@@ -92,7 +140,7 @@ describe("color-matching", () => {
       // (the oklchDistance function handles this internally)
       const distance = oklchDistance(red1, red2);
       expect(distance).toBeGreaterThan(0);
-      expect(distance).toBeLessThan(OKLCH_DISTANCE_THRESHOLD);
+      expect(distance).toBeLessThan(VOCABULARY_THRESHOLD);
     });
 
     it("returns small distance for very similar colors", () => {
@@ -167,7 +215,7 @@ describe("color-matching", () => {
 
   describe("against the anchors and the catalogue", () => {
     it("two greys stay close", () => {
-      expect(perceptualDistance("#808080", "#909090")).toBeLessThan(OKLCH_DISTANCE_THRESHOLD);
+      expect(perceptualDistance("#808080", "#909090")).toBeLessThan(VOCABULARY_THRESHOLD);
     });
 
     it("grey vs saturated: pushed above the raw OKLCH distance", () => {
@@ -225,11 +273,11 @@ describe("color-matching", () => {
       }
     });
 
-    it("Black (#000000) is within OKLCH_DISTANCE_THRESHOLD of itself", () => {
+    it("Black (#000000) is within VOCABULARY_THRESHOLD of itself", () => {
       // This is trivially true but validates that the threshold constant
       // is sane (> 0) and the distance fn works end-to-end.
       expect(oklchDistance("#000000", "#000000")).toBeLessThan(
-        OKLCH_DISTANCE_THRESHOLD,
+        VOCABULARY_THRESHOLD,
       );
     });
   });
