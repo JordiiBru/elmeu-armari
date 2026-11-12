@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { generateOutfitGroups, generateOutfitGroupsForGarment, candidatesFor } from "@/lib/outfits/engine";
+import {
+  generateOutfitGroups,
+  generateOutfitGroupsForGarment,
+  candidatesFor,
+  paletteSetFor,
+} from "@/lib/outfits/engine";
 import { MEMBERSHIP_THRESHOLD, VOCABULARY_THRESHOLD } from "@/lib/outfits/color-matching";
 import { ANCHOR_CASES } from "@/lib/outfits/anchor-reference";
 import { palettes } from "@/lib/colors";
@@ -487,6 +492,27 @@ describe("engine", () => {
         createTestGarment("sh", "SHOES", [OLIVE]),
       ];
       expect(generateOutfitGroups(wardrobe, palettes).groups).toHaveLength(0);
+    });
+
+    it("treats a grey shoe as a wildcard, but not a grey top", () => {
+      // The dev wardrobe case from #220: this blue sweater and these
+      // khaki-brown chinos share one palette (343), and no shoe the owner
+      // has is in it. The grey sneaker anchors to Plumbeous, a grey rung,
+      // so it goes with them the way a black shoe would.
+      const greyShoe = createTestGarment("sh", "SHOES", ["#716c63"]);
+      const wardrobe = [
+        createTestGarment("s", "SWEATER", ["#386585"]),
+        createTestGarment("p", "PANTS", ["#5d5246"]),
+        greyShoe,
+      ];
+      expect(paletteSetFor(greyShoe)).toBe("any");
+      const { groups } = generateOutfitGroups(wardrobe, palettes);
+      expect(groups).toHaveLength(1);
+      expect(groups[0].palettes[0].palette.id).toBe(343);
+      // The same grey on a top still narrows the palettes.
+      expect(paletteSetFor(createTestGarment("t", "SWEATER", ["#716c63"]))).not.toBe("any");
+      // A coloured shoe is not a wildcard.
+      expect(paletteSetFor(createTestGarment("b", "SHOES", ["#5e2b24"]))).not.toBe("any");
     });
 
     it("lets an all-neutral outfit be a group, cited on a palette that has black", () => {

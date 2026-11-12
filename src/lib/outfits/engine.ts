@@ -90,6 +90,17 @@ const MIN_DISTINCT_PALETTE_COLORS = 2;
 // anchor to one of these is a wildcard in the palette intersection. This was
 // a shoe-only rule; a white sweater with black trousers matched nothing.
 const NEUTRAL_SLUGS = new Set(["black", "white"]);
+
+// A grey shoe goes with everything too, the way a black or white one does:
+// it is never what a look is built around. Only shoes: a grey top or pair of
+// trousers is a real part of the look and keeps narrowing the palettes (15
+// of the 36 tops and trousers in the dev wardrobe are grey). Without this,
+// 20 top and trouser pairs on the dev wardrobe shared a palette but had no
+// shoe that fitted it, so the builder could never save them (#220).
+function isWildcard(g: GarmentWithColors, snaps: Snap[]): boolean {
+  if (snaps.every((s) => NEUTRAL_SLUGS.has(s.best.canonical.slug))) return true;
+  return g.category === "SHOES" && snaps.every((s) => GREY_RUNGS.has(s.best.canonical.slug));
+}
 const ALL_PALETTE_IDS: Set<number> = new Set(namedColors.flatMap((c) => c.combinations));
 
 // What a colour with no anchor inside a palette adds to that palette's
@@ -148,7 +159,8 @@ interface Ctx {
   snaps: Snap[];
   paletteIds: Set<number>;
   totalDistance: number;
-  /** Every colour of the piece anchors to Black or White: see `NEUTRAL_SLUGS`. */
+  /** A wildcard: every colour anchors to Black or White, or the piece is a
+   * shoe whose colours all anchor to a grey rung. See `isWildcard`. */
   neutral: boolean;
 }
 
@@ -254,12 +266,12 @@ function buildContext(
     }
     return union;
   });
-  // A black or white piece is a wildcard: it lives in every palette, so it
+  // A wildcard (black or white, or a grey shoe) lives in every palette, so it
   // never narrows the ones an outfit can be cited on. Its own colours are
   // still anchored where the palette has them (and cost a penalty where it
   // does not, see `paletteMatchFor`), which ranks a palette that really
-  // contains black or white above one that merely tolerates it.
-  const neutral = snaps.every((s) => NEUTRAL_SLUGS.has(s.best.canonical.slug));
+  // contains the wildcard's colour above one that merely tolerates it.
+  const neutral = isWildcard(g, snaps);
   const paletteIds = neutral ? ALL_PALETTE_IDS : intersectSets(perColour);
   if (paletteIds.size === 0) return null;
 
@@ -328,8 +340,8 @@ function paletteMatchFor(
       if (anchor) {
         totalDistance += anchor.distance;
       } else {
-        // Reachable through the black-or-white shoe exception, which rides
-        // along in a palette that has no black or white. It used to add
+        // Reachable through a wildcard piece (see `isWildcard`), which
+        // rides along in a palette that lacks its colour. It used to add
         // nothing, so an incomplete match scored better than a complete
         // one; it now pays a fixed price no anchored colour can undercut.
         totalDistance += UNANCHORED_PENALTY;
