@@ -392,7 +392,7 @@ export function OutfitStudio({
             size="sm"
             onClick={() => setOpenOutfitId(existing.id)}
             aria-label={t("open", { number: number(existing) })}
-            className="justify-center tabular-nums sm:min-w-[9.5rem]"
+            className="justify-center tabular-nums max-sm:h-8 max-sm:px-2 sm:min-w-[9.5rem]"
           >
             n{number(existing)}
             <Icon name="arrow-right" size={12} className="ml-2" />
@@ -405,7 +405,7 @@ export function OutfitStudio({
             disabled={pending}
             loading={pending}
             loadingText={t("saving")}
-            className="justify-center sm:min-w-[9.5rem]"
+            className="justify-center max-sm:h-8 max-sm:px-2 sm:min-w-[9.5rem]"
           >
             {t("save")}
           </Button>
@@ -416,7 +416,7 @@ export function OutfitStudio({
           variant="secondary"
           onClick={clear}
           disabled={pieces.length === 0 || pending}
-          className="justify-center sm:min-w-[7.5rem]"
+          className="justify-center max-sm:h-8 max-sm:px-2 sm:min-w-[7.5rem]"
         >
           {t("clear")}
         </Button>
@@ -425,11 +425,13 @@ export function OutfitStudio({
   );
 
   const stage = (
-    <div className="flex min-w-0 items-stretch gap-4 sm:gap-8 lg:flex-col lg:gap-5">
+    <div className="flex min-w-0 items-stretch gap-3 sm:gap-8 lg:flex-col lg:gap-5">
       {/* Sized from the screen's height as well as its width: the stage
           stays pinned while the pieces scroll under it, so it must leave
-          most of the screen to them. Square boxes, for the same reason. */}
-      <div className="w-[max(46%,9.75rem)] max-w-[15rem] flex-shrink-0 sm:w-[clamp(13rem,30vh,20rem)] sm:max-w-none lg:w-full">
+          most of the screen to them. Square boxes, for the same reason.
+          On a phone the boxes take most of the row: they are what you
+          tap and look at, the palette beside them only needs a strip. */}
+      <div className="w-[clamp(9.75rem,min(58%,27svh),15rem)] flex-shrink-0 sm:w-[clamp(13rem,30vh,20rem)] lg:w-full">
         <Figure picks={picks} active={slot} onSlot={changeSlot} label={slotLabel} prompt={(s) => t(`prompts.${s}`)} />
       </div>
       <div data-stage-side className="flex min-w-0 flex-1 flex-col gap-2 sm:gap-4 lg:flex-none">
@@ -458,7 +460,7 @@ export function OutfitStudio({
 
   return (
     <Stack gap={9} className="md:gap-16">
-      <Stack gap={6} className="md:gap-8">
+      <Stack gap={3} className="sm:gap-8">
         <div className="flex items-center gap-6">
           <FilterToggle on={seasonOnly} onToggle={() => setSeasonOnly((v) => !v)} label={tOutfits("seasonOnly")} />
           <FilterToggle on={cleanOnly} onToggle={() => setCleanOnly((v) => !v)} label={tOutfits("cleanOnly")} />
@@ -489,6 +491,11 @@ export function OutfitStudio({
             {stage}
             <div className="mt-3 sm:mt-5 lg:hidden">
               <ViewTabs active={view} onView={changeView} label={viewLabel} ariaLabel={t("viewsAria")} />
+              {/* Pinned with the rest: at the foot of a long category the
+                  next one is still one tap away. */}
+              {view === "BUILD" && (
+                <SlotTabs active={slot} picks={picks} onSlot={changeSlot} label={slotLabel} ariaLabel={t("slotsAria")} />
+              )}
             </div>
           </div>
 
@@ -511,12 +518,6 @@ export function OutfitStudio({
             >
               {view === "BUILD" && (
                 <div key="build">
-                  {/* On a phone the four boxes above already switch slot;
-                      the tabs are here too, at the top of the pieces, for
-                      whoever reads the list before the boxes. */}
-                  <div className="mb-5 -mt-1 lg:hidden">
-                    <SlotTabs active={slot} picks={picks} onSlot={changeSlot} label={slotLabel} ariaLabel={t("slotsAria")} />
-                  </div>
                 {shown.length === 0 ? (
                   <Text italic tone="secondary" className="font-serif py-8">
                     {t("noOptions")}
@@ -775,7 +776,7 @@ function PalettePanel({
   const alternatives = match ? matches.filter((m) => m.palette.id !== match.palette.id) : [];
   return (
     <div className="flex flex-1 flex-col gap-2 sm:gap-4">
-      <div className="flex h-8 w-full items-end gap-1 sm:h-14" title={match?.palette.nombre}>
+      <div className="flex h-6 w-full items-end gap-1 sm:h-14" title={match?.palette.nombre}>
         {match
           ? match.palette.colores.map((hex, i) => (
               <span
