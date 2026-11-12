@@ -14,7 +14,7 @@ import {
   type Picks,
 } from "@/lib/outfits/builder";
 import { palettes } from "@/lib/colors";
-import { OKLCH_DISTANCE_THRESHOLD } from "@/lib/outfits/color-matching";
+import { VOCABULARY_THRESHOLD } from "@/lib/outfits/color-matching";
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
 import type { SavedOutfit } from "@/lib/outfits/types";
 
@@ -131,7 +131,7 @@ describe("builder palettes", () => {
     const own = scored.find((s) => s.garment.id === "shirt")!;
     expect(own.fits).toBe(true);
     // Its count is the palettes the trousers leave it, not shirt ∩ shirt.
-    const loose = (x: GarmentWithColors) => paletteSetFor(x, OKLCH_DISTANCE_THRESHOLD) as Set<number>;
+    const loose = (x: GarmentWithColors) => paletteSetFor(x, VOCABULARY_THRESHOLD) as Set<number>;
     const expected = [...loose(shirt)].filter((id) => loose(pants).has(id)).length;
     expect(own.palettes).toBe(expected);
   });

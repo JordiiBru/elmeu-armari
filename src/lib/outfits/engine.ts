@@ -5,29 +5,33 @@ import { namedColors } from "@/lib/colors";
 import type { NamedColor } from "@/lib/colors";
 import {
   perceptualDistance,
-  OKLCH_DISTANCE_THRESHOLD,
-  OKLCH_TIGHT_MATCH_THRESHOLD,
+  VOCABULARY_THRESHOLD,
+  TIGHT_MATCH_THRESHOLD,
   MEMBERSHIP_THRESHOLD,
   MAX_EXTRA_PALETTES,
+  type RungSlack,
 } from "./color-matching";
 
-// Sanzo Wada has no dark or mid grey: Black, White and three light greys
-// tinted green or cyan (C 0.03 to 0.04) are all there is. These are the
-// rungs of the grey ramp, and the number is how far, in OKLab L, a grey
-// piece may sit from the rung and still read as it. A charcoal shirt is
-// black to anyone dressing, hence 0.4 for Black; the light greys stretch
-// less; White barely, because a light grey has a real grey to go to.
-// Fawn (a pink), Plumbeous and the deep slates are not rungs: a grey earns
-// no slack towards them. The published Plumbeous (#72737c) is itself close
-// to grey, so a mid grey reaches it on plain distance without slack.
-// Keyed by slug, not hex, so new catalogue hex values cannot silently drop
-// the slack.
-const GREY_RUNGS = new Map<string, number>([
-  ["black", 0.4],
-  ["white", 0.05],
-  ["warm-gray", 0.15],
-  ["neutral-gray", 0.15],
-  ["mineral-gray", 0.15],
+// The rungs of the grey ramp: Black, White, the three light Sanzo greys
+// (C 0.008 to 0.02) and Plumbeous, which the published data makes a lead
+// grey (#72737c, C 0.014). A piece that anchors to a rung reads as grey
+// (`isGreyColour`), and the slack says how far, in OKLab L, a grey piece may
+// sit from the rung on each side and still read as it (`RungSlack`). The
+// ramp's one gap is between Black (L 0) and Plumbeous (L 0.56): a charcoal
+// stretches up to Black, a dark grey down to Plumbeous. The light greys and
+// White sit 0.04 to 0.18 apart and need no slack: plain distance already
+// finds the nearest. Plumbeous does not stretch upwards, or it would pull
+// light greys away from Warm Gray. Fawn (a pink) and the deep slates are not
+// rungs. Keyed by slug, not hex, so new catalogue hex values cannot silently
+// drop the slack.
+const NO_SLACK: RungSlack = { darker: 0, lighter: 0 };
+const GREY_RUNGS = new Map<string, RungSlack>([
+  ["black", { darker: 0, lighter: 0.25 }],
+  ["deep-violet-plumbeous", { darker: 0.15, lighter: 0 }],
+  ["white", NO_SLACK],
+  ["warm-gray", NO_SLACK],
+  ["neutral-gray", NO_SLACK],
+  ["mineral-gray", NO_SLACK],
 ]);
 
 /**
@@ -43,7 +47,7 @@ const GREY_RUNGS = new Map<string, number>([
  *
  *   1. Snap every garment colour to its nearest canonical, with the one
  *      continuous `perceptualDistance` from color-matching.ts. Every
- *      canonical within OKLCH_DISTANCE_THRESHOLD is a candidate; a
+ *      canonical within VOCABULARY_THRESHOLD is a candidate; a
  *      colour with none takes the garment out of the vocabulary.
  *   2. A garment "lives in" the intersection of the `combinations`
  *      sets of its snapped canonicals — the palettes that contain
@@ -92,7 +96,7 @@ const ALL_PALETTE_IDS: Set<number> = new Set(namedColors.flatMap((c) => c.combin
 // score. An anchored colour is always closer than the vocabulary threshold
 // (that is what makes it a candidate), so this can never be undercut: an
 // unanchored piece never scores better than an anchored one.
-const UNANCHORED_PENALTY = OKLCH_DISTANCE_THRESHOLD;
+const UNANCHORED_PENALTY = VOCABULARY_THRESHOLD;
 
 // Order in which garments should be laid out in a rendered outfit.
 const CATEGORY_LAYOUT_ORDER = ["SHIRT", "SWEATER", "PANTS", "SHOES"] as const;
@@ -148,6 +152,15 @@ interface Ctx {
   neutral: boolean;
 }
 
+/**
+ * The distance the snap ranks a canonical by: `perceptualDistance` with the
+ * canonical's grey-ramp slack when it is a rung. Exported so tests can read
+ * the same number the engine compares.
+ */
+export function snapDistance(hex: string, canonical: NamedColor): number {
+  return perceptualDistance(hex, canonical.hex, GREY_RUNGS.get(canonical.slug));
+}
+
 function snapColour(hex: string, membership: number = MEMBERSHIP_THRESHOLD): Snap | null {
   // One measure for every colour, no branches by chroma: a piece the
   // engine cannot place is one that sits beyond the threshold from
@@ -156,8 +169,8 @@ function snapColour(hex: string, membership: number = MEMBERSHIP_THRESHOLD): Sna
   // the nearest stays as the display anchor.
   const found: Candidate[] = [];
   for (const canonical of namedColors) {
-    const distance = perceptualDistance(hex, canonical.hex, GREY_RUNGS.get(canonical.slug));
-    if (distance < OKLCH_DISTANCE_THRESHOLD) found.push({ canonical, distance });
+    const distance = snapDistance(hex, canonical);
+    if (distance < VOCABULARY_THRESHOLD) found.push({ canonical, distance });
   }
   if (found.length === 0) return null;
   found.sort((a, b) => a.distance - b.distance);
@@ -438,7 +451,7 @@ function refinePalettes(
   if (!primary) return matches;
   const tightExtras = rest
     .filter((pm) =>
-      pm.colorAssignments.every((a) => a.distance < OKLCH_TIGHT_MATCH_THRESHOLD),
+      pm.colorAssignments.every((a) => a.distance < TIGHT_MATCH_THRESHOLD),
     )
     .slice(0, MAX_EXTRA_PALETTES);
   return [primary, ...tightExtras];
@@ -539,7 +552,7 @@ function generateTiered(
   if (strict.length >= LOOSE_FALLBACK_BELOW) return strict.slice(0, MAX_GROUPS);
   const seen = new Set(strict.map(groupKey));
   const loose = rankGroups(
-    collect(OKLCH_DISTANCE_THRESHOLD).filter((g) => !seen.has(groupKey(g))),
+    collect(VOCABULARY_THRESHOLD).filter((g) => !seen.has(groupKey(g))),
     sweaterInSeason,
     shortsInSeason,
     anchorId,
@@ -612,7 +625,7 @@ export function matchPieces(garments: GarmentWithColors[], palettes: SanzoPalett
     return refinePalettes([...common], ctxs, palettes);
   };
   const strict = at(MEMBERSHIP_THRESHOLD);
-  return strict.length > 0 ? strict : at(OKLCH_DISTANCE_THRESHOLD);
+  return strict.length > 0 ? strict : at(VOCABULARY_THRESHOLD);
 }
 
 /**
@@ -630,7 +643,7 @@ export function matchPiecesOn(
   const ctxs: Ctx[] = [];
   for (const g of garments) {
     if (g.colors.length === 0) continue;
-    const ctx = buildContext(g, OKLCH_DISTANCE_THRESHOLD, true);
+    const ctx = buildContext(g, VOCABULARY_THRESHOLD, true);
     if (!ctx || !ctx.paletteIds.has(paletteId)) return null;
     ctxs.push(ctx);
   }

@@ -1,7 +1,7 @@
 import type { GarmentWithColors } from "@/lib/prendas/types";
 import type { SanzoPalette } from "./types";
 import { candidatesFor, isGreyColour } from "./engine";
-import { OKLCH_TIGHT_MATCH_THRESHOLD, perceptualDistance } from "./color-matching";
+import { TIGHT_MATCH_THRESHOLD, perceptualDistance } from "./color-matching";
 
 export interface AccessorySuggestion {
   garment: GarmentWithColors;
@@ -76,7 +76,7 @@ export function suggestAccessories(
           bestIndex = i;
         }
       });
-      if (best >= OKLCH_TIGHT_MATCH_THRESHOLD) {
+      if (best >= TIGHT_MATCH_THRESHOLD) {
         matches = false;
         break;
       }
