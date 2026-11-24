@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import type { Category, GarmentWithColors } from "@/lib/prendas/types";
-import type { OutfitGroup, SanzoPalette } from "@/lib/outfits/types";
+import type { SanzoPalette } from "@/lib/outfits/types";
 import { anchorFor } from "@/lib/outfits/engine";
 import { suggestColours } from "@/lib/colors/from-photo";
 import {
@@ -14,13 +14,14 @@ import {
   CANDIDATE_ID,
   SHOPPING_CATEGORIES,
   type Assessment,
+  type Example,
   type ShoppingCategory,
   type WardrobeReach,
 } from "@/lib/outfits/shopping";
 import { ColourStrip } from "./ColourStrip";
 import { PieceThumb } from "./PieceThumb";
 import { pieceLabel } from "./OutfitTile";
-import { Heading, SegmentedControl, Stack, Text, TextButton } from "@/components/ui";
+import { Button, Heading, Icon, SegmentedControl, Stack, Text, TextButton } from "@/components/ui";
 
 type Mode = "suggest" | "check";
 
@@ -53,11 +54,24 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function PaletteStrip({ palette, className = "" }: { palette: SanzoPalette; className?: string }) {
+/** A palette as a band of flat colour, thick enough to read as a printed
+ * swatch, with a hairline under the colour the new piece is worn as. */
+function PaletteStrip({
+  palette,
+  mark,
+  className = "",
+}: {
+  palette: SanzoPalette;
+  mark?: number | null;
+  className?: string;
+}) {
   return (
-    <div aria-hidden className={`flex overflow-hidden ${className}`}>
+    <div aria-hidden className={`flex ${className}`}>
       {palette.colores.map((hex, i) => (
-        <span key={i} className="flex-1" style={{ backgroundColor: hex }} />
+        <span key={i} className="flex flex-1 flex-col gap-1">
+          <span className="block h-4" style={{ backgroundColor: hex }} />
+          <span className={`block h-0.5 ${i === mark ? "bg-text-primary" : ""}`} />
+        </span>
       ))}
     </div>
   );
@@ -105,8 +119,13 @@ function Stats({ a, className = "" }: { a: Assessment; className?: string }) {
 function Recommendation({ a, n, onLook }: { a: Assessment; n: number; onLook: () => void }) {
   const t = useTranslations("compra");
   return (
-    <li className="flex min-w-0 flex-col gap-4 border-t border-border-strong pt-5">
-      <div className="flex items-center gap-4">
+    // The section's own rule already sits above the first row.
+    <li className="flex min-w-0 flex-col gap-4 border-t border-border-strong pt-5 first:border-t-0 first:pt-0 md:nth-2:border-t-0 md:nth-2:pt-0">
+      <button
+        type="button"
+        onClick={onLook}
+        className="flex items-center gap-4 text-left outline-none focus-visible:ring-1 focus-visible:ring-focus-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+      >
         <span
           aria-hidden
           className="block h-14 w-14 flex-shrink-0 border border-border"
@@ -120,41 +139,41 @@ function Recommendation({ a, n, onLook }: { a: Assessment; n: number; onLook: ()
             {a.name ?? a.hex.toUpperCase()}
           </Text>
         </Stack>
-      </div>
+      </button>
       <Stats a={a} />
-      {a.newPalettes.length > 0 && (
-        <Stack gap={1}>
-          {a.newPalettes.slice(0, 3).map((p) => (
-            <PaletteStrip key={p.id} palette={p} className="h-2 w-full" />
-          ))}
-        </Stack>
-      )}
+      {/* A preview of the detail: its first three looks, by palette, and the
+          coloured pieces they are built on. */}
+      <Stack gap={2}>
+        {a.examples.slice(0, 3).map((ex) => (
+          <PaletteStrip key={ex.palette.id} palette={ex.palette} mark={ex.candidateIndex} className="w-full" />
+        ))}
+      </Stack>
       <ul className="grid grid-cols-6 gap-2">
-        {a.partners.slice(0, 6).map((g) => (
+        {a.featured.slice(0, 6).map((g) => (
           <li key={g.id} className="min-w-0">
             <Thumb garment={g} />
           </li>
         ))}
       </ul>
-      <TextButton type="button" onClick={onLook} className="min-h-11 self-start">
+      <TextButton type="button" onClick={onLook} className="min-h-11 items-center gap-2 self-end">
         {t("suggest.look")}
+        <Icon name="arrow-right" size={14} />
       </TextButton>
     </li>
   );
 }
 
-function OutfitRow({ group, hex, fresh }: { group: OutfitGroup; hex: string; fresh: boolean }) {
+function OutfitRow({ example, hex }: { example: Example; hex: string }) {
   const t = useTranslations("compra");
-  const palette = group.palettes[0].palette;
   // Head to toe, the new piece in its own place among them.
-  const pieces = [...group.garments].sort(
+  const pieces = [...example.group.garments].sort(
     (a, b) => BODY_ORDER.indexOf(a.category) - BODY_ORDER.indexOf(b.category),
   );
   return (
     <li className="flex min-w-0 flex-col gap-3">
-      <div className="flex items-center gap-4">
-        <PaletteStrip palette={palette} className="h-2 w-full max-w-48" />
-        {fresh && (
+      <div className="flex items-start gap-4">
+        <PaletteStrip palette={example.palette} mark={example.candidateIndex} className="w-full max-w-64" />
+        {example.fresh && (
           <Text variant="caption" as="span" className="flex-shrink-0">
             {t("newBadge")}
           </Text>
@@ -177,7 +196,6 @@ function OutfitRow({ group, hex, fresh }: { group: OutfitGroup; hex: string; fre
 
 function Verdict({ a }: { a: Assessment }) {
   const t = useTranslations("compra");
-  const fresh = new Set(a.newPalettes.map((p) => p.id));
   return (
     <Stack gap={7}>
       <Stack as="header" gap={3} align="center" className="border-y border-border-strong py-10 text-center">
@@ -207,19 +225,14 @@ function Verdict({ a }: { a: Assessment }) {
         </Stack>
       )}
 
-      {a.outfits.length > 0 && (
+      {a.examples.length > 0 && (
         <Stack gap={3}>
           <Text variant="caption" tone="secondary" as="p">
             {t("outfits")}
           </Text>
           <ol className="flex flex-col gap-8">
-            {a.outfits.map((g) => (
-              <OutfitRow
-                key={g.garments.map((x) => x.id).join("+")}
-                group={g}
-                hex={a.hex}
-                fresh={fresh.has(g.palettes[0].palette.id)}
-              />
+            {a.examples.map((ex) => (
+              <OutfitRow key={ex.palette.id} example={ex} hex={a.hex} />
             ))}
           </ol>
         </Stack>
@@ -443,9 +456,9 @@ export function ShoppingAdvisor({ garments }: { garments: GarmentWithColors[] })
                   ))}
                 </ol>
                 {shown < list.length && (
-                  <TextButton type="button" onClick={() => setShown((s) => s + PAGE)} className="min-h-11 self-start">
+                  <Button type="button" variant="secondary" onClick={() => setShown((x) => x + PAGE)} className="min-w-48 self-center">
                     {t("suggest.more")}
-                  </TextButton>
+                  </Button>
                 )}
               </>
             )}
