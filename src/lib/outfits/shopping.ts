@@ -136,10 +136,12 @@ export interface Assessment {
   palettes: SanzoPalette[];
   /** The ones no outfit of the current wardrobe reaches. */
   newPalettes: SanzoPalette[];
-  /** The pieces it would be worn with, most often first. */
+  /** The coloured pieces it would be worn with, most often first. Black
+   * and white are left out: they go with every colour, so counting them
+   * made every colour look like it matched most of the wardrobe. */
   partners: GarmentWithColors[];
-  /** How many pieces it could have been worn with (the other engine
-   * categories), so `partners` reads as a share. */
+  /** How many coloured pieces it could have been worn with (the other
+   * engine categories), so `partners` reads as a share. */
   partnerPool: number;
   /** Example looks, one per palette: new palettes first, then the ones
    * built on pieces with a colour of their own rather than on black and
@@ -186,6 +188,9 @@ function hypothetical(category: ShoppingCategory, hex: string): GarmentWithColor
 export interface WardrobeReach {
   pieces: GarmentWithColors[];
   reached: Set<number>;
+  /** Ids of the pieces that ride in every palette (black, white, a grey
+   * shoe): they fit any colour, so they say nothing about a match. */
+  wild: Set<string>;
 }
 
 export function wardrobeReach(
@@ -200,7 +205,8 @@ export function wardrobeReach(
       reached.add(group.palettes[0].palette.id);
     }
   }
-  return { pieces, reached };
+  const wild = new Set(pieces.filter(isWildcardGarment).map((g) => g.id));
+  return { pieces, reached, wild };
 }
 
 /** Same piece again: one of its colours has the same Sanzo name, or sits
@@ -256,11 +262,7 @@ export function assessColour(
   // so a look of them shows nothing), then fewest pieces and closest to
   // the book, the engine's own key. Four looks on one palette would show
   // one idea four times.
-  const wild = new Map<string, boolean>();
-  const isWild = (g: GarmentWithColors) => {
-    if (!wild.has(g.id)) wild.set(g.id, isWildcardGarment(g));
-    return wild.get(g.id)!;
-  };
+  const isWild = (g: GarmentWithColors) => reach.wild.has(g.id);
   const wildCount = (g: OutfitGroup) => g.garments.filter((x) => x.id !== CANDIDATE_ID && isWild(x)).length;
   const ordered = [...groups].sort(
     (a, b) =>
@@ -307,8 +309,10 @@ export function assessColour(
     duplicates: reach.pieces.filter((g) => g.category === category && isDuplicate(hex, name, g)),
     palettes: usedPalettes,
     newPalettes,
-    partners: byUse(partnerUse).map((u) => u.garment),
-    partnerPool: reach.pieces.filter((g) => g.category !== category).length,
+    partners: byUse(partnerUse)
+      .map((u) => u.garment)
+      .filter((g) => !isWild(g)),
+    partnerPool: reach.pieces.filter((g) => g.category !== category && !isWild(g)).length,
     examples,
     featured,
   };

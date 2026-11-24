@@ -427,7 +427,7 @@
       "purple": "violeta",
       "red": "rojo"
     },
-    "stats": "+{fresh} {fresh, plural, one {paleta} other {paletas}} · {partners}/{pool} prendas",
+    "stats": "+{fresh} {fresh, plural, one {paleta} other {paletas}}{pool, plural, =0 {} other { · {partners}/{pool} prendas de color}}",
     "suggest": {
       "title": "Colores",
       "look": "detalle",

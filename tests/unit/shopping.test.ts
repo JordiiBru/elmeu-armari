@@ -136,8 +136,18 @@ describe("assessColour", () => {
     expect(a.examples.length).toBeGreaterThan(0);
     expect(a.partners.length).toBeGreaterThan(0);
     expect(a.partners.every((p) => p.id !== CANDIDATE_ID && p.category !== "PANTS")).toBe(true);
-    // Shirts, sweaters and shoes: everything but the trousers it replaces.
-    expect(a.partnerPool).toBe(4);
+    // Coloured shirts, sweaters and shoes only: the navy sweater. The black
+    // and white tees and the white trainers go with anything.
+    expect(a.partnerPool).toBe(1);
+  });
+
+  it("never counts black or white as a match", () => {
+    for (const hex of [hexOf("Ecru"), hexOf("Mars Brown / Tobacco"), BLACK]) {
+      const a = assessColour("PANTS", hex, reach);
+      expect(a.partners.map((p) => p.id)).not.toContain("tee-black");
+      expect(a.partners.map((p) => p.id)).not.toContain("tee-white");
+      expect(a.partners.map((p) => p.id)).not.toContain("sneakers");
+    }
   });
 
   it("counts as new only the palettes the wardrobe does not reach", () => {

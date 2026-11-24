@@ -427,7 +427,7 @@
       "purple": "violeta",
       "red": "vermell"
     },
-    "stats": "+{fresh} {fresh, plural, one {paleta} other {paletes}} · {partners}/{pool} peces",
+    "stats": "+{fresh} {fresh, plural, one {paleta} other {paletes}}{pool, plural, =0 {} other { · {partners}/{pool} peces de color}}",
     "suggest": {
       "title": "Colors",
       "look": "detall",
