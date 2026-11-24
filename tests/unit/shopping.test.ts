@@ -133,11 +133,21 @@ describe("assessColour", () => {
 
   it("lists the pieces it goes with, never itself", () => {
     const a = assessColour("PANTS", hexOf("Ecru"), reach);
-    expect(a.outfits.length).toBeGreaterThan(0);
+    expect(a.examples.length).toBeGreaterThan(0);
     expect(a.partners.length).toBeGreaterThan(0);
     expect(a.partners.every((p) => p.id !== CANDIDATE_ID && p.category !== "PANTS")).toBe(true);
-    // Shirts, sweaters and shoes: everything but the trousers it replaces.
-    expect(a.partnerPool).toBe(4);
+    // Coloured shirts, sweaters and shoes only: the navy sweater. The black
+    // and white tees and the white trainers go with anything.
+    expect(a.partnerPool).toBe(1);
+  });
+
+  it("never counts black or white as a match", () => {
+    for (const hex of [hexOf("Ecru"), hexOf("Mars Brown / Tobacco"), BLACK]) {
+      const a = assessColour("PANTS", hex, reach);
+      expect(a.partners.map((p) => p.id)).not.toContain("tee-black");
+      expect(a.partners.map((p) => p.id)).not.toContain("tee-white");
+      expect(a.partners.map((p) => p.id)).not.toContain("sneakers");
+    }
   });
 
   it("counts as new only the palettes the wardrobe does not reach", () => {
@@ -146,25 +156,76 @@ describe("assessColour", () => {
     expect(a.newPalettes.length).toBeLessThanOrEqual(a.palettes.length);
   });
 
-  it("shows one example outfit per palette, new palettes first", () => {
+  it("shows one example look per palette, new palettes first", () => {
     const a = assessColour("PANTS", hexOf("Ecru"), reach);
-    const ids = a.outfits.map((o) => o.palettes[0].palette.id);
+    const ids = a.examples.map((e) => e.palette.id);
     expect(new Set(ids).size).toBe(ids.length);
-    const fresh = new Set(a.newPalettes.map((p) => p.id));
-    const flags = ids.map((id) => fresh.has(id));
+    const flags = a.examples.map((e) => e.fresh);
     expect(flags).toEqual([...flags].sort((x, y) => Number(y) - Number(x)));
+    const fresh = new Set(a.newPalettes.map((p) => p.id));
+    for (const e of a.examples) expect(e.fresh).toBe(fresh.has(e.palette.id));
+  });
+
+  it("marks the colour of the palette the new piece is worn as", () => {
+    const a = assessColour("PANTS", hexOf("Ecru"), reach);
+    for (const e of a.examples) {
+      if (e.candidateIndex === null) continue;
+      expect(e.candidateIndex).toBeGreaterThanOrEqual(0);
+      expect(e.candidateIndex).toBeLessThan(e.palette.colores.length);
+    }
+    expect(a.examples.some((e) => e.candidateIndex !== null)).toBe(true);
   });
 
   it("says none when nothing in the wardrobe can be worn with it", () => {
     const onlyTrousers = wardrobeReach([g("p", "PANTS", [BLACK])]);
     const a = assessColour("PANTS", hexOf("Ecru"), onlyTrousers);
     expect(a.verdict).toBe("none");
-    expect(a.outfits).toEqual([]);
+    expect(a.examples).toEqual([]);
+    expect(a.featured).toEqual([]);
   });
 
   it("still assesses a colour that is unusual for the category, and flags it", () => {
     const a = assessColour("PANTS", hexOf("Spectrum Red"), reach);
     expect(a.wearable).toBe(false);
+  });
+});
+
+describe("the preview of a card", () => {
+  // A coloured wardrobe beside the black and white that fits everything.
+  const coloured = [
+    ...WARDROBE,
+    g("tee-rust", "SHIRT", [hexOf("Burnt Sienna")]),
+    g("sweater-olive", "SWEATER", [hexOf("Olive Green")]),
+    g("tee-teal", "SHIRT", [hexOf("Peacock Blue")]),
+  ];
+  const reach = wardrobeReach(coloured);
+
+  it("only features pieces the example looks wear", () => {
+    for (const hex of [hexOf("Ecru"), hexOf("Mars Brown / Tobacco"), hexOf("Dark Tyrian Blue")]) {
+      const a = assessColour("PANTS", hex, reach);
+      const inLooks = new Set(a.examples.flatMap((e) => e.group.garments.map((x) => x.id)));
+      for (const p of a.featured) expect(inLooks.has(p.id)).toBe(true);
+    }
+  });
+
+  it("leaves black and white out when the looks have coloured pieces", () => {
+    const a = assessColour("PANTS", hexOf("Ecru"), reach);
+    const ids = a.featured.map((p) => p.id);
+    expect(ids).toEqual(expect.arrayContaining(["sweater-navy", "sweater-olive", "tee-teal"]));
+    expect(ids).not.toContain("tee-black");
+    expect(ids).not.toContain("tee-white");
+    expect(ids).not.toContain("sneakers");
+    // The looks themselves are built on the coloured pieces, not on black.
+    expect(a.examples.every((e) => !e.group.garments.some((x) => x.id === "tee-black"))).toBe(true);
+  });
+
+  it("falls back to black and white when nothing else goes", () => {
+    const plain = wardrobeReach([
+      g("tee-black", "SHIRT", [BLACK]),
+      g("sneakers", "SHOES", [WHITE]),
+    ]);
+    const a = assessColour("PANTS", hexOf("Ecru"), plain);
+    expect(a.featured.map((p) => p.id).sort()).toEqual(["sneakers", "tee-black"]);
   });
 });
 

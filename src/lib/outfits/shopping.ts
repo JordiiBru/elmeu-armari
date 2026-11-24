@@ -2,7 +2,7 @@ import type { GarmentWithColors } from "@/lib/prendas/types";
 import { EXTRA_CATEGORIES } from "@/lib/prendas/types";
 import { namedColors, palettes as allPalettes } from "@/lib/colors";
 import type { OutfitGroup, SanzoPalette } from "./types";
-import { allOutfitGroupsForGarment, anchorFor } from "./engine";
+import { allOutfitGroupsForGarment, anchorFor, isWildcardGarment } from "./engine";
 import { hexToOklch, MEMBERSHIP_THRESHOLD, perceptualDistance } from "./color-matching";
 
 /**
@@ -113,6 +113,16 @@ const GOOD_PARTNER_SHARE = 0.5;
 
 type Verdict = "great" | "good" | "weak" | "duplicate" | "none";
 
+/** One example look with the new piece, as the card and the detail show it. */
+export interface Example {
+  group: OutfitGroup;
+  palette: SanzoPalette;
+  /** Which colour of the palette the new piece is worn as, if any. */
+  candidateIndex: number | null;
+  /** A palette no outfit of the current wardrobe reaches. */
+  fresh: boolean;
+}
+
 export interface Assessment {
   hex: string;
   category: ShoppingCategory;
@@ -126,13 +136,21 @@ export interface Assessment {
   palettes: SanzoPalette[];
   /** The ones no outfit of the current wardrobe reaches. */
   newPalettes: SanzoPalette[];
-  /** The pieces it would be worn with, most often first. */
+  /** The coloured pieces it would be worn with, most often first. Black
+   * and white are left out: they go with every colour, so counting them
+   * made every colour look like it matched most of the wardrobe. */
   partners: GarmentWithColors[];
-  /** How many pieces it could have been worn with (the other engine
-   * categories), so `partners` reads as a share. */
+  /** How many coloured pieces it could have been worn with (the other
+   * engine categories), so `partners` reads as a share. */
   partnerPool: number;
-  /** Example outfits, new palettes first. */
-  outfits: OutfitGroup[];
+  /** Example looks, one per palette: new palettes first, then the ones
+   * built on pieces with a colour of their own rather than on black and
+   * white, which go with anything and so say nothing. */
+  examples: Example[];
+  /** The coloured pieces of those looks (black and white only when there
+   * is nothing else): a preview of the detail, never a piece the detail
+   * does not show. */
+  featured: GarmentWithColors[];
   verdict: Verdict;
 }
 
@@ -170,6 +188,9 @@ function hypothetical(category: ShoppingCategory, hex: string): GarmentWithColor
 export interface WardrobeReach {
   pieces: GarmentWithColors[];
   reached: Set<number>;
+  /** Ids of the pieces that ride in every palette (black, white, a grey
+   * shoe): they fit any colour, so they say nothing about a match. */
+  wild: Set<string>;
 }
 
 export function wardrobeReach(
@@ -184,7 +205,8 @@ export function wardrobeReach(
       reached.add(group.palettes[0].palette.id);
     }
   }
-  return { pieces, reached };
+  const wild = new Set(pieces.filter(isWildcardGarment).map((g) => g.id));
+  return { pieces, reached, wild };
 }
 
 /** Same piece again: one of its colours has the same Sanzo name, or sits
@@ -199,7 +221,7 @@ function isDuplicate(hex: string, anchor: string | null, garment: GarmentWithCol
 }
 
 function verdictFor(a: Omit<Assessment, "verdict">): Verdict {
-  if (a.outfits.length === 0) return "none";
+  if (a.examples.length === 0) return "none";
   if (a.duplicates.length > 0) return "duplicate";
   if (a.newPalettes.length >= GREAT_NEW_PALETTES) return "great";
   const share = a.partnerPool === 0 ? 0 : a.partners.length / a.partnerPool;
@@ -235,24 +257,47 @@ export function assessColour(
   const newPalettes = usedPalettes.filter((p) => !reach.reached.has(p.id));
   const fresh = new Set(newPalettes.map((p) => p.id));
 
-  // One example per palette, the new ones first, then the fewest pieces
-  // and the closest to the book (the engine's own ranking key): four
-  // outfits on the same palette show one idea four times.
-  const outfits: OutfitGroup[] = [];
-  const shown = new Set<number>();
+  // One example per palette, the new ones first, then the looks carried
+  // by coloured pieces (a black tee and white trainers fit every palette,
+  // so a look of them shows nothing), then fewest pieces and closest to
+  // the book, the engine's own key. Four looks on one palette would show
+  // one idea four times.
+  const isWild = (g: GarmentWithColors) => reach.wild.has(g.id);
+  const wildCount = (g: OutfitGroup) => g.garments.filter((x) => x.id !== CANDIDATE_ID && isWild(x)).length;
   const ordered = [...groups].sort(
     (a, b) =>
       Number(fresh.has(b.palettes[0].palette.id)) - Number(fresh.has(a.palettes[0].palette.id)) ||
+      wildCount(a) - wildCount(b) ||
       a.garments.length - b.garments.length ||
       a.bestDistance - b.bestDistance,
   );
+  const examples: Example[] = [];
+  const shown = new Set<number>();
   for (const g of ordered) {
-    const id = g.palettes[0].palette.id;
-    if (shown.has(id)) continue;
-    shown.add(id);
-    outfits.push(g);
-    if (outfits.length === MAX_EXAMPLE_OUTFITS) break;
+    const match = g.palettes[0];
+    if (shown.has(match.palette.id)) continue;
+    shown.add(match.palette.id);
+    examples.push({
+      group: g,
+      palette: match.palette,
+      candidateIndex: match.colorAssignments.find((c) => c.garmentId === CANDIDATE_ID)?.paletteColorIndex ?? null,
+      fresh: fresh.has(match.palette.id),
+    });
+    if (examples.length === MAX_EXAMPLE_OUTFITS) break;
   }
+
+  const seen = new Set<string>();
+  const inExamples: GarmentWithColors[] = [];
+  for (const ex of examples) {
+    for (const g of ex.group.garments) {
+      if (g.id === CANDIDATE_ID || seen.has(g.id)) continue;
+      seen.add(g.id);
+      inExamples.push(g);
+    }
+  }
+  // Black and white only when the looks have nothing else to show.
+  const coloured = inExamples.filter((g) => !isWild(g));
+  const featured = coloured.length > 0 ? coloured : inExamples;
 
   const name = anchorFor(hex)?.canonical.name ?? null;
   const base = {
@@ -264,9 +309,12 @@ export function assessColour(
     duplicates: reach.pieces.filter((g) => g.category === category && isDuplicate(hex, name, g)),
     palettes: usedPalettes,
     newPalettes,
-    partners: byUse(partnerUse).map((u) => u.garment),
-    partnerPool: reach.pieces.filter((g) => g.category !== category).length,
-    outfits,
+    partners: byUse(partnerUse)
+      .map((u) => u.garment)
+      .filter((g) => !isWild(g)),
+    partnerPool: reach.pieces.filter((g) => g.category !== category && !isWild(g)).length,
+    examples,
+    featured,
   };
   return { ...base, verdict: verdictFor(base) };
 }

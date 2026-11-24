@@ -214,6 +214,16 @@ export function isGreyColour(hex: string): boolean {
 }
 
 /**
+ * True when a piece rides along in every palette (black, white, a grey
+ * shoe): it goes with anything, so it never says what a look is built on.
+ */
+export function isWildcardGarment(g: GarmentWithColors): boolean {
+  const snaps = g.colors.map((c) => snapColour(c.hex));
+  if (snaps.length === 0 || snaps.some((x) => x === null)) return false;
+  return isWildcard(g, snaps as Snap[]);
+}
+
+/**
  * Every canonical a garment hex is willing to live in, nearest first.
  * These decide palette membership, so a piece that is only willing to be
  * what it looks like is a property worth testing on its own.
