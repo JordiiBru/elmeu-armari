@@ -402,6 +402,58 @@
       "laundryHere": "Colada al final del día"
     }
   },
+  "compra": {
+    "title": "¿qué me compro?",
+    "subtitle": "los colores que te faltan.",
+    "what": "Qué quieres comprar",
+    "category": {
+      "PANTS": "pantalones",
+      "SHIRT": "camisetas",
+      "SWEATER": "jerséis",
+      "SHOES": "zapatos"
+    },
+    "owned": "ya tienes {count}",
+    "modeLabel": "Modo",
+    "mode": {
+      "suggest": "recomiéndame",
+      "check": "comprueba un color"
+    },
+    "thinking": "pensando…",
+    "family": {
+      "neutral": "neutro",
+      "earth": "tierra",
+      "green": "verde",
+      "blue": "azul",
+      "purple": "violeta",
+      "red": "rojo"
+    },
+    "stats": "+{fresh} {fresh, plural, one {paleta} other {paletas}} · {partners}/{pool} prendas",
+    "suggest": {
+      "title": "Colores",
+      "look": "detalle",
+      "more": "más",
+      "empty": "Ningún color nuevo combina con lo que tienes."
+    },
+    "check": {
+      "title": "Tu color",
+      "pick": "elige un color",
+      "fromPhoto": "desde una foto",
+      "photoNone": "ningún color en la foto",
+      "usePhotoColour": "Usar {name}"
+    },
+    "verdict": {
+      "great": "Encaja muy bien",
+      "good": "Encaja",
+      "weak": "Poco nuevo",
+      "duplicate": "Ya lo tienes",
+      "none": "No encaja"
+    },
+    "unusual": "poco habitual en esta prenda",
+    "outside": "fuera del diccionario",
+    "outfits": "outfits",
+    "newBadge": "nueva",
+    "candidate": "La prenda nueva"
+  },
   "menu": {
     "label": "Menú",
     "stats": "estadísticas",
@@ -426,7 +478,8 @@
       "armari": "Armario",
       "bugaderia": "Lavandería",
       "paleta": "Paletas",
-      "maleta": "Hacer la maleta"
+      "maleta": "Hacer la maleta",
+      "compra": "¿Qué me compro?"
     }
   },
   "outfits": {
@@ -642,6 +695,13 @@
         "p2": "El tiempo sale de lo que marcas: con abrigo, frío; con jersey, mixto; sin ninguno de los dos, calor. Los accesorios que te llevas eligen la paleta del día: si un look combina con uno, gana.",
         "p3": "Con colada, la app lava cada dos días y reutiliza las prendas. Sin colada, cada prenda aguanta tantos usos como permitan los límites entre lavados, y el día dice qué falta.",
         "p4": "«Otra propuesta» cambia los looks sin añadir prendas. Si tocas algo del formulario, la lista vuelve a empezar. Si el viaje empieza hoy, las prendas sucias se quedan en casa."
+      },
+      "compra": {
+        "title": "¿qué me compro?",
+        "p1": "Antes de comprar, mira qué te aportaría la prenda.",
+        "p2": "Elige si buscas pantalones, camisetas, jerséis o zapatos. La app prueba cada color del diccionario como si ya lo tuvieras y te dice cuáles abren paletas que hoy ningún outfit tuyo puede vestir, y con cuántas de tus prendas combinaría. Los que ya tienes quedan fuera, y de los que se parecen demasiado entre sí solo sale uno.",
+        "p3": "No todos los colores valen para todo: en pantalones y zapatos solo se proponen neutros, tierras, verdes y azules apagados y rojos oscuros; en camisetas y jerséis, todo menos los más estridentes.",
+        "p4": "Si ya tienes un color en la cabeza, elígelo (o sácalo de una foto) y te decimos si encaja, por qué, y con qué outfits lo llevarías. Abrigos y complementos no están porque no entran en las combinaciones de color."
       }
     },
     "hints": {
@@ -649,7 +709,8 @@
       "armariState": "Limpia o en el cesto: mira qué prendas están en la colada.",
       "armariSeason": "Muestra solo lo que va bien para la época del año en que estás.",
       "laundry": "Limpias son las que puedes ponerte; en el cesto, las que esperan colada. Cuando la haces, márcalas como lavadas.",
-      "paleta": "Cada color aparece en varias combinaciones del libro. Tus prendas se asignan por el color más cercano, y de ahí salen los outfits."
+      "paleta": "Cada color aparece en varias combinaciones del libro. Tus prendas se asignan por el color más cercano, y de ahí salen los outfits.",
+      "compra": "Una prenda que aún no tienes, probada contra todo el armario: qué paletas nuevas abriría y con qué la llevarías."
     },
     "paletteExample": "Una combinación del diccionario, la n{id}: tres colores que el libro da por buenos juntos."
   }

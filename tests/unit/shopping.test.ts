@@ -1,0 +1,197 @@
+import { describe, it, expect } from "vitest";
+import { namedColors } from "@/lib/colors";
+import {
+  assessColour,
+  familyOf,
+  isWearableIn,
+  recommendColours,
+  wardrobeReach,
+  CANDIDATE_ID,
+} from "@/lib/outfits/shopping";
+import type { Category, GarmentWithColors } from "@/lib/prendas/types";
+
+const BLACK = "#000000";
+const WHITE = "#ffffff";
+
+function g(id: string, category: Category, hexes: string[]): GarmentWithColors {
+  return {
+    id,
+    category,
+    texture: null,
+    pattern: null,
+    fit: null,
+    subtype: null,
+    size: null,
+    length: category === "PANTS" ? "LONG" : null,
+    cropped: false,
+    notes: null,
+    image: null,
+    dirtySince: null,
+    createdAt: new Date("2026-01-01T00:00:00Z"),
+    updatedAt: new Date("2026-01-01T00:00:00Z"),
+    colors: hexes.map((hex, i) => ({ id: `${id}-c${i}`, hex })),
+    seasons: [],
+  };
+}
+
+const hexOf = (name: string) => {
+  const c = namedColors.find((n) => n.name === name);
+  if (!c) throw new Error(`no Sanzo colour ${name}`);
+  return c.hex;
+};
+
+/** A small wardrobe in the colours most people own: black, white, navy. */
+const WARDROBE = [
+  g("tee-black", "SHIRT", [BLACK]),
+  g("tee-white", "SHIRT", [WHITE]),
+  g("sweater-navy", "SWEATER", [hexOf("Dark Tyrian Blue")]),
+  g("jeans", "PANTS", [hexOf("Dark Tyrian Blue")]),
+  g("chinos-black", "PANTS", [BLACK]),
+  g("sneakers", "SHOES", [WHITE]),
+  g("coat", "OUTERWEAR", [hexOf("Ecru")]),
+  g("bag", "ACCESSORI", [hexOf("Spectrum Red")]),
+];
+
+describe("colour families", () => {
+  it.each([
+    ["Black", "neutral"],
+    ["Neutral Gray", "neutral"],
+    ["Ecru", "earth"],
+    ["Vandyke Brown", "earth"],
+    ["Olive Green", "green"],
+    ["Dark Tyrian Blue", "blue"],
+    ["Violet", "purple"],
+    ["Vandyke Red", "red"],
+    // A pale tint is not a grey, even when its chroma is low.
+    ["Glaucous Green", "green"],
+  ])("%s is %s", (name, family) => {
+    expect(familyOf(hexOf(name))).toBe(family);
+  });
+});
+
+describe("what is wearable in each category", () => {
+  // The cases a person would say out loud. Tune the families in
+  // shopping.ts against these, not by eye.
+  it.each([
+    ["Black", true],
+    ["Neutral Gray", true],
+    ["Ecru", true],
+    ["Mars Brown / Tobacco", true],
+    ["Light Brownish Olive", true],
+    ["Olive Green", true],
+    ["Dark Tyrian Blue", true],
+    ["Olympic Blue", true],
+    ["Vandyke Red", true],
+    ["Spectrum Red", false],
+    ["Orange Yellow", false],
+    ["Hermosa Pink", false],
+    ["Glaucous Green", false],
+    ["Nile Blue", false],
+    ["Cerulian Blue", false],
+    ["Violet", false],
+  ])("trousers in %s: %s", (name, wearable) => {
+    expect(isWearableIn("PANTS", hexOf(name))).toBe(wearable);
+  });
+
+  it.each([
+    ["Vandyke Brown", true],
+    ["Dull Violet Black", true],
+    ["Pale Burnt Lake", true],
+    ["Olympic Blue", false],
+    ["Pinkish Cinnamon", false],
+  ])("shoes in %s: %s", (name, wearable) => {
+    expect(isWearableIn("SHOES", hexOf(name))).toBe(wearable);
+  });
+
+  it("tops take any colour but the loudest", () => {
+    expect(isWearableIn("SHIRT", hexOf("Coral Red"))).toBe(true);
+    expect(isWearableIn("SWEATER", hexOf("Olive Buff"))).toBe(true);
+    expect(isWearableIn("SHIRT", hexOf("Spectrum Red"))).toBe(false);
+    expect(isWearableIn("SWEATER", hexOf("Yellow"))).toBe(false);
+  });
+});
+
+describe("assessColour", () => {
+  const reach = wardrobeReach(WARDROBE);
+
+  it("reads only the pieces the engine matches", () => {
+    expect(reach.pieces.map((p) => p.id)).not.toContain("coat");
+    expect(reach.pieces.map((p) => p.id)).not.toContain("bag");
+    expect(reach.reached.size).toBeGreaterThan(0);
+  });
+
+  it("calls a colour you already own in that category a duplicate", () => {
+    const a = assessColour("PANTS", BLACK, reach);
+    expect(a.verdict).toBe("duplicate");
+    expect(a.duplicates.map((d) => d.id)).toEqual(["chinos-black"]);
+  });
+
+  it("does not call it a duplicate in another category", () => {
+    const a = assessColour("SHOES", hexOf("Dark Tyrian Blue"), reach);
+    expect(a.duplicates).toEqual([]);
+  });
+
+  it("lists the pieces it goes with, never itself", () => {
+    const a = assessColour("PANTS", hexOf("Ecru"), reach);
+    expect(a.outfits.length).toBeGreaterThan(0);
+    expect(a.partners.length).toBeGreaterThan(0);
+    expect(a.partners.every((p) => p.id !== CANDIDATE_ID && p.category !== "PANTS")).toBe(true);
+    // Shirts, sweaters and shoes: everything but the trousers it replaces.
+    expect(a.partnerPool).toBe(4);
+  });
+
+  it("counts as new only the palettes the wardrobe does not reach", () => {
+    const a = assessColour("SWEATER", hexOf("Olive Green"), reach);
+    for (const p of a.newPalettes) expect(reach.reached.has(p.id)).toBe(false);
+    expect(a.newPalettes.length).toBeLessThanOrEqual(a.palettes.length);
+  });
+
+  it("shows one example outfit per palette, new palettes first", () => {
+    const a = assessColour("PANTS", hexOf("Ecru"), reach);
+    const ids = a.outfits.map((o) => o.palettes[0].palette.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    const fresh = new Set(a.newPalettes.map((p) => p.id));
+    const flags = ids.map((id) => fresh.has(id));
+    expect(flags).toEqual([...flags].sort((x, y) => Number(y) - Number(x)));
+  });
+
+  it("says none when nothing in the wardrobe can be worn with it", () => {
+    const onlyTrousers = wardrobeReach([g("p", "PANTS", [BLACK])]);
+    const a = assessColour("PANTS", hexOf("Ecru"), onlyTrousers);
+    expect(a.verdict).toBe("none");
+    expect(a.outfits).toEqual([]);
+  });
+
+  it("still assesses a colour that is unusual for the category, and flags it", () => {
+    const a = assessColour("PANTS", hexOf("Spectrum Red"), reach);
+    expect(a.wearable).toBe(false);
+  });
+});
+
+describe("recommendColours", () => {
+  const reach = wardrobeReach(WARDROBE);
+  const recs = recommendColours("PANTS", reach);
+
+  it("only suggests wearable colours you do not own yet", () => {
+    expect(recs.length).toBeGreaterThan(0);
+    for (const a of recs) {
+      expect(a.wearable).toBe(true);
+      expect(a.verdict).not.toBe("duplicate");
+      expect(a.verdict).not.toBe("none");
+    }
+  });
+
+  it("ranks by new palettes first", () => {
+    const fresh = recs.map((a) => a.newPalettes.length);
+    expect(fresh).toEqual([...fresh].sort((x, y) => y - x));
+  });
+
+  it("keeps one of each near twin", () => {
+    const names = recs.map((a) => a.name);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it("returns nothing, not an error, for an empty wardrobe", () => {
+    expect(recommendColours("SHIRT", wardrobeReach([]))).toEqual([]);
+  });
+});

@@ -402,6 +402,58 @@
       "laundryHere": "Bugada al final del dia"
     }
   },
+  "compra": {
+    "title": "què em compro?",
+    "subtitle": "els colors que et falten.",
+    "what": "Què vols comprar",
+    "category": {
+      "PANTS": "pantalons",
+      "SHIRT": "samarretes",
+      "SWEATER": "jerseis",
+      "SHOES": "sabates"
+    },
+    "owned": "ja en tens {count}",
+    "modeLabel": "Mode",
+    "mode": {
+      "suggest": "recomana'm",
+      "check": "comprova un color"
+    },
+    "thinking": "pensant…",
+    "family": {
+      "neutral": "neutre",
+      "earth": "terra",
+      "green": "verd",
+      "blue": "blau",
+      "purple": "violeta",
+      "red": "vermell"
+    },
+    "stats": "+{fresh} {fresh, plural, one {paleta} other {paletes}} · {partners}/{pool} peces",
+    "suggest": {
+      "title": "Colors",
+      "look": "detall",
+      "more": "més",
+      "empty": "Cap color nou combina amb el que tens."
+    },
+    "check": {
+      "title": "El teu color",
+      "pick": "tria un color",
+      "fromPhoto": "des d'una foto",
+      "photoNone": "cap color a la foto",
+      "usePhotoColour": "Fer servir {name}"
+    },
+    "verdict": {
+      "great": "Encaixa molt bé",
+      "good": "Encaixa",
+      "weak": "Poca cosa nova",
+      "duplicate": "Ja el tens",
+      "none": "No encaixa"
+    },
+    "unusual": "poc habitual en aquesta peça",
+    "outside": "fora del diccionari",
+    "outfits": "outfits",
+    "newBadge": "nova",
+    "candidate": "La peça nova"
+  },
   "menu": {
     "label": "Menú",
     "stats": "estadístiques",
@@ -426,7 +478,8 @@
       "armari": "Armari",
       "bugaderia": "Bugaderia",
       "paleta": "Paletes",
-      "maleta": "Fer la maleta"
+      "maleta": "Fer la maleta",
+      "compra": "Què em compro?"
     }
   },
   "outfits": {
@@ -642,6 +695,13 @@
         "p2": "El temps surt del que marques: amb abric, fred; amb jersei, mixt; sense cap dels dos, calor. Els accessoris que t'enduus trien la paleta del dia: si un look hi combina, guanya.",
         "p3": "Amb bugada, l'app renta cada dos dies i reutilitza les peces. Sense bugada, cada peça aguanta tants usos com permetin els límits entre rentats, i el dia diu què falta.",
         "p4": "«Una altra proposta» canvia els looks sense afegir peces. Si toques alguna cosa del formulari, la llista torna a començar. Si el viatge comença avui, les peces brutes es queden a casa."
+      },
+      "compra": {
+        "title": "què em compro?",
+        "p1": "Abans de comprar, mira què t'aportaria la peça.",
+        "p2": "Tria si busques pantalons, samarretes, jerseis o sabates. L'app prova cada color del diccionari com si ja el tinguessis i et diu quins obren paletes que avui cap outfit teu pot vestir, i amb quantes de les teves peces combinaria. Els que ja tens queden fora, i dels que s'assemblen massa entre ells només en surt un.",
+        "p3": "No tots els colors valen per a tot: en pantalons i sabates només es proposen neutres, terres, verds i blaus apagats i vermells foscos; en samarretes i jerseis, tot menys els més estridents.",
+        "p4": "Si ja tens un color al cap, tria'l (o treu-lo d'una foto) i et diem si encaixa, per què, i amb quins outfits el portaries. Abrics i complements no hi són perquè no entren a les combinacions de color."
       }
     },
     "hints": {
@@ -649,7 +709,8 @@
       "armariState": "Net o al cistell: mira quines peces són a la bugaderia.",
       "armariSeason": "Mostra només el que va bé per a l'època de l'any en què ets.",
       "laundry": "Netes són les que et pots posar; al cistell, les que esperen bugada. Quan la fas, marca-les com a rentades.",
-      "paleta": "Cada color surt a diverses combinacions del llibre. Les teves peces s'hi assignen pel color més proper, i d'aquí surten els outfits."
+      "paleta": "Cada color surt a diverses combinacions del llibre. Les teves peces s'hi assignen pel color més proper, i d'aquí surten els outfits.",
+      "compra": "Una peça que encara no tens, provada contra tot l'armari: quines paletes noves obriria i amb què la portaries."
     },
     "paletteExample": "Una combinació del diccionari, la n{id}: tres colors que el llibre dóna per bons junts."
   }

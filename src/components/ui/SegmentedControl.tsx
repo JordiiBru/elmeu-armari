@@ -29,6 +29,9 @@ interface Props<V extends string> {
    * flows normally per `wrap`.
    */
   grid?: boolean;
+  /** Columns of that mobile grid. Two for four options, so they sit as
+   * two even rows instead of three and an orphan. */
+  columns?: 2 | 3;
   className?: string;
 }
 
@@ -44,6 +47,7 @@ export function SegmentedControl<V extends string>({
   ariaLabel,
   wrap = true,
   grid = false,
+  columns = 3,
   className,
 }: Props<V>) {
   return (
@@ -52,7 +56,7 @@ export function SegmentedControl<V extends string>({
       aria-label={ariaLabel}
       className={[
         grid
-          ? "grid grid-cols-3 gap-x-6 gap-y-3 justify-items-start sm:inline-flex sm:flex-wrap sm:gap-y-2"
+          ? `grid ${columns === 2 ? "grid-cols-2" : "grid-cols-3"} gap-x-6 gap-y-3 justify-items-start sm:inline-flex sm:flex-wrap sm:gap-y-2`
           : ["inline-flex gap-x-6 gap-y-2", wrap ? "flex-wrap" : "flex-nowrap"].join(" "),
         className,
       ]

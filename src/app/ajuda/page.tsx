@@ -119,6 +119,15 @@ export default async function HelpPage() {
         <P>{t("sections.maleta.p3")}</P>
         <P>{t("sections.maleta.p4")}</P>
       </PageRow>
+
+      <PageRow id="compra" number="07" title={t("sections.compra.title")}>
+        <Text variant="subtitle" as="p" className="text-2xl leading-snug md:text-3xl">
+          {t("sections.compra.p1")}
+        </Text>
+        <P>{t("sections.compra.p2")}</P>
+        <P>{t("sections.compra.p3")}</P>
+        <P>{t("sections.compra.p4")}</P>
+      </PageRow>
     </PageContainer>
   );
 }
