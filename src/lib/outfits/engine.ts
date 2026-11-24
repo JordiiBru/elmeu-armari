@@ -663,6 +663,33 @@ export function matchPiecesOn(
   return paletteMatchFor(paletteId, palettes, ctxs);
 }
 
+/** Every valid outfit around one piece at one membership threshold,
+ * unranked. */
+function collectForGarment(
+  targetGarment: GarmentWithColors,
+  allGarments: GarmentWithColors[],
+  palettes: SanzoPalette[],
+  membership: number,
+): OutfitGroup[] {
+  const targetCtx = buildContext(targetGarment, membership);
+  if (!targetCtx) return [];
+
+  const candidates: Ctx[] = [];
+  for (const g of allGarments) {
+    if (g.id === targetGarment.id) continue;
+    if (g.category === targetGarment.category) continue;
+    const ctx = buildContext(g, membership);
+    if (!ctx) continue;
+    // Prune: if target + candidate share no palette, we can drop early
+    // because deeper sets can only shrink. A black or white piece never
+    // triggers it: its set is every palette.
+    const shared = intersectSets([targetCtx.paletteIds, ctx.paletteIds]);
+    if (shared.size === 0) continue;
+    candidates.push(ctx);
+  }
+  return collectGroups([targetCtx], () => candidates, palettes);
+}
+
 export function generateOutfitGroupsForGarment(
   targetGarment: GarmentWithColors,
   allGarments: GarmentWithColors[],
@@ -676,28 +703,30 @@ export function generateOutfitGroupsForGarment(
   /** Same, for groups built around shorts. */
   shortsInSeason: boolean = true,
 ): { groups: OutfitGroup[]; hasMore: boolean } {
-  const collect = (membership: number): OutfitGroup[] => {
-    const targetCtx = buildContext(targetGarment, membership);
-    if (!targetCtx) return [];
-
-    const candidates: Ctx[] = [];
-    for (const g of allGarments) {
-      if (g.id === targetGarment.id) continue;
-      if (g.category === targetGarment.category) continue;
-      const ctx = buildContext(g, membership);
-      if (!ctx) continue;
-      // Prune: if target + candidate share no palette, we can drop early
-      // because deeper sets can only shrink. A black or white piece never
-      // triggers it: its set is every palette.
-      const shared = intersectSets([targetCtx.paletteIds, ctx.paletteIds]);
-      if (shared.size === 0) continue;
-      candidates.push(ctx);
-    }
-    return collectGroups([targetCtx], () => candidates, palettes);
-  };
-
+  const collect = (membership: number) => collectForGarment(targetGarment, allGarments, palettes, membership);
   const ranked = generateTiered(collect, sweaterInSeason, shortsInSeason, targetGarment.id);
   return { groups: ranked.slice(offset, offset + limit), hasMore: ranked.length > offset + limit };
+}
+
+/**
+ * Every outfit a piece can make, with the same two tiers but no ranking
+ * and no `MAX_GROUPS` cap: for counting (which palettes a wardrobe
+ * reaches, what a piece would add), never for showing. The capped list
+ * keeps the fewest-piece looks, so the palettes only a larger look
+ * reaches fell out of it and a piece you already own read as new.
+ */
+export function allOutfitGroupsForGarment(
+  targetGarment: GarmentWithColors,
+  allGarments: GarmentWithColors[],
+  palettes: SanzoPalette[],
+): OutfitGroup[] {
+  const strict = collectForGarment(targetGarment, allGarments, palettes, MEMBERSHIP_THRESHOLD);
+  if (strict.length >= LOOSE_FALLBACK_BELOW) return strict;
+  const seen = new Set(strict.map(groupKey));
+  const loose = collectForGarment(targetGarment, allGarments, palettes, VOCABULARY_THRESHOLD).filter(
+    (g) => !seen.has(groupKey(g)),
+  );
+  return [...strict, ...loose];
 }
 
 export function generateOutfitGroups(

@@ -402,6 +402,58 @@
       "laundryHere": "Laundry at the end of the day"
     }
   },
+  "compra": {
+    "title": "what should I buy?",
+    "subtitle": "the colours you are missing.",
+    "what": "What you want to buy",
+    "category": {
+      "PANTS": "trousers",
+      "SHIRT": "t-shirts",
+      "SWEATER": "sweaters",
+      "SHOES": "shoes"
+    },
+    "owned": "you have {count}",
+    "modeLabel": "Mode",
+    "mode": {
+      "suggest": "suggest",
+      "check": "check a colour"
+    },
+    "thinking": "thinking…",
+    "family": {
+      "neutral": "neutral",
+      "earth": "earth",
+      "green": "green",
+      "blue": "blue",
+      "purple": "violet",
+      "red": "red"
+    },
+    "stats": "+{fresh} {fresh, plural, one {palette} other {palettes}} · {partners}/{pool} pieces",
+    "suggest": {
+      "title": "Colours",
+      "look": "details",
+      "more": "more",
+      "empty": "No new colour goes with what you own."
+    },
+    "check": {
+      "title": "Your colour",
+      "pick": "choose a colour",
+      "fromPhoto": "from a photo",
+      "photoNone": "no colour in the photo",
+      "usePhotoColour": "Use {name}"
+    },
+    "verdict": {
+      "great": "A great fit",
+      "good": "It fits",
+      "weak": "Little that is new",
+      "duplicate": "You have it",
+      "none": "It does not fit"
+    },
+    "unusual": "unusual for this piece",
+    "outside": "outside the dictionary",
+    "outfits": "outfits",
+    "newBadge": "new",
+    "candidate": "The new piece"
+  },
   "menu": {
     "label": "Menu",
     "stats": "statistics",
@@ -426,7 +478,8 @@
       "armari": "Wardrobe",
       "bugaderia": "Laundry",
       "paleta": "Palettes",
-      "maleta": "Pack a suitcase"
+      "maleta": "Pack a suitcase",
+      "compra": "What should I buy?"
     }
   },
   "outfits": {
@@ -642,6 +695,13 @@
         "p2": "The weather comes from what you tick: with a coat, cold; with a sweater, mixed; with neither, warm. Accessories you take choose the day's palette: a look that matches one wins.",
         "p3": "With laundry, the app washes every two days and reuses pieces. Without it, each piece lasts as many wears as the limits between washes allow, and the day says what is missing.",
         "p4": "Another proposal changes the looks without adding pieces. If you change anything in the form, the list starts again. If the trip starts today, dirty pieces stay home."
+      },
+      "compra": {
+        "title": "what should I buy?",
+        "p1": "Before buying, see what the piece would bring.",
+        "p2": "Choose whether you are after trousers, t-shirts, sweaters or shoes. The app tries every colour in the dictionary as if you already owned it and tells you which ones open palettes no outfit of yours can wear today, and how many of your pieces it would go with. The ones you already own are left out, and of colours too alike only one is shown.",
+        "p3": "Not every colour works for everything: for trousers and shoes only neutrals, earth tones, muted greens and blues and deep reds are suggested; for t-shirts and sweaters, everything except the loudest.",
+        "p4": "If you already have a colour in mind, choose it (or take it from a photo) and we tell you whether it fits, why, and which outfits you would wear it in. Coats and accessories are not here because they take no part in colour matching."
       }
     },
     "hints": {
@@ -649,7 +709,8 @@
       "armariState": "Clean or in the basket: see which pieces are in the laundry.",
       "armariSeason": "Shows only what suits the time of year you are in.",
       "laundry": "Clean are the ones you can wear; in the basket, the ones waiting for a wash. When you do the laundry, mark them as washed.",
-      "paleta": "Each colour appears in several combinations of the book. Your pieces are assigned by the nearest colour, and the outfits come from that."
+      "paleta": "Each colour appears in several combinations of the book. Your pieces are assigned by the nearest colour, and the outfits come from that.",
+      "compra": "A piece you do not own yet, tried against the whole wardrobe: which new palettes it would open and what you would wear it with."
     },
     "paletteExample": "One combination from the dictionary, n{id}: three colours the book pairs as good together."
   }

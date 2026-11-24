@@ -15,9 +15,10 @@ export const dynamic = "force-dynamic";
  * belongs in this column; estadístiques and configuració are about it,
  * and live in the header menu instead. That is also what makes this page
  * hold together: one column of items on one axis, and nothing else to
- * centre. Packing a suitcase is the app too, so it joins the column.
+ * centre. Packing a suitcase is the app too, so it joins the column, and so
+ * is deciding what to buy next.
  */
-const PRIMARY = ["avui", "armari", "bugaderia", "maleta", "paleta"] as const;
+const PRIMARY = ["avui", "armari", "bugaderia", "maleta", "compra", "paleta"] as const;
 
 function pickPalette() {
   const i = Math.floor(Math.random() * palettes.length);
